@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto Detailing | Book Now</title>
+    <meta
+      name="description"
+      content="Premium auto detailing with real results. Easy booking and convenient pickup/drop-off."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <!-- Top announcement bar -->
+    <div class="topbar">
+      <div class="container topbar__inner">
+        <p>
+          <strong>Your Area’s 5-Star Auto Detailing</strong> — Real Results, Confident Booking,
+          Convenient Pickup/Drop-Off
+        </p>
+        <button class="topbar__close" aria-label="Close announcement" data-topbar-close>×</button>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="top">
+      <div class="container header__inner">
+        <a class="brand" href="#top" aria-label="Home">
+          <div class="brand__mark" aria-hidden="true"></div>
+          <div class="brand__text">
+            <span class="brand__name">YOUR COMPANY NAME</span>
+            <span class="brand__tag">Auto Detailing</span>
+          </div>
+        </a>
+
+        <button class="navToggle" aria-label="Open menu" aria-expanded="false" data-nav-toggle>
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" data-nav>
+          <a href="#services">Services</a>
+          <a href="#work">Our Work</a>
+          <a href="#contact">Contact</a>
+          <a href="#faq">FAQ</a>
+          <div class="nav__icons">
+            <a href="#" aria-label="Instagram" class="iconBtn">IG</a>
+            <a href="#" aria-label="Facebook" class="iconBtn">FB</a>
+          </div>
+          <a class="btn btn--primary nav__cta" href="#book">BOOK NOW</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero" aria-label="Hero">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <h1 class="hero__headline">MORE THAN JUST A CAR WASH.</h1>
+        <p class="hero__sub">
+          Premium detailing for interiors, exteriors, and coatings — done right, every time.
+        </p>
+
+        <div class="hero__actions">
+          <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
+          <a class="btn btn--ghost btn--lg" href="tel:+16309368723">CALL / TEXT</a>
+        </div>
+
+        <div class="hero__trust">
+          <div class="trustPill">✅ Pickup/Drop-Off Available</div>
+          <div class="trustPill">⭐ 5-Star Rated</div>
+          <div class="trustPill">🧼 Professional Products</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Services -->
+    <section class="section" id="services">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">OUR SERVICES:</h2>
+          <p class="section__sub">
+            Pick a package below. Transparent starting prices. Tap “Learn More” for details.
+          </p>
+        </div>
+
+        <div class="cards">
+          <!-- Card -->
+          <article class="card">
+            <div class="card__img" style="background-image:url('./assets/service-interior.jpg')"></div>
+            <div class="card__body">
+              <h3>INTERIOR DETAIL</h3>
+              <p class="card__price">Starting at <strong>$150</strong></p>
+              <button class="btn btn--secondary" data-modal-open="interior">LEARN MORE</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__img" style="background-image:url('./assets/service-exterior.jpg')"></div>
+            <div class="card__body">
+              <h3>EXTERIOR DETAIL</h3>
+              <p class="card__price">Starting at <strong>$100</strong></p>
+              <button class="btn btn--secondary" data-modal-open="exterior">LEARN MORE</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__img" style="background-image:url('./assets/service-engine.jpg')"></div>
+            <div class="card__body">
+              <h3>ENGINE BAY DETAIL</h3>
+              <p class="card__price">Starting at <strong>$50</strong></p>
+              <button class="btn btn--secondary" data-modal-open="engine">LEARN MORE</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__img" style="background-image:url('./assets/service-paint.jpg')"></div>
+            <div class="card__body">
+              <h3>PAINT CORRECTION</h3>
+              <p class="card__price">Starting at <strong>$350</strong></p>
+              <button class="btn btn--secondary" data-modal-open="paint">LEARN MORE</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__img" style="background-image:url('./assets/service-ceramic.jpg')"></div>
+            <div class="card__body">
+              <h3>CERAMIC COATING</h3>
+              <p class="card__price">Starting at <strong>$350</strong></p>
+              <button class="btn btn--secondary" data-modal-open="ceramic">LEARN MORE</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__img" style="background-image:url('./assets/service-maintenance.jpg')"></div>
+            <div class="card__body">
+              <h3>MAINTENANCE DETAIL</h3>
+              <p class="card__price">Starting at <strong>$80</strong></p>
+              <button class="btn btn--secondary" data-modal-open="maintenance">LEARN MORE</button>
+            </div>
+          </article>
+        </div>
+
+        <div class="center mt-24">
+          <a class="btn btn--ghost btn--lg" href="#book">BOOK NOW</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Transformations -->
+    <section class="work" id="work" aria-label="Recent Transformations">
+      <div class="work__bg" aria-hidden="true"></div>
+      <div class="container work__inner">
+        <h2 class="work__title">RECENT TRANSFORMATIONS:</h2>
+
+        <div class="workGrid">
+          <img src="./assets/work-1.jpg" alt="Detailing transformation photo 1" />
+          <img src="./assets/work-2.jpg" alt="Detailing transformation photo 2" />
+          <img src="./assets/work-3.jpg" alt="Detailing transformation photo 3" />
+        </div>
+
+        <div class="center mt-24">
+          <a class="btn btn--primary" href="#gallery">VIEW FULL GALLERY</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Instagram -->
+    <section class="section" id="gallery">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">FOLLOW US ON IG!</h2>
+          <p class="section__sub">Swap this placeholder for an embed or a simple photo grid.</p>
+        </div>
+
+        <div class="igEmbed">
+          <div class="igEmbed__bar">
+            <div class="igBadge">
+              <span class="igDot" aria-hidden="true"></span>
+              <strong>@yourhandle</strong>
+            </div>
+            <a class="btn btn--secondary" href="#" target="_blank" rel="noreferrer">FOLLOW</a>
+          </div>
+
+          <div class="igEmbed__grid">
+            <div class="igTile" style="background-image:url('./assets/ig-1.jpg')"></div>
+            <div class="igTile" style="background-image:url('./assets/ig-2.jpg')"></div>
+            <div class="igTile" style="background-image:url('./assets/ig-3.jpg')"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews -->
+    <section class="reviews" aria-label="Client Reviews">
+      <div class="container">
+        <h2 class="reviews__title">CLIENT REVIEWS</h2>
+
+        <div class="reviewSlider" data-slider>
+          <button class="sliderBtn" aria-label="Previous review" data-prev>‹</button>
+
+          <div class="reviewTrack" data-track>
+            <article class="review">
+              <p class="review__quote">
+                “Absolutely spotless. Interior looks brand new. Easy scheduling and super professional.”
+              </p>
+              <div class="stars" aria-label="5 stars">★★★★★</div>
+              <p class="review__name">— Sarah M</p>
+            </article>
+
+            <article class="review">
+              <p class="review__quote">
+                “Best option for quality work. Smooth pickup/drop-off and the results were insane.”
+              </p>
+              <div class="stars" aria-label="5 stars">★★★★★</div>
+              <p class="review__name">— Basil A</p>
+            </article>
+
+            <article class="review">
+              <p class="review__quote">
+                “Great work and fair prices. I’ll definitely be back.”
+              </p>
+              <div class="stars" aria-label="5 stars">★★★★★</div>
+              <p class="review__name">— Tomas H</p>
+            </article>
+          </div>
+
+          <button class="sliderBtn" aria-label="Next review" data-next>›</button>
+        </div>
+
+        <p class="reviews__note" id="faq">
+          Couldn’t find what you were looking for in our FAQ? You can always contact us directly by calling/texting at
+          <a href="tel:+16309368723">630-936-8723</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- Booking / Contact -->
+    <section class="section" id="book">
+      <div class="container">
+        <div class="book">
+          <div class="book__left">
+            <h2 class="book__title">BOOK IN 60 SECONDS</h2>
+            <p class="book__sub">
+              Tell us what you need. We’ll confirm availability fast.
+            </p>
+
+            <form class="form" onsubmit="return false" data-lead-form>
+              <div class="formRow">
+                <label>
+                  Name
+                  <input type="text" name="name" placeholder="Your name" required />
+                </label>
+                <label>
+                  Phone
+                  <input type="tel" name="phone" placeholder="(555) 555-5555" required />
+                </label>
+              </div>
+
+              <label>
+                Service
+                <select name="service" required>
+                  <option value="" selected disabled>Select a service</option>
+                  <option>Interior Detail</option>
+                  <option>Exterior Detail</option>
+                  <option>Engine Bay Detail</option>
+                  <option>Paint Correction</option>
+                  <option>Ceramic Coating</option>
+                  <option>Maintenance Detail</option>
+                </select>
+              </label>
+
+              <label>
+                Message
+                <textarea
+                  name="message"
+                  rows="4"
+                  placeholder="Vehicle year/make/model + anything we should know."
+                ></textarea>
+              </label>
+
+              <div class="formActions">
+                <button class="btn btn--primary btn--lg" type="submit" data-submit>
+                  REQUEST BOOKING
+                </button>
+                <a class="btn btn--ghost btn--lg" href="tel:+16309368723">CALL / TEXT</a>
+              </div>
+
+              <p class="formFine">
+                By submitting, you agree we can contact you via phone/text to confirm details.
+              </p>
+            </form>
+          </div>
+
+          <div class="book__right" id="contact">
+            <div class="contactCard">
+              <h3>Hours</h3>
+              <p>
+                Mon–Fri: 9am – 6pm<br />
+                Sat: 10am – 4pm<br />
+                Sun: 12pm – 4pm<br />
+                <em>Available 24/7 by appointment</em>
+              </p>
+
+              <h3 class="mt-16">Contact</h3>
+              <p>
+                Phone: <a href="tel:+16309368723">630-936-8723</a><br />
+                Email: <a href="mailto:youremail@gmail.com">youremail@gmail.com</a><br />
+                Serving: <strong>Your City & Surrounding Areas</strong>
+              </p>
+
+              <div class="map">
+                <!-- Replace with your Google Maps embed iframe -->
+                <div class="map__placeholder">
+                  MAP PLACEHOLDER<br /><span>Drop Google embed here</span>
+                </div>
+              </div>
+
+              <div class="contactIcons">
+                <a class="iconBtn iconBtn--dark" href="#" aria-label="Instagram">IG</a>
+                <a class="iconBtn iconBtn--dark" href="#" aria-label="Facebook">FB</a>
+                <a class="iconBtn iconBtn--dark" href="#top" aria-label="Back to top">↑</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sticky mobile CTA -->
+    <div class="stickyCta" role="region" aria-label="Quick actions">
+      <a class="stickyCta__btn" href="tel:+16309368723">Call/Text</a>
+      <a class="stickyCta__btn stickyCta__btn--primary" href="#book">Book Now</a>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" aria-hidden="true" data-modal>
+      <div class="modal__overlay" data-modal-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
+        <button class="modal__close" aria-label="Close" data-modal-close>×</button>
+        <h3 class="modal__title" data-modal-title>Service</h3>
+        <div class="modal__content" data-modal-content></div>
+        <div class="modal__actions">
+          <a class="btn btn--primary" href="#book" data-modal-close>BOOK THIS SERVICE</a>
+          <a class="btn btn--ghost" href="tel:+16309368723">CALL / TEXT</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
