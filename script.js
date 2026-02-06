@@ -55,7 +55,7 @@ if (track && prevBtn && nextBtn) {
   updateSlider();
 }
 
-// Service modals
+// Service modal (ONLY 3 services)
 const modal = document.querySelector("[data-modal]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const modalContent = document.querySelector("[data-modal-content]");
@@ -67,7 +67,7 @@ const serviceDetails = {
       <ul>
         <li>Deep vacuum and wipe-down</li>
         <li>Stain treatment (as needed)</li>
-        <li>Cracks and crevices cleaning</li>
+        <li>Crevices and trim detailed</li>
         <li>Interior glass cleaned</li>
       </ul>
     `,
@@ -76,40 +76,10 @@ const serviceDetails = {
     title: "Exterior Detail",
     body: `
       <ul>
-        <li>Hand wash and safe drying</li>
-        <li>Wheel and tire cleaning</li>
+        <li>Safe hand wash and drying</li>
+        <li>Wheel and tire deep clean</li>
         <li>Trim cleaned and protected</li>
         <li>Exterior glass cleaned</li>
-      </ul>
-    `,
-  },
-  engine: {
-    title: "Engine Bay Detail",
-    body: `
-      <ul>
-        <li>Safe degreasing and agitation</li>
-        <li>Careful rinse/steam as appropriate</li>
-        <li>Dressing for a clean finish</li>
-      </ul>
-    `,
-  },
-  paint: {
-    title: "Paint Correction",
-    body: `
-      <ul>
-        <li>Swirl and scratch reduction</li>
-        <li>Single or multi-stage polishing</li>
-        <li>Prep for long-term protection</li>
-      </ul>
-    `,
-  },
-  ceramic: {
-    title: "Ceramic Coating",
-    body: `
-      <ul>
-        <li>Hydrophobic protection and gloss</li>
-        <li>Easier washes and longer-lasting finish</li>
-        <li>Multiple durability options</li>
       </ul>
     `,
   },
@@ -117,9 +87,9 @@ const serviceDetails = {
     title: "Maintenance Detail",
     body: `
       <ul>
-        <li>Quick reset for interior and exterior</li>
-        <li>Perfect for keeping the vehicle consistently clean</li>
-        <li>Recommended for returning clients</li>
+        <li>Quick reset inside and out</li>
+        <li>Ideal for returning clients</li>
+        <li>Keeps your vehicle consistently clean</li>
       </ul>
     `,
   },
@@ -165,7 +135,7 @@ function openCallModal() {
 
 function closeCallModal() {
   if (!callModal) return;
-  callModal.classList.remove("isOpen"); // instant close (no fade-out)
+  callModal.classList.remove("isOpen"); // instant close
   callModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
@@ -178,7 +148,7 @@ document.querySelectorAll("[data-call-close]").forEach((btn) => {
   btn.addEventListener("click", closeCallModal);
 });
 
-// Close modals on Escape
+// Close on Escape
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeServiceModal();
