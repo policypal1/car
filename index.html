@@ -50,91 +50,78 @@
       <div class="hero__bg" aria-hidden="true"></div>
 
       <div class="container hero__inner">
-        <h1 class="hero__headline">MORE THAN JUST A CAR WASH.</h1>
-        <p class="hero__sub">
-          Premium detailing for interiors, exteriors, and coatings — done right, every time.
-        </p>
+        <!-- This panel makes the text readable (dark + blur + border) -->
+        <div class="hero__panel">
+          <h1 class="hero__headline">MORE THAN JUST A CAR WASH.</h1>
+          <p class="hero__sub">
+            Premium detailing for interiors, exteriors, and maintenance — done right, every time.
+          </p>
 
-        <div class="hero__actions">
-          <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
-          <button class="btn btn--alt btn--lg" type="button" data-call-open>CALL / TEXT</button>
-        </div>
+          <div class="hero__actions">
+            <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
+            <button class="btn btn--call btn--lg" type="button" data-call-open>
+              CALL / TEXT
+            </button>
+          </div>
 
-        <div class="hero__trust">
-          <div class="trustPill">Pickup/Drop-Off Available</div>
-          <div class="trustPill">5-Star Rated</div>
-          <div class="trustPill">Premium Products</div>
+          <div class="hero__trust">
+            <div class="trustPill">Pickup/Drop-Off Available</div>
+            <div class="trustPill">5-Star Rated</div>
+            <div class="trustPill">Premium Products</div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Services -->
+    <!-- Services (ONLY 3) -->
     <section class="section" id="services">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title">OUR SERVICES:</h2>
-          <p class="section__sub">Transparent starting prices. Tap “Learn More” for details.</p>
+          <h2 class="section__title">OUR SERVICES</h2>
+          <p class="section__sub">Choose what you need. We’ll confirm pricing based on vehicle size/condition.</p>
         </div>
 
-        <div class="cards">
-          <article class="card">
-            <div class="card__img" style="background-image:url('./assets/service-interior.jpg')"></div>
-            <div class="card__body">
+        <div class="serviceGrid">
+          <article class="serviceCard" style="background-image:url('./902dc749-00c0-4450-a27a-dd196a56ad74.png')">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__content">
               <h3>INTERIOR DETAIL</h3>
-              <p class="card__price">Starting at <strong>$150</strong></p>
-              <button class="btn btn--secondary" data-modal-open="interior">LEARN MORE</button>
+              <p>Deep clean, stains addressed, and a crisp finish.</p>
+              <div class="serviceCard__actions">
+                <button class="btn btn--secondary" data-modal-open="interior">LEARN MORE</button>
+                <a class="btn btn--primary" href="#book">BOOK</a>
+              </div>
             </div>
           </article>
 
-          <article class="card">
-            <div class="card__img" style="background-image:url('./assets/service-exterior.jpg')"></div>
-            <div class="card__body">
+          <article class="serviceCard" style="background-image:url('./e561e983-f7ec-474a-a262-a25020f9a1d6.png')">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__content">
               <h3>EXTERIOR DETAIL</h3>
-              <p class="card__price">Starting at <strong>$100</strong></p>
-              <button class="btn btn--secondary" data-modal-open="exterior">LEARN MORE</button>
+              <p>Safe wash, wheels/tires cleaned, shine restored.</p>
+              <div class="serviceCard__actions">
+                <button class="btn btn--secondary" data-modal-open="exterior">LEARN MORE</button>
+                <a class="btn btn--primary" href="#book">BOOK</a>
+              </div>
             </div>
           </article>
 
-          <article class="card">
-            <div class="card__img" style="background-image:url('./assets/service-engine.jpg')"></div>
-            <div class="card__body">
-              <h3>ENGINE BAY DETAIL</h3>
-              <p class="card__price">Starting at <strong>$50</strong></p>
-              <button class="btn btn--secondary" data-modal-open="engine">LEARN MORE</button>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card__img" style="background-image:url('./assets/service-paint.jpg')"></div>
-            <div class="card__body">
-              <h3>PAINT CORRECTION</h3>
-              <p class="card__price">Starting at <strong>$350</strong></p>
-              <button class="btn btn--secondary" data-modal-open="paint">LEARN MORE</button>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card__img" style="background-image:url('./assets/service-ceramic.jpg')"></div>
-            <div class="card__body">
-              <h3>CERAMIC COATING</h3>
-              <p class="card__price">Starting at <strong>$350</strong></p>
-              <button class="btn btn--secondary" data-modal-open="ceramic">LEARN MORE</button>
-            </div>
-          </article>
-
-          <article class="card">
-            <div class="card__img" style="background-image:url('./assets/service-maintenance.jpg')"></div>
-            <div class="card__body">
+          <article class="serviceCard" style="background-image:url('./b5a68f22-93c5-469a-88c3-b1d2edc9ec85.png')">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__content">
               <h3>MAINTENANCE DETAIL</h3>
-              <p class="card__price">Starting at <strong>$80</strong></p>
-              <button class="btn btn--secondary" data-modal-open="maintenance">LEARN MORE</button>
+              <p>Perfect for returning clients who want it consistently clean.</p>
+              <div class="serviceCard__actions">
+                <button class="btn btn--secondary" data-modal-open="maintenance">LEARN MORE</button>
+                <a class="btn btn--primary" href="#book">BOOK</a>
+              </div>
             </div>
           </article>
         </div>
 
         <div class="center mt-24">
           <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
-          <button class="btn btn--alt btn--lg" type="button" data-call-open>CALL / TEXT</button>
+          <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
         </div>
       </div>
     </section>
@@ -142,9 +129,8 @@
     <!-- Recent Transformations -->
     <section class="work" id="work" aria-label="Recent Transformations">
       <div class="work__bg" aria-hidden="true"></div>
-
       <div class="container work__inner">
-        <h2 class="work__title">RECENT TRANSFORMATIONS:</h2>
+        <h2 class="work__title">RECENT TRANSFORMATIONS</h2>
 
         <div class="workGrid">
           <img src="./assets/work-1.jpg" alt="Detailing transformation photo 1" />
@@ -212,8 +198,7 @@
         </div>
 
         <p class="reviews__note" id="faq">
-          Couldn’t find what you were looking for in our FAQ? Contact us by calling/texting at
-          <a href="tel:+16309368723">630-936-8723</a>.
+          Questions? Call/text us at <a href="tel:+15555555555">(555) 555-5555</a>.
         </p>
       </div>
     </section>
@@ -244,9 +229,6 @@
                   <option value="" selected disabled>Select a service</option>
                   <option>Interior Detail</option>
                   <option>Exterior Detail</option>
-                  <option>Engine Bay Detail</option>
-                  <option>Paint Correction</option>
-                  <option>Ceramic Coating</option>
                   <option>Maintenance Detail</option>
                 </select>
               </label>
@@ -264,7 +246,7 @@
                 <button class="btn btn--primary btn--lg" type="submit" data-submit>
                   REQUEST BOOKING
                 </button>
-                <button class="btn btn--alt btn--lg" type="button" data-call-open>
+                <button class="btn btn--call btn--lg" type="button" data-call-open>
                   CALL / TEXT
                 </button>
               </div>
@@ -287,7 +269,7 @@
 
               <h3 class="mt-16">Contact</h3>
               <p>
-                Phone: <a href="tel:+16309368723">630-936-8723</a><br />
+                Phone: <a href="tel:+15555555555">(555) 555-5555</a><br />
                 Email: <a href="mailto:youremail@gmail.com">youremail@gmail.com</a><br />
                 Serving: <strong>Your City & Surrounding Areas</strong>
               </p>
@@ -322,32 +304,21 @@
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
           <a class="btn btn--primary" href="#book" data-modal-close>BOOK THIS SERVICE</a>
-          <button class="btn btn--alt" type="button" data-call-open data-modal-close>CALL / TEXT</button>
+          <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
         </div>
       </div>
     </div>
 
-    <!-- Call/Text modal -->
+    <!-- Call/Text modal (simple: sentence + phone) -->
     <div class="modal modal--call" aria-hidden="true" data-call-modal>
       <div class="modal__overlay" data-call-close></div>
 
-      <!-- square-ish with rounded edges -->
       <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
         <button class="modal__close" aria-label="Close" data-call-close>×</button>
 
-        <h3 class="callTitle">Call / Text</h3>
-        <p class="callText">
-          To receive a quote or more information, please message us.
-        </p>
-
-        <div class="callActions">
-          <a class="btn btn--primary" href="tel:+16309368723">CALL NOW</a>
-          <a class="btn btn--alt" href="sms:+16309368723">TEXT US</a>
-        </div>
-
-        <div class="callFine">
-          Placeholder message: “Hi, I’d like a quote for a detail. My vehicle is a ____.”
-        </div>
+        <h3 class="callTitle">CALL / TEXT</h3>
+        <p class="callText">To receive a quote or more information, message us at:</p>
+        <a class="callNumber" href="tel:+15555555555">(555) 555-5555</a>
       </div>
     </div>
 
