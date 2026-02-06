@@ -19,17 +19,7 @@ if (navToggle && nav) {
   });
 }
 
-// Topbar close
-const topbarClose = document.querySelector("[data-topbar-close]");
-if (topbarClose) {
-  topbarClose.addEventListener("click", () => {
-    const topbar = topbarClose.closest(".topbar");
-    if (topbar) topbar.style.display = "none";
-  });
-}
-
-// Reviews slider (simple)
-const slider = document.querySelector("[data-slider]");
+// Reviews slider
 const track = document.querySelector("[data-track]");
 const prevBtn = document.querySelector("[data-prev]");
 const nextBtn = document.querySelector("[data-next]");
@@ -43,12 +33,12 @@ function updateSlider() {
 }
 
 function clampIndex() {
-  if (!track) return 0;
+  if (!track) return;
   const max = Math.max(0, track.children.length - 1);
   index = Math.min(Math.max(index, 0), max);
 }
 
-if (slider && track && prevBtn && nextBtn) {
+if (track && prevBtn && nextBtn) {
   window.addEventListener("resize", updateSlider);
 
   prevBtn.addEventListener("click", () => {
@@ -76,22 +66,21 @@ const serviceDetails = {
     title: "Interior Detail",
     body: `
       <ul>
-        <li>Deep vacuum + thorough wipe-down</li>
+        <li>Deep vacuum and wipe-down</li>
         <li>Stain treatment (as needed)</li>
-        <li>Cracks/crevices cleaning</li>
-        <li>Glass cleaned inside</li>
+        <li>Cracks and crevices cleaning</li>
+        <li>Interior glass cleaned</li>
       </ul>
-      <p><strong>Tip:</strong> Add pet hair removal if needed.</p>
     `,
   },
   exterior: {
     title: "Exterior Detail",
     body: `
       <ul>
-        <li>Hand wash + safe drying</li>
-        <li>Wheel/tire cleaning</li>
-        <li>Trim wiped + protected</li>
-        <li>Glass cleaned outside</li>
+        <li>Hand wash and safe drying</li>
+        <li>Wheel and tire cleaning</li>
+        <li>Trim cleaned and protected</li>
+        <li>Exterior glass cleaned</li>
       </ul>
     `,
   },
@@ -99,8 +88,8 @@ const serviceDetails = {
     title: "Engine Bay Detail",
     body: `
       <ul>
-        <li>Safe degreasing + careful agitation</li>
-        <li>Rinse/steam (when appropriate)</li>
+        <li>Safe degreasing and agitation</li>
+        <li>Careful rinse/steam as appropriate</li>
         <li>Dressing for a clean finish</li>
       </ul>
     `,
@@ -109,19 +98,18 @@ const serviceDetails = {
     title: "Paint Correction",
     body: `
       <ul>
-        <li>Swirl/scratch reduction</li>
-        <li>Single or multi-stage polishing options</li>
+        <li>Swirl and scratch reduction</li>
+        <li>Single or multi-stage polishing</li>
         <li>Prep for long-term protection</li>
       </ul>
-      <p><strong>Best paired with:</strong> Ceramic coating.</p>
     `,
   },
   ceramic: {
     title: "Ceramic Coating",
     body: `
       <ul>
-        <li>Hydrophobic protection + gloss</li>
-        <li>Easier washes + longer-lasting finish</li>
+        <li>Hydrophobic protection and gloss</li>
+        <li>Easier washes and longer-lasting finish</li>
         <li>Multiple durability options</li>
       </ul>
     `,
@@ -130,9 +118,9 @@ const serviceDetails = {
     title: "Maintenance Detail",
     body: `
       <ul>
-        <li>Perfect for returning clients</li>
-        <li>Quick reset for interior + exterior</li>
-        <li>Keep your vehicle consistently clean</li>
+        <li>Quick reset for interior and exterior</li>
+        <li>Perfect for keeping the vehicle consistently clean</li>
+        <li>Recommended for returning clients</li>
       </ul>
     `,
   },
@@ -170,7 +158,7 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeModal();
 });
 
-// Lead form (swap to your backend / Formspree / email service)
+// Lead form demo
 const leadForm = document.querySelector("[data-lead-form]");
 const submitBtn = document.querySelector("[data-submit]");
 
@@ -178,8 +166,5 @@ if (leadForm && submitBtn) {
   leadForm.addEventListener("submit", () => {
     submitBtn.textContent = "SENT (DEMO)";
     submitBtn.disabled = true;
-
-    // For real use: send to Formspree, Resend, etc.
-    // fetch("/api/lead", { method:"POST", body: new FormData(leadForm) })
   });
 }
