@@ -8,7 +8,6 @@ if (navToggle && nav) {
     navToggle.setAttribute("aria-expanded", String(open));
   });
 
-  // close on link click (mobile)
   nav.querySelectorAll("a").forEach((a) => {
     a.addEventListener("click", () => {
       if (window.innerWidth < 768) {
@@ -56,7 +55,7 @@ if (track && prevBtn && nextBtn) {
   updateSlider();
 }
 
-// Modals (service details)
+// Service modals
 const modal = document.querySelector("[data-modal]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const modalContent = document.querySelector("[data-modal-content]");
@@ -126,7 +125,7 @@ const serviceDetails = {
   },
 };
 
-function openModal(key) {
+function openServiceModal(key) {
   if (!modal || !modalTitle || !modalContent) return;
   const data = serviceDetails[key];
   if (!data) return;
@@ -139,7 +138,7 @@ function openModal(key) {
   document.body.style.overflow = "hidden";
 }
 
-function closeModal() {
+function closeServiceModal() {
   if (!modal) return;
   modal.classList.remove("isOpen");
   modal.setAttribute("aria-hidden", "true");
@@ -147,15 +146,44 @@ function closeModal() {
 }
 
 document.querySelectorAll("[data-modal-open]").forEach((btn) => {
-  btn.addEventListener("click", () => openModal(btn.getAttribute("data-modal-open")));
+  btn.addEventListener("click", () => openServiceModal(btn.getAttribute("data-modal-open")));
 });
 
 document.querySelectorAll("[data-modal-close]").forEach((btn) => {
-  btn.addEventListener("click", closeModal);
+  btn.addEventListener("click", closeServiceModal);
 });
 
+// Call/Text modal (fade in, instant close)
+const callModal = document.querySelector("[data-call-modal]");
+
+function openCallModal() {
+  if (!callModal) return;
+  callModal.classList.add("isOpen");
+  callModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeCallModal() {
+  if (!callModal) return;
+  callModal.classList.remove("isOpen"); // instant close (no fade-out)
+  callModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+document.querySelectorAll("[data-call-open]").forEach((btn) => {
+  btn.addEventListener("click", openCallModal);
+});
+
+document.querySelectorAll("[data-call-close]").forEach((btn) => {
+  btn.addEventListener("click", closeCallModal);
+});
+
+// Close modals on Escape
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeModal();
+  if (e.key === "Escape") {
+    closeServiceModal();
+    closeCallModal();
+  }
 });
 
 // Lead form demo
