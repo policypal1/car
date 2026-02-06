@@ -21,7 +21,7 @@ body{
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: var(--text);
   background: var(--bg);
-  padding-bottom: 78px; /* prevents sticky CTA overlap on mobile */
+  padding-bottom: 78px;
 }
 
 img{ max-width:100%; display:block; }
@@ -122,7 +122,7 @@ img{ max-width:100%; display:block; }
 
 .nav.isOpen{ display:block; }
 
-/* Buttons (fixes “black line” + adds hover transition) */
+/* Buttons */
 .btn{
   display:inline-flex;
   align-items:center;
@@ -140,6 +140,7 @@ img{ max-width:100%; display:block; }
 }
 .btn--lg{ padding: 1rem 1.25rem; }
 
+/* BOOK NOW: green base, hover black, scale up */
 .btn--primary{
   background: linear-gradient(135deg, var(--green), var(--green-dark));
   color: #fff;
@@ -153,9 +154,24 @@ img{ max-width:100%; display:block; }
   transform: scale(1.04);
   box-shadow: 0 18px 34px rgba(0,0,0,.30);
 }
-.btn--primary:active{
-  transform: scale(1.02);
+.btn--primary:active{ transform: scale(1.02); }
+
+/* CALL/TEXT: filled + same animation, different colors */
+.btn--alt{
+  background: rgba(0,0,0,.35);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.22);
+  box-shadow: 0 14px 28px rgba(0,0,0,.18);
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease;
+  will-change: transform;
 }
+.btn--alt:hover{
+  background: rgba(0,0,0,.70);
+  transform: scale(1.04);
+  box-shadow: 0 18px 34px rgba(0,0,0,.28);
+  border-color: rgba(255,255,255,.32);
+}
+.btn--alt:active{ transform: scale(1.02); }
 
 .btn--secondary{
   background: rgba(43,182,115,.12);
@@ -183,10 +199,12 @@ img{ max-width:100%; display:block; }
 .hero__bg{
   position:absolute;
   inset:0;
-  /* Your uploaded image + dark overlay */
+
+  /* ✅ image is in ROOT, not /assets */
   background:
-    linear-gradient(90deg, rgba(0,0,0,.68), rgba(15,61,46,.45)),
-    url("./assets/533c7324-696b-4d00-84fb-26f9fdfc3a87.png") center/cover no-repeat;
+    linear-gradient(90deg, rgba(0,0,0,.62), rgba(15,61,46,.45)),
+    url("./533c7324-696b-4d00-84fb-26f9fdfc3a87.png") center/cover no-repeat;
+
   transform: scale(1.02);
 }
 .hero__inner{
@@ -250,7 +268,7 @@ img{ max-width:100%; display:block; }
   color: var(--muted);
 }
 
-/* Cards (services) */
+/* Cards */
 .cards{
   display:grid;
   grid-template-columns: 1fr;
@@ -300,7 +318,6 @@ img{ max-width:100%; display:block; }
   background:
     linear-gradient(90deg, rgba(11,11,12,.72), rgba(0,0,0,.35)),
     url("./assets/work-bg.jpg") center/cover no-repeat;
-  filter: saturate(1.05);
 }
 .work__inner{ position:relative; text-align:center; }
 .work__title{
@@ -323,7 +340,7 @@ img{ max-width:100%; display:block; }
   box-shadow: 0 18px 36px rgba(0,0,0,.25);
 }
 
-/* Simple gallery grid */
+/* Simple gallery */
 .simpleGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -498,7 +515,7 @@ img{ max-width:100%; display:block; }
   gap: 10px;
   margin-top: 14px;
 }
-.iconBtn{
+.iconBtn--dark{
   display:inline-flex;
   align-items:center;
   justify-content:center;
@@ -542,7 +559,7 @@ img{ max-width:100%; display:block; }
   color:#fff;
 }
 
-/* Modal */
+/* Modal base */
 .modal{
   position: fixed;
   inset: 0;
@@ -550,11 +567,24 @@ img{ max-width:100%; display:block; }
   z-index: 80;
 }
 .modal.isOpen{ display:block; }
+
 .modal__overlay{
   position:absolute;
   inset:0;
   background: rgba(0,0,0,.55);
 }
+
+/* Fade-in only (instant close by JS) */
+.modal.isOpen .modal__overlay,
+.modal.isOpen .modal__panel,
+.modal.isOpen .callPanel{
+  animation: fadeIn .18s ease both;
+}
+@keyframes fadeIn{
+  from{ opacity: 0; transform: translateY(8px); }
+  to{ opacity: 1; transform: translateY(0); }
+}
+
 .modal__panel{
   position:relative;
   margin: 10vh auto 0;
@@ -592,7 +622,44 @@ img{ max-width:100%; display:block; }
   margin-top: 14px;
 }
 
-/* Tiny phones: stack service card image on top */
+/* Call/Text modal panel (square-ish w/ rounded edges) */
+.callPanel{
+  position:relative;
+  margin: 18vh auto 0;
+  width: min(520px, calc(100% - 2rem));
+  background: #fff;
+  border-radius: 16px; /* rounded edges */
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+.callTitle{
+  margin: 0 0 6px;
+  font-family: Oswald, Inter, sans-serif;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--green-dark);
+}
+.callText{
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.callActions{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.callFine{
+  margin-top: 12px;
+  font-size: .92rem;
+  color: var(--muted);
+  background: rgba(0,0,0,.04);
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+/* Tiny phones */
 @media (max-width: 360px){
   .card{ grid-template-columns: 1fr; }
   .card__img{ min-height: 170px; }
@@ -631,9 +698,7 @@ img{ max-width:100%; display:block; }
     grid-template-columns: 1.1fr .9fr;
     align-items:start;
   }
-  .formRow{
-    grid-template-columns: 1fr 1fr;
-  }
+  .formRow{ grid-template-columns: 1fr 1fr; }
 
   .stickyCta{ display:none; }
 }
