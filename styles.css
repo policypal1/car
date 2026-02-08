@@ -1,5 +1,5 @@
 :root{
-  --gold:#d6b25e; /* accent only */
+  --gold:#d6b25e;
   --black:#0b0b0c;
   --white:#fff;
 
@@ -135,23 +135,18 @@ body{
 .btn:focus{ outline:none; }
 .btn:focus-visible{ outline: 3px solid var(--ring); outline-offset: 2px; }
 
-/* GET QUOTE NOW: white + black text + black outline */
 .btn--quote{
   background: #fff;
   color: #000;
   border: 2px solid #000;
   box-shadow: 0 16px 28px rgba(0,0,0,.14);
 }
-
-/* CALL/TEXT: black with gold accent */
 .btn--call{
   background: #000;
   color: #fff;
   border: 2px solid rgba(214,178,94,.45);
   box-shadow: 0 16px 28px rgba(0,0,0,.18);
 }
-
-/* Gold-outline for learn more over cards */
 .btn--ghostGold{
   background: rgba(0,0,0,.30);
   color: #fff;
@@ -171,11 +166,7 @@ body{
 .hero__bg{
   position:absolute;
   inset:0;
-
-  /* ✅ NO dark overlay now — image only */
   background: url("./dcf02815-0386-4b8d-9c4d-04bc1c821aef.png") center/cover no-repeat;
-
-  /* keep blur + “premium” look */
   filter: blur(2px) saturate(1.05) contrast(1.05);
   transform: scale(1.06);
 }
@@ -190,8 +181,6 @@ body{
   text-align:center;
   padding: 22px 18px;
   border-radius: 20px;
-
-  /* panel stays dark for readability */
   background: rgba(0,0,0,.58);
   border: 1px solid rgba(214,178,94,.18);
   backdrop-filter: blur(10px);
@@ -241,7 +230,7 @@ body{
   font-size: .92rem;
 }
 
-/* Services */
+/* Sections */
 .section{ padding: 3.2rem 0; }
 .section__head{ text-align:center; margin-bottom: 1.5rem; }
 .section__title{
@@ -258,7 +247,7 @@ body{
   color: var(--muted);
 }
 
-/* ✅ Finished look with 5 cards: center wrap */
+/* Services */
 .serviceWrap{
   display:flex;
   flex-wrap:wrap;
@@ -284,23 +273,25 @@ body{
   background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.82));
 }
 
+/* ✅ LOCKED LAYOUT: title row + description row + button row */
 .serviceCard__content{
   position:relative;
   height: 100%;
   padding: 18px;
   color:#fff;
 
-  display:flex;
-  flex-direction:column;
+  display:grid;
+  grid-template-rows: 64px 1fr auto;
+  gap: 12px;
 }
 
 .serviceCard__top{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+  flex-wrap: nowrap;
+  height: 64px;
 }
 
 .serviceCard__content h3{
@@ -309,6 +300,8 @@ body{
   letter-spacing:.8px;
   text-transform: uppercase;
   font-size: 1.65rem;
+  line-height: 1.05;
+  max-width: 16ch;
 }
 
 .tag{
@@ -321,23 +314,133 @@ body{
   color: rgba(255,255,255,.92);
   font-weight: 800;
   font-size: .85rem;
+  white-space: nowrap;
 }
 
-/* ✅ aligned descriptions */
+/* ✅ SAME HEIGHT DESCRIPTIONS */
 .serviceCard__desc{
   margin: 0;
   color: rgba(255,255,255,.92);
   line-height: 1.55;
 
-  /* same space on every card */
-  min-height: 72px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  min-height: calc(1.55em * 3);
 }
 
-/* actions stick to bottom */
 .serviceCard__actions{
-  margin-top: auto;
   display:flex;
   gap: 10px;
+  flex-wrap: wrap;
+  align-self: end;
+}
+
+/* Recent Transformations */
+.workGrid{
+  margin-top: 22px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.workCard{
+  margin: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  border: 1px solid rgba(0,0,0,.06);
+}
+.workCard img{
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display:block;
+}
+.workCard figcaption{
+  padding: 12px 14px 14px;
+}
+.workCard strong{
+  display:block;
+  font-family: Oswald, Inter, sans-serif;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--black);
+  font-size: 1.1rem;
+}
+.workCard span{
+  display:block;
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Reviews */
+.reviewGrid{
+  margin-top: 22px;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.reviewCard{
+  background:#fff;
+  border-radius: 18px;
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  border: 1px solid rgba(0,0,0,.06);
+  padding: 14px 14px 16px;
+}
+
+.reviewTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.stars{
+  display:inline-flex;
+  gap: 2px;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: #111;
+}
+.starOff{
+  opacity: .25;
+}
+
+.reviewTag{
+  display:inline-flex;
+  align-items:center;
+  padding: .35rem .65rem;
+  border-radius: 999px;
+  background: rgba(214,178,94,.12);
+  border: 1px solid rgba(214,178,94,.35);
+  color: #2a2417;
+  font-weight: 800;
+  font-size: .85rem;
+}
+
+.reviewText{
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.reviewName{
+  margin: 0;
+  font-weight: 900;
+  color: var(--black);
+}
+
+.reviewsCta{
+  margin-top: 18px;
+  display:flex;
+  justify-content:center;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -355,7 +458,6 @@ body{
   background: rgba(0,0,0,.60);
 }
 
-/* Fade-in only */
 .modal.isOpen .modal__overlay,
 .modal.isOpen .modal__panel,
 .modal.isOpen .callPanel{
@@ -425,7 +527,7 @@ body{
   border: 1px solid rgba(214,178,94,.35);
 }
 
-/* Desktop nav */
+/* Desktop enhancements */
 @media (min-width: 768px){
   .nav{
     position: static;
@@ -440,4 +542,19 @@ body{
   .nav a{ padding: 10px 10px; }
   .navToggle{ display:none; }
   .nav__cta{ margin-left: 6px; margin-top: 0; }
+
+  .workGrid{
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .workCard img{ height: 260px; }
+
+  .reviewGrid{
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px){
+  .workGrid{ grid-template-columns: repeat(3, 1fr); }
 }
