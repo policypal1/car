@@ -3,11 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Auto Detailing | Book Now</title>
-    <meta
-      name="description"
-      content="Premium auto detailing with real results. Easy booking and convenient pickup/drop-off."
-    />
+    <title>Auto Detailing</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,10 +33,10 @@
 
         <nav class="nav" data-nav>
           <a href="#services">Services</a>
-          <a href="#work">Our Work</a>
-          <a href="#contact">Contact</a>
-          <a href="#faq">FAQ</a>
-          <a class="btn btn--primary nav__cta" href="#book">BOOK NOW</a>
+          <a href="#top">Our Work</a>
+          <a href="#top">Contact</a>
+          <a href="#top">FAQ</a>
+          <button class="btn btn--quote nav__cta" type="button" data-call-open>GET QUOTE NOW</button>
         </nav>
       </div>
     </header>
@@ -59,10 +55,8 @@
           </p>
 
           <div class="hero__actions">
-            <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
-            <button class="btn btn--alt btn--lg" type="button" data-call-open>
-              CALL / TEXT
-            </button>
+            <button class="btn btn--quote btn--lg" type="button" data-call-open>GET QUOTE NOW</button>
+            <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
           </div>
 
           <div class="hero__trust">
@@ -80,11 +74,12 @@
         <div class="section__head">
           <h2 class="section__title">SERVICES</h2>
           <p class="section__sub">
-            Built for clarity on mobile and easy comparison on desktop.
+            Choose a service below — we’ll confirm pricing based on vehicle size and condition.
           </p>
         </div>
 
-        <div class="serviceGrid">
+        <div class="serviceWrap">
+          <!-- Interior -->
           <article class="serviceCard" style="background-image:url('./51ae0d9f-5775-427e-b565-cb5e0984e800.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -92,14 +87,19 @@
                 <h3>INTERIOR DETAIL</h3>
                 <span class="tag">Most Popular</span>
               </div>
-              <p>Deep clean, stain attention, tight crevices, and a crisp finish.</p>
+
+              <p class="serviceCard__desc">
+                Deep clean, stain attention, tight crevices, and a crisp finish.
+              </p>
+
               <div class="serviceCard__actions">
-                <button class="btn btn--ghostGold" data-modal-open="interior">LEARN MORE</button>
-                <a class="btn btn--primary" href="#book">BOOK</a>
+                <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
+                <button class="btn btn--quote" type="button" data-call-open>GET QUOTE</button>
               </div>
             </div>
           </article>
 
+          <!-- Exterior -->
           <article class="serviceCard" style="background-image:url('./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -107,31 +107,39 @@
                 <h3>EXTERIOR DETAIL</h3>
                 <span class="tag">Gloss Reset</span>
               </div>
-              <p>Safe wash, wheels/tires cleaned, and protection for a clean shine.</p>
+
+              <p class="serviceCard__desc">
+                Safe wash, wheels/tires cleaned, and protection for a clean shine.
+              </p>
+
               <div class="serviceCard__actions">
-                <button class="btn btn--ghostGold" data-modal-open="exterior">LEARN MORE</button>
-                <a class="btn btn--primary" href="#book">BOOK</a>
+                <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
+                <button class="btn btn--quote" type="button" data-call-open>GET QUOTE</button>
               </div>
             </div>
           </article>
 
+          <!-- Maintenance -->
           <article class="serviceCard" style="background-image:url('./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <h3>MAINTENANCE DETAIL</h3>
-                <span class="tag">Returning Clients</span>
+                <span class="tag">Returning</span>
               </div>
-              <p class="fine">
+
+              <p class="serviceCard__desc">
                 Requires an <strong>Interior + Exterior Detail first</strong>. After that, we keep it dialed in on a recurring schedule.
               </p>
+
               <div class="serviceCard__actions">
-                <button class="btn btn--ghostGold" data-modal-open="maintenance">LEARN MORE</button>
-                <a class="btn btn--primary" href="#book">BOOK</a>
+                <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
+                <button class="btn btn--quote" type="button" data-call-open>GET QUOTE</button>
               </div>
             </div>
           </article>
 
+          <!-- Ceramic -->
           <article class="serviceCard" style="background-image:url('./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -139,14 +147,19 @@
                 <h3>CERAMIC COATING</h3>
                 <span class="tag">Long-Term</span>
               </div>
-              <p>Hydrophobic protection, enhanced gloss, and easier maintenance.</p>
+
+              <p class="serviceCard__desc">
+                Hydrophobic protection, enhanced gloss, and easier maintenance.
+              </p>
+
               <div class="serviceCard__actions">
-                <button class="btn btn--ghostGold" data-modal-open="ceramic">LEARN MORE</button>
-                <a class="btn btn--primary" href="#book">BOOK</a>
+                <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
+                <button class="btn btn--quote" type="button" data-call-open>GET QUOTE</button>
               </div>
             </div>
           </article>
 
+          <!-- Paint -->
           <article class="serviceCard" style="background-image:url('./07752da8-f5f0-413a-890b-c6de41317df6 (1).png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -154,192 +167,20 @@
                 <h3>PAINT CORRECTION</h3>
                 <span class="tag">Swirl Removal</span>
               </div>
-              <p>Reduce swirls and defects for a sharper, deeper finish.</p>
+
+              <p class="serviceCard__desc">
+                Reduce swirls and defects for a sharper, deeper finish.
+              </p>
+
               <div class="serviceCard__actions">
-                <button class="btn btn--ghostGold" data-modal-open="paint">LEARN MORE</button>
-                <a class="btn btn--primary" href="#book">BOOK</a>
+                <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
+                <button class="btn btn--quote" type="button" data-call-open>GET QUOTE</button>
               </div>
             </div>
           </article>
         </div>
-
-        <div class="center mt-24">
-          <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
-          <button class="btn btn--alt btn--lg" type="button" data-call-open>CALL / TEXT</button>
-        </div>
       </div>
     </section>
-
-    <!-- Recent Transformations -->
-    <section class="work" id="work" aria-label="Recent Transformations">
-      <div class="work__bg" aria-hidden="true"></div>
-      <div class="container work__inner">
-        <h2 class="work__title">RECENT TRANSFORMATIONS</h2>
-
-        <div class="workGrid">
-          <img src="./assets/work-1.jpg" alt="Detailing transformation photo 1" />
-          <img src="./assets/work-2.jpg" alt="Detailing transformation photo 2" />
-          <img src="./assets/work-3.jpg" alt="Detailing transformation photo 3" />
-        </div>
-
-        <div class="center mt-24">
-          <a class="btn btn--primary" href="#gallery">VIEW FULL GALLERY</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- More Results -->
-    <section class="section" id="gallery">
-      <div class="container">
-        <div class="section__head">
-          <h2 class="section__title">MORE RESULTS</h2>
-          <p class="section__sub">Replace these with your real photos.</p>
-        </div>
-
-        <div class="simpleGrid">
-          <div class="tile" style="background-image:url('./assets/ig-1.jpg')"></div>
-          <div class="tile" style="background-image:url('./assets/ig-2.jpg')"></div>
-          <div class="tile" style="background-image:url('./assets/ig-3.jpg')"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Reviews -->
-    <section class="reviews" aria-label="Client Reviews">
-      <div class="container">
-        <h2 class="reviews__title">CLIENT REVIEWS</h2>
-
-        <div class="reviewSlider" data-slider>
-          <button class="sliderBtn" aria-label="Previous review" data-prev>‹</button>
-
-          <div class="reviewTrack" data-track>
-            <article class="review">
-              <p class="review__quote">
-                “Absolutely spotless. Interior looks brand new. Easy scheduling and super professional.”
-              </p>
-              <div class="stars" aria-label="5 stars">★★★★★</div>
-              <p class="review__name">— Sarah M</p>
-            </article>
-
-            <article class="review">
-              <p class="review__quote">
-                “Best option for quality work. Smooth pickup/drop-off and the results were insane.”
-              </p>
-              <div class="stars" aria-label="5 stars">★★★★★</div>
-              <p class="review__name">— Basil A</p>
-            </article>
-
-            <article class="review">
-              <p class="review__quote">
-                “Great work and fair prices. I’ll definitely be back.”
-              </p>
-              <div class="stars" aria-label="5 stars">★★★★★</div>
-              <p class="review__name">— Tomas H</p>
-            </article>
-          </div>
-
-          <button class="sliderBtn" aria-label="Next review" data-next>›</button>
-        </div>
-
-        <p class="reviews__note" id="faq">
-          Questions? Call/text us at <a href="tel:+15555555555">(555) 555-5555</a>.
-        </p>
-      </div>
-    </section>
-
-    <!-- Booking / Contact -->
-    <section class="section" id="book">
-      <div class="container">
-        <div class="book">
-          <div class="book__left">
-            <h2 class="book__title">BOOK IN 60 SECONDS</h2>
-            <p class="book__sub">Tell us what you need. We’ll confirm availability fast.</p>
-
-            <form class="form" onsubmit="return false" data-lead-form>
-              <div class="formRow">
-                <label>
-                  Name
-                  <input type="text" name="name" placeholder="Your name" required />
-                </label>
-                <label>
-                  Phone
-                  <input type="tel" name="phone" placeholder="(555) 555-5555" required />
-                </label>
-              </div>
-
-              <label>
-                Service
-                <select name="service" required>
-                  <option value="" selected disabled>Select a service</option>
-                  <option>Interior Detail</option>
-                  <option>Exterior Detail</option>
-                  <option>Maintenance Detail (requires Interior + Exterior first)</option>
-                  <option>Ceramic Coating</option>
-                  <option>Paint Correction</option>
-                </select>
-              </label>
-
-              <label>
-                Message
-                <textarea
-                  name="message"
-                  rows="4"
-                  placeholder="Vehicle year/make/model + anything we should know."
-                ></textarea>
-              </label>
-
-              <div class="formActions">
-                <button class="btn btn--primary btn--lg" type="submit" data-submit>
-                  REQUEST BOOKING
-                </button>
-                <button class="btn btn--alt btn--lg" type="button" data-call-open>
-                  CALL / TEXT
-                </button>
-              </div>
-
-              <p class="formFine">
-                By submitting, you agree we can contact you via phone/text to confirm details.
-              </p>
-            </form>
-          </div>
-
-          <div class="book__right" id="contact">
-            <div class="contactCard">
-              <h3>Hours</h3>
-              <p>
-                Mon–Fri: 9am – 6pm<br />
-                Sat: 10am – 4pm<br />
-                Sun: 12pm – 4pm<br />
-                <em>Available by appointment</em>
-              </p>
-
-              <h3 class="mt-16">Contact</h3>
-              <p>
-                Phone: <a href="tel:+15555555555">(555) 555-5555</a><br />
-                Email: <a href="mailto:youremail@gmail.com">youremail@gmail.com</a><br />
-                Serving: <strong>Your City & Surrounding Areas</strong>
-              </p>
-
-              <div class="map">
-                <div class="map__placeholder">
-                  MAP PLACEHOLDER<br /><span>Drop Google embed here</span>
-                </div>
-              </div>
-
-              <div class="contactIcons">
-                <a class="iconBtn iconBtn--dark" href="#top" aria-label="Back to top">↑</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Sticky mobile CTA -->
-    <div class="stickyCta" role="region" aria-label="Quick actions">
-      <button class="stickyCta__btn" type="button" data-call-open>Call/Text</button>
-      <a class="stickyCta__btn stickyCta__btn--primary" href="#book">Book Now</a>
-    </div>
 
     <!-- Service modal -->
     <div class="modal" aria-hidden="true" data-modal>
@@ -349,8 +190,8 @@
         <h3 class="modal__title" data-modal-title>Service</h3>
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
-          <a class="btn btn--primary" href="#book" data-modal-close>BOOK THIS SERVICE</a>
-          <button class="btn btn--alt" type="button" data-call-open data-modal-close>CALL / TEXT</button>
+          <button class="btn btn--quote" type="button" data-call-open data-modal-close>GET QUOTE NOW</button>
+          <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
         </div>
       </div>
     </div>
@@ -362,7 +203,7 @@
       <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
         <button class="modal__close" aria-label="Close" data-call-close>×</button>
 
-        <h3 class="callTitle">CALL / TEXT</h3>
+        <h3 class="callTitle">GET A QUOTE</h3>
         <p class="callText">To receive a quote or more information, message us at:</p>
         <a class="callNumber" href="tel:+15555555555">(555) 555-5555</a>
       </div>
