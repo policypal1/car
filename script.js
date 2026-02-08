@@ -140,18 +140,108 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Before/After slider logic
-document.querySelectorAll("[data-compare]").forEach((wrap) => {
-  const range = wrap.querySelector("[data-compare-range]");
-  if (!range) return;
+function initCompare() {
+  document.querySelectorAll("[data-compare]").forEach((wrap) => {
+    const range = wrap.querySelector("[data-compare-range]");
+    if (!range) return;
 
-  const setPos = (val) => {
-    const clamped = Math.max(0, Math.min(100, Number(val)));
-    wrap.style.setProperty("--pos", clamped + "%");
+    const setPos = (val) => {
+      const clamped = Math.max(0, Math.min(100, Number(val)));
+      wrap.style.setProperty("--pos", clamped + "%");
+    };
+
+    setPos(range.value);
+    range.addEventListener("input", (e) => setPos(e.target.value));
+  });
+}
+initCompare();
+
+// Simple carousel logic (buttons + dots + swipe/drag)
+function initCarousel(root) {
+  const track = root.querySelector("[data-carousel-track]");
+  const prev = root.querySelector("[data-carousel-prev]");
+  const next = root.querySelector("[data-carousel-next]");
+  const dotsWrap = root.querySelector("[data-carousel-dots]");
+  const slides = Array.from(root.querySelectorAll(".carousel__slide"));
+
+  if (!track || slides.length === 0) return;
+
+  let index = 0;
+  let startX = 0;
+  let dragging = false;
+  let dragDelta = 0;
+
+  // Build dots
+  if (dotsWrap) {
+    dotsWrap.innerHTML = "";
+    slides.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "dot" + (i === 0 ? " isActive" : "");
+      dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
+      dot.addEventListener("click", () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+  }
+
+  const setDots = () => {
+    if (!dotsWrap) return;
+    const dots = Array.from(dotsWrap.querySelectorAll(".dot"));
+    dots.forEach((d, i) => d.classList.toggle("isActive", i === index));
   };
 
-  setPos(range.value);
+  const goTo = (i) => {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    track.style.transform = `translateX(${-index * 100}%)`;
+    setDots();
+  };
 
-  range.addEventListener("input", (e) => {
-    setPos(e.target.value);
+  prev?.addEventListener("click", () => goTo(index - 1));
+  next?.addEventListener("click", () => goTo(index + 1));
+
+  // Drag/swipe on viewport
+  const viewport = root.querySelector("[data-carousel-viewport]");
+  if (!viewport) return;
+
+  const onDown = (clientX) => {
+    dragging = true;
+    startX = clientX;
+    dragDelta = 0;
+    viewport.style.cursor = "grabbing";
+  };
+
+  const onMove = (clientX) => {
+    if (!dragging) return;
+    dragDelta = clientX - startX;
+  };
+
+  const onUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    viewport.style.cursor = "";
+
+    const threshold = 60; // swipe distance
+    if (dragDelta > threshold) goTo(index - 1);
+    else if (dragDelta < -threshold) goTo(index + 1);
+  };
+
+  // Mouse
+  viewport.addEventListener("mousedown", (e) => onDown(e.clientX));
+  window.addEventListener("mousemove", (e) => onMove(e.clientX));
+  window.addEventListener("mouseup", onUp);
+
+  // Touch
+  viewport.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), { passive: true });
+  viewport.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
+  viewport.addEventListener("touchend", onUp);
+
+  // Optional: keyboard
+  root.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") goTo(index - 1);
+    if (e.key === "ArrowRight") goTo(index + 1);
   });
-});
+
+  goTo(0);
+}
+
+document.querySelectorAll("[data-carousel]").forEach(initCarousel);
