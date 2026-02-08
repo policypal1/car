@@ -34,7 +34,8 @@
         <nav class="nav" data-nav>
           <a href="#services">Services</a>
           <a href="#work">Our Work</a>
-          <a href="#top">Contact</a>
+          <a href="#about">About</a>
+          <a href="#reviews">Reviews</a>
           <button class="btn btn--quote nav__cta" type="button" data-call-open>GET QUOTE NOW</button>
         </nav>
       </div>
@@ -83,13 +84,12 @@
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
-                <h3>INTERIOR</h3>
+                <div class="serviceCard__titleBlock">
+                  <h3>INTERIOR</h3>
+                  <p class="serviceCard__mini">Deep clean, stains, crevices, crisp finish.</p>
+                </div>
                 <span class="tag">Most Popular</span>
               </div>
-
-              <p class="serviceCard__desc">
-                Deep clean, stain attention, tight crevices, and a crisp finish.
-              </p>
 
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
@@ -103,13 +103,12 @@
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
-                <h3>EXTERIOR</h3>
+                <div class="serviceCard__titleBlock">
+                  <h3>EXTERIOR</h3>
+                  <p class="serviceCard__mini">Safe wash, wheels/tires, clean shine protection.</p>
+                </div>
                 <span class="tag">Gloss Reset</span>
               </div>
-
-              <p class="serviceCard__desc">
-                Safe wash, wheels and tires cleaned, plus protection for a clean shine.
-              </p>
 
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
@@ -118,18 +117,17 @@
             </div>
           </article>
 
-          <!-- Maintenance (badge visible) -->
+          <!-- Upkeep (badge visible) -->
           <article class="serviceCard" style="background-image:url('./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
-                <h3>UPKEEP</h3>
+                <div class="serviceCard__titleBlock">
+                  <h3>UPKEEP</h3>
+                  <p class="serviceCard__mini">For returning clients on a recurring schedule.</p>
+                </div>
                 <span class="tag">Returning</span>
               </div>
-
-              <p class="serviceCard__desc">
-                Starts after an Interior + Exterior. Then we maintain it on a recurring schedule.
-              </p>
 
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
@@ -138,18 +136,17 @@
             </div>
           </article>
 
-          <!-- Ceramic (NO badge visible, but placeholder keeps alignment) -->
+          <!-- Ceramic (no visible badge, placeholder keeps alignment) -->
           <article class="serviceCard" style="background-image:url('./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
-                <h3>CERAMIC</h3>
+                <div class="serviceCard__titleBlock">
+                  <h3>CERAMIC</h3>
+                  <p class="serviceCard__mini">Hydrophobic protection with long-lasting gloss.</p>
+                </div>
                 <span class="tag tag--ghost">Hidden</span>
               </div>
-
-              <p class="serviceCard__desc">
-                Long lasting gloss and hydrophobic protection for easier washes.
-              </p>
 
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
@@ -158,18 +155,17 @@
             </div>
           </article>
 
-          <!-- Paint (NO badge visible, but placeholder keeps alignment) -->
+          <!-- Correction (no visible badge, placeholder keeps alignment) -->
           <article class="serviceCard" style="background-image:url('./07752da8-f5f0-413a-890b-c6de41317df6 (1).png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
-                <h3>CORRECTION</h3>
+                <div class="serviceCard__titleBlock">
+                  <h3>CORRECTION</h3>
+                  <p class="serviceCard__mini">Swirl removal for a sharper, deeper finish.</p>
+                </div>
                 <span class="tag tag--ghost">Hidden</span>
               </div>
-
-              <p class="serviceCard__desc">
-                Reduces swirls and defects for a sharper, deeper finish.
-              </p>
 
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
@@ -187,50 +183,238 @@
         <div class="section__head">
           <h2 class="section__title section__title--dark">RECENT TRANSFORMATIONS</h2>
           <p class="section__sub section__sub--dark">
-            Drag the slider to reveal the clean result.
+            Swipe through recent work, then drag the slider to reveal the after.
           </p>
         </div>
 
-        <!-- Before/After Slider (your images) -->
-        <div
-          class="compare"
-          data-compare
-          style="
-            --before:url('./3a1e17c7-bcc9-49db-9c9d-ae7b6e1f8ab8.png');
-            --after:url('./6107e54c-faba-40e2-924c-8e72db768435 (1).png');
-          "
-          aria-label="Before and after interior detail comparison"
-        >
-          <div class="compare__stage" aria-hidden="true"></div>
+        <div class="carousel" data-carousel="work">
+          <div class="carousel__top">
+            <button class="carouselBtn" type="button" data-carousel-prev aria-label="Previous">‹</button>
+            <div class="carouselDots" data-carousel-dots aria-hidden="true"></div>
+            <button class="carouselBtn" type="button" data-carousel-next aria-label="Next">›</button>
+          </div>
 
-          <input
-            class="compare__range"
-            data-compare-range
-            type="range"
-            min="0"
-            max="100"
-            value="10"
-            aria-label="Reveal after image"
-          />
+          <div class="carousel__viewport" data-carousel-viewport>
+            <div class="carousel__track" data-carousel-track>
+              <!-- Slide 1 -->
+              <div class="carousel__slide">
+                <div
+                  class="compare"
+                  data-compare
+                  style="
+                    --before:url('./3a1e17c7-bcc9-49db-9c9d-ae7b6e1f8ab8.png');
+                    --after:url('./6107e54c-faba-40e2-924c-8e72db768435 (1).png');
+                  "
+                  aria-label="Before and after interior detail comparison"
+                >
+                  <div class="compare__stage" aria-hidden="true"></div>
+                  <input class="compare__range" data-compare-range type="range" min="0" max="100" value="10" aria-label="Reveal after image" />
+                  <div class="compare__handle" aria-hidden="true"></div>
+                  <div class="compare__labels" aria-hidden="true">
+                    <span class="compare__label">BEFORE</span>
+                    <span class="compare__label">AFTER</span>
+                  </div>
+                </div>
 
-          <div class="compare__handle" aria-hidden="true"></div>
+                <p class="workCaption">Interior reset: seat fabric and carpets brought back to life.</p>
+              </div>
 
-          <div class="compare__labels" aria-hidden="true">
-            <span class="compare__label">BEFORE</span>
-            <span class="compare__label">AFTER</span>
+              <!-- Slide 2 -->
+              <div class="carousel__slide">
+                <div
+                  class="compare"
+                  data-compare
+                  style="
+                    --before:url('./ec6423a4-3e1a-4e7e-a85d-c3b721f450a4.png');
+                    --after:url('./adc47ac6-1e75-4feb-aa00-21671835062d.png');
+                  "
+                  aria-label="Before and after driver seat detail comparison"
+                >
+                  <div class="compare__stage" aria-hidden="true"></div>
+                  <input class="compare__range" data-compare-range type="range" min="0" max="100" value="10" aria-label="Reveal after image" />
+                  <div class="compare__handle" aria-hidden="true"></div>
+                  <div class="compare__labels" aria-hidden="true">
+                    <span class="compare__label">BEFORE</span>
+                    <span class="compare__label">AFTER</span>
+                  </div>
+                </div>
+
+                <p class="workCaption">Driver seat deep clean: stains and grime lifted for a clean finish.</p>
+              </div>
+
+              <!-- Slide 3 (placeholder you can swap later) -->
+              <div class="carousel__slide">
+                <div
+                  class="compare"
+                  data-compare
+                  style="
+                    --before:url('./placeholder-before.jpg');
+                    --after:url('./placeholder-after.jpg');
+                  "
+                  aria-label="Before and after placeholder comparison"
+                >
+                  <div class="compare__stage" aria-hidden="true"></div>
+                  <input class="compare__range" data-compare-range type="range" min="0" max="100" value="10" aria-label="Reveal after image" />
+                  <div class="compare__handle" aria-hidden="true"></div>
+                  <div class="compare__labels" aria-hidden="true">
+                    <span class="compare__label">BEFORE</span>
+                    <span class="compare__label">AFTER</span>
+                  </div>
+                </div>
+
+                <p class="workCaption">Add more transformations by swapping the two image filenames.</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="workNote">
-          <p>
-            Add more sliders later by duplicating this block and swapping the two image filenames.
+        <p class="workNote">
+          Tip: Add more slides by duplicating a <strong>carousel__slide</strong> and swapping the two image filenames.
+        </p>
+      </div>
+    </section>
+
+    <!-- About (WHITE) -->
+    <section class="section section--light" id="about">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">ABOUT US</h2>
+          <p class="section__sub">
+            Built on consistency, clean results, and simple booking.
           </p>
         </div>
 
-        <div class="workCta">
-          <button class="btn btn--quote btn--lg" type="button" data-call-open>GET QUOTE NOW</button>
-          <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
+        <div class="aboutGrid">
+          <div class="aboutCopy">
+            <h3 class="aboutTitle">Detailing that actually holds up.</h3>
+            <p class="aboutText">
+              We focus on the details most people skip. The tight areas, the stains that keep coming back, the trim that looks dull,
+              and the places that make a car feel truly clean when you sit inside.
+            </p>
+            <p class="aboutText">
+              Whether you need a deep reset or you just want your vehicle maintained on a schedule, we make it easy. Clear communication,
+              professional products, and results you can see immediately.
+            </p>
+
+            <div class="aboutPills">
+              <span class="aboutPill">Careful, non-rushed work</span>
+              <span class="aboutPill">Interior specialists</span>
+              <span class="aboutPill">Protection options available</span>
+            </div>
+          </div>
+
+          <div class="aboutMedia">
+            <img src="./images.jpg" alt="Our detailing work" loading="lazy" />
+          </div>
         </div>
+      </div>
+    </section>
+
+    <!-- Reviews (BLACK) -->
+    <section class="section section--dark" id="reviews">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title section__title--dark">REVIEWS</h2>
+          <p class="section__sub section__sub--dark">
+            What customers say after seeing the results in person.
+          </p>
+        </div>
+
+        <div class="carousel carousel--reviews" data-carousel="reviews">
+          <div class="carousel__top">
+            <button class="carouselBtn" type="button" data-carousel-prev aria-label="Previous">‹</button>
+            <div class="carouselDots" data-carousel-dots aria-hidden="true"></div>
+            <button class="carouselBtn" type="button" data-carousel-next aria-label="Next">›</button>
+          </div>
+
+          <div class="carousel__viewport" data-carousel-viewport>
+            <div class="carousel__track" data-carousel-track>
+              <div class="carousel__slide">
+                <article class="reviewCard">
+                  <div class="reviewHeader">
+                    <div class="reviewAvatar" aria-hidden="true">JR</div>
+                    <div class="reviewMeta">
+                      <div class="reviewNameRow">
+                        <strong class="reviewName">J. Rivera</strong>
+                        <div class="reviewStars" aria-label="5 out of 5 stars">
+                          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                        </div>
+                      </div>
+                      <span class="reviewLoc">Keizer</span>
+                    </div>
+                  </div>
+                  <p class="reviewQuote">
+                    “Texted them my VIN, got a price in minutes. Showed up on time and the interior looked brand new.”
+                  </p>
+                </article>
+              </div>
+
+              <div class="carousel__slide">
+                <article class="reviewCard">
+                  <div class="reviewHeader">
+                    <div class="reviewAvatar" aria-hidden="true">AM</div>
+                    <div class="reviewMeta">
+                      <div class="reviewNameRow">
+                        <strong class="reviewName">A. Monroe</strong>
+                        <div class="reviewStars" aria-label="5 out of 5 stars">
+                          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                        </div>
+                      </div>
+                      <span class="reviewLoc">Salem</span>
+                    </div>
+                  </div>
+                  <p class="reviewQuote">
+                    “Seats and carpets were spotless. No greasy shine, just clean. You can tell they take their time.”
+                  </p>
+                </article>
+              </div>
+
+              <div class="carousel__slide">
+                <article class="reviewCard">
+                  <div class="reviewHeader">
+                    <div class="reviewAvatar" aria-hidden="true">KS</div>
+                    <div class="reviewMeta">
+                      <div class="reviewNameRow">
+                        <strong class="reviewName">K. Scott</strong>
+                        <div class="reviewStars" aria-label="4 out of 5 stars">
+                          <span>★</span><span>★</span><span>★</span><span>★</span><span class="starOff">★</span>
+                        </div>
+                      </div>
+                      <span class="reviewLoc">West Salem</span>
+                    </div>
+                  </div>
+                  <p class="reviewQuote">
+                    “Great work and easy scheduling. They were booked out a bit, but the result was worth the wait.”
+                  </p>
+                </article>
+              </div>
+
+              <div class="carousel__slide">
+                <article class="reviewCard">
+                  <div class="reviewHeader">
+                    <div class="reviewAvatar" aria-hidden="true">TL</div>
+                    <div class="reviewMeta">
+                      <div class="reviewNameRow">
+                        <strong class="reviewName">T. Lane</strong>
+                        <div class="reviewStars" aria-label="5 out of 5 stars">
+                          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                        </div>
+                      </div>
+                      <span class="reviewLoc">Keizer</span>
+                    </div>
+                  </div>
+                  <p class="reviewQuote">
+                    “Exterior came out insane. Wheels were perfect and the paint looked deeper immediately.”
+                  </p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="workNote">
+          More reviews can be added by duplicating a slide and swapping the initials, name, city, and quote.
+        </p>
       </div>
     </section>
 
