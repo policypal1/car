@@ -47,18 +47,18 @@ const serviceDetails = {
     `,
   },
   maintenance: {
-    title: "Maintenance Detail",
+    title: "Upkeep Detail",
     body: `
       <p><strong>Returning clients only.</strong></p>
       <ul>
-        <li>Requires <strong>Interior + Exterior Detail first</strong></li>
+        <li>Requires <strong>Interior + Exterior</strong> first</li>
         <li>Then we maintain it on a recurring schedule</li>
-        <li>Perfect for weekly, biweekly, or monthly upkeep</li>
+        <li>Weekly, biweekly, or monthly options</li>
       </ul>
     `,
   },
   ceramic: {
-    title: "Ceramic Coating",
+    title: "Ceramic Protection",
     body: `
       <ul>
         <li>Hydrophobic protection and enhanced gloss</li>
@@ -73,7 +73,7 @@ const serviceDetails = {
       <ul>
         <li>Reduces swirls and paint defects</li>
         <li>Single or multi-stage options</li>
-        <li>Best prep before ceramic coating</li>
+        <li>Best prep before ceramic protection</li>
       </ul>
     `,
   },
@@ -137,4 +137,21 @@ document.addEventListener("keydown", (e) => {
     closeServiceModal();
     closeCallModal();
   }
+});
+
+// Before/After slider logic
+document.querySelectorAll("[data-compare]").forEach((wrap) => {
+  const range = wrap.querySelector("[data-compare-range]");
+  if (!range) return;
+
+  const setPos = (val) => {
+    const clamped = Math.max(0, Math.min(100, Number(val)));
+    wrap.style.setProperty("--pos", clamped + "%");
+  };
+
+  setPos(range.value);
+
+  range.addEventListener("input", (e) => {
+    setPos(e.target.value);
+  });
 });
