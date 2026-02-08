@@ -154,7 +154,7 @@ body{
   box-shadow: 0 10px 22px rgba(0,0,0,.18);
 }
 
-/* Hero */
+/* Hero (black) */
 .hero{
   position:relative;
   min-height: 72vh;
@@ -162,6 +162,7 @@ body{
   align-items:center;
   overflow:hidden;
   border-bottom: 1px solid rgba(0,0,0,.06);
+  background: #000;
 }
 .hero__bg{
   position:absolute;
@@ -232,6 +233,9 @@ body{
 
 /* Sections */
 .section{ padding: 3.2rem 0; }
+.section--light{ background: var(--bg); color: var(--text); }
+.section--dark{ background: #070708; color: #fff; border-top: 1px solid rgba(255,255,255,.06); }
+
 .section__head{ text-align:center; margin-bottom: 1.5rem; }
 .section__title{
   font-family: Oswald, Inter, sans-serif;
@@ -246,6 +250,8 @@ body{
   max-width: 70ch;
   color: var(--muted);
 }
+.section__title--dark{ color: #fff; }
+.section__sub--dark{ color: rgba(255,255,255,.74); }
 
 /* Services */
 .serviceWrap{
@@ -273,7 +279,7 @@ body{
   background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.82));
 }
 
-/* ✅ LOCKED LAYOUT: title row + description row + button row */
+/* LOCKED layout: title row + description row + actions row */
 .serviceCard__content{
   position:relative;
   height: 100%;
@@ -316,8 +322,11 @@ body{
   font-size: .85rem;
   white-space: nowrap;
 }
+.tag--ghost{
+  visibility: hidden; /* keeps alignment but “not visible” */
+}
 
-/* ✅ SAME HEIGHT DESCRIPTIONS */
+/* SAME height descriptions */
 .serviceCard__desc{
   margin: 0;
   color: rgba(255,255,255,.92);
@@ -337,106 +346,112 @@ body{
   align-self: end;
 }
 
-/* Recent Transformations */
-.workGrid{
-  margin-top: 22px;
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-}
-.workCard{
-  margin: 0;
-  border-radius: 18px;
+/* Before/After Compare Slider */
+.compare{
+  --pos: 10%;
+  position: relative;
+  margin: 24px auto 0;
+  width: min(980px, 100%);
+  border-radius: 22px;
   overflow: hidden;
-  background: #fff;
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
-  border: 1px solid rgba(0,0,0,.06);
+  border: 1px solid rgba(214,178,94,.18);
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  background: rgba(255,255,255,.02);
 }
-.workCard img{
+
+.compare__stage{
+  position: relative;
   width: 100%;
-  height: 240px;
-  object-fit: cover;
-  display:block;
-}
-.workCard figcaption{
-  padding: 12px 14px 14px;
-}
-.workCard strong{
-  display:block;
-  font-family: Oswald, Inter, sans-serif;
-  letter-spacing: .6px;
-  text-transform: uppercase;
-  color: var(--black);
-  font-size: 1.1rem;
-}
-.workCard span{
-  display:block;
-  margin-top: 4px;
-  color: var(--muted);
-  line-height: 1.4;
+  aspect-ratio: 16 / 9;
+  background-image: var(--before);
+  background-size: cover;
+  background-position: center;
 }
 
-/* Reviews */
-.reviewGrid{
-  margin-top: 22px;
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
+/* AFTER overlay (revealed by width) */
+.compare__stage::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  width: var(--pos);
+  background-image: var(--after);
+  background-size: cover;
+  background-position: center;
+  border-right: 2px solid rgba(255,255,255,.65);
 }
 
-.reviewCard{
-  background:#fff;
-  border-radius: 18px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
-  border: 1px solid rgba(0,0,0,.06);
-  padding: 14px 14px 16px;
+/* Slider input sits on top */
+.compare__range{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  opacity:0;
+  cursor: ew-resize;
 }
 
-.reviewTop{
+/* Visible handle */
+.compare__handle{
+  position:absolute;
+  top:0;
+  left: var(--pos);
+  transform: translateX(-50%);
+  height: 100%;
+  width: 44px;
   display:flex;
   align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+.compare__handle::before{
+  content:"";
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(214,178,94,.55);
+  box-shadow: 0 18px 44px rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+}
+.compare__handle::after{
+  content:"↔";
+  position:absolute;
+  font-weight: 900;
+  color: rgba(255,255,255,.92);
+  font-size: 1.05rem;
+}
+
+/* Labels */
+.compare__labels{
+  position:absolute;
+  inset: 14px 14px auto 14px;
+  display:flex;
   justify-content:space-between;
   gap: 10px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
+  pointer-events:none;
 }
-
-.stars{
+.compare__label{
   display:inline-flex;
-  gap: 2px;
-  font-size: 1.05rem;
-  line-height: 1;
-  color: #111;
-}
-.starOff{
-  opacity: .25;
-}
-
-.reviewTag{
-  display:inline-flex;
-  align-items:center;
-  padding: .35rem .65rem;
+  padding: .38rem .7rem;
   border-radius: 999px;
-  background: rgba(214,178,94,.12);
-  border: 1px solid rgba(214,178,94,.35);
-  color: #2a2417;
-  font-weight: 800;
-  font-size: .85rem;
-}
-
-.reviewText{
-  margin: 0 0 12px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.reviewName{
-  margin: 0;
   font-weight: 900;
-  color: var(--black);
+  letter-spacing: .4px;
+  font-size: .85rem;
+  background: rgba(0,0,0,.45);
+  border: 1px solid rgba(255,255,255,.16);
+  color: rgba(255,255,255,.92);
 }
 
-.reviewsCta{
+.workNote{
+  margin: 14px auto 0;
+  width: min(980px, 100%);
+  color: rgba(255,255,255,.70);
+  text-align:center;
+  line-height: 1.55;
+}
+
+.workCta{
   margin-top: 18px;
   display:flex;
   justify-content:center;
@@ -527,7 +542,7 @@ body{
   border: 1px solid rgba(214,178,94,.35);
 }
 
-/* Desktop enhancements */
+/* Desktop nav */
 @media (min-width: 768px){
   .nav{
     position: static;
@@ -543,18 +558,5 @@ body{
   .navToggle{ display:none; }
   .nav__cta{ margin-left: 6px; margin-top: 0; }
 
-  .workGrid{
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-  .workCard img{ height: 260px; }
-
-  .reviewGrid{
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-}
-
-@media (min-width: 1024px){
-  .workGrid{ grid-template-columns: repeat(3, 1fr); }
+  .compare{ border-radius: 26px; }
 }
