@@ -8,8 +8,8 @@ if (navToggle && nav) {
     navToggle.setAttribute("aria-expanded", String(open));
   });
 
-  nav.querySelectorAll("a").forEach((a) => {
-    a.addEventListener("click", () => {
+  nav.querySelectorAll("a, button").forEach((el) => {
+    el.addEventListener("click", () => {
       if (window.innerWidth < 768) {
         nav.classList.remove("isOpen");
         navToggle.setAttribute("aria-expanded", "false");
@@ -18,44 +18,7 @@ if (navToggle && nav) {
   });
 }
 
-// Reviews slider
-const track = document.querySelector("[data-track]");
-const prevBtn = document.querySelector("[data-prev]");
-const nextBtn = document.querySelector("[data-next]");
-
-let index = 0;
-
-function updateSlider() {
-  if (!track) return;
-  const width = track.children[0]?.getBoundingClientRect().width || 0;
-  track.style.transform = `translateX(${-index * (width + 12)}px)`;
-}
-
-function clampIndex() {
-  if (!track) return;
-  const max = Math.max(0, track.children.length - 1);
-  index = Math.min(Math.max(index, 0), max);
-}
-
-if (track && prevBtn && nextBtn) {
-  window.addEventListener("resize", updateSlider);
-
-  prevBtn.addEventListener("click", () => {
-    index -= 1;
-    clampIndex();
-    updateSlider();
-  });
-
-  nextBtn.addEventListener("click", () => {
-    index += 1;
-    clampIndex();
-    updateSlider();
-  });
-
-  updateSlider();
-}
-
-// Service modal (updated services)
+// Service modal
 const modal = document.querySelector("[data-modal]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const modalContent = document.querySelector("[data-modal-content]");
@@ -86,10 +49,10 @@ const serviceDetails = {
   maintenance: {
     title: "Maintenance Detail",
     body: `
-      <p><strong>Important:</strong> Maintenance is for returning clients.</p>
+      <p><strong>Returning clients only.</strong></p>
       <ul>
         <li>Requires <strong>Interior + Exterior Detail first</strong></li>
-        <li>Then we keep it dialed in on a recurring schedule</li>
+        <li>Then we maintain it on a recurring schedule</li>
         <li>Perfect for weekly/biweekly/monthly upkeep</li>
       </ul>
     `,
@@ -175,14 +138,3 @@ document.addEventListener("keydown", (e) => {
     closeCallModal();
   }
 });
-
-// Lead form demo
-const leadForm = document.querySelector("[data-lead-form]");
-const submitBtn = document.querySelector("[data-submit]");
-
-if (leadForm && submitBtn) {
-  leadForm.addEventListener("submit", () => {
-    submitBtn.textContent = "SENT (DEMO)";
-    submitBtn.disabled = true;
-  });
-}
