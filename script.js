@@ -55,7 +55,7 @@ if (track && prevBtn && nextBtn) {
   updateSlider();
 }
 
-// Service modal (ONLY 3 services)
+// Service modal (updated services)
 const modal = document.querySelector("[data-modal]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const modalContent = document.querySelector("[data-modal-content]");
@@ -67,7 +67,7 @@ const serviceDetails = {
       <ul>
         <li>Deep vacuum and wipe-down</li>
         <li>Stain treatment (as needed)</li>
-        <li>Crevices and trim detailed</li>
+        <li>Crevices/trim detailed</li>
         <li>Interior glass cleaned</li>
       </ul>
     `,
@@ -77,7 +77,7 @@ const serviceDetails = {
     body: `
       <ul>
         <li>Safe hand wash and drying</li>
-        <li>Wheel and tire deep clean</li>
+        <li>Wheels and tires cleaned</li>
         <li>Trim cleaned and protected</li>
         <li>Exterior glass cleaned</li>
       </ul>
@@ -86,10 +86,31 @@ const serviceDetails = {
   maintenance: {
     title: "Maintenance Detail",
     body: `
+      <p><strong>Important:</strong> Maintenance is for returning clients.</p>
       <ul>
-        <li>Quick reset inside and out</li>
-        <li>Ideal for returning clients</li>
-        <li>Keeps your vehicle consistently clean</li>
+        <li>Requires <strong>Interior + Exterior Detail first</strong></li>
+        <li>Then we keep it dialed in on a recurring schedule</li>
+        <li>Perfect for weekly/biweekly/monthly upkeep</li>
+      </ul>
+    `,
+  },
+  ceramic: {
+    title: "Ceramic Coating",
+    body: `
+      <ul>
+        <li>Hydrophobic protection and enhanced gloss</li>
+        <li>Easier washes and longer-lasting finish</li>
+        <li>Great paired with paint correction</li>
+      </ul>
+    `,
+  },
+  paint: {
+    title: "Paint Correction",
+    body: `
+      <ul>
+        <li>Reduces swirls and paint defects</li>
+        <li>Single or multi-stage options</li>
+        <li>Best prep before ceramic coating</li>
       </ul>
     `,
   },
@@ -110,7 +131,7 @@ function openServiceModal(key) {
 
 function closeServiceModal() {
   if (!modal) return;
-  modal.classList.remove("isOpen");
+  modal.classList.remove("isOpen"); // instant close
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
@@ -123,7 +144,7 @@ document.querySelectorAll("[data-modal-close]").forEach((btn) => {
   btn.addEventListener("click", closeServiceModal);
 });
 
-// Call/Text modal (fade in, instant close)
+// Call/Text modal
 const callModal = document.querySelector("[data-call-modal]");
 
 function openCallModal() {
@@ -148,7 +169,6 @@ document.querySelectorAll("[data-call-close]").forEach((btn) => {
   btn.addEventListener("click", closeCallModal);
 });
 
-// Close on Escape
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     closeServiceModal();
