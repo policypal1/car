@@ -30,7 +30,7 @@ const serviceDetails = {
       <ul>
         <li>Deep vacuum and wipe-down</li>
         <li>Stain treatment (as needed)</li>
-        <li>Crevices/trim detailed</li>
+        <li>Crevices and trim detailed</li>
         <li>Interior glass cleaned</li>
       </ul>
     `,
@@ -53,7 +53,7 @@ const serviceDetails = {
       <ul>
         <li>Requires <strong>Interior + Exterior Detail first</strong></li>
         <li>Then we maintain it on a recurring schedule</li>
-        <li>Perfect for weekly/biweekly/monthly upkeep</li>
+        <li>Perfect for weekly, biweekly, or monthly upkeep</li>
       </ul>
     `,
   },
@@ -94,7 +94,7 @@ function openServiceModal(key) {
 
 function closeServiceModal() {
   if (!modal) return;
-  modal.classList.remove("isOpen"); // instant close
+  modal.classList.remove("isOpen");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
@@ -119,7 +119,7 @@ function openCallModal() {
 
 function closeCallModal() {
   if (!callModal) return;
-  callModal.classList.remove("isOpen"); // instant close
+  callModal.classList.remove("isOpen");
   callModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
 }
