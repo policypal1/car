@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
 
@@ -50,16 +50,17 @@
       <div class="hero__bg" aria-hidden="true"></div>
 
       <div class="container hero__inner">
-        <!-- This panel makes the text readable (dark + blur + border) -->
         <div class="hero__panel">
+          <p class="hero__kicker">Premium detailing • Real results • Easy booking</p>
+
           <h1 class="hero__headline">MORE THAN JUST A CAR WASH.</h1>
           <p class="hero__sub">
-            Premium detailing for interiors, exteriors, and maintenance — done right, every time.
+            Interior & exterior detailing, paint correction, and ceramic coating — done right, every time.
           </p>
 
           <div class="hero__actions">
             <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
-            <button class="btn btn--call btn--lg" type="button" data-call-open>
+            <button class="btn btn--alt btn--lg" type="button" data-call-open>
               CALL / TEXT
             </button>
           </div>
@@ -67,52 +68,95 @@
           <div class="hero__trust">
             <div class="trustPill">Pickup/Drop-Off Available</div>
             <div class="trustPill">5-Star Rated</div>
-            <div class="trustPill">Premium Products</div>
+            <div class="trustPill">Professional Products</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Services (ONLY 3) -->
+    <!-- Services -->
     <section class="section" id="services">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title">OUR SERVICES</h2>
-          <p class="section__sub">Choose what you need. We’ll confirm pricing based on vehicle size/condition.</p>
+          <h2 class="section__title">SERVICES</h2>
+          <p class="section__sub">
+            Built for clarity on mobile and easy comparison on desktop.
+          </p>
         </div>
 
         <div class="serviceGrid">
-          <article class="serviceCard" style="background-image:url('./902dc749-00c0-4450-a27a-dd196a56ad74.png')">
+          <article class="serviceCard" style="background-image:url('./51ae0d9f-5775-427e-b565-cb5e0984e800.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
-              <h3>INTERIOR DETAIL</h3>
-              <p>Deep clean, stains addressed, and a crisp finish.</p>
+              <div class="serviceCard__top">
+                <h3>INTERIOR DETAIL</h3>
+                <span class="tag">Most Popular</span>
+              </div>
+              <p>Deep clean, stain attention, tight crevices, and a crisp finish.</p>
               <div class="serviceCard__actions">
-                <button class="btn btn--secondary" data-modal-open="interior">LEARN MORE</button>
+                <button class="btn btn--ghostGold" data-modal-open="interior">LEARN MORE</button>
                 <a class="btn btn--primary" href="#book">BOOK</a>
               </div>
             </div>
           </article>
 
-          <article class="serviceCard" style="background-image:url('./e561e983-f7ec-474a-a262-a25020f9a1d6.png')">
+          <article class="serviceCard" style="background-image:url('./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
-              <h3>EXTERIOR DETAIL</h3>
-              <p>Safe wash, wheels/tires cleaned, shine restored.</p>
+              <div class="serviceCard__top">
+                <h3>EXTERIOR DETAIL</h3>
+                <span class="tag">Gloss Reset</span>
+              </div>
+              <p>Safe wash, wheels/tires cleaned, and protection for a clean shine.</p>
               <div class="serviceCard__actions">
-                <button class="btn btn--secondary" data-modal-open="exterior">LEARN MORE</button>
+                <button class="btn btn--ghostGold" data-modal-open="exterior">LEARN MORE</button>
                 <a class="btn btn--primary" href="#book">BOOK</a>
               </div>
             </div>
           </article>
 
-          <article class="serviceCard" style="background-image:url('./b5a68f22-93c5-469a-88c3-b1d2edc9ec85.png')">
+          <article class="serviceCard" style="background-image:url('./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
-              <h3>MAINTENANCE DETAIL</h3>
-              <p>Perfect for returning clients who want it consistently clean.</p>
+              <div class="serviceCard__top">
+                <h3>MAINTENANCE DETAIL</h3>
+                <span class="tag">Returning Clients</span>
+              </div>
+              <p class="fine">
+                Requires an <strong>Interior + Exterior Detail first</strong>. After that, we keep it dialed in on a recurring schedule.
+              </p>
               <div class="serviceCard__actions">
-                <button class="btn btn--secondary" data-modal-open="maintenance">LEARN MORE</button>
+                <button class="btn btn--ghostGold" data-modal-open="maintenance">LEARN MORE</button>
+                <a class="btn btn--primary" href="#book">BOOK</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="serviceCard" style="background-image:url('./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png')">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <h3>CERAMIC COATING</h3>
+                <span class="tag">Long-Term</span>
+              </div>
+              <p>Hydrophobic protection, enhanced gloss, and easier maintenance.</p>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="ceramic">LEARN MORE</button>
+                <a class="btn btn--primary" href="#book">BOOK</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="serviceCard" style="background-image:url('./07752da8-f5f0-413a-890b-c6de41317df6 (1).png')">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <h3>PAINT CORRECTION</h3>
+                <span class="tag">Swirl Removal</span>
+              </div>
+              <p>Reduce swirls and defects for a sharper, deeper finish.</p>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="paint">LEARN MORE</button>
                 <a class="btn btn--primary" href="#book">BOOK</a>
               </div>
             </div>
@@ -121,7 +165,7 @@
 
         <div class="center mt-24">
           <a class="btn btn--primary btn--lg" href="#book">BOOK NOW</a>
-          <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
+          <button class="btn btn--alt btn--lg" type="button" data-call-open>CALL / TEXT</button>
         </div>
       </div>
     </section>
@@ -229,7 +273,9 @@
                   <option value="" selected disabled>Select a service</option>
                   <option>Interior Detail</option>
                   <option>Exterior Detail</option>
-                  <option>Maintenance Detail</option>
+                  <option>Maintenance Detail (requires Interior + Exterior first)</option>
+                  <option>Ceramic Coating</option>
+                  <option>Paint Correction</option>
                 </select>
               </label>
 
@@ -246,7 +292,7 @@
                 <button class="btn btn--primary btn--lg" type="submit" data-submit>
                   REQUEST BOOKING
                 </button>
-                <button class="btn btn--call btn--lg" type="button" data-call-open>
+                <button class="btn btn--alt btn--lg" type="button" data-call-open>
                   CALL / TEXT
                 </button>
               </div>
@@ -304,12 +350,12 @@
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
           <a class="btn btn--primary" href="#book" data-modal-close>BOOK THIS SERVICE</a>
-          <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
+          <button class="btn btn--alt" type="button" data-call-open data-modal-close>CALL / TEXT</button>
         </div>
       </div>
     </div>
 
-    <!-- Call/Text modal (simple: sentence + phone) -->
+    <!-- Call/Text modal -->
     <div class="modal modal--call" aria-hidden="true" data-call-modal>
       <div class="modal__overlay" data-call-close></div>
 
