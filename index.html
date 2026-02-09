@@ -33,6 +33,7 @@
 
         <nav class="nav" data-nav>
           <a href="#services">Services</a>
+          <a href="#process">Process</a>
           <a href="#work">Our Work</a>
           <a href="#about">About</a>
           <a href="#reviews">Reviews</a>
@@ -51,7 +52,7 @@
 
           <h1 class="hero__headline">MORE THAN JUST A CAR WASH.</h1>
           <p class="hero__sub">
-            Interior & exterior detailing, paint correction, and ceramic protection — done right, every time.
+            Interior & exterior detailing with the kind of clean you notice the second you get in.
           </p>
 
           <div class="hero__actions">
@@ -74,19 +75,19 @@
         <div class="section__head">
           <h2 class="section__title">SERVICES</h2>
           <p class="section__sub">
-            Choose a service below. We’ll confirm pricing based on vehicle size and condition.
+            Tap a service to see what’s included. We confirm pricing based on vehicle size and condition.
           </p>
         </div>
 
         <div class="serviceWrap">
-          <!-- Interior (badge visible) -->
+          <!-- Interior -->
           <article class="serviceCard" style="background-image:url('./51ae0d9f-5775-427e-b565-cb5e0984e800.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <div class="serviceCard__titleBlock">
                   <h3>INTERIOR</h3>
-                  <p class="serviceCard__mini">Deep clean, stains, crevices, crisp finish.</p>
+                  <p class="serviceCard__mini">Deep vacuum, stains, crevices, crisp finish.</p>
                 </div>
                 <span class="tag">Most Popular</span>
               </div>
@@ -98,7 +99,7 @@
             </div>
           </article>
 
-          <!-- Exterior (badge visible) -->
+          <!-- Exterior -->
           <article class="serviceCard" style="background-image:url('./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -117,7 +118,7 @@
             </div>
           </article>
 
-          <!-- Upkeep (badge visible) -->
+          <!-- Upkeep -->
           <article class="serviceCard" style="background-image:url('./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -136,7 +137,7 @@
             </div>
           </article>
 
-          <!-- Ceramic (no visible badge, placeholder keeps alignment) -->
+          <!-- Ceramic -->
           <article class="serviceCard" style="background-image:url('./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -155,7 +156,7 @@
             </div>
           </article>
 
-          <!-- Correction (no visible badge, placeholder keeps alignment) -->
+          <!-- Correction -->
           <article class="serviceCard" style="background-image:url('./07752da8-f5f0-413a-890b-c6de41317df6 (1).png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__content">
@@ -177,6 +178,53 @@
       </div>
     </section>
 
+    <!-- Filler / Trust + SEO section (WHITE) -->
+    <section class="section section--light" id="process">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">HOW IT WORKS</h2>
+          <p class="section__sub">
+            Fast booking, clear expectations, and a finish you’ll actually want to keep clean.
+          </p>
+        </div>
+
+        <div class="infoGrid">
+          <article class="infoCard">
+            <h3 class="infoTitle">1) Text us a few photos</h3>
+            <p class="infoText">
+              Send a quick photo of the inside and outside. If you can, include your vehicle make/model. We’ll reply with a real quote,
+              not a vague price range.
+            </p>
+          </article>
+
+          <article class="infoCard">
+            <h3 class="infoTitle">2) We confirm what you want fixed</h3>
+            <p class="infoText">
+              Pet hair, stains, odors, sticky cupholders, sand in the carpet, dull paint. Tell us what bothers you most and we’ll focus on it.
+            </p>
+          </article>
+
+          <article class="infoCard">
+            <h3 class="infoTitle">3) Clean, protect, and finish</h3>
+            <p class="infoText">
+              We clean first, then refine the details, then protect. That’s how you get results that stay looking good longer.
+            </p>
+          </article>
+
+          <article class="infoCard infoCard--cta">
+            <h3 class="infoTitle">Want a quote in 2 minutes?</h3>
+            <p class="infoText">
+              Tap below and send a photo. We’ll tell you the price and the earliest opening.
+            </p>
+            <div class="infoActions">
+              <button class="btn btn--quote" type="button" data-call-open>GET QUOTE NOW</button>
+              <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
     <!-- Recent Transformations (BLACK) -->
     <section class="section section--dark" id="work">
       <div class="container">
@@ -187,14 +235,12 @@
           </p>
         </div>
 
-        <div class="carousel" data-carousel="work">
-          <div class="carousel__top">
-            <button class="carouselBtn" type="button" data-carousel-prev aria-label="Previous">‹</button>
-            <div class="carouselDots" data-carousel-dots aria-hidden="true"></div>
-            <button class="carouselBtn" type="button" data-carousel-next aria-label="Next">›</button>
-          </div>
-
+        <div class="carousel carousel--overlayNav" data-carousel="work">
           <div class="carousel__viewport" data-carousel-viewport>
+            <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous">‹</button>
+            <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next">›</button>
+            <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
+
             <div class="carousel__track" data-carousel-track>
               <!-- Slide 1 -->
               <div class="carousel__slide">
@@ -210,13 +256,7 @@
                   <div class="compare__stage" aria-hidden="true"></div>
                   <input class="compare__range" data-compare-range type="range" min="0" max="100" value="10" aria-label="Reveal after image" />
                   <div class="compare__handle" aria-hidden="true"></div>
-                  <div class="compare__labels" aria-hidden="true">
-                    <span class="compare__label">BEFORE</span>
-                    <span class="compare__label">AFTER</span>
-                  </div>
                 </div>
-
-                <p class="workCaption">Interior reset: seat fabric and carpets brought back to life.</p>
               </div>
 
               <!-- Slide 2 -->
@@ -228,21 +268,15 @@
                     --before:url('./ec6423a4-3e1a-4e7e-a85d-c3b721f450a4.png');
                     --after:url('./adc47ac6-1e75-4feb-aa00-21671835062d.png');
                   "
-                  aria-label="Before and after driver seat detail comparison"
+                  aria-label="Before and after seat detail comparison"
                 >
                   <div class="compare__stage" aria-hidden="true"></div>
                   <input class="compare__range" data-compare-range type="range" min="0" max="100" value="10" aria-label="Reveal after image" />
                   <div class="compare__handle" aria-hidden="true"></div>
-                  <div class="compare__labels" aria-hidden="true">
-                    <span class="compare__label">BEFORE</span>
-                    <span class="compare__label">AFTER</span>
-                  </div>
                 </div>
-
-                <p class="workCaption">Driver seat deep clean: stains and grime lifted for a clean finish.</p>
               </div>
 
-              <!-- Slide 3 (placeholder you can swap later) -->
+              <!-- Slide 3 placeholder -->
               <div class="carousel__slide">
                 <div
                   class="compare"
@@ -256,21 +290,11 @@
                   <div class="compare__stage" aria-hidden="true"></div>
                   <input class="compare__range" data-compare-range type="range" min="0" max="100" value="10" aria-label="Reveal after image" />
                   <div class="compare__handle" aria-hidden="true"></div>
-                  <div class="compare__labels" aria-hidden="true">
-                    <span class="compare__label">BEFORE</span>
-                    <span class="compare__label">AFTER</span>
-                  </div>
                 </div>
-
-                <p class="workCaption">Add more transformations by swapping the two image filenames.</p>
               </div>
             </div>
           </div>
         </div>
-
-        <p class="workNote">
-          Tip: Add more slides by duplicating a <strong>carousel__slide</strong> and swapping the two image filenames.
-        </p>
       </div>
     </section>
 
@@ -278,29 +302,30 @@
     <section class="section section--light" id="about">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title">ABOUT US</h2>
+          <h2 class="section__title">ABOUT</h2>
           <p class="section__sub">
-            Built on consistency, clean results, and simple booking.
+            Simple booking. Clean work. No rushed shortcuts.
           </p>
         </div>
 
         <div class="aboutGrid">
           <div class="aboutCopy">
-            <h3 class="aboutTitle">Detailing that actually holds up.</h3>
+            <h3 class="aboutTitle">Detailing that looks good now and still looks good later.</h3>
+
             <p class="aboutText">
-              We focus on the details most people skip. The tight areas, the stains that keep coming back, the trim that looks dull,
-              and the places that make a car feel truly clean when you sit inside.
-            </p>
-            <p class="aboutText">
-              Whether you need a deep reset or you just want your vehicle maintained on a schedule, we make it easy. Clear communication,
-              professional products, and results you can see immediately.
+              I started detailing because I couldn’t stand the quick clean that looks fine for a day and then falls apart. I like the work
+              that people notice: the tight seams, the sticky spots, the dull trim, the carpets that never feel fully clean.
             </p>
 
-            <div class="aboutPills">
-              <span class="aboutPill">Careful, non-rushed work</span>
-              <span class="aboutPill">Interior specialists</span>
-              <span class="aboutPill">Protection options available</span>
-            </div>
+            <p class="aboutText">
+              When you book, you’ll get clear communication and a realistic time window. My goal is simple: you step in, look around,
+              and immediately feel like the car is reset.
+            </p>
+
+            <p class="aboutText">
+              Outside of detailing, I’m into photography and I’m always chasing better lighting and cleaner finishes. It sounds random,
+              but it’s the same obsession with small details.
+            </p>
           </div>
 
           <div class="aboutMedia">
@@ -316,21 +341,19 @@
         <div class="section__head">
           <h2 class="section__title section__title--dark">REVIEWS</h2>
           <p class="section__sub section__sub--dark">
-            What customers say after seeing the results in person.
+            Real feedback from people who cared about their car.
           </p>
         </div>
 
-        <div class="carousel carousel--reviews" data-carousel="reviews">
-          <div class="carousel__top">
-            <button class="carouselBtn" type="button" data-carousel-prev aria-label="Previous">‹</button>
-            <div class="carouselDots" data-carousel-dots aria-hidden="true"></div>
-            <button class="carouselBtn" type="button" data-carousel-next aria-label="Next">›</button>
-          </div>
-
+        <div class="carousel carousel--reviews carousel--overlayNav" data-carousel="reviews">
           <div class="carousel__viewport" data-carousel-viewport>
+            <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous">‹</button>
+            <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next">›</button>
+            <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
+
             <div class="carousel__track" data-carousel-track>
               <div class="carousel__slide">
-                <article class="reviewCard">
+                <article class="reviewCard reviewCard--big">
                   <div class="reviewHeader">
                     <div class="reviewAvatar" aria-hidden="true">JR</div>
                     <div class="reviewMeta">
@@ -344,13 +367,14 @@
                     </div>
                   </div>
                   <p class="reviewQuote">
-                    “Texted them my VIN, got a price in minutes. Showed up on time and the interior looked brand new.”
+                    “I had dog hair packed into the back seats and it was driving me crazy. They got it out of the fabric and the car finally
+                    smells clean again. The door jambs and cupholders were spotless too.”
                   </p>
                 </article>
               </div>
 
               <div class="carousel__slide">
-                <article class="reviewCard">
+                <article class="reviewCard reviewCard--big">
                   <div class="reviewHeader">
                     <div class="reviewAvatar" aria-hidden="true">AM</div>
                     <div class="reviewMeta">
@@ -364,33 +388,35 @@
                     </div>
                   </div>
                   <p class="reviewQuote">
-                    “Seats and carpets were spotless. No greasy shine, just clean. You can tell they take their time.”
+                    “Booked through text and got a straight answer on price. They showed up on time and the interior looked like it had been
+                    replaced. The carpets were the biggest difference. No weird shine on the dash either.”
                   </p>
                 </article>
               </div>
 
               <div class="carousel__slide">
-                <article class="reviewCard">
+                <article class="reviewCard reviewCard--big">
                   <div class="reviewHeader">
                     <div class="reviewAvatar" aria-hidden="true">KS</div>
                     <div class="reviewMeta">
                       <div class="reviewNameRow">
                         <strong class="reviewName">K. Scott</strong>
-                        <div class="reviewStars" aria-label="4 out of 5 stars">
-                          <span>★</span><span>★</span><span>★</span><span>★</span><span class="starOff">★</span>
+                        <div class="reviewStars" aria-label="5 out of 5 stars">
+                          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                         </div>
                       </div>
                       <span class="reviewLoc">West Salem</span>
                     </div>
                   </div>
                   <p class="reviewQuote">
-                    “Great work and easy scheduling. They were booked out a bit, but the result was worth the wait.”
+                    “I thought the stain in my passenger seat was permanent. It’s gone. The seats feel clean, not sticky, and the whole car
+                    just feels newer. I’m scheduling upkeep because I don’t want it to get bad again.”
                   </p>
                 </article>
               </div>
 
               <div class="carousel__slide">
-                <article class="reviewCard">
+                <article class="reviewCard reviewCard--big">
                   <div class="reviewHeader">
                     <div class="reviewAvatar" aria-hidden="true">TL</div>
                     <div class="reviewMeta">
@@ -404,7 +430,8 @@
                     </div>
                   </div>
                   <p class="reviewQuote">
-                    “Exterior came out insane. Wheels were perfect and the paint looked deeper immediately.”
+                    “Exterior detail was worth it. Wheels looked brand new and the paint had a deep gloss without looking greasy. They got the
+                    bugs off the front end that I could not remove.”
                   </p>
                 </article>
               </div>
@@ -412,11 +439,57 @@
           </div>
         </div>
 
-        <p class="workNote">
-          More reviews can be added by duplicating a slide and swapping the initials, name, city, and quote.
-        </p>
+        <div class="reviewsCta">
+          <p class="reviewsCta__text">Want your car to look like the photos?</p>
+          <div class="reviewsCta__actions">
+            <button class="btn btn--quote" type="button" data-call-open>GET QUOTE NOW</button>
+            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+          </div>
+        </div>
       </div>
     </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container footer__inner">
+        <div class="footer__brand">
+          <div class="footer__name">YOUR COMPANY NAME</div>
+          <div class="footer__meta">Mobile Auto Detailing</div>
+          <p class="footer__text">
+            Serving Salem, Keizer, and nearby areas. Text a photo for a quick quote and availability.
+          </p>
+        </div>
+
+        <div class="footer__cols">
+          <div class="footer__col">
+            <div class="footer__title">Contact</div>
+            <a class="footer__link" href="tel:+15555555555">(555) 555-5555</a>
+            <button class="footer__link footer__linkBtn" type="button" data-call-open>Text for a Quote</button>
+          </div>
+
+          <div class="footer__col">
+            <div class="footer__title">Site</div>
+            <a class="footer__link" href="#services">Services</a>
+            <a class="footer__link" href="#work">Our Work</a>
+            <a class="footer__link" href="#reviews">Reviews</a>
+          </div>
+
+          <div class="footer__col">
+            <div class="footer__title">More</div>
+            <a class="footer__link" href="./pricing.html">Pricing</a>
+            <a class="footer__link" href="./gallery.html">Gallery</a>
+            <a class="footer__link" href="./contact.html">Contact</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <div class="container footer__bottomInner">
+          <span>© <span data-year></span> YOUR COMPANY NAME</span>
+          <a class="footer__bottomLink" href="#top">Back to top</a>
+        </div>
+      </div>
+    </footer>
 
     <!-- Service modal -->
     <div class="modal" aria-hidden="true" data-modal>
@@ -442,6 +515,8 @@
         <h3 class="callTitle">GET A QUOTE</h3>
         <p class="callText">To receive a quote or more information, message us at:</p>
         <a class="callNumber" href="tel:+15555555555">(555) 555-5555</a>
+
+        <p class="callHint">Tip: Text 2 to 3 photos of the interior and exterior for the fastest quote.</p>
       </div>
     </div>
 
