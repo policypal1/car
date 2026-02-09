@@ -50,11 +50,14 @@ body{
   color: inherit;
 }
 .brand__mark{
-  width:44px;height:44px;
+  width:44px;
+  height:44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #2b2b2e, var(--black));
   border: 1px solid rgba(214,178,94,.22);
   box-shadow: 0 12px 24px rgba(0,0,0,.18);
+  object-fit: cover;
+  display:block;
+  background: #0b0b0c;
 }
 .brand__text{ line-height:1.05; }
 .brand__name{
@@ -858,7 +861,7 @@ body{
 
 /* Footer dark */
 .footer--dark{ background: #070708; color: #fff; border-top: 1px solid rgba(255,255,255,.08); }
-.footer__inner{ padding: 2.4rem 0; display:grid; grid-template-columns: 1fr; gap: 18px; }
+.footer__inner{ padding: 1.6rem 0 1.2rem; display:grid; grid-template-columns: 1fr; gap: 12px; }
 .footer__name{
   font-family: Oswald, Inter, sans-serif;
   letter-spacing: .8px;
@@ -869,23 +872,23 @@ body{
 .footer--dark .footer__text,
 .footer--dark .footer__link,
 .footer--dark .footer__bottomInner{ color: rgba(255,255,255,.72); }
-.footer__quick{ margin-top: 12px; display:flex; gap: 10px; flex-wrap:wrap; }
+.footer__quick{ margin-top: 10px; display:flex; gap: 8px; flex-wrap:wrap; }
 
-.footer__cols{ display:grid; grid-template-columns: 1fr; gap: 14px; }
+.footer__cols{ display:grid; grid-template-columns: 1fr; gap: 10px; }
 .footer--dark .footer__col{
   background: rgba(255,255,255,.04);
   border: 1px solid rgba(255,255,255,.10);
   border-radius: 16px;
-  padding: 14px;
+  padding: 10px 12px;
 }
 .footer__title{ font-weight: 900; margin-bottom: 8px; }
-.footer__link{ display:block; text-decoration:none; padding: 8px 0; }
-.footer__linkBtn{ background: transparent; border: 0; cursor:pointer; padding: 8px 0; font: inherit; }
+.footer__link{ display:block; text-decoration:none; padding: 6px 0; }
+.footer__linkBtn{ background: transparent; border: 0; cursor:pointer; padding: 6px 0; font: inherit; }
 .footer--dark .footer__link:hover,
 .footer--dark .footer__linkBtn:hover{ color:#fff; }
 
 .footer__bottom--dark{ border-top: 1px solid rgba(255,255,255,.10); }
-.footer__bottomInner{ padding: 12px 0; display:flex; justify-content:space-between; gap: 12px; font-size: .95rem; }
+.footer__bottomInner{ padding: 8px 0; display:flex; justify-content:space-between; gap: 12px; font-size: .95rem; }
 .footer__bottomLink{ text-decoration:none; color: rgba(255,255,255,.72); }
 .footer__bottomLink:hover{ color:#fff; }
 
