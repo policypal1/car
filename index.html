@@ -239,19 +239,15 @@
             <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next">›</button>
           </div>
         </div>
-
-        <!-- ✅ removed the big bottom CTA that used to be here -->
       </div>
     </section>
 
-    <!-- How It Works (WHITE) -->
+    <!-- How It Works (WHITE) - NO buttons/badges -->
     <section class="section section--light" id="process">
       <div class="container">
         <div class="section__head">
           <h2 class="section__title">HOW IT WORKS</h2>
-          <p class="section__sub">
-            Simple process. Clear communication. Clean results.
-          </p>
+          <p class="section__sub">Simple process. Clear communication. Clean results.</p>
         </div>
 
         <div class="steps">
@@ -263,7 +259,6 @@
             <p class="stepText">
               Choose your service, vehicle size, and condition. It takes under a minute and you don’t need to type much.
             </p>
-            <button class="btn btn--quote stepBtn" type="button" data-quote-open>GET QUOTE</button>
           </article>
 
           <article class="stepCard">
@@ -274,7 +269,6 @@
             <p class="stepText">
               We confirm details, give you the earliest opening, and lock in a time that works.
             </p>
-            <div class="stepMini">Fast replies. No guessing.</div>
           </article>
 
           <article class="stepCard">
@@ -285,7 +279,6 @@
             <p class="stepText">
               We show up ready, do the work properly, and focus on the areas you care about most.
             </p>
-            <div class="stepMini">Interior, exterior, correction, ceramic.</div>
           </article>
 
           <article class="stepCard stepCard--finish">
@@ -296,43 +289,44 @@
             <p class="stepText">
               The kind of clean you notice immediately. A reset that feels better every time you drive.
             </p>
-            <div class="stepActions">
-              <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
-              <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
-            </div>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- ✅ About (WHITE) moved ABOVE Reviews -->
-    <section class="section section--light" id="about">
+    <!-- About (BLACK) -->
+    <section class="section section--dark" id="about">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title">ABOUT</h2>
-          <p class="section__sub">
+          <h2 class="section__title section__title--dark">ABOUT</h2>
+          <p class="section__sub section__sub--dark">
             Simple booking. Clean work. No rushed shortcuts.
           </p>
         </div>
 
         <div class="aboutGrid">
           <div class="aboutCopy">
-            <h3 class="aboutTitle">Detailing that looks good now and still looks good later.</h3>
+            <h3 class="aboutTitle aboutTitle--dark">Detailing that looks good now and still looks good later.</h3>
 
-            <p class="aboutText">
+            <p class="aboutText aboutText--dark">
               I started doing this because I couldn’t stand the quick “wipe and go” clean that looks fine for a day and then falls apart.
               I’m picky about the little stuff: tight seams, sticky areas, dull trim, and carpets that never feel fully clean.
             </p>
 
-            <p class="aboutText">
+            <p class="aboutText aboutText--dark">
               When you book, you get clear communication, a realistic time window, and results you can see immediately. The goal is simple:
               you open the door, look around, and it feels like the car was reset.
             </p>
 
-            <p class="aboutText">
+            <p class="aboutText aboutText--dark">
               Outside of detailing, I’m into photography. Chasing good lighting makes you notice small imperfections, and that same mindset
               carries over to how I finish a vehicle.
             </p>
+
+            <div class="aboutActions">
+              <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
+              <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            </div>
           </div>
 
           <div class="aboutMedia">
@@ -342,18 +336,18 @@
       </div>
     </section>
 
-    <!-- ✅ Reviews (BLACK) compact carousel -->
-    <section class="section section--dark" id="reviews">
+    <!-- Reviews (WHITE) -->
+    <section class="section section--light" id="reviews">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title section__title--dark">REVIEWS</h2>
-          <p class="section__sub section__sub--dark">
+          <h2 class="section__title">REVIEWS</h2>
+          <p class="section__sub">
             Swipe through what people say after they see the results in person.
           </p>
         </div>
 
         <div class="reviewsShowcase">
-          <div class="reviewsBanner">
+          <div class="reviewsBanner reviewsBanner--light">
             <div class="reviewsBanner__top">
               <div class="reviewsScore">
                 <div class="reviewsScore__big">5.0</div>
@@ -377,129 +371,98 @@
           <div class="reviewsRailWrap" data-rail>
             <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">‹</button>
 
-            <div class="reviewsRail" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
-              <!-- Keep all your reviews, but they no longer stack vertically -->
-              <article class="rCard rCard--rail">
+            <div class="reviewsRail reviewsRail--light" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
+              <article class="rCard rCard--rail rCard--light">
                 <div class="rHead">
-                  <div class="rAvatar">JR</div>
+                  <div class="rAvatar rAvatar--light">JR</div>
                   <div class="rMeta">
-                    <div class="rName">J. Rivera</div>
-                    <div class="rLoc">Keizer</div>
+                    <div class="rName rName--light">J. Rivera</div>
+                    <div class="rLoc rLoc--light">Keizer</div>
                   </div>
                   <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
                 </div>
-                <p class="rText">
+                <p class="rText rText--light">
                   Dog hair was packed into the back seats and it was driving me nuts. They got it out of the fabric and the car smells clean again.
                   Cupholders and door jambs were spotless.
                 </p>
               </article>
 
-              <article class="rCard rCard--rail">
+              <article class="rCard rCard--rail rCard--light">
                 <div class="rHead">
-                  <div class="rAvatar">AM</div>
+                  <div class="rAvatar rAvatar--light">AM</div>
                   <div class="rMeta">
-                    <div class="rName">A. Monroe</div>
-                    <div class="rLoc">Salem</div>
+                    <div class="rName rName--light">A. Monroe</div>
+                    <div class="rLoc rLoc--light">Salem</div>
                   </div>
                   <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
                 </div>
-                <p class="rText">
+                <p class="rText rText--light">
                   Booked through text and got a real price fast. The carpets looked completely different and the dash looked clean without that greasy shine.
                 </p>
               </article>
 
-              <article class="rCard rCard--rail">
+              <article class="rCard rCard--rail rCard--light">
                 <div class="rHead">
-                  <div class="rAvatar">KS</div>
+                  <div class="rAvatar rAvatar--light">KS</div>
                   <div class="rMeta">
-                    <div class="rName">K. Scott</div>
-                    <div class="rLoc">West Salem</div>
+                    <div class="rName rName--light">K. Scott</div>
+                    <div class="rLoc rLoc--light">West Salem</div>
                   </div>
                   <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
                 </div>
-                <p class="rText">
+                <p class="rText rText--light">
                   I thought the stain in the passenger seat was permanent. It’s gone. The car feels newer inside and everything smells fresh.
                 </p>
               </article>
 
-              <article class="rCard rCard--rail">
+              <article class="rCard rCard--rail rCard--light">
                 <div class="rHead">
-                  <div class="rAvatar">TL</div>
+                  <div class="rAvatar rAvatar--light">TL</div>
                   <div class="rMeta">
-                    <div class="rName">T. Lane</div>
-                    <div class="rLoc">Keizer</div>
+                    <div class="rName rName--light">T. Lane</div>
+                    <div class="rLoc rLoc--light">Keizer</div>
                   </div>
                   <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
                 </div>
-                <p class="rText">
+                <p class="rText rText--light">
                   Exterior detail was worth it. Wheels looked brand new and the paint had a deep gloss. They got bugs off the front end that I could not remove.
                 </p>
               </article>
 
-              <article class="rCard rCard--rail">
+              <article class="rCard rCard--rail rCard--light">
                 <div class="rHead">
-                  <div class="rAvatar">BP</div>
+                  <div class="rAvatar rAvatar--light">BP</div>
                   <div class="rMeta">
-                    <div class="rName">B. Patel</div>
-                    <div class="rLoc">Salem</div>
+                    <div class="rName rName--light">B. Patel</div>
+                    <div class="rLoc rLoc--light">Salem</div>
                   </div>
                   <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
                 </div>
-                <p class="rText">
+                <p class="rText rText--light">
                   Super easy. I picked the service, they confirmed the time, and my interior looked completely reset. The vents and seams were actually clean.
                 </p>
               </article>
 
-              <article class="rCard rCard--rail">
+              <article class="rCard rCard--rail rCard--light">
                 <div class="rHead">
-                  <div class="rAvatar">CN</div>
+                  <div class="rAvatar rAvatar--light">CN</div>
                   <div class="rMeta">
-                    <div class="rName">C. Nguyen</div>
-                    <div class="rLoc">Keizer</div>
+                    <div class="rName rName--light">C. Nguyen</div>
+                    <div class="rLoc rLoc--light">Keizer</div>
                   </div>
                   <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
                 </div>
-                <p class="rText">
+                <p class="rText rText--light">
                   I had sand in the carpet from weeks of soccer and it was everywhere. They got it out and the mats look new again.
                 </p>
               </article>
-
-              <article class="rCard rCard--rail">
-                <div class="rHead">
-                  <div class="rAvatar">ER</div>
-                  <div class="rMeta">
-                    <div class="rName">E. Roberts</div>
-                    <div class="rLoc">South Salem</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText">
-                  The paint correction made a huge difference. Swirls were reduced a ton and the reflection looks way clearer now.
-                </p>
-              </article>
-
-              <article class="rCard rCard--rail">
-                <div class="rHead">
-                  <div class="rAvatar">MG</div>
-                  <div class="rMeta">
-                    <div class="rName">M. Garcia</div>
-                    <div class="rLoc">Salem</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText">
-                  The interior was bad after a road trip. Sticky cupholders, crumbs everywhere, and stains. They handled it and it looks clean again.
-                </p>
-              </article>
-
-              <!-- keep adding the rest of your cards here (same markup) -->
             </div>
 
             <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">›</button>
           </div>
 
-          <div class="reviewsMiniCta">
-            <p class="reviewsMiniCta__text">Want results like this? Get a quote in clicks.</p>
+          <div class="reviewsMiniCta reviewsMiniCta--light">
+            <p class="reviewsMiniCta__text reviewsMiniCta__text--light">Want results like this? Get a quote in clicks.</p>
             <div class="reviewsMiniCta__actions">
               <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
@@ -509,8 +472,8 @@
       </div>
     </section>
 
-    <!-- Footer (WHITE) -->
-    <footer class="footer footer--light">
+    <!-- Footer (BLACK) -->
+    <footer class="footer footer--dark">
       <div class="container footer__inner">
         <div class="footer__brand">
           <div class="footer__name">YOUR COMPANY NAME</div>
@@ -550,7 +513,7 @@
         </div>
       </div>
 
-      <div class="footer__bottom footer__bottom--light">
+      <div class="footer__bottom footer__bottom--dark">
         <div class="container footer__bottomInner">
           <span>© <span data-year></span> YOUR COMPANY NAME</span>
           <a class="footer__bottomLink" href="#top">Back to top</a>
@@ -558,7 +521,7 @@
       </div>
     </footer>
 
-    <!-- Service details modal (centered) -->
+    <!-- Service details modal -->
     <div class="modal" aria-hidden="true" data-modal>
       <div class="modal__overlay" data-modal-close></div>
       <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
