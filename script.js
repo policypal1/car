@@ -22,59 +22,74 @@ if (navToggle && nav) {
 const modal = document.querySelector("[data-modal]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const modalContent = document.querySelector("[data-modal-content]");
+let lastActiveEl = null;
 
 const serviceDetails = {
   interior: {
     title: "Interior Detail",
     body: `
+      <p><strong>Best for:</strong> spills, stains, pet hair, sand, and an overall “reset” inside the cabin.</p>
       <ul>
-        <li>Deep vacuum and wipe-down</li>
-        <li>Stain treatment (as needed)</li>
-        <li>Crevices and trim detailed</li>
+        <li>Full interior vacuum including seats, carpets, mats, and trunk area</li>
+        <li>Cracks and crevices detailed (seams, consoles, vents where accessible)</li>
+        <li>Panels and trim cleaned and finished (no greasy shine)</li>
+        <li>Spot stain treatment as needed</li>
         <li>Interior glass cleaned</li>
       </ul>
+      <p><strong>Notes:</strong> Heavier stains, heavy pet hair, or bio messes may require extra time. We will always tell you first.</p>
     `,
   },
   exterior: {
     title: "Exterior Detail",
     body: `
+      <p><strong>Best for:</strong> a clean shine, protected finish, and wheels that don’t look brown after one day.</p>
       <ul>
-        <li>Safe hand wash and drying</li>
-        <li>Wheels and tires cleaned</li>
+        <li>Safe hand wash with proper mitts and drying towels</li>
+        <li>Wheels, tires, and wheel wells cleaned</li>
+        <li>Bug and grime removal on front end as needed</li>
         <li>Trim cleaned and protected</li>
         <li>Exterior glass cleaned</li>
       </ul>
+      <p><strong>Notes:</strong> We focus on safe cleaning to avoid scratching and swirls.</p>
     `,
   },
   maintenance: {
     title: "Upkeep Detail",
     body: `
-      <p><strong>Returning clients only.</strong></p>
+      <p><strong>Best for:</strong> clients who want their vehicle to stay clean without letting it get bad again.</p>
       <ul>
-        <li>Requires <strong>Interior + Exterior</strong> first</li>
-        <li>Then we maintain it on a recurring schedule</li>
+        <li>Requires an initial Interior and Exterior detail first</li>
+        <li>Then we maintain it on a schedule that fits your driving</li>
         <li>Weekly, biweekly, or monthly options</li>
+        <li>Faster appointments with consistent results</li>
       </ul>
+      <p><strong>Notes:</strong> Upkeep is the best value long-term because it prevents heavy build-up.</p>
     `,
   },
   ceramic: {
     title: "Ceramic Protection",
     body: `
+      <p><strong>Best for:</strong> long-lasting gloss and easier washes. Water beads off and dirt doesn’t cling as easily.</p>
       <ul>
-        <li>Hydrophobic protection and enhanced gloss</li>
-        <li>Easier washes and longer-lasting finish</li>
-        <li>Great paired with paint correction</li>
+        <li>Thorough prep wash to remove surface grime</li>
+        <li>Decontamination steps as needed for bonding</li>
+        <li>Ceramic protection applied for hydrophobic behavior</li>
+        <li>Finishing wipe-down and final inspection</li>
       </ul>
+      <p><strong>Recommended:</strong> Pair with paint correction for the cleanest, deepest finish before coating.</p>
     `,
   },
   paint: {
     title: "Paint Correction",
     body: `
+      <p><strong>Best for:</strong> swirls, haze, oxidation, and making the paint look sharper and deeper.</p>
       <ul>
-        <li>Reduces swirls and paint defects</li>
-        <li>Single or multi-stage options</li>
-        <li>Best prep before ceramic protection</li>
+        <li>Paint inspection under proper lighting</li>
+        <li>Machine polishing to reduce swirls and defects</li>
+        <li>Single-stage or multi-stage options depending on paint condition</li>
+        <li>Protection recommended afterward (sealant or ceramic)</li>
       </ul>
+      <p><strong>Notes:</strong> Correction is about improving paint clarity. We’ll be honest about what’s realistic for your vehicle.</p>
     `,
   },
 };
@@ -84,12 +99,17 @@ function openServiceModal(key) {
   const data = serviceDetails[key];
   if (!data) return;
 
+  lastActiveEl = document.activeElement;
+
   modalTitle.textContent = data.title;
   modalContent.innerHTML = data.body;
 
   modal.classList.add("isOpen");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+
+  const closeBtn = modal.querySelector("[data-modal-close]");
+  closeBtn?.focus();
 }
 
 function closeServiceModal() {
@@ -97,6 +117,10 @@ function closeServiceModal() {
   modal.classList.remove("isOpen");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+
+  if (lastActiveEl && typeof lastActiveEl.focus === "function") {
+    lastActiveEl.focus();
+  }
 }
 
 document.querySelectorAll("[data-modal-open]").forEach((btn) => {
@@ -109,12 +133,18 @@ document.querySelectorAll("[data-modal-close]").forEach((btn) => {
 
 // Call/Text modal
 const callModal = document.querySelector("[data-call-modal]");
+let lastActiveElCall = null;
 
 function openCallModal() {
   if (!callModal) return;
+  lastActiveElCall = document.activeElement;
+
   callModal.classList.add("isOpen");
   callModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
+
+  const closeBtn = callModal.querySelector("[data-call-close]");
+  closeBtn?.focus();
 }
 
 function closeCallModal() {
@@ -122,6 +152,10 @@ function closeCallModal() {
   callModal.classList.remove("isOpen");
   callModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
+
+  if (lastActiveElCall && typeof lastActiveElCall.focus === "function") {
+    lastActiveElCall.focus();
+  }
 }
 
 document.querySelectorAll("[data-call-open]").forEach((btn) => {
@@ -138,6 +172,10 @@ document.addEventListener("keydown", (e) => {
     closeCallModal();
   }
 });
+
+// Footer year
+const yearEl = document.querySelector("[data-year]");
+if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
 // Before/After slider logic
 function initCompare() {
@@ -220,7 +258,7 @@ function initCarousel(root) {
     dragging = false;
     viewport.style.cursor = "";
 
-    const threshold = 60; // swipe distance
+    const threshold = 60;
     if (dragDelta > threshold) goTo(index - 1);
     else if (dragDelta < -threshold) goTo(index + 1);
   };
@@ -234,12 +272,6 @@ function initCarousel(root) {
   viewport.addEventListener("touchstart", (e) => onDown(e.touches[0].clientX), { passive: true });
   viewport.addEventListener("touchmove", (e) => onMove(e.touches[0].clientX), { passive: true });
   viewport.addEventListener("touchend", onUp);
-
-  // Optional: keyboard
-  root.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") goTo(index - 1);
-    if (e.key === "ArrowRight") goTo(index + 1);
-  });
 
   goTo(0);
 }
