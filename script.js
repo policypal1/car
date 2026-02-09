@@ -2,7 +2,7 @@
 // CONFIG (set these)
 // --------------------
 const BUSINESS_PHONE = "+15555555555";
-const SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdfZmt7x4ZCM4x8-jPjEJFN6gll0ZxYdY8dyjSEZDlM2lNDSJ8p-XTwueG4p7hM88/exec";
 
 // --------------------
 // Mobile nav
