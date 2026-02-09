@@ -1,4 +1,16 @@
+// --------------------
+// CONFIG (set these)
+// --------------------
+
+// 1) Your business phone (used for call button + optional SMS fallback)
+const BUSINESS_PHONE = "+15555555555";
+
+// 2) Paste your Google Apps Script Web App URL here (see Apps Script code below)
+const SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+// --------------------
 // Mobile nav
+// --------------------
 const navToggle = document.querySelector("[data-nav-toggle]");
 const nav = document.querySelector("[data-nav]");
 
@@ -22,7 +34,9 @@ if (navToggle && nav) {
 const yearEl = document.querySelector("[data-year]");
 if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+// --------------------
 // Service info modal
+// --------------------
 const modal = document.querySelector("[data-modal]");
 const modalTitle = document.querySelector("[data-modal-title]");
 const modalContent = document.querySelector("[data-modal-content]");
@@ -131,7 +145,9 @@ document.querySelectorAll("[data-modal-close]").forEach((btn) => {
   btn.addEventListener("click", closeServiceModal);
 });
 
+// --------------------
 // Call/Text modal
+// --------------------
 const callModal = document.querySelector("[data-call-modal]");
 let lastActiveElCall = null;
 
@@ -166,7 +182,9 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// --------------------
 // Before/After slider
+// --------------------
 function initCompare() {
   document.querySelectorAll("[data-compare]").forEach((wrap) => {
     const range = wrap.querySelector("[data-compare-range]");
@@ -183,7 +201,9 @@ function initCompare() {
 }
 initCompare();
 
-// Carousel (buttons + dots + swipe/drag)
+// --------------------
+// Carousel (work) buttons + dots + swipe/drag
+// --------------------
 function initCarousel(root) {
   const track = root.querySelector("[data-carousel-track]");
   const prev = root.querySelector("[data-carousel-prev]");
@@ -259,9 +279,32 @@ function initCarousel(root) {
 }
 document.querySelectorAll("[data-carousel]").forEach(initCarousel);
 
-/* -------------------------
-   QUOTE WIZARD (multi-step)
--------------------------- */
+// --------------------
+// Reviews rail arrows
+// --------------------
+(function initReviewsRail(){
+  const wrap = document.querySelector("[data-rail]");
+  if (!wrap) return;
+
+  const track = wrap.querySelector("[data-rail-track]");
+  const prev = wrap.querySelector("[data-rail-prev]");
+  const next = wrap.querySelector("[data-rail-next]");
+  if (!track) return;
+
+  const scrollByAmount = () => Math.max(280, Math.round(track.clientWidth * 0.85));
+
+  prev?.addEventListener("click", () => {
+    track.scrollBy({ left: -scrollByAmount(), behavior: "smooth" });
+  });
+
+  next?.addEventListener("click", () => {
+    track.scrollBy({ left: scrollByAmount(), behavior: "smooth" });
+  });
+})();
+
+// -------------------------
+// QUOTE WIZARD (auto-advance)
+// -------------------------
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
 const quoteNextBtn = document.querySelector("[data-quote-next]");
@@ -277,17 +320,12 @@ const quoteState = {
   condition: "",
   addons: [],
   name: "",
-  phone: ""
+  phone: "",
+  notes: "",
+  honeypot: "" // spam trap
 };
 
-const steps = [
-  "service",
-  "size",
-  "condition",
-  "addons",
-  "contact",
-  "done"
-];
+const steps = ["service","size","condition","addons","contact","done"];
 let stepIndex = 0;
 
 const services = [
@@ -299,10 +337,11 @@ const services = [
   { label: "Ceramic Protection", hint: "Longer gloss, easier washes" }
 ];
 
+// ✅ Your size images
 const sizes = [
-  { label: "Small", hint: "Coupe, sedan" },
-  { label: "Medium", hint: "Small SUV, wagon" },
-  { label: "Large", hint: "3-row SUV, truck, van" }
+  { label: "Small", hint: "Coupe, sedan", img: "./cosySec.png" },
+  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp" },
+  { label: "Large", hint: "3-row SUV, truck, van", img: "./Chevrolet_Suburban_LT_6cd76558e4.png" }
 ];
 
 const conditions = [
@@ -311,11 +350,11 @@ const conditions = [
   { label: "Heavy", hint: "Stains, pet hair, heavy build-up" }
 ];
 
+// ✅ Engine bay removed
 const addons = [
   "Pet hair focus",
   "Odor removal focus",
   "Shampoo seats/carpets",
-  "Engine bay (light)",
   "Headlight restoration"
 ];
 
@@ -324,7 +363,15 @@ function openQuoteModal(presetService = "") {
 
   lastActiveElQuote = document.activeElement;
 
-  if (presetService) quoteState.service = presetService;
+  // reset (but keep preset if passed)
+  quoteState.service = presetService || "";
+  quoteState.size = "";
+  quoteState.condition = "";
+  quoteState.addons = [];
+  quoteState.name = "";
+  quoteState.phone = "";
+  quoteState.notes = "";
+  quoteState.honeypot = "";
 
   stepIndex = 0;
   renderStep();
@@ -355,9 +402,7 @@ quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
 function setProgress() {
   const dots = quoteDots();
-  dots.forEach((d, i) => {
-    d.classList.toggle("isOn", i === stepIndex);
-  });
+  dots.forEach((d, i) => d.classList.toggle("isOn", i === stepIndex));
 }
 
 function canContinue() {
@@ -392,8 +437,24 @@ function optionButton(label, hint, isSelected, onClick) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "qOpt" + (isSelected ? " isSel" : "");
-  btn.innerHTML = `<span>${label}</span>${hint ? `<small>${hint}</small>` : ""}`;
+  btn.innerHTML = `<span>${escapeHtml(label)}</span>${hint ? `<small>${escapeHtml(hint)}</small>` : ""}`;
   btn.addEventListener("click", onClick);
+  return btn;
+}
+
+function sizeCard(label, hint, img, isSelected, onClick) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "qCard" + (isSelected ? " isSel" : "");
+  btn.addEventListener("click", onClick);
+
+  btn.innerHTML = `
+    <div class="qCardMedia">
+      <img src="${escapeHtml(img)}" alt="${escapeHtml(label)} vehicle example" loading="lazy" />
+    </div>
+    <div class="qCardLabel">${escapeHtml(label)}</div>
+    <div class="qCardHint">${escapeHtml(hint)}</div>
+  `;
   return btn;
 }
 
@@ -404,6 +465,14 @@ function tagButton(label, isSelected, onClick) {
   btn.textContent = label;
   btn.addEventListener("click", onClick);
   return btn;
+}
+
+// ✅ auto-advance helper
+function pickAndAdvance(pickFn) {
+  pickFn();
+  renderStep();
+  // move forward right away (but let render happen)
+  setTimeout(() => nextStep(true), 60);
 }
 
 function renderStep() {
@@ -420,15 +489,14 @@ function renderStep() {
 
   if (step === "service") {
     title.textContent = "Choose a service";
-    sub.textContent = "Pick one option. You can add details later.";
+    sub.textContent = "Tap one option. You can go back any time.";
     const opts = document.createElement("div");
     opts.className = "qOptions";
 
     services.forEach((s) => {
       opts.appendChild(
         optionButton(s.label, s.hint, quoteState.service === s.label, () => {
-          quoteState.service = s.label;
-          renderStep();
+          pickAndAdvance(() => { quoteState.service = s.label; });
         })
       );
     });
@@ -438,33 +506,31 @@ function renderStep() {
 
   if (step === "size") {
     title.textContent = "Vehicle size";
-    sub.textContent = "This keeps the quote accurate.";
-    const opts = document.createElement("div");
-    opts.className = "qOptions";
+    sub.textContent = "Pick the closest match. Tap to continue.";
+    const cards = document.createElement("div");
+    cards.className = "qCards";
 
     sizes.forEach((s) => {
-      opts.appendChild(
-        optionButton(s.label, s.hint, quoteState.size === s.label, () => {
-          quoteState.size = s.label;
-          renderStep();
+      cards.appendChild(
+        sizeCard(s.label, s.hint, s.img, quoteState.size === s.label, () => {
+          pickAndAdvance(() => { quoteState.size = s.label; });
         })
       );
     });
 
-    quoteBody.append(title, sub, opts);
+    quoteBody.append(title, sub, cards);
   }
 
   if (step === "condition") {
     title.textContent = "Vehicle condition";
-    sub.textContent = "Choose the closest match. We’ll confirm with you.";
+    sub.textContent = "Choose the closest match. Tap to continue.";
     const opts = document.createElement("div");
     opts.className = "qOptions";
 
     conditions.forEach((c) => {
       opts.appendChild(
         optionButton(c.label, c.hint, quoteState.condition === c.label, () => {
-          quoteState.condition = c.label;
-          renderStep();
+          pickAndAdvance(() => { quoteState.condition = c.label; });
         })
       );
     });
@@ -474,7 +540,7 @@ function renderStep() {
 
   if (step === "addons") {
     title.textContent = "Any extras?";
-    sub.textContent = "Optional. Tap to add or remove.";
+    sub.textContent = "Optional. Tap to add or remove, then hit Continue.";
     const tags = document.createElement("div");
     tags.className = "qTags";
 
@@ -482,8 +548,7 @@ function renderStep() {
       const sel = quoteState.addons.includes(a);
       tags.appendChild(
         tagButton(a, sel, () => {
-          if (sel) quoteState.addons = quoteState.addons.filter((x) => x !== a);
-          else quoteState.addons = [...quoteState.addons, a];
+          quoteState.addons = sel ? quoteState.addons.filter((x) => x !== a) : [...quoteState.addons, a];
           renderStep();
         })
       );
@@ -494,7 +559,7 @@ function renderStep() {
 
   if (step === "contact") {
     title.textContent = "Where should we send the quote?";
-    sub.textContent = "Just the basics. We’ll reach out to schedule.";
+    sub.textContent = "We’ll text/call you to confirm details and schedule.";
 
     const wrap = document.createElement("div");
     wrap.className = "qInputs";
@@ -513,38 +578,41 @@ function renderStep() {
       <input id="qPhone" autocomplete="tel" inputmode="tel" placeholder="(555) 555-5555" value="${escapeHtml(quoteState.phone)}" />
     `;
 
-    wrap.append(f1, f2);
+    const f3 = document.createElement("div");
+    f3.className = "qField";
+    f3.innerHTML = `
+      <label for="qNotes">Notes (optional)</label>
+      <input id="qNotes" placeholder="Pet hair, stains, etc." value="${escapeHtml(quoteState.notes)}" />
+    `;
+
+    // honeypot (hidden)
+    const f4 = document.createElement("div");
+    f4.style.display = "none";
+    f4.innerHTML = `<input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />`;
+
+    wrap.append(f1, f2, f3, f4);
     quoteBody.append(title, sub, wrap);
 
     const nameEl = quoteBody.querySelector("#qName");
     const phoneEl = quoteBody.querySelector("#qPhone");
+    const notesEl = quoteBody.querySelector("#qNotes");
+    const hpEl = quoteBody.querySelector("#qCompany");
 
-    nameEl?.addEventListener("input", (e) => {
-      quoteState.name = e.target.value || "";
-      updateNav();
-    });
-    phoneEl?.addEventListener("input", (e) => {
-      quoteState.phone = e.target.value || "";
-      updateNav();
-    });
+    nameEl?.addEventListener("input", (e) => { quoteState.name = e.target.value || ""; updateNav(); });
+    phoneEl?.addEventListener("input", (e) => { quoteState.phone = e.target.value || ""; updateNav(); });
+    notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
+    hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
 
     setTimeout(() => nameEl?.focus(), 50);
   }
 
   if (step === "done") {
-    title.textContent = "All set";
-    sub.textContent = "Use the button below to send your quote request. You can edit anytime.";
+    title.textContent = "Request sent";
+    sub.textContent = "We’ll reach out shortly to confirm and schedule.";
 
     const summary = document.createElement("div");
     summary.className = "qSummary";
     const addOnText = quoteState.addons.length ? quoteState.addons.join(", ") : "None";
-    const message = `Quote request:
-Service: ${quoteState.service}
-Size: ${quoteState.size}
-Condition: ${quoteState.condition}
-Add-ons: ${addOnText}
-Name: ${quoteState.name}
-Phone: ${quoteState.phone}`;
 
     summary.innerHTML = `
       <div class="qStepSub" style="margin-top:10px;">
@@ -554,7 +622,8 @@ Phone: ${quoteState.phone}`;
         Condition: ${escapeHtml(quoteState.condition)}<br/>
         Add-ons: ${escapeHtml(addOnText)}<br/>
         Name: ${escapeHtml(quoteState.name)}<br/>
-        Phone: ${escapeHtml(quoteState.phone)}
+        Phone: ${escapeHtml(quoteState.phone)}<br/>
+        Notes: ${escapeHtml(quoteState.notes || "—")}
       </div>
     `;
 
@@ -564,22 +633,18 @@ Phone: ${quoteState.phone}`;
     actions.style.gap = "10px";
     actions.style.flexWrap = "wrap";
 
-    // IMPORTANT: set your business phone here (same one used elsewhere)
-    const businessPhone = "+15555555555";
-
-    const smsHref = buildSmsLink(businessPhone, message);
-
-    const smsBtn = document.createElement("a");
-    smsBtn.className = "btn btn--call";
-    smsBtn.href = smsHref;
-    smsBtn.textContent = "SEND TEXT REQUEST";
-
     const callBtn = document.createElement("a");
-    callBtn.className = "btn btn--quote";
-    callBtn.href = `tel:${businessPhone}`;
-    callBtn.textContent = "CALL INSTEAD";
+    callBtn.className = "btn btn--call";
+    callBtn.href = `tel:${BUSINESS_PHONE}`;
+    callBtn.textContent = "CALL NOW";
 
-    actions.append(smsBtn, callBtn);
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "btn btn--quote";
+    closeBtn.type = "button";
+    closeBtn.textContent = "CLOSE";
+    closeBtn.addEventListener("click", closeQuoteModal);
+
+    actions.append(callBtn, closeBtn);
 
     quoteBody.append(title, sub, summary, actions);
   }
@@ -587,10 +652,64 @@ Phone: ${quoteState.phone}`;
   updateNav();
 }
 
-function nextStep() {
+async function submitToGoogleAppsScript() {
+  // basic spam trap
+  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return true;
+
+  if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
+    // If you didn't set the URL, don't hard-fail the UX.
+    return true;
+  }
+
+  const payload = {
+    timestamp: new Date().toISOString(),
+    service: quoteState.service,
+    size: quoteState.size,
+    condition: quoteState.condition,
+    addons: quoteState.addons,
+    name: quoteState.name,
+    phone: quoteState.phone,
+    notes: quoteState.notes,
+    source: "Website Quote Wizard"
+  };
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    // no-cors gives opaque response; assume ok
+    return !!res;
+  } catch (err) {
+    return false;
+  }
+}
+
+function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
+
+  const step = steps[stepIndex];
+
+  // On Finish: send to Google Apps Script, then show "done"
+  if (step === "contact") {
+    quoteNextBtn.disabled = true;
+    quoteNextBtn.textContent = "Sending...";
+    submitToGoogleAppsScript().finally(() => {
+      stepIndex = Math.min(stepIndex + 1, steps.length - 1);
+      renderStep();
+      quoteNextBtn.textContent = "Continue";
+      quoteNextBtn.disabled = false;
+    });
+    return;
+  }
+
   if (stepIndex < steps.length - 1) stepIndex++;
   renderStep();
+
+  // If we auto-advanced into addons/contact, keep nav correct.
+  if (fromAutoAdvance) updateNav();
 }
 
 function prevStep() {
@@ -602,16 +721,12 @@ function prevStep() {
   renderStep();
 }
 
-quoteNextBtn?.addEventListener("click", nextStep);
+quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
 
-function buildSmsLink(phone, text) {
-  const encoded = encodeURIComponent(text);
-  // iOS uses sms:&body=, Android supports ?body=
-  // This version works in most modern mobile browsers:
-  return `sms:${phone}?&body=${encoded}`;
+function closeIfOpenByEsc() {
+  closeQuoteModal();
 }
-
 function escapeHtml(str) {
   return String(str || "")
     .replaceAll("&", "&amp;")
