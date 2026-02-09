@@ -1,11 +1,7 @@
 // --------------------
 // CONFIG (set these)
 // --------------------
-
-// 1) Your business phone (used for call button + optional SMS fallback)
 const BUSINESS_PHONE = "+15555555555";
-
-// 2) Paste your Google Apps Script Web App URL here (see Apps Script code below)
 const SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
 
 // --------------------
@@ -202,7 +198,7 @@ function initCompare() {
 initCompare();
 
 // --------------------
-// Carousel (work) buttons + dots + swipe/drag
+// Carousel (work)
 // --------------------
 function initCarousel(root) {
   const track = root.querySelector("[data-carousel-track]");
@@ -291,7 +287,7 @@ document.querySelectorAll("[data-carousel]").forEach(initCarousel);
   const next = wrap.querySelector("[data-rail-next]");
   if (!track) return;
 
-  const scrollByAmount = () => Math.max(280, Math.round(track.clientWidth * 0.85));
+  const scrollByAmount = () => Math.max(280, Math.round(track.clientWidth * 0.92));
 
   prev?.addEventListener("click", () => {
     track.scrollBy({ left: -scrollByAmount(), behavior: "smooth" });
@@ -322,26 +318,26 @@ const quoteState = {
   name: "",
   phone: "",
   notes: "",
-  honeypot: "" // spam trap
+  honeypot: ""
 };
 
 const steps = ["service","size","condition","addons","contact","done"];
 let stepIndex = 0;
 
+/* ✅ SERVICES use the SAME images as the Services section */
 const services = [
-  { label: "Interior Detail", hint: "Seats, carpets, stains, pet hair" },
-  { label: "Exterior Detail", hint: "Wash, wheels, trim, gloss" },
-  { label: "Interior + Exterior", hint: "Full reset inside and out" },
-  { label: "Upkeep Detail", hint: "Maintenance for returning clients" },
-  { label: "Paint Correction", hint: "Reduce swirls, improve clarity" },
-  { label: "Ceramic Protection", hint: "Longer gloss, easier washes" }
+  { label: "Interior Detail", hint: "Seats, carpets, stains, pet hair", img: "./51ae0d9f-5775-427e-b565-cb5e0984e800.png" },
+  { label: "Exterior Detail", hint: "Wash, wheels, trim, gloss", img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png" },
+  { label: "Interior + Exterior", hint: "Full reset inside and out", img: "./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png" },
+  { label: "Upkeep Detail", hint: "Maintenance for returning clients", img: "./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png" },
+  { label: "Paint Correction", hint: "Reduce swirls, improve clarity", img: "./07752da8-f5f0-413a-890b-c6de41317df6 (1).png" },
+  { label: "Ceramic Protection", hint: "Longer gloss, easier washes", img: "./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png" }
 ];
 
-// ✅ Your size images
 const sizes = [
   { label: "Small", hint: "Coupe, sedan", img: "./cosySec.png" },
   { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp" },
-  { label: "Large", hint: "3-row SUV, truck, van", img: "./Chevrolet_Suburban_LT_6cd76558e4.png" }
+  { label: "Large", hint: "3-row SUV, truck, van", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true }
 ];
 
 const conditions = [
@@ -350,7 +346,7 @@ const conditions = [
   { label: "Heavy", hint: "Stains, pet hair, heavy build-up" }
 ];
 
-// ✅ Engine bay removed
+/* ✅ Engine bay removed */
 const addons = [
   "Pet hair focus",
   "Odor removal focus",
@@ -363,7 +359,6 @@ function openQuoteModal(presetService = "") {
 
   lastActiveElQuote = document.activeElement;
 
-  // reset (but keep preset if passed)
   quoteState.service = presetService || "";
   quoteState.size = "";
   quoteState.condition = "";
@@ -433,16 +428,13 @@ function updateNav() {
   quoteNextBtn.disabled = !canContinue();
 }
 
-function optionButton(label, hint, isSelected, onClick) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "qOpt" + (isSelected ? " isSel" : "");
-  btn.innerHTML = `<span>${escapeHtml(label)}</span>${hint ? `<small>${escapeHtml(hint)}</small>` : ""}`;
-  btn.addEventListener("click", onClick);
-  return btn;
+function pickAndAdvance(pickFn) {
+  pickFn();
+  renderStep();
+  setTimeout(() => nextStep(true), 60);
 }
 
-function sizeCard(label, hint, img, isSelected, onClick) {
+function cardButton(label, hint, img, isSelected, onClick, contain = false) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "qCard" + (isSelected ? " isSel" : "");
@@ -450,7 +442,7 @@ function sizeCard(label, hint, img, isSelected, onClick) {
 
   btn.innerHTML = `
     <div class="qCardMedia">
-      <img src="${escapeHtml(img)}" alt="${escapeHtml(label)} vehicle example" loading="lazy" />
+      <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)} option" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
@@ -465,14 +457,6 @@ function tagButton(label, isSelected, onClick) {
   btn.textContent = label;
   btn.addEventListener("click", onClick);
   return btn;
-}
-
-// ✅ auto-advance helper
-function pickAndAdvance(pickFn) {
-  pickFn();
-  renderStep();
-  // move forward right away (but let render happen)
-  setTimeout(() => nextStep(true), 60);
 }
 
 function renderStep() {
@@ -490,31 +474,33 @@ function renderStep() {
   if (step === "service") {
     title.textContent = "Choose a service";
     sub.textContent = "Tap one option. You can go back any time.";
-    const opts = document.createElement("div");
-    opts.className = "qOptions";
+
+    const cards = document.createElement("div");
+    cards.className = "qCards";
 
     services.forEach((s) => {
-      opts.appendChild(
-        optionButton(s.label, s.hint, quoteState.service === s.label, () => {
+      cards.appendChild(
+        cardButton(s.label, s.hint, s.img, quoteState.service === s.label, () => {
           pickAndAdvance(() => { quoteState.service = s.label; });
         })
       );
     });
 
-    quoteBody.append(title, sub, opts);
+    quoteBody.append(title, sub, cards);
   }
 
   if (step === "size") {
     title.textContent = "Vehicle size";
     sub.textContent = "Pick the closest match. Tap to continue.";
+
     const cards = document.createElement("div");
     cards.className = "qCards";
 
     sizes.forEach((s) => {
       cards.appendChild(
-        sizeCard(s.label, s.hint, s.img, quoteState.size === s.label, () => {
+        cardButton(s.label, s.hint, s.img, quoteState.size === s.label, () => {
           pickAndAdvance(() => { quoteState.size = s.label; });
-        })
+        }, !!s.contain)
       );
     });
 
@@ -524,15 +510,19 @@ function renderStep() {
   if (step === "condition") {
     title.textContent = "Vehicle condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
+
     const opts = document.createElement("div");
     opts.className = "qOptions";
 
     conditions.forEach((c) => {
-      opts.appendChild(
-        optionButton(c.label, c.hint, quoteState.condition === c.label, () => {
-          pickAndAdvance(() => { quoteState.condition = c.label; });
-        })
-      );
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "qOpt" + (quoteState.condition === c.label ? " isSel" : "");
+      btn.innerHTML = `<span>${escapeHtml(c.label)}</span><small>${escapeHtml(c.hint)}</small>`;
+      btn.addEventListener("click", () => {
+        pickAndAdvance(() => { quoteState.condition = c.label; });
+      });
+      opts.appendChild(btn);
     });
 
     quoteBody.append(title, sub, opts);
@@ -541,6 +531,7 @@ function renderStep() {
   if (step === "addons") {
     title.textContent = "Any extras?";
     sub.textContent = "Optional. Tap to add or remove, then hit Continue.";
+
     const tags = document.createElement("div");
     tags.className = "qTags";
 
@@ -585,7 +576,6 @@ function renderStep() {
       <input id="qNotes" placeholder="Pet hair, stains, etc." value="${escapeHtml(quoteState.notes)}" />
     `;
 
-    // honeypot (hidden)
     const f4 = document.createElement("div");
     f4.style.display = "none";
     f4.innerHTML = `<input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />`;
@@ -598,10 +588,20 @@ function renderStep() {
     const notesEl = quoteBody.querySelector("#qNotes");
     const hpEl = quoteBody.querySelector("#qCompany");
 
-    nameEl?.addEventListener("input", (e) => { quoteState.name = e.target.value || ""; updateNav(); });
-    phoneEl?.addEventListener("input", (e) => { quoteState.phone = e.target.value || ""; updateNav(); });
-    notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
-    hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
+    nameEl?.addEventListener("input", (e) => {
+      quoteState.name = e.target.value || "";
+      updateNav();
+    });
+    phoneEl?.addEventListener("input", (e) => {
+      quoteState.phone = e.target.value || "";
+      updateNav();
+    });
+    notesEl?.addEventListener("input", (e) => {
+      quoteState.notes = e.target.value || "";
+    });
+    hpEl?.addEventListener("input", (e) => {
+      quoteState.honeypot = e.target.value || "";
+    });
 
     setTimeout(() => nameEl?.focus(), 50);
   }
@@ -610,10 +610,10 @@ function renderStep() {
     title.textContent = "Request sent";
     sub.textContent = "We’ll reach out shortly to confirm and schedule.";
 
-    const summary = document.createElement("div");
-    summary.className = "qSummary";
     const addOnText = quoteState.addons.length ? quoteState.addons.join(", ") : "None";
 
+    const summary = document.createElement("div");
+    summary.className = "qSummary";
     summary.innerHTML = `
       <div class="qStepSub" style="margin-top:10px;">
         <strong>Summary</strong><br/>
@@ -645,7 +645,6 @@ function renderStep() {
     closeBtn.addEventListener("click", closeQuoteModal);
 
     actions.append(callBtn, closeBtn);
-
     quoteBody.append(title, sub, summary, actions);
   }
 
@@ -653,13 +652,8 @@ function renderStep() {
 }
 
 async function submitToGoogleAppsScript() {
-  // basic spam trap
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return true;
-
-  if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) {
-    // If you didn't set the URL, don't hard-fail the UX.
-    return true;
-  }
+  if (!SCRIPT_URL || SCRIPT_URL.includes("PASTE_YOUR")) return true;
 
   const payload = {
     timestamp: new Date().toISOString(),
@@ -674,14 +668,13 @@ async function submitToGoogleAppsScript() {
   };
 
   try {
-    const res = await fetch(SCRIPT_URL, {
+    await fetch(SCRIPT_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    // no-cors gives opaque response; assume ok
-    return !!res;
+    return true;
   } catch (err) {
     return false;
   }
@@ -692,14 +685,15 @@ function nextStep(fromAutoAdvance = false) {
 
   const step = steps[stepIndex];
 
-  // On Finish: send to Google Apps Script, then show "done"
   if (step === "contact") {
     quoteNextBtn.disabled = true;
+    const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
+
     submitToGoogleAppsScript().finally(() => {
       stepIndex = Math.min(stepIndex + 1, steps.length - 1);
       renderStep();
-      quoteNextBtn.textContent = "Continue";
+      quoteNextBtn.textContent = old;
       quoteNextBtn.disabled = false;
     });
     return;
@@ -708,7 +702,6 @@ function nextStep(fromAutoAdvance = false) {
   if (stepIndex < steps.length - 1) stepIndex++;
   renderStep();
 
-  // If we auto-advanced into addons/contact, keep nav correct.
   if (fromAutoAdvance) updateNav();
 }
 
@@ -724,9 +717,6 @@ function prevStep() {
 quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
 
-function closeIfOpenByEsc() {
-  closeQuoteModal();
-}
 function escapeHtml(str) {
   return String(str || "")
     .replaceAll("&", "&amp;")
