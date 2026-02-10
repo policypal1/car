@@ -33,24 +33,9 @@ const sizes = [
 ];
 
 const conditions = [
-  {
-    label: "Light",
-    hint: "Mostly clean • quick refresh",
-    icon: "✨",
-    bullets: ["Light dust", "Few crumbs", "No heavy stains"]
-  },
-  {
-    label: "Normal",
-    hint: "Daily driver • solid reset",
-    icon: "🧼",
-    bullets: ["Normal buildup", "Cupholders/crevices", "Some spots"]
-  },
-  {
-    label: "Heavy",
-    hint: "Stains/pet hair • deep work",
-    icon: "💪",
-    bullets: ["Pet hair", "Stains/spills", "Heavy buildup"]
-  }
+  { label: "Light", hint: "Mostly clean • quick refresh", icon: "✨", bullets: ["Light dust", "Few crumbs", "No heavy stains"] },
+  { label: "Normal", hint: "Daily driver • solid reset", icon: "🧼", bullets: ["Normal buildup", "Cupholders/crevices", "Some spots"] },
+  { label: "Heavy", hint: "Stains/pet hair • deep work", icon: "💪", bullets: ["Pet hair", "Stains/spills", "Heavy buildup"] }
 ];
 
 const contactWindows = [
@@ -109,7 +94,7 @@ function closeQuoteModal() {
   if (lastActiveElQuote && typeof lastActiveElQuote.focus === "function") lastActiveElQuote.focus();
 }
 
-// keep these global for your existing escape key handler
+// Keep global (Escape handler in script.js calls it)
 window.openQuoteModal = openQuoteModal;
 window.closeQuoteModal = closeQuoteModal;
 
@@ -436,10 +421,7 @@ function timeout(ms) {
 }
 
 async function submitToGoogleAppsScript() {
-  // honeypot anti-spam
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return true;
-
-  // Always advance UI even if Google blocks/cors/etc
   if (!SCRIPT_URL || !SCRIPT_URL.startsWith("https://script.google.com/")) return true;
 
   const payload = {
@@ -457,7 +439,6 @@ async function submitToGoogleAppsScript() {
   };
 
   try {
-    // no-cors means we can't read response; that's fine
     await Promise.race([
       fetch(SCRIPT_URL, {
         method: "POST",
@@ -480,13 +461,11 @@ function nextStep(fromAutoAdvance = false) {
   const step = steps[stepIndex];
 
   if (step === "contact") {
-    // Finish submit
     quoteNextBtn.disabled = true;
     const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
 
     submitToGoogleAppsScript().finally(() => {
-      // ALWAYS move to done, even if submission fails
       stepIndex = Math.min(stepIndex + 1, steps.length - 1);
       renderStep();
       quoteNextBtn.textContent = old;
