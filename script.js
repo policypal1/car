@@ -325,50 +325,56 @@ const sizes = [
 ];
 
 const serviceTypes = [
-  { label: "Exterior", hint: "Paint + wheels + gloss", img: "./d578cf79-5a6e-440a-a943-aa515b51447f.png" },
-  { label: "Interior", hint: "Cabin-focused clean", img: "./2017-05-22-07-32-26.jpg" },
-  { label: "Both", hint: "Interior + Exterior", img: "./Untitled design (3).png" }
+  { label: "Interior", hint: "Cabin-focused clean", icon: "🛋️" },
+  { label: "Exterior", hint: "Paint + wheels + gloss", icon: "✨" },
+  { label: "Both", hint: "Full inside + out", icon: "✅" }
 ];
 
 const exteriorServices = [
-  { label: "Exterior Wash", hint: "Safe wash + shine", img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png" },
-  { label: "Paint Correction", hint: "Remove swirls + haze", img: "./07752da8-f5f0-413a-890b-c6de41317df6 (1).png" },
-  { label: "Ceramic Coating", hint: "Long-term protection", img: "./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png" }
+  { label: "Exterior Wash", hint: "Safe wash + shine", icon: "🚿" },
+  { label: "Paint Correction", hint: "Remove swirls + haze", icon: "🛠️" },
+  { label: "Ceramic Coating", hint: "Long-term protection", icon: "🛡️" }
 ];
 
 const exteriorWashTiers = [
   {
     label: "Basic Wash",
-    hint: "Entry clean: hand wash + quick dry",
-    img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png"
+    hint: "Quick clean and dry",
+    icon: "🧽",
+    bullets: ["Hand wash", "Wheels rinsed", "Quick dry"]
   },
   {
     label: "Standard Wash",
-    hint: "Mid tier: wheel scrub + added protection",
-    img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png"
+    hint: "Deeper clean + protection",
+    icon: "🫧",
+    bullets: ["Hand wash", "Wheel/tire scrub", "Spray sealant"]
   },
   {
     label: "Premium Wash",
-    hint: "Top tier: most thorough wash + gloss finish",
-    img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png"
+    hint: "Maximum shine + protection",
+    icon: "💎",
+    bullets: ["Hand wash", "Wheel/tire scrub", "Sealant + gloss finish"]
   }
 ];
 
 const interiorTiers = [
   {
     label: "Light Interior Clean",
-    hint: "Light reset for already-maintained interiors",
-    img: "./51ae0d9f-5775-427e-b565-cb5e0984e800.png"
+    hint: "Quick refresh for tidy cabins",
+    icon: "🌤️",
+    bullets: ["Vacuum seats/floors", "Wipe surfaces", "Glass clean"]
   },
   {
     label: "Deep Interior Clean",
-    hint: "More thorough cleaning for everyday buildup",
-    img: "./3a1e17c7-bcc9-49db-9c9d-ae7b6e1f8ab8.png"
+    hint: "Deeper reset for daily drivers",
+    icon: "🧼",
+    bullets: ["Vacuum + crevices", "Stain spot treatment", "Detail panels/trim"]
   },
   {
-    label: "Full Interior Detail",
-    hint: "Most complete interior restoration tier",
-    img: "./6107e54c-faba-40e2-924c-8e72db768435 (1).png"
+    label: "Full Detail Interior",
+    hint: "Most thorough interior service",
+    icon: "🏆",
+    bullets: ["Deep vacuum", "Stain + odor treatment", "Full trim + vents detail"]
   }
 ];
 
@@ -706,15 +712,15 @@ function renderStep() {
   }
 
   if (step === "serviceType") {
-    title.textContent = "Select Service";
-    sub.textContent = "Choose one category to continue.";
+    title.textContent = "Service type";
+    sub.textContent = "Choose the level of service you need. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
 
     serviceTypes.forEach((s) => {
       cards.appendChild(
-        cardButton(s.label, s.hint, s.img, quoteState.serviceType === s.label, () => {
+        simpleCard(s.label, s.hint, s.icon, quoteState.serviceType === s.label, () => {
           pickAndAdvance(() => {
             quoteState.serviceType = s.label;
             quoteState.interiorTier = "";
@@ -740,9 +746,9 @@ function renderStep() {
 
     interiorTiers.forEach((tier) => {
       cards.appendChild(
-        cardButton(tier.label, tier.hint, tier.img, quoteState.interiorTier === tier.label, () => {
+        simpleCard(tier.label, tier.hint, tier.icon, quoteState.interiorTier === tier.label, () => {
           pickAndAdvance(() => (quoteState.interiorTier = tier.label));
-        })
+        }, tier.bullets)
       );
     });
 
@@ -758,7 +764,7 @@ function renderStep() {
 
     exteriorServices.forEach((service) => {
       cards.appendChild(
-        cardButton(service.label, service.hint, service.img, quoteState.exteriorService === service.label, () => {
+        simpleCard(service.label, service.hint, service.icon, quoteState.exteriorService === service.label, () => {
           pickAndAdvance(() => {
             quoteState.exteriorService = service.label;
             if (service.label !== "Exterior Wash") {
@@ -781,9 +787,9 @@ function renderStep() {
 
     exteriorWashTiers.forEach((tier) => {
       cards.appendChild(
-        cardButton(tier.label, tier.hint, tier.img, quoteState.exteriorWashTier === tier.label, () => {
+        simpleCard(tier.label, tier.hint, tier.icon, quoteState.exteriorWashTier === tier.label, () => {
           pickAndAdvance(() => (quoteState.exteriorWashTier = tier.label));
-        })
+        }, tier.bullets)
       );
     });
 
