@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Auto Detailing</title>
+    <title>Keizer Mobile Detailing</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,7 +12,12 @@
       rel="stylesheet"
     />
 
+    <!-- Favicon -->
+    <link rel="icon" href="./Untitled design (4).png" type="image/png" />
+    <link rel="apple-touch-icon" href="./Untitled design (4).png" />
+
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./quote-wizard.css" />
   </head>
 
   <body>
@@ -20,10 +25,10 @@
     <header class="header" id="top">
       <div class="container header__inner">
         <a class="brand" href="#top" aria-label="Home">
-          <div class="brand__mark" aria-hidden="true"></div>
+          <img class="brand__logo" src="./Untitled design (2).png" alt="Keizer Mobile Detailing logo" loading="eager" />
           <div class="brand__text">
-            <span class="brand__name">YOUR COMPANY NAME</span>
-            <span class="brand__tag">Auto Detailing</span>
+            <span class="brand__name">Keizer Mobile Detailing</span>
+            <span class="brand__tag">Mobile Auto Detailing</span>
           </div>
         </a>
 
@@ -408,6 +413,63 @@
                   Exterior detail was worth it. Wheels looked brand new and the paint had a deep gloss. They got bugs off the front end that I could not remove.
                 </p>
               </article>
+
+              <!-- Added reviews -->
+              <article class="rCard rCard--rail rCard--light">
+                <div class="rHead">
+                  <div class="rAvatar rAvatar--light">MC</div>
+                  <div class="rMeta">
+                    <div class="rName rName--light">M. Chen</div>
+                    <div class="rLoc rLoc--light">Keizer</div>
+                  </div>
+                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+                </div>
+                <p class="rText rText--light">
+                  Quick quote, showed up on time, and the interior looks brand new. The vents and seams were actually detailed — not skipped.
+                </p>
+              </article>
+
+              <article class="rCard rCard--rail rCard--light">
+                <div class="rHead">
+                  <div class="rAvatar rAvatar--light">SB</div>
+                  <div class="rMeta">
+                    <div class="rName rName--light">S. Brown</div>
+                    <div class="rLoc rLoc--light">Salem</div>
+                  </div>
+                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+                </div>
+                <p class="rText rText--light">
+                  My kids trashed the back seat. They removed stains I didn’t think would come out and it finally smells clean again.
+                </p>
+              </article>
+
+              <article class="rCard rCard--rail rCard--light">
+                <div class="rHead">
+                  <div class="rAvatar rAvatar--light">DW</div>
+                  <div class="rMeta">
+                    <div class="rName rName--light">D. White</div>
+                    <div class="rLoc rLoc--light">Keizer</div>
+                  </div>
+                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+                </div>
+                <p class="rText rText--light">
+                  Super easy booking. The paint looks deeper and the windows are crystal clear. Great attention to detail.
+                </p>
+              </article>
+
+              <article class="rCard rCard--rail rCard--light">
+                <div class="rHead">
+                  <div class="rAvatar rAvatar--light">LP</div>
+                  <div class="rMeta">
+                    <div class="rName rName--light">L. Patel</div>
+                    <div class="rLoc rLoc--light">Keizer</div>
+                  </div>
+                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+                </div>
+                <p class="rText rText--light">
+                  The “new car” feeling is real. Dash isn’t greasy, carpets look refreshed, and every little spot I pointed out got handled.
+                </p>
+              </article>
             </div>
 
             <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">›</button>
@@ -420,7 +482,7 @@
     <footer class="footer footer--dark">
       <div class="container footer__inner">
         <div class="footer__brand">
-          <div class="footer__name">YOUR COMPANY NAME</div>
+          <div class="footer__name">Keizer Mobile Detailing</div>
           <div class="footer__meta">Mobile Auto Detailing</div>
           <p class="footer__text">Serving Salem, Keizer, and nearby areas. Tap “Get Quote” to book in clicks.</p>
 
@@ -457,7 +519,7 @@
 
       <div class="footer__bottom footer__bottom--dark">
         <div class="container footer__bottomInner">
-          <span>© <span data-year></span> YOUR COMPANY NAME</span>
+          <span>© <span data-year></span> Keizer Mobile Detailing</span>
           <a class="footer__bottomLink" href="#top">Back to top</a>
         </div>
       </div>
@@ -520,5 +582,6 @@
     </div>
 
     <script src="./script.js"></script>
+    <script src="./quote-wizard.js"></script>
   </body>
 </html>
