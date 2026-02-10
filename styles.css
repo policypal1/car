@@ -402,7 +402,7 @@ body{
 }
 .compare__stage{
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1 / 1;
   background-image: var(--before);
   background-size: cover;
   background-position: center;
@@ -799,7 +799,7 @@ body{
 }
 .qCardMedia{
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1 / 1;
   border-radius: 14px;
   overflow:hidden;
   border: 1px solid rgba(0,0,0,.08);
@@ -1003,6 +1003,25 @@ body{
 .footer__bottomLink{ text-decoration:none; color: rgba(255,255,255,.72); }
 .footer__bottomLink:hover{ color:#fff; }
 
+.footer__inner--compact{ padding: .9rem 0 .6rem; gap: 8px; }
+.footer__cols--compact{ grid-template-columns: 1fr; gap: 8px; }
+.footer__inner--compact .footer__quick,
+.footer__inner--compact .footer__text{ display:none; }
+.footer__inner--compact .footer__col{
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.footer__inner--compact .footer__title{ margin-bottom: 4px; }
+.footer__inner--compact .footer__link,
+.footer__inner--compact .footer__linkBtn{ padding: 2px 0; }
+.footer__inner--compact .footer__meta{ margin-top: 2px; }
+.footer__inner--compact + .footer__bottom .footer__bottomInner{
+  justify-content:flex-start;
+  padding: 6px 0;
+}
+
 /* Desktop */
 @media (min-width: 768px){
   .nav{
@@ -1038,4 +1057,6 @@ body{
 
   .footer__inner{ grid-template-columns: 1.1fr .9fr; gap: 22px; }
   .footer__cols{ grid-template-columns: repeat(3, 1fr); }
+  .footer__inner--compact{ grid-template-columns: 1fr auto; align-items:start; gap: 16px; }
+  .footer__cols--compact{ grid-template-columns: repeat(2, auto); gap: 24px; }
 }
