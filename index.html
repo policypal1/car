@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Keizer Mobile Detailing</title>
 
+    <meta name="description" content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking." />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -40,6 +42,7 @@
           <a href="#services">Services</a>
           <a href="#work">Our Work</a>
           <a href="#process">How It Works</a>
+          <a href="#service-area">Service Area</a>
           <a href="#about">About</a>
           <a href="#reviews">Reviews</a>
           <button class="btn btn--quote nav__cta" type="button" data-quote-open>GET QUOTE NOW</button>
@@ -53,8 +56,6 @@
 
       <div class="container hero__inner">
         <div class="hero__panel">
-          <p class="hero__kicker">Mobile detailing • Clean results • Simple booking</p>
-
           <h1 class="hero__headline">YOUR CAR, RESET.</h1>
           <p class="hero__sub">
             Interior and exterior detailing that feels clean the moment you sit down.
@@ -87,11 +88,12 @@
         <div class="serviceWrap">
           <article class="serviceCard" style="background-image:url('./51ae0d9f-5775-427e-b565-cb5e0984e800.png')">
             <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <div class="serviceCard__titleBlock">
                   <h3>INTERIOR</h3>
-                  <p class="serviceCard__mini">Deep vacuum, stains, crevices, fresh finish.</p>
+                  <p class="serviceCard__mini">3-tier interior cleaning options. From refresh to deep reset.</p>
                 </div>
                 <span class="tag">Most Popular</span>
               </div>
@@ -104,11 +106,12 @@
 
           <article class="serviceCard" style="background-image:url('./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png')">
             <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <div class="serviceCard__titleBlock">
                   <h3>EXTERIOR</h3>
-                  <p class="serviceCard__mini">Safe wash, wheels/tires, clean gloss.</p>
+                  <p class="serviceCard__mini">3 wash levels. Safe wash to premium protection.</p>
                 </div>
                 <span class="tag">Gloss Reset</span>
               </div>
@@ -121,6 +124,7 @@
 
           <article class="serviceCard" style="background-image:url('./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png')">
             <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <div class="serviceCard__titleBlock">
@@ -138,6 +142,7 @@
 
           <article class="serviceCard" style="background-image:url('./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png')">
             <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <div class="serviceCard__titleBlock">
@@ -155,6 +160,7 @@
 
           <article class="serviceCard" style="background-image:url('./07752da8-f5f0-413a-890b-c6de41317df6 (1).png')">
             <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
               <div class="serviceCard__top">
                 <div class="serviceCard__titleBlock">
@@ -244,10 +250,64 @@
             <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next">›</button>
           </div>
         </div>
+
+        <!-- Vertical before/after grid (supports vertical photos) -->
+        <div class="vba">
+          <div class="vba__head">
+            <h3 class="vba__title">VERTICAL BEFORE / AFTER</h3>
+            <p class="vba__sub">Drag the slider to reveal the after.</p>
+          </div>
+
+          <div class="vba__grid">
+            <div
+              class="compare compare--vertical"
+              data-compare
+              style="--ratio: 4 / 5; --before:url('./Tires.webp'); --after:url('./Rims.webp');"
+              aria-label="Before and after tires to rims"
+            >
+              <div class="compare__stage" aria-hidden="true"></div>
+              <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+              <div class="compare__handle" aria-hidden="true"></div>
+            </div>
+
+            <div
+              class="compare compare--vertical"
+              data-compare
+              style="--ratio: 4 / 5; --before:url('./floor.webp'); --after:url('./Carpets.webp');"
+              aria-label="Before and after floor to carpets"
+            >
+              <div class="compare__stage" aria-hidden="true"></div>
+              <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+              <div class="compare__handle" aria-hidden="true"></div>
+            </div>
+
+            <div
+              class="compare compare--vertical"
+              data-compare
+              style="--ratio: 4 / 5; --before:url('./Crayons.jpg'); --after:url('./surface.jpg');"
+              aria-label="Before and after crayons to clean surface"
+            >
+              <div class="compare__stage" aria-hidden="true"></div>
+              <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+              <div class="compare__handle" aria-hidden="true"></div>
+            </div>
+
+            <div
+              class="compare compare--vertical"
+              data-compare
+              style="--ratio: 4 / 5; --before:url('./Headlights.webp'); --after:url('./Car.webp');"
+              aria-label="Before and after headlights to clean car"
+            >
+              <div class="compare__stage" aria-hidden="true"></div>
+              <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+              <div class="compare__handle" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- How It Works (WHITE) - NO buttons -->
+    <!-- How It Works (WHITE) -->
     <section class="section section--light" id="process">
       <div class="container">
         <div class="section__head">
@@ -291,24 +351,62 @@
       </div>
     </section>
 
-    <!-- About (BLACK) -->
-    <section class="section section--dark" id="about">
+    <!-- Service Area (BLACK) -->
+    <section class="section section--dark" id="service-area">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title section__title--dark">ABOUT</h2>
-          <p class="section__sub section__sub--dark">Simple booking. Clean work. No rushed shortcuts.</p>
+          <h2 class="section__title section__title--dark">SERVICE AREA</h2>
+          <p class="section__sub section__sub--dark">
+            Serving Keizer, Salem, and nearby areas. Text 2–3 photos for the fastest quote.
+          </p>
         </div>
 
-        <div class="aboutGrid">
-          <div class="aboutCopy">
-            <h3 class="aboutTitle aboutTitle--dark">Detailing that looks good now and still looks good later.</h3>
+        <div class="areaGrid">
+          <div class="areaCard">
+            <h3 class="areaTitle">Where we come to you</h3>
+            <p class="areaText">
+              We’re mobile — we detail at your home or location. If you’re near Keizer/Salem, there’s a strong chance you’re in range.
+              Not sure? Send your address and we’ll confirm quickly.
+            </p>
 
-            <p class="aboutText aboutText--dark">
+            <div class="areaBullets">
+              <div class="areaPill">Keizer</div>
+              <div class="areaPill">Salem</div>
+              <div class="areaPill">West Salem</div>
+              <div class="areaPill">Nearby Areas</div>
+            </div>
+
+            <div class="areaActions">
+              <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
+              <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            </div>
+          </div>
+
+          <div class="areaMap">
+            <img src="./7ba7fa53-6f99-442c-b6f0-97a1086a63ea.png" alt="Service area map" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About (WHITE) -->
+    <section class="section section--light" id="about">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">ABOUT</h2>
+          <p class="section__sub">Simple booking. Clean work. No rushed shortcuts.</p>
+        </div>
+
+        <div class="aboutGrid aboutGrid--light">
+          <div class="aboutCopy">
+            <h3 class="aboutTitle">Detailing that looks good now and still looks good later.</h3>
+
+            <p class="aboutText">
               I started doing this because I couldn’t stand the quick “wipe and go” clean that looks fine for a day and then falls apart.
               I’m picky about the little stuff: tight seams, sticky areas, dull trim, and carpets that never feel fully clean.
             </p>
 
-            <p class="aboutText aboutText--dark">
+            <p class="aboutText">
               When you book, you get clear communication, a realistic time window, and results you can see immediately.
             </p>
 
@@ -319,28 +417,28 @@
           </div>
 
           <div class="aboutMedia">
-            <img src="./images.jpg" alt="Our detailing work" loading="lazy" />
+            <img src="./images.jpg" alt="Detailing work" loading="lazy" />
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Reviews (WHITE) -->
-    <section class="section section--light" id="reviews">
+    <!-- Reviews (BLACK) -->
+    <section class="section section--dark" id="reviews">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title">REVIEWS</h2>
-          <p class="section__sub">Swipe through what people say after they see the results in person.</p>
+          <h2 class="section__title section__title--dark">REVIEWS</h2>
+          <p class="section__sub section__sub--dark">Swipe through what people say after they see the results in person.</p>
         </div>
 
-        <div class="reviewsShowcase">
-          <div class="reviewsBanner reviewsBanner--light">
+        <div class="reviewsShowcase reviewsShowcase--dark">
+          <div class="reviewsBanner reviewsBanner--dark">
             <div class="reviewsBanner__top">
-              <div class="reviewsScore">
+              <div class="reviewsScore reviewsScore--dark">
                 <div class="reviewsScore__big">5.0</div>
                 <div class="reviewsScore__meta">
                   <div class="starsRow" aria-hidden="true">★★★★★</div>
-                  <div class="reviewsScore__small">Based on local customer feedback</div>
+                  <div class="reviewsScore__small reviewsScore__small--dark">Based on local customer feedback</div>
                 </div>
               </div>
 
@@ -350,126 +448,40 @@
               </div>
             </div>
 
-            <p class="reviewsBanner__line">Most people mention the same things: carpets, pet hair, cupholders, and that “new car” feel inside.</p>
+            <p class="reviewsBanner__line reviewsBanner__line--dark">
+              Most people mention the same things: carpets, pet hair, cupholders, and that “new car” feel inside.
+            </p>
           </div>
 
           <div class="reviewsRailWrap" data-rail>
             <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">‹</button>
 
-            <div class="reviewsRail reviewsRail--light" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">JR</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">J. Rivera</div>
-                    <div class="rLoc rLoc--light">Keizer</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  Dog hair was packed into the back seats and it was driving me nuts. They got it out of the fabric and the car smells clean again.
-                  Cupholders and door jambs were spotless.
-                </p>
-              </article>
+            <div class="reviewsRail reviewsRail--dark" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
+              <!-- 20 reviews -->
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">JR</div><div class="rMeta"><div class="rName rName--dark">J. Rivera</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Dog hair was packed into the back seats. They got it out and the car smells clean again. Cupholders and door jambs were spotless.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">AM</div><div class="rMeta"><div class="rName rName--dark">A. Monroe</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Booked through text and got a real price fast. The carpets looked completely different and the dash looked clean without that greasy shine.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">KS</div><div class="rMeta"><div class="rName rName--dark">K. Scott</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">I thought the stain in the passenger seat was permanent. It’s gone. The car feels newer inside and everything smells fresh.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">TL</div><div class="rMeta"><div class="rName rName--dark">T. Lane</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Exterior detail was worth it. Wheels looked brand new and the paint had a deep gloss. They got bugs off the front end I couldn’t remove.</p></article>
 
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">AM</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">A. Monroe</div>
-                    <div class="rLoc rLoc--light">Salem</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  Booked through text and got a real price fast. The carpets looked completely different and the dash looked clean without that greasy shine.
-                </p>
-              </article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">MC</div><div class="rMeta"><div class="rName rName--dark">M. Chen</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Quick quote, on time, and the interior looks brand new. Vents and seams were actually detailed — not skipped.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">SB</div><div class="rMeta"><div class="rName rName--dark">S. Brown</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">My kids trashed the back seat. They removed stains I didn’t think would come out and it finally smells clean again.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">DW</div><div class="rMeta"><div class="rName rName--dark">D. White</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Super easy booking. The paint looks deeper and the windows are crystal clear. Great attention to detail.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">LP</div><div class="rMeta"><div class="rName rName--dark">L. Patel</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">The “new car” feeling is real. Dash isn’t greasy, carpets refreshed, and every little spot I pointed out got handled.</p></article>
 
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">KS</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">K. Scott</div>
-                    <div class="rLoc rLoc--light">West Salem</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  I thought the stain in the passenger seat was permanent. It’s gone. The car feels newer inside and everything smells fresh.
-                </p>
-              </article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">HB</div><div class="rMeta"><div class="rName rName--dark">H. Bennett</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">They got sand out of the carpet that’s been there for months. Clean lines, clean smell, and no rushed work.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">RJ</div><div class="rMeta"><div class="rName rName--dark">R. Johnson</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">The wheels and tires looked insane after. You can tell they don’t cut corners.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">AC</div><div class="rMeta"><div class="rName rName--dark">A. Carter</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Fast quote and honest expectations. Results were better than I hoped — seats and console look brand new.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">NG</div><div class="rMeta"><div class="rName rName--dark">N. Green</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Pet hair was a disaster. They got it out of the fabric and the smell is gone.</p></article>
 
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">TL</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">T. Lane</div>
-                    <div class="rLoc rLoc--light">Keizer</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  Exterior detail was worth it. Wheels looked brand new and the paint had a deep gloss. They got bugs off the front end that I could not remove.
-                </p>
-              </article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">PC</div><div class="rMeta"><div class="rName rName--dark">P. Cooper</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Interior tier 2 was perfect for my daily driver. Looks clean without being “over shiny.”</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">MS</div><div class="rMeta"><div class="rName rName--dark">M. Sanders</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Booked in minutes. Communication was clear and they showed up ready. Great service.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">KT</div><div class="rMeta"><div class="rName rName--dark">K. Turner</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">The doors, trims, and little corners were all done. That’s what impressed me the most.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">ED</div><div class="rMeta"><div class="rName rName--dark">E. Diaz</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Exterior wash level 2 made my car look new again. Wheels were perfect.</p></article>
 
-              <!-- Added reviews -->
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">MC</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">M. Chen</div>
-                    <div class="rLoc rLoc--light">Keizer</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  Quick quote, showed up on time, and the interior looks brand new. The vents and seams were actually detailed — not skipped.
-                </p>
-              </article>
-
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">SB</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">S. Brown</div>
-                    <div class="rLoc rLoc--light">Salem</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  My kids trashed the back seat. They removed stains I didn’t think would come out and it finally smells clean again.
-                </p>
-              </article>
-
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">DW</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">D. White</div>
-                    <div class="rLoc rLoc--light">Keizer</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  Super easy booking. The paint looks deeper and the windows are crystal clear. Great attention to detail.
-                </p>
-              </article>
-
-              <article class="rCard rCard--rail rCard--light">
-                <div class="rHead">
-                  <div class="rAvatar rAvatar--light">LP</div>
-                  <div class="rMeta">
-                    <div class="rName rName--light">L. Patel</div>
-                    <div class="rLoc rLoc--light">Keizer</div>
-                  </div>
-                  <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
-                </div>
-                <p class="rText rText--light">
-                  The “new car” feeling is real. Dash isn’t greasy, carpets look refreshed, and every little spot I pointed out got handled.
-                </p>
-              </article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">JL</div><div class="rMeta"><div class="rName rName--dark">J. Lee</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">They removed a sticky mess in the cupholders and the seats look totally refreshed.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">BM</div><div class="rMeta"><div class="rName rName--dark">B. Moore</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Clear pricing and no surprises. The finish looks clean, not overdone.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">WS</div><div class="rMeta"><div class="rName rName--dark">W. Stone</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Headlights look so much clearer after. Great work all around.</p></article>
+              <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">CF</div><div class="rMeta"><div class="rName rName--dark">C. Flores</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">My interior was embarrassing. Now it looks like I just bought the car.</p></article>
             </div>
 
             <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">›</button>
@@ -478,41 +490,19 @@
       </div>
     </section>
 
-    <!-- Footer (BLACK) -->
+    <!-- Footer (BLACK - compact) -->
     <footer class="footer footer--dark">
-      <div class="container footer__inner">
-        <div class="footer__brand">
-          <div class="footer__name">Keizer Mobile Detailing</div>
-          <div class="footer__meta">Mobile Auto Detailing</div>
-          <p class="footer__text">Serving Salem, Keizer, and nearby areas. Tap “Get Quote” to book in clicks.</p>
-
-          <div class="footer__quick">
-            <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
-            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
-          </div>
+      <div class="container footerMini">
+        <div class="footerMini__left">
+          <div class="footerMini__name">Keizer Mobile Detailing</div>
+          <div class="footerMini__meta">Mobile Auto Detailing</div>
         </div>
 
-        <div class="footer__cols">
-          <div class="footer__col">
-            <div class="footer__title">Contact</div>
-            <a class="footer__link" href="tel:+15555555555">(555) 555-5555</a>
-            <button class="footer__link footer__linkBtn" type="button" data-call-open>Text for a Quote</button>
-          </div>
-
-          <div class="footer__col">
-            <div class="footer__title">Site</div>
-            <a class="footer__link" href="#services">Services</a>
-            <a class="footer__link" href="#work">Our Work</a>
-            <a class="footer__link" href="#process">How It Works</a>
-            <a class="footer__link" href="#about">About</a>
-            <a class="footer__link" href="#reviews">Reviews</a>
-          </div>
-
-          <div class="footer__col">
-            <div class="footer__title">More</div>
-            <a class="footer__link" href="./pricing.html">Pricing</a>
-            <a class="footer__link" href="./gallery.html">Gallery</a>
-            <a class="footer__link" href="./contact.html">Contact</a>
+        <div class="footerMini__right">
+          <a class="footerMini__phone" href="tel:+15555555555">(555) 555-5555</a>
+          <div class="footerMini__actions">
+            <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
           </div>
         </div>
       </div>
