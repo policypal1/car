@@ -2,33 +2,8 @@
 // CONFIG
 // --------------------
 const BUSINESS_PHONE = "+15555555555";
-const SUPABASE_URL = "";
-const SUPABASE_ANON_KEY = "";
-const supabaseClient = SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  : null;
-/*
-Supabase schema suggestion:
-Table: availability_slots
-- id (uuid, pk)
-- start_time (timestamptz)
-- end_time (timestamptz)
-- is_available (boolean, default true)
-- created_at (timestamptz)
-
-Table: bookings
-- id (uuid, pk)
-- slot_id (uuid, fk -> availability_slots.id, unique)
-- name (text)
-- phone (text)
-- vehicle_size (text)
-- service_type (text)
-- interior_tier (text)
-- exterior_service (text)
-- exterior_wash_tier (text)
-- questions (text)
-- created_at (timestamptz)
-*/
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxdfZmt7x4ZCM4x8-jPjEJFN6gll0ZxYdY8dyjSEZDlM2lNDSJ8p-XTwueG4p7hM88/exec";
 
 // --------------------
 // Mobile nav
@@ -193,7 +168,6 @@ document.addEventListener("keydown", (e) => {
     closeServiceModal();
     closeCallModal();
     closeQuoteModal();
-    document.querySelector(".adminPanel")?.remove();
   }
 });
 
@@ -284,127 +258,78 @@ document.querySelectorAll("[data-carousel]").forEach(initCarousel);
 })();
 
 // -------------------------
-// QUOTE WIZARD (conversion flow + scheduling)
+// QUOTE WIZARD (new questions)
 // -------------------------
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
 const quoteNextBtn = document.querySelector("[data-quote-next]");
 const quoteBackBtn = document.querySelector("[data-quote-back]");
 const quoteCloseBtns = document.querySelectorAll("[data-quote-close]");
-const quoteProgress = document.querySelector("[data-quote-progress]");
+const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 
 let lastActiveElQuote = null;
-let availabilitySlots = [];
-let availabilityStatus = "idle";
-let availabilityError = "";
-let availabilityChannel = null;
-let adminUnlocked = false;
 
 const quoteState = {
   size: "",
-  serviceType: "",
-  interiorTier: "",
-  exteriorService: "",
-  exteriorWashTier: "",
-  scheduleSlotId: "",
-  scheduleSlotLabel: "",
-  scheduleError: "",
+  condition: "",
+  contactWindow: "",
+  heardAbout: "",
   bookingStatus: "",
-  questions: "",
+  ackDeposit: false,
   name: "",
   phone: "",
+  notes: "",
   honeypot: ""
 };
 
+const steps = ["size","condition","contactWindow","heardAbout","bookingStatus","contact","done"];
 let stepIndex = 0;
 
 const sizes = [
-  { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp" },
+  { label: "Small", hint: "Coupe, sedan", img: "./cosySec.png" },
   { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp" },
   { label: "Large", hint: "3-row SUV, truck, van", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true }
 ];
 
-const serviceTypes = [
-  { label: "Interior", hint: "Cabin-focused clean", icon: "🛋️" },
-  { label: "Exterior", hint: "Paint + wheels + gloss", icon: "✨" },
-  { label: "Both", hint: "Full inside + out", icon: "✅" }
-];
-
-const exteriorServices = [
-  { label: "Exterior Wash", hint: "Safe wash + shine", icon: "🚿" },
-  { label: "Paint Correction", hint: "Remove swirls + haze", icon: "🛠️" },
-  { label: "Ceramic Coating", hint: "Long-term protection", icon: "🛡️" }
-];
-
-const exteriorWashTiers = [
+const conditions = [
   {
-    label: "Basic Wash",
-    hint: "Quick clean and dry",
-    icon: "🧽",
-    bullets: ["Hand wash", "Wheels rinsed", "Quick dry"]
+    label: "Light",
+    hint: "Mostly clean • quick refresh",
+    icon: "✨",
+    bullets: ["Light dust", "Few crumbs", "No heavy stains"]
   },
   {
-    label: "Standard Wash",
-    hint: "Deeper clean + protection",
-    icon: "🫧",
-    bullets: ["Hand wash", "Wheel/tire scrub", "Spray sealant"]
-  },
-  {
-    label: "Premium Wash",
-    hint: "Maximum shine + protection",
-    icon: "💎",
-    bullets: ["Hand wash", "Wheel/tire scrub", "Sealant + gloss finish"]
-  }
-];
-
-const interiorTiers = [
-  {
-    label: "Light Interior Clean",
-    hint: "Quick refresh for tidy cabins",
-    icon: "🌤️",
-    bullets: ["Vacuum seats/floors", "Wipe surfaces", "Glass clean"]
-  },
-  {
-    label: "Deep Interior Clean",
-    hint: "Deeper reset for daily drivers",
+    label: "Normal",
+    hint: "Daily driver • solid reset",
     icon: "🧼",
-    bullets: ["Vacuum + crevices", "Stain spot treatment", "Detail panels/trim"]
+    bullets: ["Normal buildup", "Cupholders/crevices", "Some spots"]
   },
   {
-    label: "Full Detail Interior",
-    hint: "Most thorough interior service",
-    icon: "🏆",
-    bullets: ["Deep vacuum", "Stain + odor treatment", "Full trim + vents detail"]
+    label: "Heavy",
+    hint: "Stains/pet hair • deep work",
+    icon: "💪",
+    bullets: ["Pet hair", "Stains/spills", "Heavy buildup"]
   }
 ];
 
-const bookingStatusOptions = [
+const contactWindows = [
+  { label: "Morning", hint: "8am–12pm", icon: "🌤️" },
+  { label: "Afternoon", hint: "12pm–5pm", icon: "☀️" },
+  { label: "Evening", hint: "After 5pm", icon: "🌙" }
+];
+
+const heardAbout = [
+  { label: "Returning Client", hint: "Welcome back", icon: "✅" },
+  { label: "Family / Friend", hint: "Referral", icon: "🤝" },
+  { label: "Social Media", hint: "Instagram / TikTok", icon: "📱" },
+  { label: "Google Search", hint: "Maps / Search", icon: "🔎" },
+  { label: "Other", hint: "Another source", icon: "🗂️" }
+];
+
+const bookingStatus = [
   { label: "I'm ready to book", hint: "Secure an appointment", icon: "📅" },
-  { label: "I still have more questions", hint: "Before booking", icon: "❓" }
+  { label: "I have a few questions", hint: "Before booking", icon: "❓" }
 ];
-
-function getStepSequence() {
-  const sequence = ["size", "serviceType"];
-
-  if (quoteState.serviceType === "Interior" || quoteState.serviceType === "Both") {
-    sequence.push("interiorTier");
-  }
-  if (quoteState.serviceType === "Exterior" || quoteState.serviceType === "Both") {
-    sequence.push("exteriorService");
-    if (quoteState.exteriorService === "Exterior Wash") {
-      sequence.push("exteriorWashTier");
-    }
-  }
-
-  sequence.push("schedule", "bookingStatus");
-
-  if (quoteState.bookingStatus === "I still have more questions") {
-    sequence.push("questions");
-  }
-
-  sequence.push("contact", "done");
-  return sequence;
-}
 
 function openQuoteModal() {
   if (!quoteModal || !quoteBody) return;
@@ -413,25 +338,19 @@ function openQuoteModal() {
 
   Object.assign(quoteState, {
     size: "",
-    serviceType: "",
-    interiorTier: "",
-    exteriorService: "",
-    exteriorWashTier: "",
-    scheduleSlotId: "",
-    scheduleSlotLabel: "",
-    scheduleError: "",
+    condition: "",
+    contactWindow: "",
+    heardAbout: "",
     bookingStatus: "",
-    questions: "",
+    ackDeposit: false,
     name: "",
     phone: "",
+    notes: "",
     honeypot: ""
   });
 
-  availabilityStatus = "idle";
-  availabilityError = "";
   stepIndex = 0;
   renderStep();
-  setupRealtime();
 
   quoteModal.classList.add("isOpen");
   quoteModal.setAttribute("aria-hidden", "false");
@@ -455,32 +374,18 @@ document.querySelectorAll("[data-quote-open]").forEach((btn) => {
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
 function setProgress() {
-  const steps = getStepSequence();
-  if (!quoteProgress) return;
-
-  if (quoteProgress.children.length !== steps.length) {
-    quoteProgress.innerHTML = "";
-    steps.forEach(() => {
-      const dot = document.createElement("span");
-      dot.className = "qpDot";
-      quoteProgress.appendChild(dot);
-    });
-  }
-
-  Array.from(quoteProgress.children).forEach((d, i) => d.classList.toggle("isOn", i === stepIndex));
+  const dots = quoteDots();
+  dots.forEach((d, i) => d.classList.toggle("isOn", i === stepIndex));
 }
 
 function canContinue() {
-  const step = getStepSequence()[stepIndex];
+  const step = steps[stepIndex];
   if (step === "size") return !!quoteState.size;
-  if (step === "serviceType") return !!quoteState.serviceType;
-  if (step === "interiorTier") return !!quoteState.interiorTier;
-  if (step === "exteriorService") return !!quoteState.exteriorService;
-  if (step === "exteriorWashTier") return !!quoteState.exteriorWashTier;
-  if (step === "schedule") return !!quoteState.scheduleSlotId;
+  if (step === "condition") return !!quoteState.condition;
+  if (step === "contactWindow") return !!quoteState.contactWindow;
+  if (step === "heardAbout") return !!quoteState.heardAbout;
   if (step === "bookingStatus") return !!quoteState.bookingStatus;
-  if (step === "questions") return quoteState.questions.trim().length > 0;
-  if (step === "contact") return quoteState.name.trim().length >= 2 && quoteState.phone.trim().length >= 7;
+  if (step === "contact") return quoteState.name.trim().length >= 2 && quoteState.phone.trim().length >= 7 && quoteState.ackDeposit === true;
   return true;
 }
 
@@ -489,7 +394,7 @@ function updateNav() {
 
   quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
 
-  const step = getStepSequence()[stepIndex];
+  const step = steps[stepIndex];
   if (step === "done") {
     quoteNextBtn.style.display = "none";
     quoteBackBtn.textContent = "Close";
@@ -499,7 +404,7 @@ function updateNav() {
 
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
-  quoteNextBtn.textContent = step === "contact" ? "Submit Quote" : "Continue";
+  quoteNextBtn.textContent = step === "contact" ? "Finish" : "Continue";
   quoteNextBtn.disabled = !canContinue();
 }
 
@@ -546,147 +451,12 @@ function simpleCard(label, hint, icon, isSelected, onClick, bullets = null) {
   return btn;
 }
 
-function formatDateLabel(dateStr) {
-  return new Date(dateStr).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-}
-
-function formatTimeLabel(dateStr) {
-  return new Date(dateStr).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-}
-
-function buildSlotLabel(slot) {
-  return `${formatDateLabel(slot.start_time)} • ${formatTimeLabel(slot.start_time)}`;
-}
-
-function groupSlotsByDate(slots) {
-  return slots.reduce((acc, slot) => {
-    const key = new Date(slot.start_time).toISOString().slice(0, 10);
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(slot);
-    return acc;
-  }, {});
-}
-
-function resetScheduleSelection() {
-  quoteState.scheduleSlotId = "";
-  quoteState.scheduleSlotLabel = "";
-}
-
-async function loadAvailability() {
-  if (!supabaseClient) {
-    availabilityStatus = "error";
-    availabilityError = "Supabase is not configured yet.";
-    return;
-  }
-  availabilityStatus = "loading";
-  availabilityError = "";
-
-  const { data, error } = await supabaseClient
-    .from("availability_slots")
-    .select("id,start_time,end_time,is_available")
-    .eq("is_available", true)
-    .gte("start_time", new Date().toISOString())
-    .order("start_time", { ascending: true });
-
-  if (error) {
-    availabilityStatus = "error";
-    availabilityError = "Unable to load availability.";
-    return;
-  }
-
-  availabilitySlots = data || [];
-  availabilityStatus = "ready";
-}
-
-function setupRealtime() {
-  if (!supabaseClient || availabilityChannel) return;
-  availabilityChannel = supabaseClient
-    .channel("availability-realtime")
-    .on("postgres_changes", { event: "*", schema: "public", table: "availability_slots" }, () => {
-      availabilityStatus = "idle";
-      if (getStepSequence()[stepIndex] === "schedule") renderStep();
-    })
-    .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => {
-      availabilityStatus = "idle";
-      if (getStepSequence()[stepIndex] === "schedule") renderStep();
-    })
-    .subscribe();
-}
-
-function renderSchedule(container) {
-  container.innerHTML = "";
-
-  if (quoteState.scheduleError) {
-    const errorEl = document.createElement("div");
-    errorEl.className = "qNotice qNotice--error";
-    errorEl.textContent = quoteState.scheduleError;
-    container.appendChild(errorEl);
-  }
-
-  if (availabilityStatus === "loading") {
-    const loading = document.createElement("div");
-    loading.className = "qNotice";
-    loading.textContent = "Loading available times...";
-    container.appendChild(loading);
-    return;
-  }
-
-  if (availabilityStatus === "error") {
-    const error = document.createElement("div");
-    error.className = "qNotice qNotice--error";
-    error.textContent = availabilityError || "Availability is unavailable right now.";
-    container.appendChild(error);
-    return;
-  }
-
-  if (!availabilitySlots.length) {
-    const empty = document.createElement("div");
-    empty.className = "qNotice";
-    empty.textContent = "No open slots right now. Please check back shortly.";
-    container.appendChild(empty);
-    return;
-  }
-
-  const grouped = groupSlotsByDate(availabilitySlots);
-  Object.entries(grouped).forEach(([dateKey, slots]) => {
-    const group = document.createElement("div");
-    group.className = "qDateGroup";
-
-    const title = document.createElement("div");
-    title.className = "qDateTitle";
-    title.textContent = formatDateLabel(dateKey);
-
-    const slotWrap = document.createElement("div");
-    slotWrap.className = "qSlots";
-
-    slots.forEach((slot) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "qSlot" + (quoteState.scheduleSlotId === slot.id ? " isSel" : "");
-      btn.textContent = formatTimeLabel(slot.start_time);
-      btn.addEventListener("click", () => {
-        quoteState.scheduleSlotId = slot.id;
-        quoteState.scheduleSlotLabel = buildSlotLabel(slot);
-        quoteState.scheduleError = "";
-        renderStep();
-      });
-      slotWrap.appendChild(btn);
-    });
-
-    group.append(title, slotWrap);
-    container.appendChild(group);
-  });
-}
-
 function renderStep() {
   if (!quoteBody) return;
   quoteBody.innerHTML = "";
-
-  const steps = getStepSequence();
-  if (stepIndex >= steps.length) stepIndex = steps.length - 1;
-  const step = steps[stepIndex];
-
   setProgress();
+
+  const step = steps[stepIndex];
 
   const title = document.createElement("div");
   title.className = "qStepTitle";
@@ -711,25 +481,35 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  if (step === "serviceType") {
-    title.textContent = "Service type";
-    sub.textContent = "Choose the level of service you need. Tap to continue.";
+  if (step === "condition") {
+    title.textContent = "Vehicle condition";
+    sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
 
-    serviceTypes.forEach((s) => {
+    conditions.forEach((c) => {
       cards.appendChild(
-        simpleCard(s.label, s.hint, s.icon, quoteState.serviceType === s.label, () => {
-          pickAndAdvance(() => {
-            quoteState.serviceType = s.label;
-            quoteState.interiorTier = "";
-            quoteState.exteriorService = "";
-            quoteState.exteriorWashTier = "";
-            resetScheduleSelection();
-            quoteState.bookingStatus = "";
-            quoteState.questions = "";
-          });
+        simpleCard(c.label, c.hint, c.icon, quoteState.condition === c.label, () => {
+          pickAndAdvance(() => (quoteState.condition = c.label));
+        }, c.bullets)
+      );
+    });
+
+    quoteBody.append(title, sub, cards);
+  }
+
+  if (step === "contactWindow") {
+    title.textContent = "Preferred contact window";
+    sub.textContent = "When should we reach out? Tap to continue.";
+
+    const cards = document.createElement("div");
+    cards.className = "qCards";
+
+    contactWindows.forEach((o) => {
+      cards.appendChild(
+        simpleCard(o.label, o.hint, o.icon, quoteState.contactWindow === o.label, () => {
+          pickAndAdvance(() => (quoteState.contactWindow = o.label));
         })
       );
     });
@@ -737,135 +517,45 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  if (step === "interiorTier") {
-    title.textContent = "Interior service tier";
-    sub.textContent = "Each tier gets more thorough. Tap to continue.";
+  if (step === "heardAbout") {
+    title.textContent = "How did you hear about us?";
+    sub.textContent = "Tap one option. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
 
-    interiorTiers.forEach((tier) => {
+    heardAbout.forEach((o) => {
       cards.appendChild(
-        simpleCard(tier.label, tier.hint, tier.icon, quoteState.interiorTier === tier.label, () => {
-          pickAndAdvance(() => (quoteState.interiorTier = tier.label));
-        }, tier.bullets)
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "exteriorService") {
-    title.textContent = "Exterior service";
-    sub.textContent = "Select one exterior service. Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards";
-
-    exteriorServices.forEach((service) => {
-      cards.appendChild(
-        simpleCard(service.label, service.hint, service.icon, quoteState.exteriorService === service.label, () => {
-          pickAndAdvance(() => {
-            quoteState.exteriorService = service.label;
-            if (service.label !== "Exterior Wash") {
-              quoteState.exteriorWashTier = "";
-            }
-          });
+        simpleCard(o.label, o.hint, o.icon, quoteState.heardAbout === o.label, () => {
+          pickAndAdvance(() => (quoteState.heardAbout = o.label));
         })
       );
     });
 
     quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "exteriorWashTier") {
-    title.textContent = "Exterior wash tier";
-    sub.textContent = "Pick the wash level that fits your needs.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards";
-
-    exteriorWashTiers.forEach((tier) => {
-      cards.appendChild(
-        simpleCard(tier.label, tier.hint, tier.icon, quoteState.exteriorWashTier === tier.label, () => {
-          pickAndAdvance(() => (quoteState.exteriorWashTier = tier.label));
-        }, tier.bullets)
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "schedule") {
-    title.textContent = "Choose your appointment";
-    sub.textContent = "Tap a date and time to reserve your spot.";
-
-    const calendar = document.createElement("div");
-    calendar.className = "qCalendar";
-
-    quoteBody.append(title, sub, calendar);
-
-    if (availabilityStatus === "idle") {
-      loadAvailability().then(() => {
-        if (getStepSequence()[stepIndex] === "schedule") renderStep();
-      });
-    }
-
-    renderSchedule(calendar);
   }
 
   if (step === "bookingStatus") {
-    title.textContent = "Anything else before we book?";
-    sub.textContent = "Tell us if you’re ready or still have questions.";
+    title.textContent = "Booking status";
+    sub.textContent = "Tap one option. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
 
-    bookingStatusOptions.forEach((o) => {
+    bookingStatus.forEach((o) => {
       cards.appendChild(
         simpleCard(o.label, o.hint, o.icon, quoteState.bookingStatus === o.label, () => {
-          pickAndAdvance(() => {
-            quoteState.bookingStatus = o.label;
-            if (o.label !== "I still have more questions") {
-              quoteState.questions = "";
-            }
-          });
+          pickAndAdvance(() => (quoteState.bookingStatus = o.label));
         })
       );
     });
 
     quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "questions") {
-    title.textContent = "I still have more questions";
-    sub.textContent = "Tell us anything we should know.";
-
-    const field = document.createElement("div");
-    field.className = "qField";
-    field.innerHTML = `
-      <label for="qQuestions">Tell us anything we should know *</label>
-      <textarea id="qQuestions" placeholder="Add your questions here.">${escapeHtml(quoteState.questions)}</textarea>
-      <div class="qStatus" data-q-status>${canContinue() ? "" : "Please add a quick note so we can help."}</div>
-    `;
-
-    quoteBody.append(title, sub, field);
-
-    const questionsEl = quoteBody.querySelector("#qQuestions");
-    const statusEl = quoteBody.querySelector("[data-q-status]");
-
-    questionsEl?.addEventListener("input", (e) => {
-      quoteState.questions = e.target.value || "";
-      if (statusEl) statusEl.textContent = canContinue() ? "" : "Please add a quick note so we can help.";
-      updateNav();
-    });
-
-    setTimeout(() => questionsEl?.focus(), 50);
   }
 
   if (step === "contact") {
     title.textContent = "Your contact info";
-    sub.textContent = "Required. We’ll text/call you to confirm.";
+    sub.textContent = "Required. We’ll text/call you to confirm and schedule.";
 
     const grid = document.createElement("div");
     grid.className = "qGrid2";
@@ -886,24 +576,45 @@ function renderStep() {
 
     grid.append(f1, f2);
 
-    const status = document.createElement("div");
-    status.className = "qStatus";
-    status.textContent = canContinue() ? "" : "Required: name and phone number.";
-
-    const honeypot = document.createElement("div");
-    honeypot.style.display = "none";
-    honeypot.innerHTML = `
-      <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
+    const notes = document.createElement("div");
+    notes.className = "qField";
+    notes.style.marginTop = "10px";
+    notes.innerHTML = `
+      <label for="qNotes">Anything else we should know?</label>
+      <textarea id="qNotes" placeholder="Pet hair, stains, preferred timing, etc.">${escapeHtml(quoteState.notes)}</textarea>
     `;
 
-    quoteBody.append(title, sub, grid, status, honeypot);
+    const ack = document.createElement("div");
+    ack.style.marginTop = "10px";
+    ack.innerHTML = `
+      <div class="qCheck">
+        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
+        <label for="qAck">
+          <strong>Acknowledgement *</strong><br/>
+          I understand that a $25 booking deposit is required to reserve my appointment and will be applied to the total.
+          All listed prices are starting prices and may adjust after a vehicle assessment based on condition.
+        </label>
+      </div>
+      <div class="qStatus" data-q-status>
+        ${canContinue() ? "" : "Required: name, phone, and acknowledgement."}
+      </div>
+      <div style="display:none;">
+        <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
+      </div>
+    `;
+
+    quoteBody.append(title, sub, grid, notes, ack);
 
     const nameEl = quoteBody.querySelector("#qName");
     const phoneEl = quoteBody.querySelector("#qPhone");
+    const notesEl = quoteBody.querySelector("#qNotes");
+    const ackEl = quoteBody.querySelector("#qAck");
     const hpEl = quoteBody.querySelector("#qCompany");
+    const statusEl = quoteBody.querySelector("[data-q-status]");
 
     const updateStatus = () => {
-      status.textContent = canContinue() ? "" : "Required: name and phone number.";
+      if (!statusEl) return;
+      statusEl.textContent = canContinue() ? "" : "Required: name, phone, and acknowledgement.";
     };
 
     nameEl?.addEventListener("input", (e) => {
@@ -916,6 +627,14 @@ function renderStep() {
       updateNav();
       updateStatus();
     });
+    notesEl?.addEventListener("input", (e) => {
+      quoteState.notes = e.target.value || "";
+    });
+    ackEl?.addEventListener("change", (e) => {
+      quoteState.ackDeposit = !!e.target.checked;
+      updateNav();
+      updateStatus();
+    });
     hpEl?.addEventListener("input", (e) => {
       quoteState.honeypot = e.target.value || "";
     });
@@ -925,7 +644,7 @@ function renderStep() {
 
   if (step === "done") {
     title.textContent = "Request sent";
-    sub.textContent = "We’ll reach out shortly to confirm your appointment.";
+    sub.textContent = "We’ll reach out shortly to confirm and schedule.";
 
     const summary = document.createElement("div");
     summary.className = "qSummary";
@@ -933,14 +652,13 @@ function renderStep() {
       <div class="qStepSub" style="margin-top:10px;">
         <strong>Summary</strong><br/>
         Size: ${escapeHtml(quoteState.size)}<br/>
-        Service Type: ${escapeHtml(quoteState.serviceType)}<br/>
-        Interior Tier: ${escapeHtml(quoteState.interiorTier || "—")}<br/>
-        Exterior Service: ${escapeHtml(quoteState.exteriorService || "—")}<br/>
-        Exterior Wash Tier: ${escapeHtml(quoteState.exteriorWashTier || "—")}<br/>
-        Appointment: ${escapeHtml(quoteState.scheduleSlotLabel || "—")}<br/>
-        Questions: ${escapeHtml(quoteState.questions || "—")}<br/>
+        Condition: ${escapeHtml(quoteState.condition)}<br/>
+        Contact Window: ${escapeHtml(quoteState.contactWindow)}<br/>
+        Heard About: ${escapeHtml(quoteState.heardAbout)}<br/>
+        Booking Status: ${escapeHtml(quoteState.bookingStatus)}<br/>
         Name: ${escapeHtml(quoteState.name)}<br/>
-        Phone: ${escapeHtml(quoteState.phone)}
+        Phone: ${escapeHtml(quoteState.phone)}<br/>
+        Notes: ${escapeHtml(quoteState.notes || "—")}
       </div>
     `;
 
@@ -968,75 +686,78 @@ function renderStep() {
   updateNav();
 }
 
-async function submitToSupabase() {
-  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
-  if (!supabaseClient) return { ok: true };
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  if (!quoteState.scheduleSlotId) {
-    return { ok: false, message: "Please select a time slot." };
-  }
+async function submitToGoogleAppsScript() {
+  // honeypot anti-spam
+  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return true;
+
+  // Always advance UI even if Google blocks/cors/etc
+  if (!SCRIPT_URL || !SCRIPT_URL.startsWith("https://script.google.com/")) return true;
 
   const payload = {
-    slot_id: quoteState.scheduleSlotId,
+    timestamp: new Date().toISOString(),
+    size: quoteState.size,
+    condition: quoteState.condition,
+    contactWindow: quoteState.contactWindow,
+    heardAbout: quoteState.heardAbout,
+    bookingStatus: quoteState.bookingStatus,
+    ackDeposit: quoteState.ackDeposit,
     name: quoteState.name,
     phone: quoteState.phone,
-    vehicle_size: quoteState.size,
-    service_type: quoteState.serviceType,
-    interior_tier: quoteState.interiorTier || null,
-    exterior_service: quoteState.exteriorService || null,
-    exterior_wash_tier: quoteState.exteriorWashTier || null,
-    questions: quoteState.questions || null
+    notes: quoteState.notes,
+    source: "Website Quote Wizard"
   };
 
-  const { error } = await supabaseClient.from("bookings").insert([payload]);
-  if (error) {
-    return { ok: false, message: "That time just booked. Please choose another slot." };
+  try {
+    // no-cors means we can't read response; that's fine
+    await Promise.race([
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+        keepalive: true
+      }),
+      timeout(2500)
+    ]);
+    return true;
+  } catch (e) {
+    return false;
   }
-
-  await supabaseClient
-    .from("availability_slots")
-    .update({ is_available: false })
-    .eq("id", quoteState.scheduleSlotId);
-
-  return { ok: true };
 }
 
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
-  const step = getStepSequence()[stepIndex];
+  const step = steps[stepIndex];
 
   if (step === "contact") {
+    // Finish submit
     quoteNextBtn.disabled = true;
     const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
 
-    submitToSupabase().then((result) => {
+    submitToGoogleAppsScript().finally(() => {
+      // ALWAYS move to done, even if submission fails
+      stepIndex = Math.min(stepIndex + 1, steps.length - 1);
+      renderStep();
       quoteNextBtn.textContent = old;
       quoteNextBtn.disabled = false;
-
-      if (!result.ok) {
-        quoteState.scheduleError = result.message;
-        const scheduleIndex = getStepSequence().indexOf("schedule");
-        stepIndex = scheduleIndex >= 0 ? scheduleIndex : 0;
-        renderStep();
-        return;
-      }
-
-      stepIndex = Math.min(stepIndex + 1, getStepSequence().length - 1);
-      renderStep();
     });
     return;
   }
 
-  if (stepIndex < getStepSequence().length - 1) stepIndex++;
+  if (stepIndex < steps.length - 1) stepIndex++;
   renderStep();
 
   if (fromAutoAdvance) updateNav();
 }
 
 function prevStep() {
-  if (getStepSequence()[stepIndex] === "done") {
+  if (steps[stepIndex] === "done") {
     closeQuoteModal();
     return;
   }
@@ -1046,150 +767,6 @@ function prevStep() {
 
 quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
-
-function openAdminPanel() {
-  if (!adminUnlocked) return;
-  let panel = document.querySelector(".adminPanel");
-
-  if (!panel) {
-    panel = document.createElement("div");
-    panel.className = "adminPanel";
-    panel.innerHTML = `
-      <div class="adminPanel__card" role="dialog" aria-modal="true" aria-label="Admin scheduling panel">
-        <div class="adminPanel__header">
-          <div>
-            <div class="adminPanel__title">Admin Schedule Control</div>
-            <div class="adminPanel__sub">Add or remove appointment slots.</div>
-          </div>
-          <button class="adminPanel__close" type="button" aria-label="Close admin panel">×</button>
-        </div>
-        <div class="adminPanel__body">
-          <div class="adminPanel__section">
-            <div class="adminPanel__sectionTitle">Create slot</div>
-            <div class="adminPanel__form">
-              <div class="adminField">
-                <label for="adminDate">Date</label>
-                <input id="adminDate" type="date" />
-              </div>
-              <div class="adminField">
-                <label for="adminTime">Start time</label>
-                <input id="adminTime" type="time" />
-              </div>
-              <div class="adminField">
-                <label for="adminDuration">Duration</label>
-                <select id="adminDuration">
-                  <option value="60">60 min</option>
-                  <option value="90">90 min</option>
-                  <option value="120">120 min</option>
-                </select>
-              </div>
-              <button class="btn btn--quote adminPanel__action" type="button" data-admin-add>Add Slot</button>
-            </div>
-          </div>
-          <div class="adminPanel__section">
-            <div class="adminPanel__sectionTitle">Current slots</div>
-            <div class="adminPanel__list" data-admin-list></div>
-            <div class="adminPanel__status" data-admin-status></div>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(panel);
-
-    panel.addEventListener("click", (e) => {
-      if (e.target === panel) panel.remove();
-    });
-
-    panel.querySelector(".adminPanel__close")?.addEventListener("click", () => panel?.remove());
-  }
-
-  const listEl = panel.querySelector("[data-admin-list]");
-  const statusEl = panel.querySelector("[data-admin-status]");
-  const addBtn = panel.querySelector("[data-admin-add]");
-
-  const refreshAdminList = async () => {
-    if (!listEl || !statusEl) return;
-    if (!supabaseClient) {
-      statusEl.textContent = "Supabase is not configured.";
-      listEl.innerHTML = "";
-      return;
-    }
-
-    statusEl.textContent = "Loading slots...";
-    const { data, error } = await supabaseClient
-      .from("availability_slots")
-      .select("id,start_time,end_time,is_available")
-      .order("start_time", { ascending: true });
-
-    if (error) {
-      statusEl.textContent = "Unable to load slots.";
-      listEl.innerHTML = "";
-      return;
-    }
-
-    statusEl.textContent = "";
-    if (!data || !data.length) {
-      listEl.innerHTML = "<div class=\"qNotice\">No slots yet.</div>";
-      return;
-    }
-
-    listEl.innerHTML = "";
-    data.forEach((slot) => {
-      const item = document.createElement("div");
-      item.className = "adminSlot";
-      item.innerHTML = `
-        <div>
-          <div class="adminSlot__title">${escapeHtml(buildSlotLabel(slot))}</div>
-          <div class="adminSlot__meta">${slot.is_available ? "Available" : "Booked"}</div>
-        </div>
-        <button class="btn btn--ghostGold adminSlot__remove" type="button">Remove</button>
-      `;
-      item.querySelector(".adminSlot__remove")?.addEventListener("click", async () => {
-        await supabaseClient.from("availability_slots").delete().eq("id", slot.id);
-        refreshAdminList();
-        availabilityStatus = "idle";
-      });
-      listEl.appendChild(item);
-    });
-  };
-
-  if (!panel.dataset.bound) {
-    addBtn?.addEventListener("click", async () => {
-      if (!supabaseClient) return;
-      const date = panel.querySelector("#adminDate")?.value;
-      const time = panel.querySelector("#adminTime")?.value;
-      const duration = Number(panel.querySelector("#adminDuration")?.value || 60);
-      const statusEl = panel.querySelector("[data-admin-status]");
-
-      if (!date || !time) {
-        if (statusEl) statusEl.textContent = "Add a date and time.";
-        return;
-      }
-
-      const start = new Date(`${date}T${time}`);
-      const end = new Date(start.getTime() + duration * 60000);
-      await supabaseClient.from("availability_slots").insert([
-        { start_time: start.toISOString(), end_time: end.toISOString(), is_available: true }
-      ]);
-      if (statusEl) statusEl.textContent = "Slot added.";
-      refreshAdminList();
-      availabilityStatus = "idle";
-    });
-    panel.dataset.bound = "true";
-  }
-
-  refreshAdminList();
-}
-
-document.addEventListener("keydown", (e) => {
-  if (e.ctrlKey && e.shiftKey && e.altKey && e.key.toLowerCase() === "a") {
-    const passcode = window.prompt("Admin access code");
-    if (passcode === "1111") {
-      adminUnlocked = true;
-      openAdminPanel();
-    }
-  }
-});
 
 function escapeHtml(str) {
   return String(str || "")
