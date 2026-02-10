@@ -41,31 +41,104 @@ let lastActiveEl = null;
 
 const serviceDetails = {
   interior: {
-    title: "Interior Detail",
+    title: "Interior Detail (3 Tiers)",
     body: `
-      <p><strong>Best for:</strong> stains, spills, pet hair, sand, and a full interior reset.</p>
-      <ul>
-        <li>Full vacuum (seats, carpets, mats, trunk area)</li>
-        <li>Cracks and crevices detailed (seams, consoles, tight areas)</li>
-        <li>Panels and trim cleaned and finished (no greasy shine)</li>
-        <li>Spot stain treatment as needed</li>
-        <li>Interior glass cleaned</li>
-      </ul>
+      <p><strong>Best for:</strong> crumbs, stains, pet hair, and that “reset” feeling when you sit down.</p>
+
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier__top">
+            <div class="tier__name">Tier 1 — Interior Refresh</div>
+            <div class="tier__tag">Entry</div>
+          </div>
+          <ul>
+            <li>Thorough vacuum (seats, carpets, mats)</li>
+            <li>Wipe-down of dash/doors/console</li>
+            <li>Interior glass cleaned</li>
+            <li>Light crevice detailing</li>
+          </ul>
+        </div>
+
+        <div class="tier">
+          <div class="tier__top">
+            <div class="tier__name">Tier 2 — Interior Reset</div>
+            <div class="tier__tag">Most booked</div>
+          </div>
+          <ul>
+            <li>Deep vacuum + cracks/crevices</li>
+            <li>Panels/trim cleaned (no greasy shine)</li>
+            <li>Spot stain treatment (as needed)</li>
+            <li>Interior glass cleaned</li>
+          </ul>
+        </div>
+
+        <div class="tier">
+          <div class="tier__top">
+            <div class="tier__name">Tier 3 — Deep Interior Restore</div>
+            <div class="tier__tag">Heavy</div>
+          </div>
+          <ul>
+            <li>Heavy stain focus + deeper extraction</li>
+            <li>Pet hair removal focus (as needed)</li>
+            <li>Deep crevice work + tight seams</li>
+            <li>Full interior finish + glass</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
+
   exterior: {
-    title: "Exterior Detail",
+    title: "Exterior Wash (3 Levels)",
     body: `
-      <p><strong>Best for:</strong> a clean gloss, safe wash, and details that make the car look sharp.</p>
-      <ul>
-        <li>Safe hand wash and proper drying</li>
-        <li>Wheels, tires, and wheel wells cleaned</li>
-        <li>Bug and grime removal on front end</li>
-        <li>Trim cleaned and protected</li>
-        <li>Exterior glass cleaned</li>
-      </ul>
+      <p><strong>Best for:</strong> safe wash results and a clean gloss that makes the car look sharp.</p>
+
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier__top">
+            <div class="tier__name">Level 1 — Basic Wash</div>
+            <div class="tier__tag">Quick</div>
+          </div>
+          <ul>
+            <li>Safe hand wash + dry</li>
+            <li>Exterior glass cleaned</li>
+            <li>Light wheel/tire clean</li>
+          </ul>
+        </div>
+
+        <div class="tier">
+          <div class="tier__top">
+            <div class="tier__name">Level 2 — Wash + Wheel Detail</div>
+            <div class="tier__tag">Popular</div>
+          </div>
+          <ul>
+            <li>Safe hand wash + dry</li>
+            <li>Wheels/tires + wheel wells cleaned</li>
+            <li>Bug/grime removal on front end</li>
+            <li>Exterior glass cleaned</li>
+          </ul>
+        </div>
+
+        <div class="tier">
+          <div class="tier__top">
+            <div class="tier__name">Level 3 — Premium Exterior</div>
+            <div class="tier__tag">Best</div>
+          </div>
+          <ul>
+            <li>Everything in Level 2</li>
+            <li>Trim cleaned and protected</li>
+            <li>Enhanced finish for deeper gloss</li>
+            <li>Extra time on problem areas</li>
+          </ul>
+        </div>
+      </div>
+
+      <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
+
   maintenance: {
     title: "Upkeep Detail",
     body: `
@@ -77,6 +150,7 @@ const serviceDetails = {
       </ul>
     `,
   },
+
   ceramic: {
     title: "Ceramic Protection",
     body: `
@@ -88,6 +162,7 @@ const serviceDetails = {
       </ul>
     `,
   },
+
   paint: {
     title: "Paint Correction",
     body: `
@@ -172,7 +247,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // --------------------
-// Before/After slider
+// Before/After slider (supports vertical via CSS --ratio)
 // --------------------
 function initCompare() {
   document.querySelectorAll("[data-compare]").forEach((wrap) => {
