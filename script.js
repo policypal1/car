@@ -44,7 +44,6 @@ const serviceDetails = {
     title: "Interior Detail (3 Tiers)",
     body: `
       <p><strong>Best for:</strong> crumbs, stains, pet hair, and that “reset” feeling when you sit down.</p>
-
       <div class="tiers">
         <div class="tier">
           <div class="tier__top">
@@ -85,7 +84,6 @@ const serviceDetails = {
           </ul>
         </div>
       </div>
-
       <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
@@ -94,7 +92,6 @@ const serviceDetails = {
     title: "Exterior Wash (3 Levels)",
     body: `
       <p><strong>Best for:</strong> safe wash results and a clean gloss that makes the car look sharp.</p>
-
       <div class="tiers">
         <div class="tier">
           <div class="tier__top">
@@ -134,7 +131,6 @@ const serviceDetails = {
           </ul>
         </div>
       </div>
-
       <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
@@ -195,6 +191,7 @@ function openServiceModal(key) {
 
 function closeServiceModal() {
   if (!modal) return;
+
   modal.classList.remove("isOpen");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
@@ -205,6 +202,7 @@ function closeServiceModal() {
 document.querySelectorAll("[data-modal-open]").forEach((btn) => {
   btn.addEventListener("click", () => openServiceModal(btn.getAttribute("data-modal-open")));
 });
+
 document.querySelectorAll("[data-modal-close]").forEach((btn) => {
   btn.addEventListener("click", closeServiceModal);
 });
@@ -217,6 +215,7 @@ let lastActiveElCall = null;
 
 function openCallModal() {
   if (!callModal) return;
+
   lastActiveElCall = document.activeElement;
 
   callModal.classList.add("isOpen");
@@ -228,6 +227,7 @@ function openCallModal() {
 
 function closeCallModal() {
   if (!callModal) return;
+
   callModal.classList.remove("isOpen");
   callModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
@@ -247,7 +247,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // --------------------
-// Before/After slider (supports vertical via CSS --ratio)
+// Before/After slider
 // --------------------
 function initCompare() {
   document.querySelectorAll("[data-compare]").forEach((wrap) => {
@@ -274,21 +274,10 @@ function initCarousel(root) {
   const next = root.querySelector("[data-carousel-next]");
   const dotsWrap = root.querySelector("[data-carousel-dots]");
   const slides = Array.from(root.querySelectorAll(".carousel__slide"));
+
   if (!track || slides.length === 0) return;
 
   let index = 0;
-
-  if (dotsWrap) {
-    dotsWrap.innerHTML = "";
-    slides.forEach((_, i) => {
-      const dot = document.createElement("button");
-      dot.type = "button";
-      dot.className = "dot" + (i === 0 ? " isActive" : "");
-      dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
-      dot.addEventListener("click", () => goTo(i));
-      dotsWrap.appendChild(dot);
-    });
-  }
 
   const setDots = () => {
     if (!dotsWrap) return;
@@ -302,11 +291,24 @@ function initCarousel(root) {
     setDots();
   };
 
+  if (dotsWrap) {
+    dotsWrap.innerHTML = "";
+    slides.forEach((_, i) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "dot" + (i === 0 ? " isActive" : "");
+      dot.setAttribute("aria-label", `Go to slide ${i + 1}`);
+      dot.addEventListener("click", () => goTo(i));
+      dotsWrap.appendChild(dot);
+    });
+  }
+
   prev?.addEventListener("click", () => goTo(index - 1));
   next?.addEventListener("click", () => goTo(index + 1));
 
   goTo(0);
 }
+
 document.querySelectorAll("[data-carousel]").forEach(initCarousel);
 
 // --------------------
