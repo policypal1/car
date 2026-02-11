@@ -420,7 +420,7 @@ body{
 
   /* AFTER is the base (full frame) */
   background-image: var(--after);
-  background-size: var(--afterSize, cover);
+  background-size: var(--afterSize, var(--mediaSize, cover));
   background-position: var(--afterPos, center);
   background-repeat: no-repeat;
 
@@ -434,11 +434,18 @@ body{
   /* BEFORE clipped on the left */
   width: var(--pos);
   background-image: var(--before);
-  background-size: var(--beforeSize, cover);
+  background-size: var(--beforeSize, var(--mediaSize, cover));
   background-position: var(--beforePos, center);
   background-repeat: no-repeat;
 
   border-right: 2px solid rgba(255,255,255,.70);
+}
+
+/* Slide 3+ fix: reveal via clipping only, never scaling image while dragging */
+.compare--fixedReveal .compare__stage,
+.compare--fixedReveal .compare__stage::after{
+  transition: none;
+  transform: none;
 }
 .compare__range{
   position:absolute;
@@ -668,13 +675,11 @@ body{
 .reviewsTopSimple__small{ color: rgba(255,255,255,.72); }
 .reviewsTopSimple__cta{ display:flex; gap: 10px; flex-wrap:wrap; }
 
-/* Wrap holds arrows */
+/* Wrap holds arrows outside the review rail */
 .reviewsRailWrap{
   position: relative;
   margin-top: 16px;
-
-  /* ✅ no weird side padding that causes peeking math */
-  padding: 0;
+  padding: 0 56px;
 }
 
 /* Track = padded so cards aren't touching border */
@@ -733,7 +738,7 @@ body{
 .rStars{ color: var(--gold); letter-spacing: 1px; font-size: 1rem; }
 .rText--dark{ margin: 10px 0 0; line-height: 1.7; color: rgba(255,255,255,.74); }
 
-/* ✅ Arrows sit inside the rail (not outside), no overlap issues */
+/* Arrows sit outside the review card rail */
 .railArrow{
   position:absolute;
   top: 50%;
@@ -749,8 +754,8 @@ body{
   z-index: 3;
   box-shadow: 0 14px 34px rgba(0,0,0,.35);
 }
-.railArrow--left{ left: 10px; }
-.railArrow--right{ right: 10px; }
+.railArrow--left{ left: 0; }
+.railArrow--right{ right: 0; }
 .railArrow:focus-visible{
   outline: 3px solid var(--ring);
   outline-offset: 2px;
@@ -983,8 +988,10 @@ body{
     grid-auto-columns: calc((100% - (2 * var(--rail-pad)) - (2 * var(--rail-gap))) / 3);
   }
 
-  .railArrow--left{ left: 14px; }
-  .railArrow--right{ right: 14px; }
+  .reviewsRailWrap{ padding: 0 64px; }
+
+  .railArrow--left{ left: 0; }
+  .railArrow--right{ right: 0; }
 }
 
 /* Larger desktop */
