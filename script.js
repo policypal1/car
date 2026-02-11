@@ -1,7 +1,7 @@
 // --------------------
 // CONFIG
 // --------------------
-const BUSINESS_PHONE = "+15555555555";
+const BUSINESS_PHONE = "+19712865503";
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbxdfZmt7x4ZCM4x8-jPjEJFN6gll0ZxYdY8dyjSEZDlM2lNDSJ8p-XTwueG4p7hM88/exec";
 
@@ -44,6 +44,7 @@ const serviceDetails = {
     title: "Interior Detail (3 Tiers)",
     body: `
       <p><strong>Best for:</strong> crumbs, stains, pet hair, and that “reset” feeling when you sit down.</p>
+
       <div class="tiers">
         <div class="tier">
           <div class="tier__top">
@@ -84,6 +85,7 @@ const serviceDetails = {
           </ul>
         </div>
       </div>
+
       <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
@@ -92,6 +94,7 @@ const serviceDetails = {
     title: "Exterior Wash (3 Levels)",
     body: `
       <p><strong>Best for:</strong> safe wash results and a clean gloss that makes the car look sharp.</p>
+
       <div class="tiers">
         <div class="tier">
           <div class="tier__top">
@@ -131,6 +134,7 @@ const serviceDetails = {
           </ul>
         </div>
       </div>
+
       <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
@@ -202,7 +206,6 @@ function closeServiceModal() {
 document.querySelectorAll("[data-modal-open]").forEach((btn) => {
   btn.addEventListener("click", () => openServiceModal(btn.getAttribute("data-modal-open")));
 });
-
 document.querySelectorAll("[data-modal-close]").forEach((btn) => {
   btn.addEventListener("click", closeServiceModal);
 });
@@ -274,7 +277,6 @@ function initCarousel(root) {
   const next = root.querySelector("[data-carousel-next]");
   const dotsWrap = root.querySelector("[data-carousel-dots]");
   const slides = Array.from(root.querySelectorAll(".carousel__slide"));
-
   if (!track || slides.length === 0) return;
 
   let index = 0;
@@ -305,10 +307,8 @@ function initCarousel(root) {
 
   prev?.addEventListener("click", () => goTo(index - 1));
   next?.addEventListener("click", () => goTo(index + 1));
-
   goTo(0);
 }
-
 document.querySelectorAll("[data-carousel]").forEach(initCarousel);
 
 // --------------------
