@@ -261,6 +261,8 @@ body{
   gap: 18px;
   margin-top: 22px;
 }
+
+/* ✅ FIXED: removed harsh borders/halo shadow that looked like black lines */
 .serviceCard{
   position:relative;
   border-radius: 22px;
@@ -269,26 +271,32 @@ body{
   min-height: 330px;
   background-size: cover;
   background-position: center;
-  box-shadow: 0 26px 80px rgba(0,0,0,.16);
-  border: 1px solid rgba(0,0,0,.08);
+  background-color: #0b0b0c; /* prevents edge seam */
+  box-shadow: 0 18px 55px rgba(0,0,0,.12);
+  border: 0;
   transform: translateY(0);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
 .serviceCard:hover{
   transform: translateY(-4px);
-  box-shadow: 0 34px 95px rgba(0,0,0,.20);
-  border-color: rgba(214,178,94,.28);
+  box-shadow: 0 26px 70px rgba(0,0,0,.14);
 }
 .serviceCard__overlay{
   position:absolute;
   inset:0;
-  background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.88));
+  /* ✅ FIXED: less inky pooling at bottom corners */
+  background: linear-gradient(
+    180deg,
+    rgba(0,0,0,.10) 0%,
+    rgba(0,0,0,.55) 55%,
+    rgba(0,0,0,.78) 100%
+  );
 }
 .serviceCard__shine{
   position:absolute;
   inset:-40%;
   background: radial-gradient(circle at 30% 30%, rgba(214,178,94,.22), rgba(255,255,255,0) 55%);
-  opacity: .65;
+  opacity: .55;
   transform: rotate(12deg);
   pointer-events:none;
 }
@@ -399,10 +407,7 @@ body{
   border-color: rgba(214,178,94,.85);
 }
 
-/* ✅ Before/After compare
-   Fix: AFTER is the base (fills right side). BEFORE is clipped overlay on the left.
-   This matches: "after is on the right" + lets us zoom AFTER without affecting before.
-*/
+/* ✅ Before/After compare */
 .compare{
   --pos: 12%;
   --ratio: 16 / 9;
@@ -418,7 +423,6 @@ body{
   width: 100%;
   aspect-ratio: var(--ratio);
 
-  /* AFTER is the base (full frame) */
   background-image: var(--after);
   background-size: var(--afterSize, var(--mediaSize, cover));
   background-position: var(--afterPos, center);
@@ -431,7 +435,6 @@ body{
   position:absolute;
   inset:0;
 
-  /* BEFORE clipped on the left */
   width: var(--pos);
   background-image: var(--before);
   background-size: var(--beforeSize, var(--mediaSize, cover));
@@ -440,8 +443,6 @@ body{
 
   border-right: 2px solid rgba(255,255,255,.70);
 }
-
-/* Slide 3+ fix: reveal via clipping only, never scaling image while dragging */
 .compare--fixedReveal .compare__stage,
 .compare--fixedReveal .compare__stage::after{
   transition: none;
@@ -541,7 +542,7 @@ body{
 }
 .stepCard--finish{ border-color: rgba(214,178,94,.32); }
 
-/* ✅ Service area (map + card aligned) */
+/* Service area */
 .areaGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -549,17 +550,13 @@ body{
   margin-top: 20px;
   align-items: stretch;
 }
-.areaMap{
-  height: 100%;
-}
+.areaMap{ height: 100%; }
 .areaCard{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
   background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.14), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
   padding: 16px;
   box-shadow: 0 22px 60px rgba(0,0,0,.35);
-
-  /* makes bottom align nicely */
   height: 100%;
   display:flex;
   flex-direction:column;
@@ -575,8 +572,6 @@ body{
   color: rgba(255,255,255,.74);
   line-height: 1.7;
 }
-
-/* service area list */
 .areaList{
   margin-top: 12px;
   border-radius: 16px;
@@ -595,17 +590,13 @@ body{
   color: rgba(255,255,255,.78);
   line-height: 1.7;
 }
-
 .areaActions{
   display:flex;
   gap: 10px;
   flex-wrap:wrap;
-
-  /* ✅ pushes CTA row to the bottom so the map/card bottoms line up */
   margin-top: auto;
   padding-top: 14px;
 }
-
 .areaMap img{
   width:100%;
   height: 320px;
@@ -616,7 +607,7 @@ body{
   display:block;
 }
 
-/* About (light) */
+/* About */
 .aboutGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -651,38 +642,50 @@ body{
   flex-wrap:wrap;
 }
 
-/* ✅ Reviews (dark) */
+/* Reviews */
 .reviewsTopSimple{
-  border-radius: 22px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.16), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
-  padding: 16px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.35);
-  display:flex;
-  flex-direction: column;
-  gap: 14px;
+  /* ✅ FIXED: no big card panel */
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
   margin-top: 18px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 14px;
+  flex-wrap:wrap;
 }
-.reviewsTopSimple__score{ display:flex; flex-direction: column; gap: 6px; }
+.reviewsTopSimple__score{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  flex-wrap:wrap;
+}
 .reviewsTopSimple__big{
   font-family: Oswald, Inter, sans-serif;
   font-weight: 800;
-  font-size: 3rem;
+  font-size: 2.4rem;
   line-height: 1;
   color: #fff;
 }
-.reviewsTopSimple__stars{ color: var(--gold); letter-spacing: 2px; font-size: 1.15rem; }
+.reviewsTopSimple__stars{ color: var(--gold); letter-spacing: 2px; font-size: 1.05rem; }
 .reviewsTopSimple__small{ color: rgba(255,255,255,.72); }
-.reviewsTopSimple__cta{ display:flex; gap: 10px; flex-wrap:wrap; }
+.reviewsTopSimple__cta{
+  margin-left: auto;
+  display:flex;
+  gap: 10px;
+  flex-wrap:wrap;
+}
 
-/* Wrap holds arrows outside the review rail */
+/* Reviews rail */
 .reviewsRailWrap{
   position: relative;
   margin-top: 16px;
   padding: 0 56px;
 }
-
-/* Track = padded so cards aren't touching border */
 .reviewsRail--dark{
   --rail-gap: 14px;
   --rail-pad: 18px;
@@ -738,7 +741,7 @@ body{
 .rStars{ color: var(--gold); letter-spacing: 1px; font-size: 1rem; }
 .rText--dark{ margin: 10px 0 0; line-height: 1.7; color: rgba(255,255,255,.74); }
 
-/* Arrows sit outside the review card rail */
+/* Rail arrows */
 .railArrow{
   position:absolute;
   top: 50%;
@@ -796,13 +799,14 @@ body{
 }
 
 /* Service modal */
+/* ✅ FIXED: wider modal + better padding so tiers aren't cramped */
 .modal__panel{
   position:relative;
-  width: min(680px, 100%);
+  width: min(980px, 100%);
   background:#fff;
   border-radius: 18px;
   box-shadow: var(--shadow);
-  padding: 18px;
+  padding: 20px 18px 18px;
   max-height: calc(100vh - 3rem);
   overflow:auto;
 }
@@ -817,17 +821,18 @@ body{
 .modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
 /* Tier layout inside modals */
+/* ✅ FIXED: more breathing room, better widths */
 .tiers{
   display:grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 12px;
   margin-top: 12px;
 }
 .tier{
   border-radius: 16px;
   border: 1px solid rgba(0,0,0,.10);
   background: radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.12), rgba(255,255,255,0) 60%), #fff;
-  padding: 12px;
+  padding: 14px;
   box-shadow: 0 16px 38px rgba(0,0,0,.08);
 }
 .tier__top{
@@ -960,13 +965,21 @@ body{
 
   .areaGrid{ grid-template-columns: 1fr 1fr; gap: 18px; }
 
-  /* ✅ match heights on desktop */
   .areaMap img{
     height: 100%;
     min-height: 380px;
   }
 
-  .tiers{ grid-template-columns: repeat(3, 1fr); }
+  /* ✅ FIXED: tiers spread out nicely on desktop */
+  .tiers{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  /* ✅ more side padding in modal on desktop */
+  .modal__panel{
+    padding: 22px 22px 18px;
+  }
 
   .footerMini{
     flex-direction:row;
@@ -975,13 +988,6 @@ body{
     gap: 14px;
   }
   .footerMini__right{ align-items:flex-end; }
-
-  /* ✅ Reviews: EXACTLY 3 cards, no peeking */
-  .reviewsTopSimple{
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
 
   .reviewsRail--dark{
     --rail-pad: 22px;
@@ -996,5 +1002,8 @@ body{
 
 /* Larger desktop */
 @media (min-width: 1024px){
-  /* kept for future expansions */
+  /* ✅ Make modal even more spacious on large screens */
+  .modal__panel{
+    width: min(1080px, 100%);
+  }
 }
