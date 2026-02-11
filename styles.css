@@ -399,47 +399,57 @@ body{
   border-color: rgba(214,178,94,.85);
 }
 
-/* ✅ Before/After compare
-   Fix: AFTER is the base (fills right side). BEFORE is clipped overlay on the left.
-   This matches: "after is on the right" + lets us zoom AFTER without affecting before.
-*/
+/* Before/After compare (Before LEFT, After RIGHT — like your first slide) */
 .compare{
-  --pos: 12%;
+  --pos: 50%;
   --ratio: 16 / 9;
+
+  /* default zoom for AFTER to remove gutters */
+  --afterSize: 150%;
+  --afterPos: center;
+
   position: relative;
   width: 100%;
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid rgba(214,178,94,.18);
   box-shadow: 0 26px 70px rgba(0,0,0,.35);
-  background: #0b0b0c;
+  background: #0b0b0c; /* prevents white edges */
 }
+
 .compare__stage{
   width: 100%;
   aspect-ratio: var(--ratio);
 
-  /* AFTER is the base (full frame) */
-  background-image: var(--after);
-  background-size: var(--afterSize, cover);
-  background-position: var(--afterPos, center);
-  background-repeat: no-repeat;
-
-  position: relative;
-}
-.compare__stage::after{
-  content:"";
-  position:absolute;
-  inset:0;
-
-  /* BEFORE clipped on the left */
-  width: var(--pos);
+  /* BEFORE fills the whole frame */
   background-image: var(--before);
   background-size: var(--beforeSize, cover);
   background-position: var(--beforePos, center);
   background-repeat: no-repeat;
 
-  border-right: 2px solid rgba(255,255,255,.70);
+  position: relative;
 }
+
+/* AFTER sits on the RIGHT side (from handle to the right edge) */
+.compare__stage::after{
+  content:"";
+  position:absolute;
+  top: 0;
+  bottom: 0;
+
+  /* Right-side reveal */
+  left: var(--pos);
+  right: 0;
+
+  background-image: var(--after);
+  background-size: var(--afterSize, 150%);
+  background-position: var(--afterPos, center);
+  background-repeat: no-repeat;
+
+  /* divider line exactly at the handle */
+  border-left: 2px solid rgba(255,255,255,.70);
+}
+
 .compare__range{
   position:absolute;
   inset:0;
@@ -448,6 +458,7 @@ body{
   opacity:0;
   cursor: ew-resize;
 }
+
 .compare__handle{
   position:absolute;
   top:0;
@@ -457,6 +468,7 @@ body{
   width: 44px;
   pointer-events:none;
 }
+
 .compare__handle::before{
   content:"";
   position:absolute;
@@ -470,6 +482,7 @@ body{
   border: 1px solid rgba(214,178,94,.60);
   box-shadow: 0 18px 44px rgba(0,0,0,.35);
 }
+
 .compare__handle::after{
   content:"↔";
   position:absolute;
