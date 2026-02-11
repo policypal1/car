@@ -44,7 +44,6 @@ const serviceDetails = {
     title: "Interior Detail (3 Tiers)",
     body: `
       <p><strong>Best for:</strong> crumbs, stains, pet hair, and that “reset” feeling when you sit down.</p>
-
       <div class="tiers">
         <div class="tier">
           <div class="tier__top">
@@ -85,7 +84,6 @@ const serviceDetails = {
           </ul>
         </div>
       </div>
-
       <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
@@ -94,7 +92,6 @@ const serviceDetails = {
     title: "Exterior Wash (3 Levels)",
     body: `
       <p><strong>Best for:</strong> safe wash results and a clean gloss that makes the car look sharp.</p>
-
       <div class="tiers">
         <div class="tier">
           <div class="tier__top">
@@ -134,7 +131,6 @@ const serviceDetails = {
           </ul>
         </div>
       </div>
-
       <p style="margin-top:12px;"><strong>Note:</strong> Final quote depends on vehicle size and condition.</p>
     `,
   },
@@ -182,24 +178,20 @@ function openServiceModal(key) {
   if (!data) return;
 
   lastActiveEl = document.activeElement;
-
   modalTitle.textContent = data.title;
   modalContent.innerHTML = data.body;
 
   modal.classList.add("isOpen");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
-
   modal.querySelector("[data-modal-close]")?.focus();
 }
 
 function closeServiceModal() {
   if (!modal) return;
-
   modal.classList.remove("isOpen");
   modal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
-
   if (lastActiveEl && typeof lastActiveEl.focus === "function") lastActiveEl.focus();
 }
 
@@ -218,23 +210,18 @@ let lastActiveElCall = null;
 
 function openCallModal() {
   if (!callModal) return;
-
   lastActiveElCall = document.activeElement;
-
   callModal.classList.add("isOpen");
   callModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
-
   callModal.querySelector("[data-call-close]")?.focus();
 }
 
 function closeCallModal() {
   if (!callModal) return;
-
   callModal.classList.remove("isOpen");
   callModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
-
   if (lastActiveElCall && typeof lastActiveElCall.focus === "function") lastActiveElCall.focus();
 }
 
@@ -281,18 +268,6 @@ function initCarousel(root) {
 
   let index = 0;
 
-  const setDots = () => {
-    if (!dotsWrap) return;
-    const dots = Array.from(dotsWrap.querySelectorAll(".dot"));
-    dots.forEach((d, i) => d.classList.toggle("isActive", i === index));
-  };
-
-  const goTo = (i) => {
-    index = Math.max(0, Math.min(slides.length - 1, i));
-    track.style.transform = `translateX(${-index * 100}%)`;
-    setDots();
-  };
-
   if (dotsWrap) {
     dotsWrap.innerHTML = "";
     slides.forEach((_, i) => {
@@ -305,10 +280,24 @@ function initCarousel(root) {
     });
   }
 
+  const setDots = () => {
+    if (!dotsWrap) return;
+    const dots = Array.from(dotsWrap.querySelectorAll(".dot"));
+    dots.forEach((d, i) => d.classList.toggle("isActive", i === index));
+  };
+
+  const goTo = (i) => {
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    track.style.transform = `translateX(${-index * 100}%)`;
+    setDots();
+  };
+
   prev?.addEventListener("click", () => goTo(index - 1));
   next?.addEventListener("click", () => goTo(index + 1));
+
   goTo(0);
 }
+
 document.querySelectorAll("[data-carousel]").forEach(initCarousel);
 
 // --------------------
@@ -328,11 +317,10 @@ document.querySelectorAll("[data-carousel]").forEach(initCarousel);
     if (!first) return Math.max(280, Math.round(track.clientWidth * 0.92));
     const cardW = first.getBoundingClientRect().width;
 
-    // get gap from computed styles
     const styles = window.getComputedStyle(track);
     const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
 
-    return Math.round(cardW + gap); // ✅ one card at a time
+    return Math.round(cardW + gap);
   };
 
   prev?.addEventListener("click", () => {
@@ -343,4 +331,3 @@ document.querySelectorAll("[data-carousel]").forEach(initCarousel);
     track.scrollBy({ left: getStep(), behavior: "smooth" });
   });
 })();
-
