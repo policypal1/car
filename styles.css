@@ -362,7 +362,7 @@ body{
   border-radius: 22px;
   position: relative;
   background: rgba(255,255,255,.02);
-  aspect-ratio: 16 / 9; /* fixed frame always */
+  aspect-ratio: 16 / 9;
 }
 .carousel__track{ display:flex; transition: transform .28s ease; }
 .carousel__slide{ flex: 0 0 100%; }
@@ -399,7 +399,10 @@ body{
   border-color: rgba(214,178,94,.85);
 }
 
-/* Before/After compare */
+/* ✅ Before/After compare
+   Fix: AFTER is the base (fills right side). BEFORE is clipped overlay on the left.
+   This matches: "after is on the right" + lets us zoom AFTER without affecting before.
+*/
 .compare{
   --pos: 12%;
   --ratio: 16 / 9;
@@ -409,26 +412,32 @@ body{
   overflow: hidden;
   border: 1px solid rgba(214,178,94,.18);
   box-shadow: 0 26px 70px rgba(0,0,0,.35);
-  background: #0b0b0c; /* prevents white edges */
+  background: #0b0b0c;
 }
 .compare__stage{
   width: 100%;
   aspect-ratio: var(--ratio);
-  background-image: var(--before);
-  background-size: var(--beforeSize, cover); /* allow slide zoom */
-  background-position: var(--beforePos, center);
+
+  /* AFTER is the base (full frame) */
+  background-image: var(--after);
+  background-size: var(--afterSize, cover);
+  background-position: var(--afterPos, center);
   background-repeat: no-repeat;
+
   position: relative;
 }
 .compare__stage::after{
   content:"";
   position:absolute;
   inset:0;
+
+  /* BEFORE clipped on the left */
   width: var(--pos);
-  background-image: var(--after);
-  background-size: var(--afterSize, cover); /* allow slide zoom */
-  background-position: var(--afterPos, center);
+  background-image: var(--before);
+  background-size: var(--beforeSize, cover);
+  background-position: var(--beforePos, center);
   background-repeat: no-repeat;
+
   border-right: 2px solid rgba(255,255,255,.70);
 }
 .compare__range{
@@ -525,7 +534,7 @@ body{
 }
 .stepCard--finish{ border-color: rgba(214,178,94,.32); }
 
-/* Service area */
+/* ✅ Service area (map + card aligned) */
 .areaGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -533,12 +542,20 @@ body{
   margin-top: 20px;
   align-items: stretch;
 }
+.areaMap{
+  height: 100%;
+}
 .areaCard{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
   background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.14), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
   padding: 16px;
   box-shadow: 0 22px 60px rgba(0,0,0,.35);
+
+  /* makes bottom align nicely */
+  height: 100%;
+  display:flex;
+  flex-direction:column;
 }
 .areaTitle{
   margin: 0 0 8px;
@@ -550,12 +567,6 @@ body{
   margin: 0 0 12px;
   color: rgba(255,255,255,.74);
   line-height: 1.7;
-}
-.areaActions{
-  display:flex;
-  gap: 10px;
-  flex-wrap:wrap;
-  margin-top: 12px;
 }
 
 /* service area list */
@@ -578,6 +589,16 @@ body{
   line-height: 1.7;
 }
 
+.areaActions{
+  display:flex;
+  gap: 10px;
+  flex-wrap:wrap;
+
+  /* ✅ pushes CTA row to the bottom so the map/card bottoms line up */
+  margin-top: auto;
+  padding-top: 14px;
+}
+
 .areaMap img{
   width:100%;
   height: 320px;
@@ -585,6 +606,7 @@ body{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  display:block;
 }
 
 /* About (light) */
@@ -622,7 +644,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Reviews (dark) */
+/* ✅ Reviews (dark) */
 .reviewsTopSimple{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
@@ -646,32 +668,41 @@ body{
 .reviewsTopSimple__small{ color: rgba(255,255,255,.72); }
 .reviewsTopSimple__cta{ display:flex; gap: 10px; flex-wrap:wrap; }
 
+/* Wrap holds arrows */
 .reviewsRailWrap{
   position: relative;
-  margin-top: 14px;
-  padding: 2px 0;
-}
-.reviewsRailWrap--roomy{
   margin-top: 16px;
-  padding: 0 56px; /* more breathing room on edges */
+
+  /* ✅ no weird side padding that causes peeking math */
+  padding: 0;
 }
+
+/* Track = padded so cards aren't touching border */
 .reviewsRail--dark{
   --rail-gap: 14px;
+  --rail-pad: 18px;
+
   display:grid;
   grid-auto-flow: column;
   grid-auto-columns: 88%;
   gap: var(--rail-gap);
+
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 18px;
+
+  padding: 18px var(--rail-pad);
   border-radius: 22px;
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: 0 18px 44px rgba(0,0,0,.35);
+
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  scroll-padding-left: var(--rail-pad);
+  scroll-padding-right: var(--rail-pad);
 }
 .reviewsRail--dark::-webkit-scrollbar{ display:none; }
+
 .rCard{
   scroll-snap-align: start;
   border-radius: 20px;
@@ -702,6 +733,7 @@ body{
 .rStars{ color: var(--gold); letter-spacing: 1px; font-size: 1rem; }
 .rText--dark{ margin: 10px 0 0; line-height: 1.7; color: rgba(255,255,255,.74); }
 
+/* ✅ Arrows sit inside the rail (not outside), no overlap issues */
 .railArrow{
   position:absolute;
   top: 50%;
@@ -717,8 +749,8 @@ body{
   z-index: 3;
   box-shadow: 0 14px 34px rgba(0,0,0,.35);
 }
-.railArrow--left{ left: -6px; }
-.railArrow--right{ right: -6px; }
+.railArrow--left{ left: 10px; }
+.railArrow--right{ right: 10px; }
 .railArrow:focus-visible{
   outline: 3px solid var(--ring);
   outline-offset: 2px;
@@ -922,7 +954,12 @@ body{
   .steps{ grid-template-columns: repeat(2, 1fr); gap: 16px; }
 
   .areaGrid{ grid-template-columns: 1fr 1fr; gap: 18px; }
-  .areaMap img{ height: 380px; }
+
+  /* ✅ match heights on desktop */
+  .areaMap img{
+    height: 100%;
+    min-height: 380px;
+  }
 
   .tiers{ grid-template-columns: repeat(3, 1fr); }
 
@@ -934,20 +971,23 @@ body{
   }
   .footerMini__right{ align-items:flex-end; }
 
-  /* reviews: 3 visible + arrows inset */
+  /* ✅ Reviews: EXACTLY 3 cards, no peeking */
   .reviewsTopSimple{
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
   }
+
   .reviewsRail--dark{
-    grid-auto-columns: calc((100% - (2 * var(--rail-gap))) / 3);
+    --rail-pad: 22px;
+    grid-auto-columns: calc((100% - (2 * var(--rail-pad)) - (2 * var(--rail-gap))) / 3);
   }
+
   .railArrow--left{ left: 14px; }
   .railArrow--right{ right: 14px; }
 }
 
 /* Larger desktop */
 @media (min-width: 1024px){
-  /* left empty intentionally (kept for future expansions) */
+  /* kept for future expansions */
 }
