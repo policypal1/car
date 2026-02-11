@@ -180,7 +180,6 @@
           <p class="section__sub section__sub--dark">Swipe through work, then drag the slider to reveal the after.</p>
         </div>
 
-        <!-- ✅ ONE carousel. No duplicates. No vertical grid. -->
         <div class="carousel carousel--outsideNav" data-carousel="work">
           <div class="carousel__frame">
             <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous">‹</button>
@@ -188,67 +187,30 @@
             <div class="carousel__viewport" data-carousel-viewport>
               <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
 
+              <!-- ✅ UPDATED: swapped before/after on slides 1-2 + deleted slides 3-6 -->
               <div class="carousel__track" data-carousel-track>
-                <!-- 1 -->
+                <!-- 1 (SWAPPED) -->
                 <div class="carousel__slide">
-                  <div class="compare compare--fill" data-compare
-                    style="--before:url('./3a1e17c7-bcc9-49db-9c9d-ae7b6e1f8ab8.png'); --after:url('./6107e54c-faba-40e2-924c-8e72db768435 (1).png');"
-                    aria-label="Before and after interior detail comparison">
+                  <div
+                    class="compare compare--fill"
+                    data-compare
+                    style="--before:url('./6107e54c-faba-40e2-924c-8e72db768435 (1).png'); --after:url('./3a1e17c7-bcc9-49db-9c9d-ae7b6e1f8ab8.png');"
+                    aria-label="Before and after interior detail comparison"
+                  >
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <!-- 2 -->
+                <!-- 2 (SWAPPED) -->
                 <div class="carousel__slide">
-                  <div class="compare compare--fill" data-compare
-                    style="--before:url('./ec6423a4-3e1a-4e7e-a85d-c3b721f450a4.png'); --after:url('./adc47ac6-1e75-4feb-aa00-21671835062d.png');"
-                    aria-label="Before and after seat detail comparison">
-                    <div class="compare__stage" aria-hidden="true"></div>
-                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
-                    <div class="compare__handle" aria-hidden="true"></div>
-                  </div>
-                </div>
-
-                <!-- 3 (Tires/Rims) – zoomed to kill white gutters -->
-                <div class="carousel__slide">
-                  <div class="compare compare--fill compare--fixedReveal" data-compare
-                    style="--before:url('./Tires.webp'); --after:url('./Rims.webp'); --mediaSize:145%;"
-                    aria-label="Before and after tires to rims">
-                    <div class="compare__stage" aria-hidden="true"></div>
-                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
-                    <div class="compare__handle" aria-hidden="true"></div>
-                  </div>
-                </div>
-
-                <!-- 4 (Floor/Carpets) -->
-                <div class="carousel__slide">
-                  <div class="compare compare--fill compare--fixedReveal" data-compare
-                    style="--before:url('./floor.webp'); --after:url('./Carpets.webp'); --mediaSize:145%;"
-                    aria-label="Before and after floor to carpets">
-                    <div class="compare__stage" aria-hidden="true"></div>
-                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
-                    <div class="compare__handle" aria-hidden="true"></div>
-                  </div>
-                </div>
-
-                <!-- 5 (Crayons/Surface) -->
-                <div class="carousel__slide">
-                  <div class="compare compare--fill compare--fixedReveal" data-compare
-                    style="--before:url('./Crayons.jpg'); --after:url('./surface.jpg'); --mediaSize:120%;"
-                    aria-label="Before and after crayons to clean surface">
-                    <div class="compare__stage" aria-hidden="true"></div>
-                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
-                    <div class="compare__handle" aria-hidden="true"></div>
-                  </div>
-                </div>
-
-                <!-- 6 (Headlights/Car) -->
-                <div class="carousel__slide">
-                  <div class="compare compare--fill compare--fixedReveal" data-compare
-                    style="--before:url('./Headlights.webp'); --after:url('./Car.webp'); --mediaSize:145%;"
-                    aria-label="Before and after headlights to clean car">
+                  <div
+                    class="compare compare--fill"
+                    data-compare
+                    style="--before:url('./adc47ac6-1e75-4feb-aa00-21671835062d.png'); --after:url('./ec6423a4-3e1a-4e7e-a85d-c3b721f450a4.png');"
+                    aria-label="Before and after seat detail comparison"
+                  >
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
@@ -307,7 +269,7 @@
       </div>
     </section>
 
-    <!-- Service Area (BLACK) – back to side-by-side layout -->
+    <!-- Service Area (BLACK) -->
     <section class="section section--dark" id="service-area">
       <div class="container">
         <div class="section__head">
@@ -376,7 +338,7 @@
       </div>
     </section>
 
-    <!-- Reviews (BLACK) – FULL restored -->
+    <!-- Reviews (BLACK) -->
     <section class="section section--dark" id="reviews">
       <div class="container">
         <div class="section__head">
