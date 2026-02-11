@@ -167,7 +167,7 @@ body{
 .hero__bg{
   position:absolute;
   inset:0;
-  background: url("./4abc79bd-b397-44f1-b79e-c8049917c05d.png") center/cover no-repeat;
+  background: url("./b1d23148-c3e1-4497-bab9-7c6aa4b9c5cf.png") center/cover no-repeat;
   filter: saturate(1.05) contrast(1.05);
   transform: scale(1.04);
 }
