@@ -312,7 +312,7 @@ function initCarousel(root) {
 document.querySelectorAll("[data-carousel]").forEach(initCarousel);
 
 // --------------------
-// Reviews rail arrows
+// Reviews rail arrows (move by 1 card)
 // --------------------
 (function initReviewsRail() {
   const wrap = document.querySelector("[data-rail]");
@@ -323,13 +323,24 @@ document.querySelectorAll("[data-carousel]").forEach(initCarousel);
   const next = wrap.querySelector("[data-rail-next]");
   if (!track) return;
 
-  const scrollByAmount = () => Math.max(280, Math.round(track.clientWidth * 0.92));
+  const getStep = () => {
+    const first = track.querySelector(".rCard");
+    if (!first) return Math.max(280, Math.round(track.clientWidth * 0.92));
+    const cardW = first.getBoundingClientRect().width;
+
+    // get gap from computed styles
+    const styles = window.getComputedStyle(track);
+    const gap = parseFloat(styles.columnGap || styles.gap || "0") || 0;
+
+    return Math.round(cardW + gap); // ✅ one card at a time
+  };
 
   prev?.addEventListener("click", () => {
-    track.scrollBy({ left: -scrollByAmount(), behavior: "smooth" });
+    track.scrollBy({ left: -getStep(), behavior: "smooth" });
   });
 
   next?.addEventListener("click", () => {
-    track.scrollBy({ left: scrollByAmount(), behavior: "smooth" });
+    track.scrollBy({ left: getStep(), behavior: "smooth" });
   });
 })();
+
