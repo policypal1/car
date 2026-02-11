@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Keizer Mobile Detailing</title>
-    <meta
-      name="description"
-      content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking."
-    />
+    <meta name="description" content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking." />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -182,6 +180,7 @@
           <p class="section__sub section__sub--dark">Swipe through work, then drag the slider to reveal the after.</p>
         </div>
 
+        <!-- ✅ ONE carousel. No duplicates. No vertical grid. -->
         <div class="carousel carousel--outsideNav" data-carousel="work">
           <div class="carousel__frame">
             <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous">‹</button>
@@ -190,107 +189,66 @@
               <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
 
               <div class="carousel__track" data-carousel-track>
-                <!-- Slide 1 -->
+                <!-- 1 -->
                 <div class="carousel__slide">
-                  <div
-                    class="compare compare--fill"
-                    data-compare
+                  <div class="compare compare--fill" data-compare
                     style="--before:url('./3a1e17c7-bcc9-49db-9c9d-ae7b6e1f8ab8.png'); --after:url('./6107e54c-faba-40e2-924c-8e72db768435 (1).png');"
-                    aria-label="Before and after interior detail comparison"
-                  >
+                    aria-label="Before and after interior detail comparison">
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <!-- Slide 2 -->
+                <!-- 2 -->
                 <div class="carousel__slide">
-                  <div
-                    class="compare compare--fill"
-                    data-compare
+                  <div class="compare compare--fill" data-compare
                     style="--before:url('./ec6423a4-3e1a-4e7e-a85d-c3b721f450a4.png'); --after:url('./adc47ac6-1e75-4feb-aa00-21671835062d.png');"
-                    aria-label="Before and after seat detail comparison"
-                  >
+                    aria-label="Before and after seat detail comparison">
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <!-- ✅ Slide 3 DELETED (placeholder removed) -->
-
-                <!-- Slide 4 (zoomed to remove white) -->
+                <!-- 3 (Tires/Rims) – zoomed to kill white gutters -->
                 <div class="carousel__slide">
-                  <div
-                    class="compare compare--fill"
-                    data-compare
-                    style="
-                      --before:url('./Tires.webp');
-                      --after:url('./Rims.webp');
-                      --beforeSize: 140%;
-                      --afterSize: 140%;
-                      --beforePos: center;
-                      --afterPos: center;
-                    "
-                    aria-label="Before and after tires to rims"
-                  >
+                  <div class="compare compare--fill" data-compare
+                    style="--before:url('./Tires.webp'); --after:url('./Rims.webp'); --beforeSize:145%; --afterSize:145%;"
+                    aria-label="Before and after tires to rims">
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <!-- Slide 5 (zoomed to remove white) -->
+                <!-- 4 (Floor/Carpets) -->
                 <div class="carousel__slide">
-                  <div
-                    class="compare compare--fill"
-                    data-compare
-                    style="
-                      --before:url('./floor.webp');
-                      --after:url('./Carpets.webp');
-                      --beforeSize: 140%;
-                      --afterSize: 140%;
-                      --beforePos: center;
-                      --afterPos: center;
-                    "
-                    aria-label="Before and after floor to carpets"
-                  >
+                  <div class="compare compare--fill" data-compare
+                    style="--before:url('./floor.webp'); --after:url('./Carpets.webp'); --beforeSize:145%; --afterSize:145%;"
+                    aria-label="Before and after floor to carpets">
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <!-- Slide 6 (unchanged) -->
+                <!-- 5 (Crayons/Surface) -->
                 <div class="carousel__slide">
-                  <div
-                    class="compare compare--fill"
-                    data-compare
-                    style="--before:url('./Crayons.jpg'); --after:url('./surface.jpg');"
-                    aria-label="Before and after crayons to clean surface"
-                  >
+                  <div class="compare compare--fill" data-compare
+                    style="--before:url('./Crayons.jpg'); --after:url('./surface.jpg'); --beforeSize:120%; --afterSize:120%;"
+                    aria-label="Before and after crayons to clean surface">
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <!-- Slide 7 (zoomed to remove white) -->
+                <!-- 6 (Headlights/Car) -->
                 <div class="carousel__slide">
-                  <div
-                    class="compare compare--fill"
-                    data-compare
-                    style="
-                      --before:url('./Headlights.webp');
-                      --after:url('./Car.webp');
-                      --beforeSize: 140%;
-                      --afterSize: 140%;
-                      --beforePos: center;
-                      --afterPos: center;
-                    "
-                    aria-label="Before and after headlights to clean car"
-                  >
+                  <div class="compare compare--fill" data-compare
+                    style="--before:url('./Headlights.webp'); --after:url('./Car.webp'); --beforeSize:145%; --afterSize:145%;"
+                    aria-label="Before and after headlights to clean car">
                     <div class="compare__stage" aria-hidden="true"></div>
                     <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                     <div class="compare__handle" aria-hidden="true"></div>
@@ -349,7 +307,7 @@
       </div>
     </section>
 
-    <!-- Service Area (BLACK) -->
+    <!-- Service Area (BLACK) – back to side-by-side layout -->
     <section class="section section--dark" id="service-area">
       <div class="container">
         <div class="section__head">
@@ -358,7 +316,11 @@
         </div>
 
         <div class="areaGrid">
-          <div class="areaCard areaCard--info">
+          <div class="areaMap">
+            <img src="./7ba7fa53-6f99-442c-b6f0-97a1086a63ea.png" alt="Service area map" loading="lazy" />
+          </div>
+
+          <div class="areaCard">
             <h3 class="areaTitle">Where we come to you</h3>
             <p class="areaText">
               We’re mobile — we detail at your home or location. If you’re near Keizer/Salem, there’s a strong chance you’re in range.
@@ -379,10 +341,6 @@
               <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
-          </div>
-
-          <div class="areaMap areaMap--media">
-            <img src="./7ba7fa53-6f99-442c-b6f0-97a1086a63ea.png" alt="Service area map" loading="lazy" />
           </div>
         </div>
       </div>
@@ -418,7 +376,7 @@
       </div>
     </section>
 
-    <!-- Reviews (BLACK) -->
+    <!-- Reviews (BLACK) – FULL restored -->
     <section class="section section--dark" id="reviews">
       <div class="container">
         <div class="section__head">
@@ -443,9 +401,26 @@
           <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">‹</button>
 
           <div class="reviewsRail reviewsRail--dark" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
-            <!-- reviews unchanged from your file -->
-            <!-- keep your existing review cards here exactly as-is -->
-            <!-- (paste your full list) -->
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">JR</div><div class="rMeta"><div class="rName rName--dark">J. Rivera</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Dog hair was packed into the back seats. They got it out and the car smells clean again. Cupholders and door jambs were spotless.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">AM</div><div class="rMeta"><div class="rName rName--dark">A. Monroe</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Booked through text and got a real price fast. The carpets looked completely different and the dash looked clean without that greasy shine.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">KS</div><div class="rMeta"><div class="rName rName--dark">K. Scott</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">I thought the stain in the passenger seat was permanent. It’s gone. The car feels newer inside and everything smells fresh.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">TL</div><div class="rMeta"><div class="rName rName--dark">T. Lane</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Exterior detail was worth it. Wheels looked brand new and the paint had a deep gloss. They got bugs off the front end I couldn’t remove.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">MC</div><div class="rMeta"><div class="rName rName--dark">M. Chen</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Quick quote, on time, and the interior looks brand new. Vents and seams were actually detailed — not skipped.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">SB</div><div class="rMeta"><div class="rName rName--dark">S. Brown</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">My kids trashed the back seat. They removed stains I didn’t think would come out and it finally smells clean again.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">DW</div><div class="rMeta"><div class="rName rName--dark">D. White</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Super easy booking. The paint looks deeper and the windows are crystal clear. Great attention to detail.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">LP</div><div class="rMeta"><div class="rName rName--dark">L. Patel</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">The “new car” feeling is real. Dash isn’t greasy, carpets refreshed, and every little spot I pointed out got handled.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">HB</div><div class="rMeta"><div class="rName rName--dark">H. Bennett</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">They got sand out of the carpet that’s been there for months. Clean lines, clean smell, and no rushed work.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">RJ</div><div class="rMeta"><div class="rName rName--dark">R. Johnson</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">The wheels and tires looked insane after. You can tell they don’t cut corners.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">AC</div><div class="rMeta"><div class="rName rName--dark">A. Carter</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Fast quote and honest expectations. Results were better than I hoped — seats and console look brand new.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">NG</div><div class="rMeta"><div class="rName rName--dark">N. Green</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Pet hair was a disaster. They got it out of the fabric and the smell is gone.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">PC</div><div class="rMeta"><div class="rName rName--dark">P. Cooper</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Interior tier 2 was perfect for my daily driver. Looks clean without being “over shiny.”</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">MS</div><div class="rMeta"><div class="rName rName--dark">M. Sanders</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Booked in minutes. Communication was clear and they showed up ready. Great service.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">KT</div><div class="rMeta"><div class="rName rName--dark">K. Turner</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">The doors, trims, and little corners were all done. That’s what impressed me the most.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">ED</div><div class="rMeta"><div class="rName rName--dark">E. Diaz</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Exterior wash level 2 made my car look new again. Wheels were perfect.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">JL</div><div class="rMeta"><div class="rName rName--dark">J. Lee</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">They removed a sticky mess in the cupholders and the seats look totally refreshed.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">BM</div><div class="rMeta"><div class="rName rName--dark">B. Moore</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Clear pricing and no surprises. The finish looks clean, not overdone.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">WS</div><div class="rMeta"><div class="rName rName--dark">W. Stone</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">Headlights look so much clearer after. Great work all around.</p></article>
+            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">CF</div><div class="rMeta"><div class="rName rName--dark">C. Flores</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars">★★★★★</div></div><p class="rText rText--dark">My interior was embarrassing. Now it looks like I just bought the car.</p></article>
           </div>
 
           <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">›</button>
@@ -458,9 +433,7 @@
       <div class="container footerMini footerMini--light">
         <div class="footerMini__left">
           <div class="footerMini__name footerMini__name--light">Keizer Mobile Detailing</div>
-          <!-- ✅ removed “Mobile Auto Detailing” -->
         </div>
-
         <div class="footerMini__right">
           <div class="footerMini__actions">
             <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
@@ -477,7 +450,7 @@
       </div>
     </footer>
 
-    <!-- Modals (unchanged) -->
+    <!-- Service details modal -->
     <div class="modal" aria-hidden="true" data-modal>
       <div class="modal__overlay" data-modal-close></div>
       <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
@@ -491,6 +464,7 @@
       </div>
     </div>
 
+    <!-- Call/Text modal -->
     <div class="modal modal--call" aria-hidden="true" data-call-modal>
       <div class="modal__overlay" data-call-close></div>
       <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
@@ -502,6 +476,7 @@
       </div>
     </div>
 
+    <!-- Quote Wizard -->
     <div class="modal modal--quote" aria-hidden="true" data-quote-modal>
       <div class="modal__overlay" data-quote-close></div>
       <div class="quotePanel" role="dialog" aria-modal="true" aria-label="Get a quote">
@@ -509,8 +484,13 @@
         <div class="quoteTop">
           <h3 class="quoteTitle">GET A QUOTE</h3>
           <div class="quoteProgress" aria-hidden="true">
-            <span class="qpDot isOn"></span><span class="qpDot"></span><span class="qpDot"></span>
-            <span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
+            <span class="qpDot isOn"></span>
+            <span class="qpDot"></span>
+            <span class="qpDot"></span>
+            <span class="qpDot"></span>
+            <span class="qpDot"></span>
+            <span class="qpDot"></span>
+            <span class="qpDot"></span>
           </div>
         </div>
         <div class="quoteBody" data-quote-body></div>
