@@ -486,28 +486,63 @@ body{
 
   .steps{ grid-template-columns: repeat(2, 1fr); gap: 16px; }
 
-  /* service area: image LEFT on desktop */
-  .areaGrid{
-    grid-template-columns: .95fr 1.05fr;
-    gap: 18px;
-    grid-template-areas: "map card";
-    align-items: stretch;
-  }
-  .areaMap img{ height: 340px; } /* ✅ not bigger, slightly trimmed */
-
-  /* tiers: real breathing room */
-  .tiers{ grid-template-columns: repeat(3, 1fr); gap: 16px; }
-
-  /* reviews: bigger cards and smoother feel */
-  .reviewsRail--dark{ grid-auto-columns: 48%; }
-  .reviewsRailWrap{ padding: 2px 54px; }
-  .railArrow--left{ left: 10px; }
-  .railArrow--right{ right: 10px; }
-
-  .footerMini--light{ flex-direction:row; align-items:center; justify-content:space-between; gap: 14px; }
-  .footerMini__right{ align-items:flex-end; display:flex; flex-direction:column; gap: 10px; }
+ /* ----------------------------
+   COMPARE: allow per-slide zoom
+---------------------------- */
+.compare__stage{
+  background-size: var(--beforeSize, cover);
+  background-position: var(--beforePos, center);
+}
+.compare__stage::after{
+  background-size: var(--afterSize, cover);
+  background-position: var(--afterPos, center);
 }
 
-@media (min-width: 1024px){
-  .reviewsRail--dark{ grid-auto-columns: 38%; }
+/* carousel stays locked frame */
+.carousel__viewport{ aspect-ratio: 16 / 9; }
+
+/* ----------------------------
+   SERVICE AREA: map same height as card
+---------------------------- */
+@media (min-width: 768px){
+  .areaGrid{ align-items: stretch; }
+  .areaCard{ height: 100%; }
+  .areaMap--media{
+    height: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  }
+  .areaMap--media img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}
+
+/* ----------------------------
+   REVIEWS: 3 visible + scroll by 1 card feel
+   add more edge padding so it isn't packed
+---------------------------- */
+.reviewsRailWrap--roomy{
+  margin-top: 14px;
+  padding: 0 56px; /* ✅ more breathing room */
+}
+
+.reviewsRail--dark{
+  --rail-gap: 14px;
+  gap: var(--rail-gap);
+  padding: 18px 18px; /* ✅ more inside padding */
+}
+
+@media (min-width: 768px){
+  .reviewsRail--dark{
+    grid-auto-columns: calc((100% - (2 * var(--rail-gap))) / 3); /* ✅ always 3 on desktop */
+  }
+  .railArrow--left{ left: 14px; }
+  .railArrow--right{ right: 14px; }
 }
