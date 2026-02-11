@@ -100,14 +100,7 @@ body{
 .btn--lg{ padding: 1rem 1.25rem; }
 
 /* Hero */
-.hero{
-  position:relative;
-  min-height: 72vh;
-  display:flex;
-  align-items:center;
-  overflow:hidden;
-  background: #000;
-}
+.hero{ position:relative; min-height: 72vh; display:flex; align-items:center; overflow:hidden; background: #000; }
 .hero__bg{
   position:absolute;
   inset:0;
@@ -115,12 +108,7 @@ body{
   filter: saturate(1.05) contrast(1.05);
   transform: scale(1.04);
 }
-.hero__bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: radial-gradient(900px 520px at 50% 20%, rgba(0,0,0,.15), rgba(0,0,0,.72));
-}
+.hero__bg::after{ content:""; position:absolute; inset:0; background: radial-gradient(900px 520px at 50% 20%, rgba(0,0,0,.15), rgba(0,0,0,.72)); }
 .hero__inner{ position:relative; padding: 3.25rem 0 2.5rem; display:flex; justify-content:center; }
 .hero__panel{
   width: min(860px, 100%);
@@ -163,7 +151,7 @@ body{
 .section__title--dark{ color: #fff; }
 .section__sub--dark{ color: rgba(255,255,255,.74); }
 
-/* Services */
+/* Services cards */
 .serviceWrap{ display:flex; flex-wrap:wrap; justify-content:center; gap: 18px; margin-top: 22px; }
 .serviceCard{
   position:relative;
@@ -178,11 +166,7 @@ body{
   transform: translateY(0);
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.serviceCard:hover{
-  transform: translateY(-4px);
-  box-shadow: 0 34px 95px rgba(0,0,0,.20);
-  border-color: rgba(214,178,94,.28);
-}
+.serviceCard:hover{ transform: translateY(-4px); box-shadow: 0 34px 95px rgba(0,0,0,.20); border-color: rgba(214,178,94,.28); }
 .serviceCard__overlay{ position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.88)); }
 .serviceCard__shine{ position:absolute; inset:-40%; background: radial-gradient(circle at 30% 30%, rgba(214,178,94,.22), rgba(255,255,255,0) 55%); opacity: .65; transform: rotate(12deg); pointer-events:none; }
 .serviceCard__content{ position:relative; height: 100%; padding: 18px; color:#fff; display:grid; grid-template-rows: 1fr auto; gap: 14px; }
@@ -194,16 +178,20 @@ body{
 .tag--ghost{ visibility:hidden; }
 .serviceCard__actions{ display:flex; gap: 10px; flex-wrap: wrap; align-self: end; }
 
-/* Work carousel */
+/* Work carousel (LOCKED frame) */
 .carousel{ margin: 18px auto 0; width: min(980px, 100%); }
 .carousel__frame{ display:grid; grid-template-columns: auto 1fr auto; align-items:center; gap: 12px; }
-.carousel__viewport{ overflow:hidden; border-radius: 22px; position: relative; background: rgba(255,255,255,.02); }
-.carousel__track{ display:flex; transition: transform .28s ease; }
-.carousel__slide{ flex: 0 0 100%; }
+.carousel__viewport{
+  overflow:hidden;
+  border-radius: 22px;
+  position: relative;
+  background: rgba(255,255,255,.02);
+  aspect-ratio: 16 / 9; /* ✅ locks every slide to the same frame */
+}
+.carousel__track{ display:flex; height: 100%; transition: transform .28s ease; }
+.carousel__slide{ flex: 0 0 100%; height: 100%; }
 .carouselArrow{
-  width: 46px;
-  height: 46px;
-  border-radius: 999px;
+  width: 46px; height: 46px; border-radius: 999px;
   border: 1px solid rgba(214,178,94,.40);
   background: rgba(0,0,0,.45);
   color: rgba(255,255,255,.95);
@@ -223,7 +211,7 @@ body{
 .dot{ width: 8px; height: 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.18); }
 .dot.isActive{ width: 22px; background: rgba(214,178,94,.75); border-color: rgba(214,178,94,.85); }
 
-/* Before/After */
+/* Compare (default) */
 .compare{
   --pos: 12%;
   --ratio: 16 / 9;
@@ -256,18 +244,27 @@ body{
 .compare__handle{ position:absolute; top:0; left: var(--pos); transform: translateX(-50%); height: 100%; width: 44px; pointer-events:none; }
 .compare__handle::before{
   content:"";
-  position:absolute;
-  top: 50%;
-  left: 50%;
+  position:absolute; top: 50%; left: 50%;
   transform: translate(-50%,-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
+  width: 44px; height: 44px; border-radius: 999px;
   background: rgba(0,0,0,.60);
   border: 1px solid rgba(214,178,94,.60);
   box-shadow: 0 18px 44px rgba(0,0,0,.35);
 }
 .compare__handle::after{ content:"↔"; position:absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-weight: 900; color: rgba(255,255,255,.92); }
+
+/* ✅ Compare inside carousel fills locked viewport */
+.compare--fill{ height: 100%; border-radius: 22px; }
+.compare--fill .compare__stage{
+  position:absolute;
+  inset:0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+}
+.compare--fill .compare__stage{ background-position: center; }
+.compare--fill .compare__stage::after{ height: 100%; }
+.compare--fill .compare__range{ cursor: ew-resize; }
 
 /* How it works */
 .steps{ display:grid; grid-template-columns: 1fr; gap: 14px; margin-top: 22px; }
@@ -287,7 +284,7 @@ body{
 .stepText{ margin: 10px 0 0; color: var(--muted); line-height: 1.7; position: relative; }
 .stepCard--finish{ border-color: rgba(214,178,94,.32); }
 
-/* Service area */
+/* Service area (equal height + less dead space) */
 .areaGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -302,39 +299,30 @@ body{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
   background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.14), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
-  padding: 16px;
+  padding: 16px 16px 14px; /* ✅ trims bottom */
   box-shadow: 0 22px 60px rgba(0,0,0,.35);
   grid-area: card;
+  display:flex;
+  flex-direction:column;
 }
-.areaMap{ grid-area: map; }
 .areaTitle{ margin: 0 0 8px; font-family: Oswald, Inter, sans-serif; letter-spacing: .7px; text-transform: uppercase; }
 .areaText{ margin: 0 0 12px; color: rgba(255,255,255,.74); line-height: 1.7; }
 
 .areaList{
-  margin: 14px 0 12px;
+  margin: 12px 0 12px;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.25);
   padding: 12px;
 }
-.areaList__title{
-  font-weight: 900;
-  letter-spacing: .2px;
-  margin-bottom: 8px;
-  color: rgba(255,255,255,.92);
-}
-.areaList__ul{
-  margin: 0;
-  padding: 0 0 0 18px;
-  color: rgba(255,255,255,.74);
-  line-height: 1.8;
-  font-weight: 650;
-}
-.areaActions{ display:flex; gap: 10px; flex-wrap:wrap; }
+.areaList__title{ font-weight: 900; margin-bottom: 8px; color: rgba(255,255,255,.92); }
+.areaList__ul{ margin: 0; padding: 0 0 0 18px; color: rgba(255,255,255,.74); line-height: 1.85; font-weight: 650; }
 
+.areaActions{ display:flex; gap: 10px; flex-wrap:wrap; margin-top: auto; } /* ✅ keeps buttons aligned, reduces ugly empty feel */
+.areaMap{ grid-area: map; }
 .areaMap img{
   width:100%;
-  height: 320px;
+  height: 300px; /* ✅ slightly reduced so card doesn’t have huge dead space */
   object-fit: cover;
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
@@ -348,36 +336,37 @@ body{
 .aboutMedia img{ width:100%; height: 320px; object-fit: cover; border-radius: 22px; border: 1px solid rgba(0,0,0,.08); box-shadow: 0 26px 70px rgba(0,0,0,.16); }
 .aboutActions{ margin-top: 14px; display:flex; gap:10px; flex-wrap:wrap; }
 
-/* Reviews */
-.reviewsShowcase{ margin-top: 18px; }
-.reviewsBanner--dark{
+/* Reviews top (single vibe, not 2 columns) */
+.reviewsTopSimple{
+  margin: 18px auto 10px;
+  width: min(980px, 100%);
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
   background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.16), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
   padding: 16px;
   box-shadow: 0 18px 44px rgba(0,0,0,.35);
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+  align-items:center;
+  text-align:center;
 }
-.reviewsBanner__top{ display:flex; flex-direction:column; gap: 12px; }
-.reviewsScore{ display:flex; gap: 14px; align-items:center; }
-.reviewsScore__big{ font-family: Oswald, Inter, sans-serif; font-weight: 800; font-size: 3rem; line-height: 1; color: #fff; }
-.starsRow{ color: var(--gold); letter-spacing: 2px; font-size: 1.15rem; }
-.reviewsScore__small--dark{ color: rgba(255,255,255,.72); margin-top: 4px; }
-.reviewsBanner__cta{ display:flex; gap: 10px; flex-wrap:wrap; }
-.reviewsBanner__line--dark{ margin: 12px 0 0; color: rgba(255,255,255,.72); line-height: 1.7; }
+.reviewsTopSimple__big{ font-family: Oswald, Inter, sans-serif; font-weight: 800; font-size: 3rem; line-height: 1; color: #fff; }
+.reviewsTopSimple__stars{ color: var(--gold); letter-spacing: 2px; font-size: 1.15rem; display:block; margin-top: 6px; }
+.reviewsTopSimple__small{ color: rgba(255,255,255,.72); display:block; margin-top: 6px; }
+.reviewsTopSimple__cta{ display:flex; gap: 10px; flex-wrap:wrap; justify-content:center; }
 
-.reviewsRailWrap{
-  position: relative;
-  margin-top: 14px;
-  padding: 2px 0;
-}
+.reviewsRailWrap{ position: relative; margin-top: 10px; padding: 2px 0; }
+.reviewsRailWrap--tight{ margin-top: 12px; }
+
 .reviewsRail--dark{
   display:grid;
   grid-auto-flow: column;
-  grid-auto-columns: 88%;
-  gap: 12px;
+  grid-auto-columns: 92%; /* ✅ bigger cards */
+  gap: 14px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 10px 10px;
+  padding: 14px 12px;
   border-radius: 22px;
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.10);
@@ -387,22 +376,21 @@ body{
 }
 .reviewsRail--dark::-webkit-scrollbar{ display:none; }
 
-.rCard{ scroll-snap-align: start; border-radius: 20px; padding: 14px; }
+.rCard{ scroll-snap-align: start; border-radius: 20px; padding: 16px; }
 .rCard--dark{
-  border: 1px solid rgba(255,255,255,.10);
-  background: radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.12), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  background: radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.12), rgba(255,255,255,0) 60%), rgba(255,255,255,.045);
   box-shadow: 0 18px 44px rgba(0,0,0,.35);
 }
-.rCard--rail{ min-height: 180px; }
+.rCard--rail{ min-height: 200px; } /* ✅ slightly larger */
 .rHead{ display:flex; align-items:center; gap: 12px; }
-.rAvatar{ width: 44px; height: 44px; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-weight: 900; border: 1px solid rgba(214,178,94,.35); background: rgba(214,178,94,.14); color: rgba(255,255,255,.92); }
+.rAvatar{ width: 46px; height: 46px; border-radius: 999px; display:flex; align-items:center; justify-content:center; font-weight: 900; border: 1px solid rgba(214,178,94,.35); background: rgba(214,178,94,.14); color: rgba(255,255,255,.92); }
 .rMeta{ flex: 1; }
-.rName--dark{ font-weight: 900; color: rgba(255,255,255,.92); }
-.rLoc--dark{ font-size: .92rem; margin-top: 2px; color: rgba(255,255,255,.68); }
+.rName--dark{ font-weight: 900; color: rgba(255,255,255,.92); font-size: 1.05rem; }
+.rLoc--dark{ font-size: .95rem; margin-top: 2px; color: rgba(255,255,255,.68); }
 .rStars{ color: var(--gold); letter-spacing: 1px; font-size: 1rem; }
-.rText--dark{ margin: 10px 0 0; line-height: 1.7; color: rgba(255,255,255,.74); }
+.rText--dark{ margin: 12px 0 0; line-height: 1.8; color: rgba(255,255,255,.74); font-size: 1.03rem; }
 
-/* Review arrows (moved to the SIDE on desktop) */
 .railArrow{
   position:absolute;
   top: 50%;
@@ -428,28 +416,40 @@ body{
 .modal__overlay{ position:absolute; inset:0; background: rgba(0,0,0,.60); }
 @keyframes fadeIn{ from{ opacity: 0; transform: translateY(10px); } to{ opacity: 1; transform: translateY(0); } }
 .modal__panel, .callPanel, .quotePanel{ animation: fadeIn .18s ease both; }
-.modal__close{ position:absolute; top: 10px; right: 10px; width: 38px; height: 38px; border-radius: 12px; border: 1px solid rgba(0,0,0,.12); background:#fff; cursor:pointer; font-size: 1.2rem; }
+.modal__close{ position:absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(0,0,0,.12); background:#fff; cursor:pointer; font-size: 1.2rem; }
 
-/* Service modal */
+/* ✅ Service modal overhaul (bigger + better tiers) */
 .modal__panel{
   position:relative;
-  width: min(680px, 100%);
+  width: min(920px, 100%);
   background:#fff;
   border-radius: 18px;
   box-shadow: var(--shadow);
-  padding: 18px;
+  padding: 20px;
   max-height: calc(100vh - 3rem);
   overflow:auto;
 }
-.modal__title{ margin: 0 0 10px; font-family: Oswald, Inter, sans-serif; letter-spacing:.7px; text-transform: uppercase; color: var(--black); }
-.modal__content{ color: var(--muted); line-height: 1.7; }
-.modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-.tiers{ display:grid; grid-template-columns: 1fr; gap: 10px; margin-top: 12px; }
-.tier{ border-radius: 16px; border: 1px solid rgba(0,0,0,.10); background: radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.12), rgba(255,255,255,0) 60%), #fff; padding: 12px; box-shadow: 0 16px 38px rgba(0,0,0,.08); }
-.tier__top{ display:flex; justify-content:space-between; gap: 10px; align-items:flex-start; }
-.tier__name{ font-weight: 900; color: #111; }
-.tier__tag{ font-weight: 900; font-size: .85rem; padding: .25rem .55rem; border-radius: 999px; border: 1px solid rgba(214,178,94,.40); background: rgba(214,178,94,.12); color: #111; white-space: nowrap; }
-.tier ul{ margin: 10px 0 0 18px; padding: 0; }
+.modal__title{ margin: 0 0 10px; font-family: Oswald, Inter, sans-serif; letter-spacing:.7px; text-transform: uppercase; color: var(--black); font-size: 1.6rem; }
+.modal__content{ color: var(--muted); line-height: 1.75; font-size: 1.02rem; }
+.modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+.tiers{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.tier{
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,.10);
+  background: radial-gradient(800px 260px at 20% 10%, rgba(214,178,94,.14), rgba(255,255,255,0) 60%), #fff;
+  padding: 16px;
+  box-shadow: 0 16px 38px rgba(0,0,0,.08);
+}
+.tier__top{ display:flex; justify-content:space-between; gap: 12px; align-items:flex-start; }
+.tier__name{ font-weight: 950; color: #111; font-size: 1.05rem; }
+.tier__tag{ font-weight: 900; font-size: .9rem; padding: .3rem .6rem; border-radius: 999px; border: 1px solid rgba(214,178,94,.40); background: rgba(214,178,94,.14); color: #111; white-space: nowrap; }
+.tier ul{ margin: 12px 0 0 18px; padding: 0; line-height: 1.85; font-weight: 600; color: rgba(15,17,21,.78); }
 
 /* Call modal */
 .callPanel{ position:relative; width: min(560px, 100%); background: #fff; border-radius: 16px; box-shadow: var(--shadow); padding: 18px; max-height: calc(100vh - 3rem); overflow:auto; }
@@ -459,15 +459,10 @@ body{
 .callHint{ margin: 10px 0 0; color: rgba(0,0,0,.60); line-height: 1.6; }
 
 /* Footer (WHITE) */
-.footer--light{
-  background: #fff;
-  color: #111;
-  border-top: 1px solid rgba(0,0,0,.10);
-}
+.footer--light{ background: #fff; color: #111; border-top: 1px solid rgba(0,0,0,.10); }
 .footerMini--light{ padding: 1.05rem 0; display:flex; flex-direction:column; gap: 10px; }
 .footerMini__name--light{ color: #111; }
 .footerMini__meta--light{ color: rgba(0,0,0,.60); margin-top: 2px; }
-.footerMini__phone--light{ color: #111; text-decoration:none; font-weight: 900; }
 .footer__bottom--light{ border-top: 1px solid rgba(0,0,0,.10); }
 .footer__bottomInner--light{
   padding: 10px 0;
@@ -491,25 +486,28 @@ body{
 
   .steps{ grid-template-columns: repeat(2, 1fr); gap: 16px; }
 
-  /* service area: IMAGE LEFT on desktop */
+  /* service area: image LEFT on desktop */
   .areaGrid{
     grid-template-columns: .95fr 1.05fr;
     gap: 18px;
     grid-template-areas: "map card";
     align-items: stretch;
   }
-  .areaMap img{ height: 380px; }
+  .areaMap img{ height: 340px; } /* ✅ not bigger, slightly trimmed */
 
-  .tiers{ grid-template-columns: repeat(3, 1fr); }
+  /* tiers: real breathing room */
+  .tiers{ grid-template-columns: repeat(3, 1fr); gap: 16px; }
 
-  .reviewsBanner__top{ flex-direction:row; align-items:center; justify-content:space-between; }
+  /* reviews: bigger cards and smoother feel */
   .reviewsRail--dark{ grid-auto-columns: 48%; }
-
-  /* review arrows moved OUTSIDE on desktop */
   .reviewsRailWrap{ padding: 2px 54px; }
   .railArrow--left{ left: 10px; }
   .railArrow--right{ right: 10px; }
 
   .footerMini--light{ flex-direction:row; align-items:center; justify-content:space-between; gap: 14px; }
   .footerMini__right{ align-items:flex-end; display:flex; flex-direction:column; gap: 10px; }
+}
+
+@media (min-width: 1024px){
+  .reviewsRail--dark{ grid-auto-columns: 38%; }
 }
