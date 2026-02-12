@@ -163,7 +163,7 @@ body{
 .hero__bg{
   position:absolute;
   inset:0;
-  background: url("./4abc79bd-b397-44f1-b79e-c8049917c05d.png") center/cover no-repeat;
+  background: url("./b1d23148-c3e1-4497-bab9-7c6aa4b9c5cf.png") center/cover no-repeat;
   filter: saturate(1.05) contrast(1.05);
   transform: scale(1.04);
 }
@@ -342,11 +342,17 @@ body{
   white-space: nowrap;
 }
 .tag--ghost{ visibility:hidden; }
+
+/* ✅ UPDATED: Learn More + Get Quote spacing (less cramped) */
 .serviceCard__actions{
-  display:flex;
-  gap: 10px;
-  flex-wrap: wrap;
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
   align-self: end;
+}
+.serviceCard__actions .btn{
+  width: 100%;
+  justify-content:center;
 }
 
 /* Work carousel */
@@ -665,7 +671,7 @@ body{
 .reviewsTopSimple__small{ color: rgba(255,255,255,.72); }
 .reviewsTopSimple__cta{ display:flex; gap: 10px; flex-wrap:wrap; }
 
-/* ✅ NEW: Centered rating header (no card/column look) */
+/* ✅ Centered rating header (bigger) */
 .reviewsTopSimple--center{
   background: none;
   border: 0;
@@ -687,13 +693,13 @@ body{
   text-align: center;
 }
 .reviewsTopSimple--center .reviewsTopSimple__big{
-  font-size: 1.35rem;
+  font-size: 1.85rem;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   font-weight: 900;
 }
 .reviewsTopSimple--center .reviewsTopSimple__stars{
   color: var(--gold) !important;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   letter-spacing: 2px;
 }
 .reviewsTopSimple--center .reviewsTopSimple__small{
@@ -1009,6 +1015,12 @@ body{
   .reviewsRailWrap{ padding: 0 64px; }
   .railArrow--left{ left: 0; }
   .railArrow--right{ right: 0; }
+
+  /* ✅ UPDATED: actions become 2 columns on desktop */
+  .serviceCard__actions{
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
 }
 
 /* Larger desktop */
