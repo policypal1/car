@@ -1,16 +1,11 @@
 // -------------------------
-// QUOTE WIZARD (Flow v3)
+// QUOTE WIZARD (Flow v4)
 // -------------------------
-// Car Type -> Service Category -> Service -> Condition(s) -> Heard About -> Estimate -> Calendar -> Contact -> Done
+// Vehicle -> Category -> Service (auto-select if 1) -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
-// Required globals (set in script.js or before this file loads):
-//   window.SCRIPT_URL = "https://script.google.com/macros/s/XXXXX/exec";
-//   window.BUSINESS_PHONE = "+19712865503";
-//
-// Apps Script endpoints expected:
-//   GET  SCRIPT_URL?action=slots  -> { ok:true, slots:[{id,label}] }
-//   POST SCRIPT_URL?action=reserve -> { ok:true } or { ok:false, message:"..." }
-// -------------------------
+// Apps Script URL (provided)
+const DEFAULT_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbzqReZg1ewa_mjsKi7eymwfAtFJYxe2gPGtJiQaoCwJts0_tRis6QAxEc89hyWZvpFO6Q/exec";
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -22,12 +17,12 @@ const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 let lastActiveElQuote = null;
 
 const quoteState = {
-  vehicleType: "",        // Small | Medium | Large | Truck
-  serviceCategory: "",    // Interior | Exterior | Interior + Exterior
-  service: "",            // Specific service/package (from your services section)
+  vehicleType: "",
+  serviceCategory: "",
+  service: "",
 
-  interiorCondition: "",  // Light | Normal | Heavy
-  exteriorCondition: "",  // Light | Normal | Heavy
+  interiorCondition: "",
+  exteriorCondition: "",
 
   heardAbout: "",
 
@@ -46,7 +41,6 @@ const quoteState = {
   honeypot: ""
 };
 
-// max steps = 10 (condition steps can be skipped)
 const steps = [
   "vehicleType",
   "serviceCategory",
@@ -77,25 +71,15 @@ const serviceCategories = [
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
-// These are pulled from your Services section images (index.html background-image URLs)
+// From your Services section images (index.html)
 const servicesAll = [
-  // Interior
   { label: "Interior Detail", category: "Interior", img: "./51ae0d9f-5775-427e-b565-cb5e0984e800.png" },
-
-  // Exterior
   { label: "Exterior Wash", category: "Exterior", img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png" },
-
-  // Upkeep (assume Interior + Exterior)
   { label: "Upkeep Plan", category: "Interior + Exterior", img: "./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png" },
-
-  // Ceramic (Exterior-ish but keep under full menu; allow for Exterior or Both)
   { label: "Ceramic Coating", category: "Exterior", img: "./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png" },
-
-  // Paint correction (Exterior)
   { label: "Paint Correction", category: "Exterior", img: "./07752da8-f5f0-413a-890b-c6de41317df6 (1).png" }
 ];
 
-// Condition images (your new JPGs)
 const interiorConditions = [
   { label: "Light", hint: "Mostly clean • quick refresh", img: "./IMG_2915.jpg" },
   { label: "Normal", hint: "Daily driver • solid reset", img: "./IMG_2916.jpg" },
@@ -117,9 +101,8 @@ const heardAboutOptions = [
 ];
 
 // -------------------------
-// ESTIMATE RULES (EDIT THESE)
+// ESTIMATES (edit anytime)
 // -------------------------
-// Base interior/exterior estimates by vehicleType + condition
 const estimateTable = {
   Interior: {
     Small: { Light: [120, 160], Normal: [160, 220], Heavy: [220, 320] },
@@ -135,31 +118,20 @@ const estimateTable = {
   }
 };
 
-// If they pick “Ceramic Coating” or “Paint Correction”, override estimate with a starting range.
-// You can tune these numbers.
 const serviceOverrides = {
   "Ceramic Coating": {
-    Small: [450, 900],
-    Medium: [550, 1100],
-    Large: [650, 1400],
-    Truck: [650, 1400]
+    Small: [450, 900], Medium: [550, 1100], Large: [650, 1400], Truck: [650, 1400]
   },
   "Paint Correction": {
-    Small: [350, 800],
-    Medium: [450, 950],
-    Large: [550, 1200],
-    Truck: [550, 1200]
+    Small: [350, 800], Medium: [450, 950], Large: [550, 1200], Truck: [550, 1200]
   },
   "Upkeep Plan": {
-    Small: [90, 160],
-    Medium: [110, 190],
-    Large: [130, 220],
-    Truck: [130, 240]
+    Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240]
   }
 };
 
 // -------------------------
-// Helpers
+// FLOW HELPERS
 // -------------------------
 function includesInteriorByCategory() {
   return quoteState.serviceCategory === "Interior" || quoteState.serviceCategory === "Interior + Exterior";
@@ -169,20 +141,12 @@ function includesExteriorByCategory() {
 }
 
 function serviceRequiresInteriorCondition() {
-  // Ceramic/Correction shouldn't require interior
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return false;
-
-  // Otherwise depend on category
   return includesInteriorByCategory() || quoteState.service === "Interior Detail";
 }
-
 function serviceRequiresExteriorCondition() {
-  // Interior-only doesn't require exterior
   if (quoteState.service === "Interior Detail") return false;
-
-  // Ceramic/Correction are exterior-focused: still useful to ask exterior condition
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return true;
-
   return includesExteriorByCategory() || quoteState.service === "Exterior Wash" || quoteState.service === "Upkeep Plan";
 }
 
@@ -191,17 +155,12 @@ function stepIsActive(stepName) {
   if (stepName === "conditionExterior") return serviceRequiresExteriorCondition();
   return true;
 }
-
 function nextActiveStepIndex(fromIndex) {
-  for (let i = fromIndex + 1; i < steps.length; i++) {
-    if (stepIsActive(steps[i])) return i;
-  }
+  for (let i = fromIndex + 1; i < steps.length; i++) if (stepIsActive(steps[i])) return i;
   return steps.length - 1;
 }
 function prevActiveStepIndex(fromIndex) {
-  for (let i = fromIndex - 1; i >= 0; i--) {
-    if (stepIsActive(steps[i])) return i;
-  }
+  for (let i = fromIndex - 1; i >= 0; i--) if (stepIsActive(steps[i])) return i;
   return 0;
 }
 
@@ -222,7 +181,6 @@ function canContinue() {
   if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
 
   if (step === "heardAbout") return !!quoteState.heardAbout;
-
   if (step === "appointment") return !!quoteState.slotId;
 
   if (step === "contact") {
@@ -233,7 +191,6 @@ function canContinue() {
       quoteState.ackDeposit === true
     );
   }
-
   return true;
 }
 
@@ -254,10 +211,7 @@ function updateNav() {
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
 
-  // Button text changes
-  if (step === "contact") quoteNextBtn.textContent = "Finish";
-  else quoteNextBtn.textContent = "Continue";
-
+  quoteNextBtn.textContent = step === "contact" ? "Finish" : "Continue";
   quoteNextBtn.disabled = !canContinue();
 }
 
@@ -298,7 +252,6 @@ function textCard({ label, hint, isSelected = false, onClick }) {
   btn.type = "button";
   btn.className = "qCard qCard--text" + (isSelected ? " isSel" : "");
   btn.addEventListener("click", onClick);
-
   btn.innerHTML = `
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
@@ -307,36 +260,31 @@ function textCard({ label, hint, isSelected = false, onClick }) {
 }
 
 // -------------------------
-// Estimate logic
+// Estimate
 // -------------------------
 function computeEstimate() {
   const type = quoteState.vehicleType;
   if (!type) return null;
 
-  // Override services
   if (serviceOverrides[quoteState.service]) {
     const r = serviceOverrides[quoteState.service][type];
     if (r) return r;
   }
 
-  // Otherwise build from category + conditions
   const cat = quoteState.serviceCategory;
 
-  // Interior only
   if (cat === "Interior") {
     const ic = quoteState.interiorCondition;
     if (!ic) return null;
     return estimateTable.Interior?.[type]?.[ic] || null;
   }
 
-  // Exterior only
   if (cat === "Exterior") {
     const ec = quoteState.exteriorCondition;
     if (!ec) return null;
     return estimateTable.Exterior?.[type]?.[ec] || null;
   }
 
-  // Both
   if (cat === "Interior + Exterior") {
     const ic = quoteState.interiorCondition;
     const ec = quoteState.exteriorCondition;
@@ -345,6 +293,7 @@ function computeEstimate() {
     const ir = estimateTable.Interior?.[type]?.[ic];
     const er = estimateTable.Exterior?.[type]?.[ec];
     if (!ir || !er) return null;
+
     return [ir[0] + er[0], ir[1] + er[1]];
   }
 
@@ -415,13 +364,13 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle Type
+  // 1) Vehicle type (2x2 grid container)
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards";
+    cards.className = "qCards qCards--vehicle2x2";
 
     vehicleTypes.forEach((v) => {
       cards.appendChild(
@@ -440,7 +389,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Service Category
+  // 2) Category (portrait images)
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -455,12 +404,11 @@ function renderStep() {
           hint: c.hint,
           img: c.img,
           contain: false,
-          variant: "qCard--serviceCat",
+          variant: "qCard--portrait qCard--serviceCat",
           isSelected: quoteState.serviceCategory === c.label,
           onClick: () =>
             pickAndAdvance(() => {
               quoteState.serviceCategory = c.label;
-              // reset downstream
               quoteState.service = "";
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
@@ -472,20 +420,27 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Specific Service (from your Services section)
+  // 3) Specific service (auto-select if only 1)
   if (step === "service") {
+    const filtered = servicesAll.filter((s) => {
+      if (quoteState.serviceCategory === "Interior + Exterior") return true;
+      return s.category === quoteState.serviceCategory;
+    });
+
+    // Auto-select if exactly one option
+    if (filtered.length === 1 && quoteState.service !== filtered[0].label) {
+      quoteState.service = filtered[0].label;
+      // skip rendering this step; jump forward
+      stepIndex = nextActiveStepIndex(stepIndex);
+      renderStep();
+      return;
+    }
+
     title.textContent = "Select service";
     sub.textContent = "Pick the service you want. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
-
-    const filtered = servicesAll.filter((s) => {
-      // if they selected Interior + Exterior, show everything relevant
-      if (quoteState.serviceCategory === "Interior + Exterior") return true;
-      // otherwise show services matching category
-      return s.category === quoteState.serviceCategory;
-    });
 
     filtered.forEach((s) => {
       cards.appendChild(
@@ -494,12 +449,11 @@ function renderStep() {
           hint: "Tap to select",
           img: s.img,
           contain: false,
-          variant: "qCard--servicePick",
+          variant: "qCard--portrait qCard--servicePick",
           isSelected: quoteState.service === s.label,
           onClick: () =>
             pickAndAdvance(() => {
               quoteState.service = s.label;
-              // reset conditions (some services don’t need them)
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
             })
@@ -510,7 +464,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior Condition
+  // 4) Interior condition (portrait)
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -525,7 +479,7 @@ function renderStep() {
           hint: c.hint,
           img: c.img,
           contain: false,
-          variant: "qCard--condition",
+          variant: "qCard--portrait qCard--condition",
           isSelected: quoteState.interiorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.interiorCondition = c.label))
         })
@@ -535,7 +489,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior Condition
+  // 5) Exterior condition (portrait)
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -550,7 +504,7 @@ function renderStep() {
           hint: c.hint,
           img: c.img,
           contain: false,
-          variant: "qCard--condition",
+          variant: "qCard--portrait qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
         })
@@ -560,7 +514,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Heard About
+  // 6) Heard about
   if (step === "heardAbout") {
     title.textContent = "How did you hear about us?";
     sub.textContent = "Tap one option. Tap to continue.";
@@ -582,7 +536,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 7) Estimate (shown BEFORE calendar + contact)
+  // 7) Estimate (fancy)
   if (step === "estimate") {
     title.textContent = "Estimated price range";
     sub.textContent = "Based on your selections. Final price may adjust after assessment.";
@@ -599,22 +553,21 @@ function renderStep() {
     const box = document.createElement("div");
     box.className = "qEstimateBox";
     box.innerHTML = `
-      <div class="qEstimateBig">
-        ${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "We’ll confirm after assessment"}
-      </div>
-      <div class="qEstimateSmall">
-        Vehicle: ${escapeHtml(quoteState.vehicleType)}<br/>
-        Category: ${escapeHtml(quoteState.serviceCategory)}<br/>
-        Service: ${escapeHtml(quoteState.service)}<br/>
-        ${quoteState.interiorCondition ? `Interior: ${escapeHtml(quoteState.interiorCondition)}<br/>` : ""}
-        ${quoteState.exteriorCondition ? `Exterior: ${escapeHtml(quoteState.exteriorCondition)}<br/>` : ""}
+      <div class="qEstimateBadge">ESTIMATE</div>
+      <div class="qEstimateBig">${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "We’ll confirm after assessment"}</div>
+      <div class="qEstimateMeta">
+        <div><strong>Vehicle</strong>: ${escapeHtml(quoteState.vehicleType)}</div>
+        <div><strong>Category</strong>: ${escapeHtml(quoteState.serviceCategory)}</div>
+        <div><strong>Service</strong>: ${escapeHtml(quoteState.service)}</div>
+        ${quoteState.interiorCondition ? `<div><strong>Interior</strong>: ${escapeHtml(quoteState.interiorCondition)}</div>` : ""}
+        ${quoteState.exteriorCondition ? `<div><strong>Exterior</strong>: ${escapeHtml(quoteState.exteriorCondition)}</div>` : ""}
       </div>
     `;
 
     quoteBody.append(title, sub, box);
   }
 
-  // 8) Calendar / Slot
+  // 8) Calendar / Slots
   if (step === "appointment") {
     title.textContent = "Pick an appointment time";
     sub.textContent = "Select an available slot. Once booked, it disappears for everyone else.";
@@ -644,7 +597,7 @@ function renderStep() {
   // 9) Contact
   if (step === "contact") {
     title.textContent = "Your contact info";
-    sub.textContent = "Required. We’ll confirm your appointment by text/call.";
+    sub.textContent = "Required. We’ll confirm by text/call.";
 
     const grid = document.createElement("div");
     grid.className = "qGrid2";
@@ -802,9 +755,9 @@ async function loadSlots(statusEl, slotsGridEl) {
   statusEl.textContent = "Loading available times...";
   slotsGridEl.innerHTML = "";
 
-  const script = window.SCRIPT_URL;
+  const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
   if (!script || !String(script).startsWith("https://script.google.com/")) {
-    statusEl.textContent = "Scheduling not configured (SCRIPT_URL missing).";
+    statusEl.textContent = "Scheduling not configured.";
     return;
   }
 
@@ -839,14 +792,14 @@ async function loadSlots(statusEl, slotsGridEl) {
       slotsGridEl.appendChild(btn);
     });
   } catch (e) {
-    statusEl.textContent = "Couldn’t load times yet (Apps Script not set up).";
+    statusEl.textContent = "Couldn’t load times (Apps Script response/CORS).";
   } finally {
     updateNav();
   }
 }
 
 // -------------------------
-// Submit (reserve slot + email)
+// Submit
 // -------------------------
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -894,7 +847,7 @@ async function postJson(url, payload) {
 async function reserveAndSend() {
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
 
-  const script = window.SCRIPT_URL;
+  const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
   if (!script || !String(script).startsWith("https://script.google.com/")) return { ok: true };
 
   const payload = buildPayload();
@@ -905,48 +858,20 @@ async function reserveAndSend() {
     if (result && result.ok === true) return { ok: true };
     if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked. Pick another." };
   } catch (e) {
-    // fall through; don't block UX
+    // don't block UX
   }
-
   return { ok: true };
 }
 
 // -------------------------
-// Navigation
+// Nav
 // -------------------------
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
 
-  // Final submit happens on CONTACT step (so we already have all info)
-  if (step === "contact") {
-    quoteNextBtn.disabled = true;
-    const old = quoteNextBtn.textContent;
-    quoteNextBtn.textContent = "Sending...";
-
-    reserveAndSend().then((result) => {
-      if (result && result.ok === false) {
-        alert(result.message || "That time was just booked. Pick another slot.");
-        // bounce back to calendar if collision
-        stepIndex = steps.indexOf("appointment");
-        renderStep();
-        quoteNextBtn.textContent = old;
-        quoteNextBtn.disabled = false;
-        return;
-      }
-
-      stepIndex = nextActiveStepIndex(stepIndex);
-      renderStep();
-
-      quoteNextBtn.textContent = old;
-      quoteNextBtn.disabled = false;
-    });
-
-    return;
-  }
-
-  // When leaving "heardAbout" -> compute estimate once
+  // leaving heardAbout -> compute estimate
   if (step === "heardAbout") {
     const est = computeEstimate();
     if (est) {
@@ -956,6 +881,30 @@ function nextStep(fromAutoAdvance = false) {
       quoteState.estimateLow = "";
       quoteState.estimateHigh = "";
     }
+  }
+
+  if (step === "contact") {
+    quoteNextBtn.disabled = true;
+    const old = quoteNextBtn.textContent;
+    quoteNextBtn.textContent = "Sending...";
+
+    reserveAndSend().then((result) => {
+      if (result && result.ok === false) {
+        alert(result.message || "That time was just booked. Pick another slot.");
+        stepIndex = steps.indexOf("appointment");
+        renderStep();
+        quoteNextBtn.textContent = old;
+        quoteNextBtn.disabled = false;
+        return;
+      }
+
+      stepIndex = nextActiveStepIndex(stepIndex);
+      renderStep();
+      quoteNextBtn.textContent = old;
+      quoteNextBtn.disabled = false;
+    });
+
+    return;
   }
 
   stepIndex = nextActiveStepIndex(stepIndex);
