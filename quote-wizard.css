@@ -64,7 +64,7 @@
   gap:10px;
 }
 
-/* Vehicle step: force 2 columns (not 3 then 1) */
+/* Vehicle step: always 2x2 */
 .qCards--vehicle2x2{
   grid-template-columns: 1fr 1fr;
 }
@@ -92,7 +92,6 @@
   background:rgba(0,0,0,.04);
 }
 
-/* Default media ratio */
 .qCard--img .qCardMedia{
   aspect-ratio: 16 / 9;
 }
@@ -105,24 +104,33 @@
   display:block;
 }
 
-/* Vehicle cards: show full car + zoom in slightly more */
+/* Vehicle cards: contain + normalized zoom */
 .qCard--vehicle .qCardMedia{
   aspect-ratio: 16 / 9;
   padding:10px;
   background:#fff;
+  --carZoom: 1.28;
 }
 .qCard--vehicle img.isContain{
   object-fit:contain;
   background:#fff;
-  transform: scale(1.18);
+  transform: scale(var(--carZoom));
   transform-origin:center;
 }
 
-/* AFTER vehicle selection: make all images portrait */
+/* Portrait cards (after vehicle selection) */
 .qCard--portrait .qCardMedia{
   aspect-ratio: 3 / 4;
 }
 .qCard--portrait .qCardMedia img{
+  object-fit:cover;
+}
+
+/* Square cards for service selection */
+.qCard--square .qCardMedia{
+  aspect-ratio: 1 / 1;
+}
+.qCard--square .qCardMedia img{
   object-fit:cover;
 }
 
@@ -212,14 +220,19 @@
 
 .qEstimateMeta{
   margin-top:12px;
-  text-align:left;
-  display:inline-block;
-  width:min(520px, 100%);
   border-top:1px solid rgba(0,0,0,.10);
   padding-top:12px;
   color:rgba(0,0,0,.72);
   font-weight:800;
   line-height:1.55;
+}
+
+/* ✅ Center estimate details */
+.qEstimateMeta--center{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
 }
 
 /* Slots */
@@ -250,14 +263,14 @@
   justify-content:center;
 }
 
-/* Desktop: keep vehicle 2 columns (not 3) */
+/* Desktop layout */
 @media (min-width:768px){
   .qCards{ grid-template-columns:repeat(3, 1fr); }
-  .qCards--vehicle2x2{ grid-template-columns: repeat(2, 1fr); }
+  .qCards--vehicle2x2{ grid-template-columns:repeat(2, 1fr); }
   .qGrid2{ grid-template-columns:1fr 1fr 1fr; }
   .qSlots{ grid-template-columns:repeat(2, 1fr); }
 }
 @media (min-width:1024px){
-  .qCards--vehicle2x2{ grid-template-columns: repeat(2, 1fr); }
+  .qCards--vehicle2x2{ grid-template-columns:repeat(2, 1fr); }
   .qSlots{ grid-template-columns:repeat(3, 1fr); }
 }
