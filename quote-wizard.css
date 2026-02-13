@@ -53,8 +53,13 @@
 }
 .quoteNext{ min-width: 160px; }
 
-/* Card selectors */
-.qCards{ display:grid; grid-template-columns: 1fr; gap: 10px; }
+/* Cards */
+.qCards{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
 .qCard{
   text-align:left;
   border-radius: 18px;
@@ -68,31 +73,40 @@
   border-color: rgba(214,178,94,.70);
   box-shadow: 0 18px 44px rgba(214,178,94,.18);
 }
+
+/* Square media tiles */
 .qCardMedia{
   width: 100%;
-  aspect-ratio: 16 / 9;
   border-radius: 14px;
   overflow:hidden;
   border: 1px solid rgba(0,0,0,.08);
   background: rgba(0,0,0,.04);
 }
-.qCardMedia img{ width:100%; height:100%; object-fit: cover; display:block; }
-.qCardMedia img.isContain{ object-fit: contain; background:#fff; }
-.qCardLabel{ margin: 10px 2px 2px; font-weight: 900; color: #111; }
-.qCardHint{ margin: 0 2px 0; color: rgba(0,0,0,.62); font-weight: 700; font-size: .95rem; line-height: 1.45; }
+.qCardMedia--square{
+  aspect-ratio: 1 / 1;
+}
+.qCardMedia img{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+}
+.qCardMedia img.isContain{
+  object-fit: contain;
+  background:#fff;
+}
 
-.qIcon{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
+.qCardLabel{
+  margin: 10px 2px 2px;
   font-weight: 900;
-  color: #000;
-  background: rgba(214,178,94,.25);
-  border: 1px solid rgba(214,178,94,.35);
-  margin-bottom: 10px;
+  color: #111;
+}
+.qCardHint{
+  margin: 0 2px 0;
+  color: rgba(0,0,0,.62);
+  font-weight: 700;
+  font-size: .95rem;
+  line-height: 1.45;
 }
 
 .qGrid2{ display:grid; grid-template-columns: 1fr; gap: 10px; }
@@ -130,7 +144,39 @@
   color: rgba(0,0,0,.65);
 }
 
+/* Slots */
+.qSlotsWrap{ margin-top: 6px; }
+.qSlots{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+.qSlotBtn{
+  width: 100%;
+  text-align:left;
+  padding: 12px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+.qSlotBtn.isSel{
+  border-color: rgba(214,178,94,.70);
+  box-shadow: 0 0 0 4px rgba(214,178,94,.18);
+}
+.qReload{
+  margin-top: 12px;
+  width: 100%;
+  justify-content: center;
+}
+
 @media (min-width: 768px){
   .qCards{ grid-template-columns: repeat(3, 1fr); }
-  .qGrid2{ grid-template-columns: 1fr 1fr; }
+  .qGrid2{ grid-template-columns: 1fr 1fr 1fr; }
+  .qSlots{ grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px){
+  .qSlots{ grid-template-columns: repeat(3, 1fr); }
 }
