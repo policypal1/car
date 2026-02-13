@@ -1,6 +1,17 @@
 // -------------------------
-// QUOTE WIZARD (NEW FLOW)
-// Size -> Service -> Condition(s) -> Appointment Slot -> Contact -> Done
+// QUOTE WIZARD (NEW FLOW v2)
+// -------------------------
+// Size -> Service -> Condition(s) -> Heard About -> Contact -> Appointment Slot -> Done
+// Uses live slots from Google Apps Script (free) so once booked it disappears for everyone else.
+//
+// Required globals:
+//   window.SCRIPT_URL = "https://script.google.com/macros/s/XXXX/exec"
+//   window.BUSINESS_PHONE = "+19712865503"
+//
+// Expected Apps Script endpoints:
+//   GET  SCRIPT_URL?action=slots  -> { ok:true, slots:[{id,label}] }
+//   POST SCRIPT_URL?action=reserve -> { ok:true } or { ok:false, message:"..." }
+//
 // -------------------------
 
 const quoteModal = document.querySelector("[data-quote-modal]");
@@ -12,38 +23,14 @@ const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 
 let lastActiveElQuote = null;
 
-/**
- * Required globals expected (set these in script.js or inline):
- * - const SCRIPT_URL = "https://script.google.com/macros/s/...../exec";
- * - const BUSINESS_PHONE = "+1971....";
- *
- * NOTE: To support live slots (auto-disappear when booked), your Apps Script must:
- * 1) Allow CORS (doGet/doPost with ContentService + setHeader)
- * 2) Return JSON
- *
- * Endpoints expected:
- * - GET  SCRIPT_URL?action=slots
- *    returns: { ok:true, timezone:"America/Los_Angeles", slots:[ { id:"2026-02-18T10:00", label:"Wed Feb 18 • 10:00 AM" }, ... ] }
- *
- * - POST SCRIPT_URL?action=reserve
- *    body JSON: { slotId, name, phone, email, ...wizardData }
- *    returns: { ok:true } or { ok:false, message:"Slot already booked" }
- *
- * - POST SCRIPT_URL?action=lead
- *    body JSON: { ...wizardData }  (fallback if reserve is not used)
- *    returns: { ok:true }
- */
-
 const quoteState = {
   size: "",
+  service: "",
 
-  service: "", // "Interior" | "Exterior" | "Interior + Exterior"
+  interiorCondition: "",
+  exteriorCondition: "",
 
-  interiorCondition: "", // "Light" | "Normal" | "Heavy" (only if interior included)
-  exteriorCondition: "", // "Light" | "Normal" | "Heavy" (only if exterior included)
-
-  slotId: "",
-  slotLabel: "",
+  heardAbout: "",
 
   name: "",
   phone: "",
@@ -51,39 +38,56 @@ const quoteState = {
   notes: "",
   ackDeposit: false,
 
+  slotId: "",
+  slotLabel: "",
+
   honeypot: ""
 };
 
+// Max path = 8 steps (some condition steps are skipped based on service)
 const steps = [
   "size",
   "service",
   "conditionInterior",
   "conditionExterior",
-  "appointment",
+  "heardAbout",
   "contact",
+  "appointment",
   "done"
 ];
 
 let stepIndex = 0;
 
-// --- CONFIG: Images you provided ---
+// -------------------------
+// IMAGES / OPTIONS
+// -------------------------
+
+// Push small/medium back so whole car shows: use contain:true
 const sizes = [
-  { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp" },
-  // keep your existing medium/large unless you want to replace them too
-  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp" },
+  { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp", contain: true },
+  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp", contain: true },
   { label: "Large", hint: "3-row SUV, truck, van", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true }
 ];
 
 const services = [
-  { label: "Interior", hint: "Seats, carpets, plastics, glass", img: "./IMG_2915.heic", contain: true },
-  { label: "Exterior", hint: "Wash, wheels, finish, protection", img: "./IMG_2469.jpg", contain: true },
-  { label: "Interior + Exterior", hint: "Full reset inside and out", img: "./51ae0d9f-5775-427e-b565-cb5e0984e800.png" }
+  { label: "Interior", hint: "Seats, carpets, plastics, glass", img: "./2017-05-22-07-32-26.jpg", contain: true },
+  { label: "Exterior", hint: "Wash, wheels, finish, protection", img: "./c36084da09340612d8431de0221ea985.jpg", contain: true },
+  { label: "Interior + Exterior", hint: "Full reset inside and out", img: "./Untitled design (3).png", contain: true }
+];
+
+const heardAboutOptions = [
+  { label: "Returning Client", hint: "Welcome back" },
+  { label: "Family / Friend", hint: "Referral" },
+  { label: "Social Media", hint: "Instagram / TikTok" },
+  { label: "Google Search", hint: "Maps / Search" },
+  { label: "Other", hint: "Another source" }
 ];
 
 // Interior condition images
 const interiorConditions = [
-  { label: "Light", hint: "Mostly clean • quick refresh", img: "./IMG_2915.heic" },
-  { label: "Normal", hint: "Daily driver • solid reset", img: "./IMG_2916.heic" },
+  // NOTE: HEIC usually breaks in Chrome. Convert to JPG/WEBP and update the filenames here.
+  { label: "Light", hint: "Mostly clean • quick refresh", img: "./IMG_2915.jpg" }, // <-- change extension if needed
+  { label: "Normal", hint: "Daily driver • solid reset", img: "./IMG_2916.jpg" }, // <-- change extension if needed
   { label: "Heavy", hint: "Stains/pet hair • deep work", img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png" }
 ];
 
@@ -94,7 +98,7 @@ const exteriorConditions = [
   { label: "Heavy", hint: "Neglected • heavy buildup", img: "./dirty-car.jpg" }
 ];
 
-// Simple pricing estimator (edit these anytime)
+// Simple estimate table (edit any time)
 const estimateTable = {
   Interior: {
     Small: { Light: [120, 160], Normal: [160, 220], Heavy: [220, 320] },
@@ -108,9 +112,11 @@ const estimateTable = {
   }
 };
 
+// -------------------------
+// MODAL OPEN/CLOSE
+// -------------------------
 function openQuoteModal() {
   if (!quoteModal || !quoteBody) return;
-
   lastActiveElQuote = document.activeElement;
 
   Object.assign(quoteState, {
@@ -118,13 +124,14 @@ function openQuoteModal() {
     service: "",
     interiorCondition: "",
     exteriorCondition: "",
-    slotId: "",
-    slotLabel: "",
+    heardAbout: "",
     name: "",
     phone: "",
     email: "",
     notes: "",
     ackDeposit: false,
+    slotId: "",
+    slotLabel: "",
     honeypot: ""
   });
 
@@ -151,15 +158,18 @@ window.closeQuoteModal = closeQuoteModal;
 document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
-function setProgress() {
-  const dots = quoteDots();
-  dots.forEach((d, i) => d.classList.toggle("isOn", i === stepIndex));
+// -------------------------
+// FLOW LOGIC
+// -------------------------
+function includesInterior() {
+  return quoteState.service === "Interior" || quoteState.service === "Interior + Exterior";
+}
+function includesExterior() {
+  return quoteState.service === "Exterior" || quoteState.service === "Interior + Exterior";
 }
 
 function stepIsActive(stepName) {
-  // Skip interior condition if service doesn't include interior
   if (stepName === "conditionInterior") return includesInterior();
-  // Skip exterior condition if service doesn't include exterior
   if (stepName === "conditionExterior") return includesExterior();
   return true;
 }
@@ -170,7 +180,6 @@ function nextActiveStepIndex(fromIndex) {
   }
   return steps.length - 1;
 }
-
 function prevActiveStepIndex(fromIndex) {
   for (let i = fromIndex - 1; i >= 0; i--) {
     if (stepIsActive(steps[i])) return i;
@@ -178,11 +187,12 @@ function prevActiveStepIndex(fromIndex) {
   return 0;
 }
 
-function includesInterior() {
-  return quoteState.service === "Interior" || quoteState.service === "Interior + Exterior";
-}
-function includesExterior() {
-  return quoteState.service === "Exterior" || quoteState.service === "Interior + Exterior";
+function setProgress() {
+  const dots = quoteDots();
+
+  // Map stepIndex (0..7) to dots (whatever exists in HTML)
+  // If you only have 7 dots, last step won't show properly — add 8 dots in HTML.
+  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
 }
 
 function canContinue() {
@@ -194,7 +204,7 @@ function canContinue() {
   if (step === "conditionInterior") return !includesInterior() ? true : !!quoteState.interiorCondition;
   if (step === "conditionExterior") return !includesExterior() ? true : !!quoteState.exteriorCondition;
 
-  if (step === "appointment") return !!quoteState.slotId;
+  if (step === "heardAbout") return !!quoteState.heardAbout;
 
   if (step === "contact") {
     return (
@@ -205,6 +215,8 @@ function canContinue() {
     );
   }
 
+  if (step === "appointment") return !!quoteState.slotId;
+
   return true;
 }
 
@@ -214,6 +226,7 @@ function updateNav() {
   quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
 
   const step = steps[stepIndex];
+
   if (step === "done") {
     quoteNextBtn.style.display = "none";
     quoteBackBtn.textContent = "Close";
@@ -224,8 +237,7 @@ function updateNav() {
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
 
-  // Text rules
-  quoteNextBtn.textContent = step === "contact" ? "Finish" : "Continue";
+  quoteNextBtn.textContent = step === "appointment" ? "Finish" : "Continue";
   quoteNextBtn.disabled = !canContinue();
 }
 
@@ -235,14 +247,17 @@ function pickAndAdvance(pickFn) {
   setTimeout(() => nextStep(true), 80);
 }
 
-function imageCard({ label, hint, img, isSelected, onClick, contain = false }) {
+// -------------------------
+// UI COMPONENTS
+// -------------------------
+function imgCard({ label, hint, img, contain = false, isSelected = false, onClick }) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "qCard qCard--img" + (isSelected ? " isSel" : "");
   btn.addEventListener("click", onClick);
 
   btn.innerHTML = `
-    <div class="qCardMedia qCardMedia--square">
+    <div class="qCardMedia">
       <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
@@ -251,6 +266,22 @@ function imageCard({ label, hint, img, isSelected, onClick, contain = false }) {
   return btn;
 }
 
+function textCard({ label, hint, isSelected = false, onClick }) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "qCard qCard--text" + (isSelected ? " isSel" : "");
+  btn.addEventListener("click", onClick);
+
+  btn.innerHTML = `
+    <div class="qCardLabel">${escapeHtml(label)}</div>
+    <div class="qCardHint">${escapeHtml(hint)}</div>
+  `;
+  return btn;
+}
+
+// -------------------------
+// RENDER STEPS
+// -------------------------
 function renderStep() {
   if (!quoteBody) return;
   quoteBody.innerHTML = "";
@@ -263,7 +294,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // ---- SIZE ----
+  // 1) SIZE
   if (step === "size") {
     title.textContent = "Vehicle size";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -273,7 +304,7 @@ function renderStep() {
 
     sizes.forEach((s) => {
       cards.appendChild(
-        imageCard({
+        imgCard({
           label: s.label,
           hint: s.hint,
           img: s.img,
@@ -287,7 +318,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // ---- SERVICE ----
+  // 2) SERVICE
   if (step === "service") {
     title.textContent = "Select service";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -297,7 +328,7 @@ function renderStep() {
 
     services.forEach((s) => {
       cards.appendChild(
-        imageCard({
+        imgCard({
           label: s.label,
           hint: s.hint,
           img: s.img,
@@ -306,8 +337,7 @@ function renderStep() {
           onClick: () =>
             pickAndAdvance(() => {
               quoteState.service = s.label;
-
-              // reset conditions when service changes
+              // reset conditions on service change
               if (!includesInterior()) quoteState.interiorCondition = "";
               if (!includesExterior()) quoteState.exteriorCondition = "";
             })
@@ -318,7 +348,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // ---- INTERIOR CONDITION ----
+  // 3) INTERIOR CONDITION
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -328,7 +358,7 @@ function renderStep() {
 
     interiorConditions.forEach((c) => {
       cards.appendChild(
-        imageCard({
+        imgCard({
           label: c.label,
           hint: c.hint,
           img: c.img,
@@ -341,7 +371,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // ---- EXTERIOR CONDITION ----
+  // 4) EXTERIOR CONDITION
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -351,7 +381,7 @@ function renderStep() {
 
     exteriorConditions.forEach((c) => {
       cards.appendChild(
-        imageCard({
+        imgCard({
           label: c.label,
           hint: c.hint,
           img: c.img,
@@ -364,34 +394,29 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // ---- APPOINTMENT SLOT (LIVE) ----
-  if (step === "appointment") {
-    title.textContent = "Pick an appointment time";
-    sub.textContent = "Select an available slot. Once booked, it disappears for everyone else.";
+  // 5) HEARD ABOUT
+  if (step === "heardAbout") {
+    title.textContent = "How did you hear about us?";
+    sub.textContent = "Tap one option. Tap to continue.";
 
-    const wrap = document.createElement("div");
-    wrap.className = "qSlotsWrap";
+    const cards = document.createElement("div");
+    cards.className = "qCards";
 
-    const status = document.createElement("div");
-    status.className = "qStatus";
-    status.textContent = "Loading available times...";
+    heardAboutOptions.forEach((o) => {
+      cards.appendChild(
+        textCard({
+          label: o.label,
+          hint: o.hint,
+          isSelected: quoteState.heardAbout === o.label,
+          onClick: () => pickAndAdvance(() => (quoteState.heardAbout = o.label))
+        })
+      );
+    });
 
-    const slotsGrid = document.createElement("div");
-    slotsGrid.className = "qSlots";
-
-    const reload = document.createElement("button");
-    reload.type = "button";
-    reload.className = "btn btn--quote qReload";
-    reload.textContent = "Reload times";
-    reload.addEventListener("click", () => loadSlots(status, slotsGrid));
-
-    wrap.append(status, slotsGrid, reload);
-    quoteBody.append(title, sub, wrap);
-
-    loadSlots(status, slotsGrid);
+    quoteBody.append(title, sub, cards);
   }
 
-  // ---- CONTACT ----
+  // 6) CONTACT
   if (step === "contact") {
     title.textContent = "Your contact info";
     sub.textContent = "Required. We’ll confirm your appointment by text/call.";
@@ -422,15 +447,6 @@ function renderStep() {
 
     grid.append(f1, f2, f3);
 
-    const appt = document.createElement("div");
-    appt.className = "qApptSummary";
-    appt.style.marginTop = "10px";
-    appt.innerHTML = `
-      <div class="qStepSub" style="margin:0;">
-        <strong>Selected time:</strong> ${escapeHtml(quoteState.slotLabel || "—")}
-      </div>
-    `;
-
     const notes = document.createElement("div");
     notes.className = "qField";
     notes.style.marginTop = "10px";
@@ -458,7 +474,7 @@ function renderStep() {
       </div>
     `;
 
-    quoteBody.append(title, sub, grid, appt, notes, ack);
+    quoteBody.append(title, sub, grid, notes, ack);
 
     const nameEl = quoteBody.querySelector("#qName");
     const phoneEl = quoteBody.querySelector("#qPhone");
@@ -475,26 +491,22 @@ function renderStep() {
 
     nameEl?.addEventListener("input", (e) => {
       quoteState.name = e.target.value || "";
-      updateNav();
-      updateStatus();
+      updateNav(); updateStatus();
     });
     phoneEl?.addEventListener("input", (e) => {
       quoteState.phone = e.target.value || "";
-      updateNav();
-      updateStatus();
+      updateNav(); updateStatus();
     });
     emailEl?.addEventListener("input", (e) => {
       quoteState.email = e.target.value || "";
-      updateNav();
-      updateStatus();
+      updateNav(); updateStatus();
     });
     notesEl?.addEventListener("input", (e) => {
       quoteState.notes = e.target.value || "";
     });
     ackEl?.addEventListener("change", (e) => {
       quoteState.ackDeposit = !!e.target.checked;
-      updateNav();
-      updateStatus();
+      updateNav(); updateStatus();
     });
     hpEl?.addEventListener("input", (e) => {
       quoteState.honeypot = e.target.value || "";
@@ -503,15 +515,40 @@ function renderStep() {
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // ---- DONE ----
+  // 7) APPOINTMENT SLOT (LIVE)
+  if (step === "appointment") {
+    title.textContent = "Pick an appointment time";
+    sub.textContent = "Select an available slot. Once booked, it disappears for everyone else.";
+
+    const wrap = document.createElement("div");
+    wrap.className = "qSlotsWrap";
+
+    const status = document.createElement("div");
+    status.className = "qStatus";
+    status.textContent = "Loading available times...";
+
+    const slotsGrid = document.createElement("div");
+    slotsGrid.className = "qSlots";
+
+    const reload = document.createElement("button");
+    reload.type = "button";
+    reload.className = "btn btn--quote qReload";
+    reload.textContent = "Reload times";
+    reload.addEventListener("click", () => loadSlots(status, slotsGrid));
+
+    wrap.append(status, slotsGrid, reload);
+    quoteBody.append(title, sub, wrap);
+
+    loadSlots(status, slotsGrid);
+  }
+
+  // 8) DONE (estimate shown)
   if (step === "done") {
     title.textContent = "Request sent";
-    sub.textContent = "We’ll reach out shortly to confirm and schedule.";
+    sub.textContent = "We’ll reach out shortly to confirm.";
 
     const estimate = getEstimateRange();
-    const estimateLine = estimate
-      ? `$${estimate[0]}–$${estimate[1]}`
-      : "Provided after assessment";
+    const estimateLine = estimate ? `$${estimate[0]}–$${estimate[1]}` : "Provided after assessment";
 
     const summary = document.createElement("div");
     summary.className = "qSummary";
@@ -522,10 +559,11 @@ function renderStep() {
         Service: ${escapeHtml(quoteState.service)}<br/>
         ${includesInterior() ? `Interior condition: ${escapeHtml(quoteState.interiorCondition)}<br/>` : ""}
         ${includesExterior() ? `Exterior condition: ${escapeHtml(quoteState.exteriorCondition)}<br/>` : ""}
-        Appointment: ${escapeHtml(quoteState.slotLabel)}<br/>
+        Heard about us: ${escapeHtml(quoteState.heardAbout)}<br/>
         Name: ${escapeHtml(quoteState.name)}<br/>
         Phone: ${escapeHtml(quoteState.phone)}<br/>
         Email: ${escapeHtml(quoteState.email)}<br/>
+        Appointment: ${escapeHtml(quoteState.slotLabel || "—")}<br/>
         Notes: ${escapeHtml(quoteState.notes || "—")}<br/><br/>
         <strong>Estimated range:</strong> ${escapeHtml(estimateLine)}<br/>
         <span style="display:block;margin-top:6px;color:rgba(0,0,0,.62);font-weight:700;">
@@ -542,7 +580,7 @@ function renderStep() {
 
     const callBtn = document.createElement("a");
     callBtn.className = "btn btn--call";
-    callBtn.href = `tel:${BUSINESS_PHONE}`;
+    callBtn.href = `tel:${window.BUSINESS_PHONE || ""}`;
     callBtn.textContent = "CALL NOW";
 
     const closeBtn = document.createElement("button");
@@ -558,27 +596,26 @@ function renderStep() {
   updateNav();
 }
 
+// -------------------------
+// ESTIMATE
+// -------------------------
 function getEstimateRange() {
   const size = quoteState.size;
   const service = quoteState.service;
-
   if (!size || !service) return null;
 
-  // If only interior
   if (service === "Interior") {
     const c = quoteState.interiorCondition;
     if (!c) return null;
     return estimateTable.Interior?.[size]?.[c] || null;
   }
 
-  // If only exterior
   if (service === "Exterior") {
     const c = quoteState.exteriorCondition;
     if (!c) return null;
     return estimateTable.Exterior?.[size]?.[c] || null;
   }
 
-  // If both: add ranges together
   if (service === "Interior + Exterior") {
     const ic = quoteState.interiorCondition;
     const ec = quoteState.exteriorCondition;
@@ -595,7 +632,7 @@ function getEstimateRange() {
 }
 
 // -------------------------
-// Slots loading + selection
+// SLOTS (Google Apps Script)
 // -------------------------
 async function loadSlots(statusEl, slotsGridEl) {
   if (!statusEl || !slotsGridEl) return;
@@ -603,14 +640,14 @@ async function loadSlots(statusEl, slotsGridEl) {
   statusEl.textContent = "Loading available times...";
   slotsGridEl.innerHTML = "";
 
-  // If no script URL, show fallback message
-  if (!window.SCRIPT_URL || !String(window.SCRIPT_URL).startsWith("https://script.google.com/")) {
-    statusEl.textContent = "Slot system not configured (SCRIPT_URL missing).";
+  const script = window.SCRIPT_URL;
+  if (!script || !String(script).startsWith("https://script.google.com/")) {
+    statusEl.textContent = "Scheduling not configured (SCRIPT_URL missing).";
     return;
   }
 
   try {
-    const url = `${window.SCRIPT_URL}?action=slots&t=${Date.now()}`;
+    const url = `${script}?action=slots&t=${Date.now()}`;
     const res = await fetch(url, { method: "GET", mode: "cors", cache: "no-store" });
     const data = await res.json();
 
@@ -640,14 +677,14 @@ async function loadSlots(statusEl, slotsGridEl) {
       slotsGridEl.appendChild(btn);
     });
   } catch (e) {
-    statusEl.textContent = "Couldn’t load times (CORS/endpoint issue). Please call/text to schedule.";
+    statusEl.textContent = "Couldn’t load times. (CORS/Apps Script not set up yet.)";
   } finally {
     updateNav();
   }
 }
 
 // -------------------------
-// Submit
+// SUBMIT
 // -------------------------
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -663,9 +700,7 @@ function buildPayload() {
     service: quoteState.service,
     interiorCondition: quoteState.interiorCondition,
     exteriorCondition: quoteState.exteriorCondition,
-
-    slotId: quoteState.slotId,
-    slotLabel: quoteState.slotLabel,
+    heardAbout: quoteState.heardAbout,
 
     name: quoteState.name,
     phone: quoteState.phone,
@@ -673,6 +708,9 @@ function buildPayload() {
     notes: quoteState.notes,
 
     ackDeposit: quoteState.ackDeposit,
+
+    slotId: quoteState.slotId,
+    slotLabel: quoteState.slotLabel,
 
     estimateLow: estimate ? estimate[0] : "",
     estimateHigh: estimate ? estimate[1] : ""
@@ -689,56 +727,45 @@ async function postJson(url, payload) {
   return res.json();
 }
 
-async function reserveSlotAndSendLead() {
-  // Honeypot: silently "success"
+async function reserveAndSend() {
+  // honeypot: silent success
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
 
   const script = window.SCRIPT_URL;
   if (!script || !String(script).startsWith("https://script.google.com/")) return { ok: true };
 
   const payload = buildPayload();
+  const reserveUrl = `${script}?action=reserve`;
 
-  // 1) Reserve slot (so it disappears for everyone else)
   try {
-    const reserveUrl = `${script}?action=reserve`;
-    const result = await Promise.race([postJson(reserveUrl, payload), timeout(6000)]);
+    const result = await Promise.race([postJson(reserveUrl, payload), timeout(7000)]);
     if (result && result.ok === true) return { ok: true };
-    if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked. Pick another slot." };
+    if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked. Pick another." };
   } catch (e) {
-    // fall through to lead
+    // fall through
   }
 
-  // 2) Fallback: send lead anyway
-  try {
-    const leadUrl = `${script}?action=lead`;
-    const result = await Promise.race([postJson(leadUrl, payload), timeout(6000)]);
-    if (result && result.ok === true) return { ok: true };
-  } catch (e) {
-    // ignore
-  }
-
-  // Even if script fails, do not block UX (you can still see the lead in console if you want)
+  // If reserve fails, still move on (don’t block UX)
   return { ok: true };
 }
 
 // -------------------------
-// Navigation
+// NAV
 // -------------------------
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
 
-  if (step === "contact") {
+  // Finish happens on appointment step
+  if (step === "appointment") {
     quoteNextBtn.disabled = true;
     const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
 
-    reserveSlotAndSendLead().then((result) => {
+    reserveAndSend().then((result) => {
       if (result && result.ok === false) {
-        // Slot collision: bounce user back to appointment step
-        alert(result.message || "That time was just booked. Please choose another.");
-        stepIndex = steps.indexOf("appointment");
+        alert(result.message || "That time was just booked. Pick another slot.");
         renderStep();
         quoteNextBtn.textContent = old;
         quoteNextBtn.disabled = false;
@@ -773,7 +800,7 @@ quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
 
 // -------------------------
-// Utilities
+// ESCAPE HTML
 // -------------------------
 function escapeHtml(str) {
   return String(str || "")
