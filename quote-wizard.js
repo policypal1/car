@@ -1,6 +1,8 @@
 // -------------------------
-// QUOTE WIZARD (new questions)
+// QUOTE WIZARD (NEW FLOW)
+// Size -> Service -> Condition(s) -> Appointment Slot -> Contact -> Done
 // -------------------------
+
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
 const quoteNextBtn = document.querySelector("[data-quote-next]");
@@ -10,52 +12,101 @@ const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 
 let lastActiveElQuote = null;
 
+/**
+ * Required globals expected (set these in script.js or inline):
+ * - const SCRIPT_URL = "https://script.google.com/macros/s/...../exec";
+ * - const BUSINESS_PHONE = "+1971....";
+ *
+ * NOTE: To support live slots (auto-disappear when booked), your Apps Script must:
+ * 1) Allow CORS (doGet/doPost with ContentService + setHeader)
+ * 2) Return JSON
+ *
+ * Endpoints expected:
+ * - GET  SCRIPT_URL?action=slots
+ *    returns: { ok:true, timezone:"America/Los_Angeles", slots:[ { id:"2026-02-18T10:00", label:"Wed Feb 18 • 10:00 AM" }, ... ] }
+ *
+ * - POST SCRIPT_URL?action=reserve
+ *    body JSON: { slotId, name, phone, email, ...wizardData }
+ *    returns: { ok:true } or { ok:false, message:"Slot already booked" }
+ *
+ * - POST SCRIPT_URL?action=lead
+ *    body JSON: { ...wizardData }  (fallback if reserve is not used)
+ *    returns: { ok:true }
+ */
+
 const quoteState = {
   size: "",
-  condition: "",
-  contactWindow: "",
-  heardAbout: "",
-  bookingStatus: "",
-  ackDeposit: false,
+
+  service: "", // "Interior" | "Exterior" | "Interior + Exterior"
+
+  interiorCondition: "", // "Light" | "Normal" | "Heavy" (only if interior included)
+  exteriorCondition: "", // "Light" | "Normal" | "Heavy" (only if exterior included)
+
+  slotId: "",
+  slotLabel: "",
+
   name: "",
   phone: "",
+  email: "",
   notes: "",
+  ackDeposit: false,
+
   honeypot: ""
 };
 
-const steps = ["size","condition","contactWindow","heardAbout","bookingStatus","contact","done"];
+const steps = [
+  "size",
+  "service",
+  "conditionInterior",
+  "conditionExterior",
+  "appointment",
+  "contact",
+  "done"
+];
+
 let stepIndex = 0;
 
+// --- CONFIG: Images you provided ---
 const sizes = [
-  { label: "Small", hint: "Coupe, sedan", img: "./cosySec.png" },
+  { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp" },
+  // keep your existing medium/large unless you want to replace them too
   { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp" },
   { label: "Large", hint: "3-row SUV, truck, van", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true }
 ];
 
-const conditions = [
-  { label: "Light", hint: "Mostly clean • quick refresh", icon: "✨", bullets: ["Light dust", "Few crumbs", "No heavy stains"] },
-  { label: "Normal", hint: "Daily driver • solid reset", icon: "🧼", bullets: ["Normal buildup", "Cupholders/crevices", "Some spots"] },
-  { label: "Heavy", hint: "Stains/pet hair • deep work", icon: "💪", bullets: ["Pet hair", "Stains/spills", "Heavy buildup"] }
+const services = [
+  { label: "Interior", hint: "Seats, carpets, plastics, glass", img: "./IMG_2915.heic", contain: true },
+  { label: "Exterior", hint: "Wash, wheels, finish, protection", img: "./IMG_2469.jpg", contain: true },
+  { label: "Interior + Exterior", hint: "Full reset inside and out", img: "./51ae0d9f-5775-427e-b565-cb5e0984e800.png" }
 ];
 
-const contactWindows = [
-  { label: "Morning", hint: "8am–12pm", icon: "🌤️" },
-  { label: "Afternoon", hint: "12pm–5pm", icon: "☀️" },
-  { label: "Evening", hint: "After 5pm", icon: "🌙" }
+// Interior condition images
+const interiorConditions = [
+  { label: "Light", hint: "Mostly clean • quick refresh", img: "./IMG_2915.heic" },
+  { label: "Normal", hint: "Daily driver • solid reset", img: "./IMG_2916.heic" },
+  { label: "Heavy", hint: "Stains/pet hair • deep work", img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png" }
 ];
 
-const heardAbout = [
-  { label: "Returning Client", hint: "Welcome back", icon: "✅" },
-  { label: "Family / Friend", hint: "Referral", icon: "🤝" },
-  { label: "Social Media", hint: "Instagram / TikTok", icon: "📱" },
-  { label: "Google Search", hint: "Maps / Search", icon: "🔎" },
-  { label: "Other", hint: "Another source", icon: "🗂️" }
+// Exterior condition images
+const exteriorConditions = [
+  { label: "Light", hint: "Light dirt • quick wash", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
+  { label: "Normal", hint: "Road film • wheels need love", img: "./IMG_2469.jpg" },
+  { label: "Heavy", hint: "Neglected • heavy buildup", img: "./dirty-car.jpg" }
 ];
 
-const bookingStatus = [
-  { label: "I'm ready to book", hint: "Secure an appointment", icon: "📅" },
-  { label: "I have a few questions", hint: "Before booking", icon: "❓" }
-];
+// Simple pricing estimator (edit these anytime)
+const estimateTable = {
+  Interior: {
+    Small: { Light: [120, 160], Normal: [160, 220], Heavy: [220, 320] },
+    Medium: { Light: [140, 190], Normal: [190, 260], Heavy: [260, 380] },
+    Large: { Light: [170, 230], Normal: [230, 320], Heavy: [320, 450] }
+  },
+  Exterior: {
+    Small: { Light: [60, 90], Normal: [90, 130], Heavy: [130, 180] },
+    Medium: { Light: [70, 100], Normal: [100, 150], Heavy: [150, 210] },
+    Large: { Light: [90, 120], Normal: [120, 180], Heavy: [180, 260] }
+  }
+};
 
 function openQuoteModal() {
   if (!quoteModal || !quoteBody) return;
@@ -64,14 +115,16 @@ function openQuoteModal() {
 
   Object.assign(quoteState, {
     size: "",
-    condition: "",
-    contactWindow: "",
-    heardAbout: "",
-    bookingStatus: "",
-    ackDeposit: false,
+    service: "",
+    interiorCondition: "",
+    exteriorCondition: "",
+    slotId: "",
+    slotLabel: "",
     name: "",
     phone: "",
+    email: "",
     notes: "",
+    ackDeposit: false,
     honeypot: ""
   });
 
@@ -81,7 +134,6 @@ function openQuoteModal() {
   quoteModal.classList.add("isOpen");
   quoteModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
-
   quoteModal.querySelector("[data-quote-close]")?.focus();
 }
 
@@ -90,17 +142,13 @@ function closeQuoteModal() {
   quoteModal.classList.remove("isOpen");
   quoteModal.setAttribute("aria-hidden", "true");
   document.body.style.overflow = "";
-
   if (lastActiveElQuote && typeof lastActiveElQuote.focus === "function") lastActiveElQuote.focus();
 }
 
-// Keep global (Escape handler in script.js calls it)
 window.openQuoteModal = openQuoteModal;
 window.closeQuoteModal = closeQuoteModal;
 
-document.querySelectorAll("[data-quote-open]").forEach((btn) => {
-  btn.addEventListener("click", openQuoteModal);
-});
+document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
 function setProgress() {
@@ -108,14 +156,55 @@ function setProgress() {
   dots.forEach((d, i) => d.classList.toggle("isOn", i === stepIndex));
 }
 
+function stepIsActive(stepName) {
+  // Skip interior condition if service doesn't include interior
+  if (stepName === "conditionInterior") return includesInterior();
+  // Skip exterior condition if service doesn't include exterior
+  if (stepName === "conditionExterior") return includesExterior();
+  return true;
+}
+
+function nextActiveStepIndex(fromIndex) {
+  for (let i = fromIndex + 1; i < steps.length; i++) {
+    if (stepIsActive(steps[i])) return i;
+  }
+  return steps.length - 1;
+}
+
+function prevActiveStepIndex(fromIndex) {
+  for (let i = fromIndex - 1; i >= 0; i--) {
+    if (stepIsActive(steps[i])) return i;
+  }
+  return 0;
+}
+
+function includesInterior() {
+  return quoteState.service === "Interior" || quoteState.service === "Interior + Exterior";
+}
+function includesExterior() {
+  return quoteState.service === "Exterior" || quoteState.service === "Interior + Exterior";
+}
+
 function canContinue() {
   const step = steps[stepIndex];
+
   if (step === "size") return !!quoteState.size;
-  if (step === "condition") return !!quoteState.condition;
-  if (step === "contactWindow") return !!quoteState.contactWindow;
-  if (step === "heardAbout") return !!quoteState.heardAbout;
-  if (step === "bookingStatus") return !!quoteState.bookingStatus;
-  if (step === "contact") return quoteState.name.trim().length >= 2 && quoteState.phone.trim().length >= 7 && quoteState.ackDeposit === true;
+  if (step === "service") return !!quoteState.service;
+
+  if (step === "conditionInterior") return !includesInterior() ? true : !!quoteState.interiorCondition;
+  if (step === "conditionExterior") return !includesExterior() ? true : !!quoteState.exteriorCondition;
+
+  if (step === "appointment") return !!quoteState.slotId;
+
+  if (step === "contact") {
+    return (
+      quoteState.name.trim().length >= 2 &&
+      quoteState.phone.trim().length >= 7 &&
+      quoteState.email.trim().includes("@") &&
+      quoteState.ackDeposit === true
+    );
+  }
+
   return true;
 }
 
@@ -134,6 +223,8 @@ function updateNav() {
 
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
+
+  // Text rules
   quoteNextBtn.textContent = step === "contact" ? "Finish" : "Continue";
   quoteNextBtn.disabled = !canContinue();
 }
@@ -144,39 +235,18 @@ function pickAndAdvance(pickFn) {
   setTimeout(() => nextStep(true), 80);
 }
 
-function cardButton(label, hint, img, isSelected, onClick, contain = false) {
+function imageCard({ label, hint, img, isSelected, onClick, contain = false }) {
   const btn = document.createElement("button");
   btn.type = "button";
-  btn.className = "qCard" + (isSelected ? " isSel" : "");
+  btn.className = "qCard qCard--img" + (isSelected ? " isSel" : "");
   btn.addEventListener("click", onClick);
 
   btn.innerHTML = `
-    <div class="qCardMedia">
-      <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)} option" loading="lazy" />
+    <div class="qCardMedia qCardMedia--square">
+      <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
-  `;
-  return btn;
-}
-
-function simpleCard(label, hint, icon, isSelected, onClick, bullets = null) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "qCard" + (isSelected ? " isSel" : "");
-  btn.addEventListener("click", onClick);
-
-  const bulletsHtml = bullets && bullets.length
-    ? `<div class="qCardHint" style="margin-top:8px;">
-        • ${bullets.map(escapeHtml).join("<br/>• ")}
-      </div>`
-    : "";
-
-  btn.innerHTML = `
-    <div class="qIcon" aria-hidden="true">${escapeHtml(icon)}</div>
-    <div class="qCardLabel">${escapeHtml(label)}</div>
-    <div class="qCardHint">${escapeHtml(hint)}</div>
-    ${bulletsHtml}
   `;
   return btn;
 }
@@ -193,6 +263,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
+  // ---- SIZE ----
   if (step === "size") {
     title.textContent = "Vehicle size";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -202,44 +273,67 @@ function renderStep() {
 
     sizes.forEach((s) => {
       cards.appendChild(
-        cardButton(s.label, s.hint, s.img, quoteState.size === s.label, () => {
-          pickAndAdvance(() => (quoteState.size = s.label));
-        }, !!s.contain)
+        imageCard({
+          label: s.label,
+          hint: s.hint,
+          img: s.img,
+          contain: !!s.contain,
+          isSelected: quoteState.size === s.label,
+          onClick: () => pickAndAdvance(() => (quoteState.size = s.label))
+        })
       );
     });
 
     quoteBody.append(title, sub, cards);
   }
 
-  if (step === "condition") {
-    title.textContent = "Vehicle condition";
+  // ---- SERVICE ----
+  if (step === "service") {
+    title.textContent = "Select service";
+    sub.textContent = "Choose what you want detailed. Tap to continue.";
+
+    const cards = document.createElement("div");
+    cards.className = "qCards";
+
+    services.forEach((s) => {
+      cards.appendChild(
+        imageCard({
+          label: s.label,
+          hint: s.hint,
+          img: s.img,
+          contain: !!s.contain,
+          isSelected: quoteState.service === s.label,
+          onClick: () =>
+            pickAndAdvance(() => {
+              quoteState.service = s.label;
+
+              // reset conditions when service changes
+              if (!includesInterior()) quoteState.interiorCondition = "";
+              if (!includesExterior()) quoteState.exteriorCondition = "";
+            })
+        })
+      );
+    });
+
+    quoteBody.append(title, sub, cards);
+  }
+
+  // ---- INTERIOR CONDITION ----
+  if (step === "conditionInterior") {
+    title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
 
-    conditions.forEach((c) => {
+    interiorConditions.forEach((c) => {
       cards.appendChild(
-        simpleCard(c.label, c.hint, c.icon, quoteState.condition === c.label, () => {
-          pickAndAdvance(() => (quoteState.condition = c.label));
-        }, c.bullets)
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "contactWindow") {
-    title.textContent = "Preferred contact window";
-    sub.textContent = "When should we reach out? Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards";
-
-    contactWindows.forEach((o) => {
-      cards.appendChild(
-        simpleCard(o.label, o.hint, o.icon, quoteState.contactWindow === o.label, () => {
-          pickAndAdvance(() => (quoteState.contactWindow = o.label));
+        imageCard({
+          label: c.label,
+          hint: c.hint,
+          img: c.img,
+          isSelected: quoteState.interiorCondition === c.label,
+          onClick: () => pickAndAdvance(() => (quoteState.interiorCondition = c.label))
         })
       );
     });
@@ -247,17 +341,22 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  if (step === "heardAbout") {
-    title.textContent = "How did you hear about us?";
-    sub.textContent = "Tap one option. Tap to continue.";
+  // ---- EXTERIOR CONDITION ----
+  if (step === "conditionExterior") {
+    title.textContent = "Exterior condition";
+    sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards";
 
-    heardAbout.forEach((o) => {
+    exteriorConditions.forEach((c) => {
       cards.appendChild(
-        simpleCard(o.label, o.hint, o.icon, quoteState.heardAbout === o.label, () => {
-          pickAndAdvance(() => (quoteState.heardAbout = o.label));
+        imageCard({
+          label: c.label,
+          hint: c.hint,
+          img: c.img,
+          isSelected: quoteState.exteriorCondition === c.label,
+          onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
         })
       );
     });
@@ -265,27 +364,37 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  if (step === "bookingStatus") {
-    title.textContent = "Booking status";
-    sub.textContent = "Tap one option. Tap to continue.";
+  // ---- APPOINTMENT SLOT (LIVE) ----
+  if (step === "appointment") {
+    title.textContent = "Pick an appointment time";
+    sub.textContent = "Select an available slot. Once booked, it disappears for everyone else.";
 
-    const cards = document.createElement("div");
-    cards.className = "qCards";
+    const wrap = document.createElement("div");
+    wrap.className = "qSlotsWrap";
 
-    bookingStatus.forEach((o) => {
-      cards.appendChild(
-        simpleCard(o.label, o.hint, o.icon, quoteState.bookingStatus === o.label, () => {
-          pickAndAdvance(() => (quoteState.bookingStatus = o.label));
-        })
-      );
-    });
+    const status = document.createElement("div");
+    status.className = "qStatus";
+    status.textContent = "Loading available times...";
 
-    quoteBody.append(title, sub, cards);
+    const slotsGrid = document.createElement("div");
+    slotsGrid.className = "qSlots";
+
+    const reload = document.createElement("button");
+    reload.type = "button";
+    reload.className = "btn btn--quote qReload";
+    reload.textContent = "Reload times";
+    reload.addEventListener("click", () => loadSlots(status, slotsGrid));
+
+    wrap.append(status, slotsGrid, reload);
+    quoteBody.append(title, sub, wrap);
+
+    loadSlots(status, slotsGrid);
   }
 
+  // ---- CONTACT ----
   if (step === "contact") {
     title.textContent = "Your contact info";
-    sub.textContent = "Required. We’ll text/call you to confirm and schedule.";
+    sub.textContent = "Required. We’ll confirm your appointment by text/call.";
 
     const grid = document.createElement("div");
     grid.className = "qGrid2";
@@ -304,14 +413,30 @@ function renderStep() {
       <input id="qPhone" autocomplete="tel" inputmode="tel" placeholder="(555) 555-5555" value="${escapeHtml(quoteState.phone)}" />
     `;
 
-    grid.append(f1, f2);
+    const f3 = document.createElement("div");
+    f3.className = "qField";
+    f3.innerHTML = `
+      <label for="qEmail">Email *</label>
+      <input id="qEmail" autocomplete="email" inputmode="email" placeholder="you@email.com" value="${escapeHtml(quoteState.email)}" />
+    `;
+
+    grid.append(f1, f2, f3);
+
+    const appt = document.createElement("div");
+    appt.className = "qApptSummary";
+    appt.style.marginTop = "10px";
+    appt.innerHTML = `
+      <div class="qStepSub" style="margin:0;">
+        <strong>Selected time:</strong> ${escapeHtml(quoteState.slotLabel || "—")}
+      </div>
+    `;
 
     const notes = document.createElement("div");
     notes.className = "qField";
     notes.style.marginTop = "10px";
     notes.innerHTML = `
       <label for="qNotes">Anything else we should know?</label>
-      <textarea id="qNotes" placeholder="Pet hair, stains, preferred timing, etc.">${escapeHtml(quoteState.notes)}</textarea>
+      <textarea id="qNotes" placeholder="Pet hair, stains, address notes, etc.">${escapeHtml(quoteState.notes)}</textarea>
     `;
 
     const ack = document.createElement("div");
@@ -326,17 +451,18 @@ function renderStep() {
         </label>
       </div>
       <div class="qStatus" data-q-status>
-        ${canContinue() ? "" : "Required: name, phone, and acknowledgement."}
+        ${canContinue() ? "" : "Required: name, phone, email, and acknowledgement."}
       </div>
       <div style="display:none;">
         <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
       </div>
     `;
 
-    quoteBody.append(title, sub, grid, notes, ack);
+    quoteBody.append(title, sub, grid, appt, notes, ack);
 
     const nameEl = quoteBody.querySelector("#qName");
     const phoneEl = quoteBody.querySelector("#qPhone");
+    const emailEl = quoteBody.querySelector("#qEmail");
     const notesEl = quoteBody.querySelector("#qNotes");
     const ackEl = quoteBody.querySelector("#qAck");
     const hpEl = quoteBody.querySelector("#qCompany");
@@ -344,7 +470,7 @@ function renderStep() {
 
     const updateStatus = () => {
       if (!statusEl) return;
-      statusEl.textContent = canContinue() ? "" : "Required: name, phone, and acknowledgement.";
+      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and acknowledgement.";
     };
 
     nameEl?.addEventListener("input", (e) => {
@@ -354,6 +480,11 @@ function renderStep() {
     });
     phoneEl?.addEventListener("input", (e) => {
       quoteState.phone = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+    emailEl?.addEventListener("input", (e) => {
+      quoteState.email = e.target.value || "";
       updateNav();
       updateStatus();
     });
@@ -372,9 +503,15 @@ function renderStep() {
     setTimeout(() => nameEl?.focus(), 50);
   }
 
+  // ---- DONE ----
   if (step === "done") {
     title.textContent = "Request sent";
     sub.textContent = "We’ll reach out shortly to confirm and schedule.";
+
+    const estimate = getEstimateRange();
+    const estimateLine = estimate
+      ? `$${estimate[0]}–$${estimate[1]}`
+      : "Provided after assessment";
 
     const summary = document.createElement("div");
     summary.className = "qSummary";
@@ -382,13 +519,18 @@ function renderStep() {
       <div class="qStepSub" style="margin-top:10px;">
         <strong>Summary</strong><br/>
         Size: ${escapeHtml(quoteState.size)}<br/>
-        Condition: ${escapeHtml(quoteState.condition)}<br/>
-        Contact Window: ${escapeHtml(quoteState.contactWindow)}<br/>
-        Heard About: ${escapeHtml(quoteState.heardAbout)}<br/>
-        Booking Status: ${escapeHtml(quoteState.bookingStatus)}<br/>
+        Service: ${escapeHtml(quoteState.service)}<br/>
+        ${includesInterior() ? `Interior condition: ${escapeHtml(quoteState.interiorCondition)}<br/>` : ""}
+        ${includesExterior() ? `Exterior condition: ${escapeHtml(quoteState.exteriorCondition)}<br/>` : ""}
+        Appointment: ${escapeHtml(quoteState.slotLabel)}<br/>
         Name: ${escapeHtml(quoteState.name)}<br/>
         Phone: ${escapeHtml(quoteState.phone)}<br/>
-        Notes: ${escapeHtml(quoteState.notes || "—")}
+        Email: ${escapeHtml(quoteState.email)}<br/>
+        Notes: ${escapeHtml(quoteState.notes || "—")}<br/><br/>
+        <strong>Estimated range:</strong> ${escapeHtml(estimateLine)}<br/>
+        <span style="display:block;margin-top:6px;color:rgba(0,0,0,.62);font-weight:700;">
+          Final price may adjust after vehicle assessment (condition, pet hair, stains, etc.)
+        </span>
       </div>
     `;
 
@@ -416,45 +558,172 @@ function renderStep() {
   updateNav();
 }
 
+function getEstimateRange() {
+  const size = quoteState.size;
+  const service = quoteState.service;
+
+  if (!size || !service) return null;
+
+  // If only interior
+  if (service === "Interior") {
+    const c = quoteState.interiorCondition;
+    if (!c) return null;
+    return estimateTable.Interior?.[size]?.[c] || null;
+  }
+
+  // If only exterior
+  if (service === "Exterior") {
+    const c = quoteState.exteriorCondition;
+    if (!c) return null;
+    return estimateTable.Exterior?.[size]?.[c] || null;
+  }
+
+  // If both: add ranges together
+  if (service === "Interior + Exterior") {
+    const ic = quoteState.interiorCondition;
+    const ec = quoteState.exteriorCondition;
+    if (!ic || !ec) return null;
+
+    const ir = estimateTable.Interior?.[size]?.[ic];
+    const er = estimateTable.Exterior?.[size]?.[ec];
+    if (!ir || !er) return null;
+
+    return [ir[0] + er[0], ir[1] + er[1]];
+  }
+
+  return null;
+}
+
+// -------------------------
+// Slots loading + selection
+// -------------------------
+async function loadSlots(statusEl, slotsGridEl) {
+  if (!statusEl || !slotsGridEl) return;
+
+  statusEl.textContent = "Loading available times...";
+  slotsGridEl.innerHTML = "";
+
+  // If no script URL, show fallback message
+  if (!window.SCRIPT_URL || !String(window.SCRIPT_URL).startsWith("https://script.google.com/")) {
+    statusEl.textContent = "Slot system not configured (SCRIPT_URL missing).";
+    return;
+  }
+
+  try {
+    const url = `${window.SCRIPT_URL}?action=slots&t=${Date.now()}`;
+    const res = await fetch(url, { method: "GET", mode: "cors", cache: "no-store" });
+    const data = await res.json();
+
+    if (!data || data.ok !== true || !Array.isArray(data.slots)) {
+      statusEl.textContent = "Couldn’t load available times. Try again.";
+      return;
+    }
+
+    if (data.slots.length === 0) {
+      statusEl.textContent = "No times available right now. Please call/text to schedule.";
+      return;
+    }
+
+    statusEl.textContent = "Select a time:";
+    data.slots.forEach((slot) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "qSlotBtn" + (quoteState.slotId === slot.id ? " isSel" : "");
+      btn.textContent = slot.label || slot.id;
+
+      btn.addEventListener("click", () => {
+        quoteState.slotId = String(slot.id || "");
+        quoteState.slotLabel = String(slot.label || slot.id || "");
+        renderStep();
+      });
+
+      slotsGridEl.appendChild(btn);
+    });
+  } catch (e) {
+    statusEl.textContent = "Couldn’t load times (CORS/endpoint issue). Please call/text to schedule.";
+  } finally {
+    updateNav();
+  }
+}
+
+// -------------------------
+// Submit
+// -------------------------
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function submitToGoogleAppsScript() {
-  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return true;
-  if (!SCRIPT_URL || !SCRIPT_URL.startsWith("https://script.google.com/")) return true;
-
-  const payload = {
+function buildPayload() {
+  const estimate = getEstimateRange();
+  return {
     timestamp: new Date().toISOString(),
+    source: "Website Quote Wizard",
+
     size: quoteState.size,
-    condition: quoteState.condition,
-    contactWindow: quoteState.contactWindow,
-    heardAbout: quoteState.heardAbout,
-    bookingStatus: quoteState.bookingStatus,
-    ackDeposit: quoteState.ackDeposit,
+    service: quoteState.service,
+    interiorCondition: quoteState.interiorCondition,
+    exteriorCondition: quoteState.exteriorCondition,
+
+    slotId: quoteState.slotId,
+    slotLabel: quoteState.slotLabel,
+
     name: quoteState.name,
     phone: quoteState.phone,
+    email: quoteState.email,
     notes: quoteState.notes,
-    source: "Website Quote Wizard"
-  };
 
-  try {
-    await Promise.race([
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }),
-      timeout(2500)
-    ]);
-    return true;
-  } catch (e) {
-    return false;
-  }
+    ackDeposit: quoteState.ackDeposit,
+
+    estimateLow: estimate ? estimate[0] : "",
+    estimateHigh: estimate ? estimate[1] : ""
+  };
 }
 
+async function postJson(url, payload) {
+  const res = await fetch(url, {
+    method: "POST",
+    mode: "cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  return res.json();
+}
+
+async function reserveSlotAndSendLead() {
+  // Honeypot: silently "success"
+  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
+
+  const script = window.SCRIPT_URL;
+  if (!script || !String(script).startsWith("https://script.google.com/")) return { ok: true };
+
+  const payload = buildPayload();
+
+  // 1) Reserve slot (so it disappears for everyone else)
+  try {
+    const reserveUrl = `${script}?action=reserve`;
+    const result = await Promise.race([postJson(reserveUrl, payload), timeout(6000)]);
+    if (result && result.ok === true) return { ok: true };
+    if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked. Pick another slot." };
+  } catch (e) {
+    // fall through to lead
+  }
+
+  // 2) Fallback: send lead anyway
+  try {
+    const leadUrl = `${script}?action=lead`;
+    const result = await Promise.race([postJson(leadUrl, payload), timeout(6000)]);
+    if (result && result.ok === true) return { ok: true };
+  } catch (e) {
+    // ignore
+  }
+
+  // Even if script fails, do not block UX (you can still see the lead in console if you want)
+  return { ok: true };
+}
+
+// -------------------------
+// Navigation
+// -------------------------
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
@@ -465,16 +734,27 @@ function nextStep(fromAutoAdvance = false) {
     const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
 
-    submitToGoogleAppsScript().finally(() => {
-      stepIndex = Math.min(stepIndex + 1, steps.length - 1);
+    reserveSlotAndSendLead().then((result) => {
+      if (result && result.ok === false) {
+        // Slot collision: bounce user back to appointment step
+        alert(result.message || "That time was just booked. Please choose another.");
+        stepIndex = steps.indexOf("appointment");
+        renderStep();
+        quoteNextBtn.textContent = old;
+        quoteNextBtn.disabled = false;
+        return;
+      }
+
+      stepIndex = nextActiveStepIndex(stepIndex);
       renderStep();
       quoteNextBtn.textContent = old;
       quoteNextBtn.disabled = false;
     });
+
     return;
   }
 
-  if (stepIndex < steps.length - 1) stepIndex++;
+  stepIndex = nextActiveStepIndex(stepIndex);
   renderStep();
 
   if (fromAutoAdvance) updateNav();
@@ -485,13 +765,16 @@ function prevStep() {
     closeQuoteModal();
     return;
   }
-  if (stepIndex > 0) stepIndex--;
+  stepIndex = prevActiveStepIndex(stepIndex);
   renderStep();
 }
 
 quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
 
+// -------------------------
+// Utilities
+// -------------------------
 function escapeHtml(str) {
   return String(str || "")
     .replaceAll("&", "&amp;")
