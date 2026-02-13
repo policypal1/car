@@ -64,6 +64,11 @@
   gap:10px;
 }
 
+/* Vehicle step: force 2 columns (not 3 then 1) */
+.qCards--vehicle2x2{
+  grid-template-columns: 1fr 1fr;
+}
+
 /* Card base */
 .qCard{
   text-align:left;
@@ -74,7 +79,6 @@
   cursor:pointer;
   box-shadow:0 12px 30px rgba(0,0,0,.08);
 }
-
 .qCard.isSel{
   border-color:rgba(214,178,94,.70);
   box-shadow:0 18px 44px rgba(214,178,94,.18);
@@ -88,16 +92,9 @@
   background:rgba(0,0,0,.04);
 }
 
-/* Default media ratio for most steps */
+/* Default media ratio */
 .qCard--img .qCardMedia{
   aspect-ratio: 16 / 9;
-}
-
-/* Vehicle type cards: keep full car visible */
-.qCard--vehicle .qCardMedia{
-  aspect-ratio: 16 / 9;
-  padding:10px; /* gives breathing room so SUV doesn't touch edges */
-  background:#fff;
 }
 
 .qCardMedia img{
@@ -108,18 +105,25 @@
   display:block;
 }
 
-/* contain = show whole car/truck */
-.qCardMedia img.isContain{
-  object-fit:contain;
+/* Vehicle cards: show full car + zoom in slightly more */
+.qCard--vehicle .qCardMedia{
+  aspect-ratio: 16 / 9;
+  padding:10px;
   background:#fff;
 }
-
-/* Condition cards: stop “super long” images */
-.qCard--condition .qCardMedia{
-  aspect-ratio: 4 / 3;  /* consistent size like your other cards */
+.qCard--vehicle img.isContain{
+  object-fit:contain;
+  background:#fff;
+  transform: scale(1.18);
+  transform-origin:center;
 }
-.qCard--condition .qCardMedia img{
-  object-fit:cover; /* keeps them punchy, not stretched */
+
+/* AFTER vehicle selection: make all images portrait */
+.qCard--portrait .qCardMedia{
+  aspect-ratio: 3 / 4;
+}
+.qCard--portrait .qCardMedia img{
+  object-fit:cover;
 }
 
 /* Text card */
@@ -176,23 +180,46 @@
   color:rgba(0,0,0,.65);
 }
 
-/* Estimate */
+/* Fancy estimate */
 .qEstimateBox{
-  border:1px solid rgba(0,0,0,.10);
-  background:rgba(0,0,0,.02);
-  border-radius:16px;
-  padding:14px;
+  border-radius:18px;
+  padding:16px;
+  border:2px solid rgba(214,178,94,.55);
+  box-shadow:0 14px 36px rgba(214,178,94,.18);
+  background: linear-gradient(180deg, rgba(214,178,94,.10), rgba(0,0,0,.02));
+  text-align:center;
 }
-.qEstimateBig{
+
+.qEstimateBadge{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(214,178,94,.55);
+  background:rgba(255,255,255,.85);
   font-weight:900;
-  font-size:1.35rem;
+  letter-spacing:.9px;
+  font-size:.82rem;
+  text-transform:uppercase;
+}
+
+.qEstimateBig{
+  margin-top:10px;
+  font-weight:1000;
+  font-size:2rem;
+  line-height:1.1;
   color:#111;
 }
-.qEstimateSmall{
-  margin-top:8px;
-  color:rgba(0,0,0,.65);
-  font-weight:700;
-  line-height:1.5;
+
+.qEstimateMeta{
+  margin-top:12px;
+  text-align:left;
+  display:inline-block;
+  width:min(520px, 100%);
+  border-top:1px solid rgba(0,0,0,.10);
+  padding-top:12px;
+  color:rgba(0,0,0,.72);
+  font-weight:800;
+  line-height:1.55;
 }
 
 /* Slots */
@@ -223,11 +250,14 @@
   justify-content:center;
 }
 
+/* Desktop: keep vehicle 2 columns (not 3) */
 @media (min-width:768px){
   .qCards{ grid-template-columns:repeat(3, 1fr); }
+  .qCards--vehicle2x2{ grid-template-columns: repeat(2, 1fr); }
   .qGrid2{ grid-template-columns:1fr 1fr 1fr; }
   .qSlots{ grid-template-columns:repeat(2, 1fr); }
 }
 @media (min-width:1024px){
+  .qCards--vehicle2x2{ grid-template-columns: repeat(2, 1fr); }
   .qSlots{ grid-template-columns:repeat(3, 1fr); }
 }
