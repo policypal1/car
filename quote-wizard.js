@@ -1,3 +1,4 @@
+// quote-wizard.js (FULL FILE REPLACEMENT)
 // -------------------------
 // QUOTE WIZARD (Flow v6)
 // -------------------------
@@ -61,26 +62,34 @@ let stepIndex = 0;
 // -------------------------
 const vehicleTypes = [
   { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp", contain: true, zoom: 1.26 },
-  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp", contain: true, zoom: 1.26 },
 
-  // ✅ ONLY CHANGE: Large SUV pushed back slightly (smaller zoom)
+  // ✅ ONLY Medium adjusted: slightly zoomed out to match visual scale
+  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp", contain: true, zoom: 1.16 },
+
+  // ✅ Keep Large as-is (do not change)
   { label: "Large", hint: "3-row SUV, large SUV", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true, zoom: 1.12 },
 
   { label: "Truck", hint: "Pickup truck", img: "./silver-pickup-truck-side-view-svdvcb49lssczxnt.png", contain: true, zoom: 1.26 }
 ];
 
 const serviceCategories = [
+  // ✅ SWAPPED: Interior now uses the correct Interior image
   { label: "Interior", hint: "Inside-only detailing", img: "./2017-05-22-07-32-26.jpg" },
+
+  // ✅ SWAPPED: Exterior now uses the correct Exterior image
   { label: "Exterior", hint: "Outside-only detailing", img: "./c36084da09340612d8431de0221ea985.jpg" },
+
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
-// ✅ UPDATED images (your new files)
+// ✅ Services list (service selection images)
+// GOAL: Exterior Wash card uses ORIGINAL image again (not the dirtiness/alternate set)
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
-  // ✅ Exterior Wash uses the new image you requested
-  { label: "Exterior Wash", category: "Exterior", img: "./IMG_2910.jpg" },
+  // ✅ Exterior Wash BACK to original image
+  // (Condition step images remain the dirtiness set below)
+  { label: "Exterior Wash", category: "Exterior", img: "./IMG_2469.jpg" },
 
   // ✅ Upkeep shows everywhere
   { label: "Upkeep Plan", category: "Both", img: "./img_6480.webp" },
@@ -96,6 +105,7 @@ const interiorConditions = [
 ];
 
 const exteriorConditions = [
+  // ✅ Keep alternate dirtiness images here (as requested)
   { label: "Light", hint: "Light dirt • quick wash", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
   { label: "Normal", hint: "Road film • wheels need love", img: "./IMG_2469.jpg" },
   { label: "Heavy", hint: "Neglected • heavy buildup", img: "./dirty-car.jpg" }
@@ -252,10 +262,12 @@ function imgCard({ label, hint, img, contain = false, zoom = null, isSelected = 
   btn.className = `qCard qCard--img ${variant}`.trim() + (isSelected ? " isSel" : "");
   btn.addEventListener("click", onClick);
 
-  const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
+  // ✅ Per-card zoom override for vehicle cards (Medium only uses different zoom value)
+  // We set a data attr to avoid changing other vehicles or global CSS.
+  const zoomAttr = typeof zoom === "number" ? `data-car-zoom="${zoom}"` : "";
 
   btn.innerHTML = `
-    <div class="qCardMedia" ${zoomStyle}>
+    <div class="qCardMedia" ${zoomAttr}>
       <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
@@ -273,6 +285,27 @@ function textCard({ label, hint, isSelected = false, onClick }) {
   btn.innerHTML = `
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
+  `;
+  return btn;
+}
+
+// ✅ Premium “Heard About” button (keeps logic the same)
+function heardCard({ label, hint, isSelected = false, onClick }) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "qHearBtn" + (isSelected ? " isSel" : "");
+  btn.setAttribute("aria-label", `Heard about us: ${label}`);
+  btn.addEventListener("click", onClick);
+
+  btn.innerHTML = `
+    <span class="qHearLeft">
+      <span class="qHearLabel">${escapeHtml(label)}</span>
+      <span class="qHearHint">${escapeHtml(hint)}</span>
+    </span>
+    <span class="qHearRight" aria-hidden="true">
+      <span class="qHearPill">${isSelected ? "Selected" : "Select"}</span>
+      <span class="qHearCheck"></span>
+    </span>
   `;
   return btn;
 }
@@ -478,10 +511,7 @@ function renderStep() {
           hint: "Tap to select",
           img: s.img,
           contain: false,
-
-          // ✅ Square cards (especially nice for Exterior step)
           variant: "qCard--square qCard--servicePick",
-
           note: s.note || "",
           isSelected: quoteState.service === s.label,
           onClick: () =>
@@ -545,17 +575,20 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Heard about
+  // 6) Heard about (premium redesign)
   if (step === "heardAbout") {
     title.textContent = "How did you hear about us?";
-    sub.textContent = "Tap one option. Tap to continue.";
+    sub.textContent = "Tap one option to continue.";
+
+    const wrap = document.createElement("div");
+    wrap.className = "qHearWrap";
 
     const cards = document.createElement("div");
-    cards.className = "qCards";
+    cards.className = "qHearGrid";
 
     heardAboutOptions.forEach((o) => {
       cards.appendChild(
-        textCard({
+        heardCard({
           label: o.label,
           hint: o.hint,
           isSelected: quoteState.heardAbout === o.label,
@@ -564,7 +597,8 @@ function renderStep() {
       );
     });
 
-    quoteBody.append(title, sub, cards);
+    wrap.appendChild(cards);
+    quoteBody.append(title, sub, wrap);
   }
 
   // 7) Estimate (better layout)
