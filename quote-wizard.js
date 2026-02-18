@@ -1,9 +1,9 @@
 // -------------------------
-// QUOTE WIZARD (Flow v4)
+// QUOTE WIZARD (Flow v6)
 // -------------------------
-// Vehicle -> Category -> Service (auto-select if 1) -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
+// Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
-// Apps Script URL (provided)
+// Apps Script URL
 const DEFAULT_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzqReZg1ewa_mjsKi7eymwfAtFJYxe2gPGtJiQaoCwJts0_tRis6QAxEc89hyWZvpFO6Q/exec";
 
@@ -53,16 +53,20 @@ const steps = [
   "contact",
   "done"
 ];
+
 let stepIndex = 0;
 
 // -------------------------
 // OPTIONS / IMAGES
 // -------------------------
 const vehicleTypes = [
-  { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp", contain: true },
-  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp", contain: true },
-  { label: "Large", hint: "3-row SUV, large SUV", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true },
-  { label: "Truck", hint: "Pickup truck", img: "./silver-pickup-truck-side-view-svdvcb49lssczxnt.png", contain: true }
+  { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp", contain: true, zoom: 1.26 },
+  { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp", contain: true, zoom: 1.26 },
+
+  // ✅ ONLY CHANGE: Large SUV pushed back slightly (smaller zoom)
+  { label: "Large", hint: "3-row SUV, large SUV", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true, zoom: 1.12 },
+
+  { label: "Truck", hint: "Pickup truck", img: "./silver-pickup-truck-side-view-svdvcb49lssczxnt.png", contain: true, zoom: 1.26 }
 ];
 
 const serviceCategories = [
@@ -71,13 +75,18 @@ const serviceCategories = [
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
-// From your Services section images (index.html)
+// ✅ UPDATED images (your new files)
 const servicesAll = [
-  { label: "Interior Detail", category: "Interior", img: "./51ae0d9f-5775-427e-b565-cb5e0984e800.png" },
-  { label: "Exterior Wash", category: "Exterior", img: "./08db8ba8-9dbd-4ee5-b99e-d8f0a8462297.png" },
-  { label: "Upkeep Plan", category: "Interior + Exterior", img: "./593000c7-e7a5-44a3-9ee8-b68781fa76e7.png" },
-  { label: "Ceramic Coating", category: "Exterior", img: "./827c7c7e-ff7d-48bc-befc-e9e2555ebf39.png" },
-  { label: "Paint Correction", category: "Exterior", img: "./07752da8-f5f0-413a-890b-c6de41317df6 (1).png" }
+  { label: "Interior Detail", category: "Interior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
+
+  // ✅ Exterior Wash uses the new image you requested
+  { label: "Exterior Wash", category: "Exterior", img: "./IMG_2910.jpg" },
+
+  // ✅ Upkeep shows everywhere
+  { label: "Upkeep Plan", category: "Both", img: "./img_6480.webp" },
+
+  { label: "Ceramic Coating", category: "Exterior", img: "./shutterstock_2241164341.jpg", note: "Exterior detailing required" },
+  { label: "Paint Correction", category: "Exterior", img: "./bee.jpg", note: "Exterior detailing required" }
 ];
 
 const interiorConditions = [
@@ -101,18 +110,18 @@ const heardAboutOptions = [
 ];
 
 // -------------------------
-// ESTIMATES (edit anytime)
+// ESTIMATES
 // -------------------------
 const estimateTable = {
   Interior: {
     Small: { Light: [120, 160], Normal: [160, 220], Heavy: [220, 320] },
-    Medium:{ Light: [140, 190], Normal: [190, 260], Heavy: [260, 380] },
+    Medium: { Light: [140, 190], Normal: [190, 260], Heavy: [260, 380] },
     Large: { Light: [170, 230], Normal: [230, 320], Heavy: [320, 450] },
     Truck: { Light: [170, 240], Normal: [240, 340], Heavy: [340, 480] }
   },
   Exterior: {
-    Small: { Light: [60, 90],  Normal: [90, 130],  Heavy: [130, 180] },
-    Medium:{ Light: [70, 100], Normal: [100, 150], Heavy: [150, 210] },
+    Small: { Light: [60, 90], Normal: [90, 130], Heavy: [130, 180] },
+    Medium: { Light: [70, 100], Normal: [100, 150], Heavy: [150, 210] },
     Large: { Light: [90, 120], Normal: [120, 180], Heavy: [180, 260] },
     Truck: { Light: [90, 130], Normal: [130, 200], Heavy: [200, 290] }
   }
@@ -120,34 +129,39 @@ const estimateTable = {
 
 const serviceOverrides = {
   "Ceramic Coating": {
-    Small: [450, 900], Medium: [550, 1100], Large: [650, 1400], Truck: [650, 1400]
+    Small: [450, 900],
+    Medium: [550, 1100],
+    Large: [650, 1400],
+    Truck: [650, 1400]
   },
   "Paint Correction": {
-    Small: [350, 800], Medium: [450, 950], Large: [550, 1200], Truck: [550, 1200]
+    Small: [350, 800],
+    Medium: [450, 950],
+    Large: [550, 1200],
+    Truck: [550, 1200]
   },
   "Upkeep Plan": {
-    Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240]
+    Small: [90, 160],
+    Medium: [110, 190],
+    Large: [130, 220],
+    Truck: [130, 240]
   }
 };
 
 // -------------------------
 // FLOW HELPERS
 // -------------------------
-function includesInteriorByCategory() {
-  return quoteState.serviceCategory === "Interior" || quoteState.serviceCategory === "Interior + Exterior";
-}
-function includesExteriorByCategory() {
-  return quoteState.serviceCategory === "Exterior" || quoteState.serviceCategory === "Interior + Exterior";
+function serviceRequiresInteriorCondition() {
+  if (quoteState.service === "Upkeep Plan") return true;
+  if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return false;
+  return quoteState.serviceCategory === "Interior" || quoteState.serviceCategory === "Interior + Exterior" || quoteState.service === "Interior Detail";
 }
 
-function serviceRequiresInteriorCondition() {
-  if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return false;
-  return includesInteriorByCategory() || quoteState.service === "Interior Detail";
-}
 function serviceRequiresExteriorCondition() {
+  if (quoteState.service === "Upkeep Plan") return true;
   if (quoteState.service === "Interior Detail") return false;
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return true;
-  return includesExteriorByCategory() || quoteState.service === "Exterior Wash" || quoteState.service === "Upkeep Plan";
+  return quoteState.serviceCategory === "Exterior" || quoteState.serviceCategory === "Interior + Exterior" || quoteState.service === "Exterior Wash";
 }
 
 function stepIsActive(stepName) {
@@ -155,10 +169,12 @@ function stepIsActive(stepName) {
   if (stepName === "conditionExterior") return serviceRequiresExteriorCondition();
   return true;
 }
+
 function nextActiveStepIndex(fromIndex) {
   for (let i = fromIndex + 1; i < steps.length; i++) if (stepIsActive(steps[i])) return i;
   return steps.length - 1;
 }
+
 function prevActiveStepIndex(fromIndex) {
   for (let i = fromIndex - 1; i >= 0; i--) if (stepIsActive(steps[i])) return i;
   return 0;
@@ -191,6 +207,7 @@ function canContinue() {
       quoteState.ackDeposit === true
     );
   }
+
   return true;
 }
 
@@ -198,7 +215,6 @@ function updateNav() {
   if (!quoteBackBtn || !quoteNextBtn) return;
 
   quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
-
   const step = steps[stepIndex];
 
   if (step === "done") {
@@ -210,7 +226,6 @@ function updateNav() {
 
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
-
   quoteNextBtn.textContent = step === "contact" ? "Finish" : "Continue";
   quoteNextBtn.disabled = !canContinue();
 }
@@ -231,18 +246,21 @@ function escapeHtml(str) {
 }
 
 // Cards
-function imgCard({ label, hint, img, contain = false, isSelected = false, onClick, variant = "" }) {
+function imgCard({ label, hint, img, contain = false, zoom = null, isSelected = false, onClick, variant = "", note = "" }) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = `qCard qCard--img ${variant}`.trim() + (isSelected ? " isSel" : "");
   btn.addEventListener("click", onClick);
 
+  const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
+
   btn.innerHTML = `
-    <div class="qCardMedia">
+    <div class="qCardMedia" ${zoomStyle}>
       <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
+    ${note ? `<div class="qCardNote">${escapeHtml(note)}</div>` : ""}
   `;
   return btn;
 }
@@ -293,8 +311,17 @@ function computeEstimate() {
     const ir = estimateTable.Interior?.[type]?.[ic];
     const er = estimateTable.Exterior?.[type]?.[ec];
     if (!ir || !er) return null;
-
     return [ir[0] + er[0], ir[1] + er[1]];
+  }
+
+  // Upkeep fallback if needed
+  if (quoteState.service === "Upkeep Plan") {
+    const ic = quoteState.interiorCondition;
+    const ec = quoteState.exteriorCondition;
+    if (!ic || !ec) return null;
+    const ir = estimateTable.Interior?.[type]?.[ic];
+    const er = estimateTable.Exterior?.[type]?.[ec];
+    if (ir && er) return [ir[0] + er[0], ir[1] + er[1]];
   }
 
   return null;
@@ -354,6 +381,7 @@ quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 // -------------------------
 function renderStep() {
   if (!quoteBody) return;
+
   quoteBody.innerHTML = "";
   setProgress();
 
@@ -364,7 +392,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle type (2x2 grid container)
+  // 1) Vehicle type (2x2)
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -379,6 +407,7 @@ function renderStep() {
           hint: v.hint,
           img: v.img,
           contain: !!v.contain,
+          zoom: v.zoom,
           variant: "qCard--vehicle",
           isSelected: quoteState.vehicleType === v.label,
           onClick: () => pickAndAdvance(() => (quoteState.vehicleType = v.label))
@@ -389,7 +418,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category (portrait images)
+  // 2) Category (portrait)
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -420,17 +449,17 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Specific service (auto-select if only 1)
+  // 3) Service (square)
   if (step === "service") {
     const filtered = servicesAll.filter((s) => {
+      if (s.category === "Both") return true;
       if (quoteState.serviceCategory === "Interior + Exterior") return true;
       return s.category === quoteState.serviceCategory;
     });
 
-    // Auto-select if exactly one option
+    // auto-select if ONLY one option
     if (filtered.length === 1 && quoteState.service !== filtered[0].label) {
       quoteState.service = filtered[0].label;
-      // skip rendering this step; jump forward
       stepIndex = nextActiveStepIndex(stepIndex);
       renderStep();
       return;
@@ -449,7 +478,11 @@ function renderStep() {
           hint: "Tap to select",
           img: s.img,
           contain: false,
-          variant: "qCard--portrait qCard--servicePick",
+
+          // ✅ Square cards (especially nice for Exterior step)
+          variant: "qCard--square qCard--servicePick",
+
+          note: s.note || "",
           isSelected: quoteState.service === s.label,
           onClick: () =>
             pickAndAdvance(() => {
@@ -478,7 +511,6 @@ function renderStep() {
           label: c.label,
           hint: c.hint,
           img: c.img,
-          contain: false,
           variant: "qCard--portrait qCard--condition",
           isSelected: quoteState.interiorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.interiorCondition = c.label))
@@ -503,7 +535,6 @@ function renderStep() {
           label: c.label,
           hint: c.hint,
           img: c.img,
-          contain: false,
           variant: "qCard--portrait qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
@@ -536,38 +567,46 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 7) Estimate (fancy)
+  // 7) Estimate (better layout)
   if (step === "estimate") {
     title.textContent = "Estimated price range";
     sub.textContent = "Based on your selections. Final price may adjust after assessment.";
 
     const est = computeEstimate();
-    if (est) {
-      quoteState.estimateLow = est[0];
-      quoteState.estimateHigh = est[1];
-    } else {
-      quoteState.estimateLow = "";
-      quoteState.estimateHigh = "";
-    }
+    quoteState.estimateLow = est ? est[0] : "";
+    quoteState.estimateHigh = est ? est[1] : "";
+
+    const needsExteriorNote = quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction";
 
     const box = document.createElement("div");
     box.className = "qEstimateBox";
     box.innerHTML = `
-      <div class="qEstimateBadge">ESTIMATE</div>
-      <div class="qEstimateBig">${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "We’ll confirm after assessment"}</div>
-      <div class="qEstimateMeta">
-        <div><strong>Vehicle</strong>: ${escapeHtml(quoteState.vehicleType)}</div>
-        <div><strong>Category</strong>: ${escapeHtml(quoteState.serviceCategory)}</div>
-        <div><strong>Service</strong>: ${escapeHtml(quoteState.service)}</div>
-        ${quoteState.interiorCondition ? `<div><strong>Interior</strong>: ${escapeHtml(quoteState.interiorCondition)}</div>` : ""}
-        ${quoteState.exteriorCondition ? `<div><strong>Exterior</strong>: ${escapeHtml(quoteState.exteriorCondition)}</div>` : ""}
+      <div class="qEstimateTop">
+        <div class="qEstimateBadge">ESTIMATE</div>
+        ${needsExteriorNote ? `<div class="qEstimateNote">Exterior detailing required for ${escapeHtml(quoteState.service)}.</div>` : ""}
+      </div>
+
+      <div class="qEstimateBig">
+        ${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "We’ll confirm after assessment"}
+      </div>
+
+      <div class="qEstimatePills">
+        <span class="qPill"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType)}</span>
+        <span class="qPill"><strong>Category:</strong> ${escapeHtml(quoteState.serviceCategory)}</span>
+        <span class="qPill"><strong>Service:</strong> ${escapeHtml(quoteState.service)}</span>
+        ${quoteState.interiorCondition ? `<span class="qPill"><strong>Interior:</strong> ${escapeHtml(quoteState.interiorCondition)}</span>` : ""}
+        ${quoteState.exteriorCondition ? `<span class="qPill"><strong>Exterior:</strong> ${escapeHtml(quoteState.exteriorCondition)}</span>` : ""}
+      </div>
+
+      <div class="qEstimateFine">
+        This is a starting range. We’ll confirm after a quick assessment.
       </div>
     `;
 
     quoteBody.append(title, sub, box);
   }
 
-  // 8) Calendar / Slots
+  // 8) Calendar / Slots (robust JSON handling)
   if (step === "appointment") {
     title.textContent = "Pick an appointment time";
     sub.textContent = "Select an available slot. Once booked, it disappears for everyone else.";
@@ -627,18 +666,11 @@ function renderStep() {
 
     const appt = document.createElement("div");
     appt.className = "qApptSummary";
-    appt.style.marginTop = "10px";
     appt.innerHTML = `
-      <div class="qStepSub" style="margin:0;">
-        <strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}
-      </div>
-      <div class="qStepSub" style="margin:6px 0 0;">
-        <strong>Estimated:</strong> ${
-          quoteState.estimateLow && quoteState.estimateHigh
-            ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
-            : "—"
-        }
-      </div>
+      <div class="qApptLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
+      <div class="qApptLine"><strong>Estimated:</strong> ${
+        quoteState.estimateLow && quoteState.estimateHigh ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}` : "—"
+      }</div>
     `;
 
     const notes = document.createElement("div");
@@ -711,9 +743,7 @@ function renderStep() {
         Heard about us: ${escapeHtml(quoteState.heardAbout)}<br/>
         Appointment: ${escapeHtml(quoteState.slotLabel || "—")}<br/>
         Estimated: ${
-          quoteState.estimateLow && quoteState.estimateHigh
-            ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
-            : "—"
+          quoteState.estimateLow && quoteState.estimateHigh ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}` : "—"
         }<br/>
         Name: ${escapeHtml(quoteState.name)}<br/>
         Phone: ${escapeHtml(quoteState.phone)}<br/>
@@ -747,7 +777,7 @@ function renderStep() {
 }
 
 // -------------------------
-// Slots (Apps Script)
+// Slots (Apps Script) — robust parsing
 // -------------------------
 async function loadSlots(statusEl, slotsGridEl) {
   if (!statusEl || !slotsGridEl) return;
@@ -756,23 +786,29 @@ async function loadSlots(statusEl, slotsGridEl) {
   slotsGridEl.innerHTML = "";
 
   const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
-  if (!script || !String(script).startsWith("https://script.google.com/")) {
-    statusEl.textContent = "Scheduling not configured.";
-    return;
-  }
 
   try {
     const url = `${script}?action=slots&t=${Date.now()}`;
-    const res = await fetch(url, { method: "GET", mode: "cors", cache: "no-store" });
-    const data = await res.json();
+    const res = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
+
+    const text = await res.text();
+    let data = null;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      statusEl.textContent =
+        "Scheduling error: Apps Script did not return JSON. (Check Web App deploy access: 'Anyone' / 'Anyone with link')";
+      return;
+    }
 
     if (!data || data.ok !== true || !Array.isArray(data.slots)) {
-      statusEl.textContent = "Couldn’t load available times. Try again.";
+      statusEl.textContent = "Couldn’t load available times. (Bad response format)";
       return;
     }
 
     if (data.slots.length === 0) {
-      statusEl.textContent = "No times available right now. Please call/text to schedule.";
+      statusEl.textContent = "No times available. Add rows in your Slots sheet with status = open.";
       return;
     }
 
@@ -792,7 +828,7 @@ async function loadSlots(statusEl, slotsGridEl) {
       slotsGridEl.appendChild(btn);
     });
   } catch (e) {
-    statusEl.textContent = "Couldn’t load times (Apps Script response/CORS).";
+    statusEl.textContent = "Couldn’t load times. Check Apps Script deployment + sheet rows.";
   } finally {
     updateNav();
   }
@@ -837,19 +873,23 @@ function buildPayload() {
 async function postJson(url, payload) {
   const res = await fetch(url, {
     method: "POST",
-    mode: "cors",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
+    redirect: "follow"
   });
-  return res.json();
+
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { ok: false, message: "Apps Script returned non-JSON (deployment/permissions)" };
+  }
 }
 
 async function reserveAndSend() {
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
 
   const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
-  if (!script || !String(script).startsWith("https://script.google.com/")) return { ok: true };
-
   const payload = buildPayload();
   const reserveUrl = `${script}?action=reserve`;
 
@@ -857,9 +897,8 @@ async function reserveAndSend() {
     const result = await Promise.race([postJson(reserveUrl, payload), timeout(8000)]);
     if (result && result.ok === true) return { ok: true };
     if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked. Pick another." };
-  } catch (e) {
-    // don't block UX
-  }
+  } catch (e) {}
+
   return { ok: true };
 }
 
@@ -871,16 +910,10 @@ function nextStep(fromAutoAdvance = false) {
 
   const step = steps[stepIndex];
 
-  // leaving heardAbout -> compute estimate
   if (step === "heardAbout") {
     const est = computeEstimate();
-    if (est) {
-      quoteState.estimateLow = est[0];
-      quoteState.estimateHigh = est[1];
-    } else {
-      quoteState.estimateLow = "";
-      quoteState.estimateHigh = "";
-    }
+    quoteState.estimateLow = est ? est[0] : "";
+    quoteState.estimateHigh = est ? est[1] : "";
   }
 
   if (step === "contact") {
