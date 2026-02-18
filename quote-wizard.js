@@ -1,4 +1,3 @@
-// quote-wizard.js (FULL FILE REPLACEMENT)
 // -------------------------
 // QUOTE WIZARD (Flow v6)
 // -------------------------
@@ -63,38 +62,34 @@ let stepIndex = 0;
 const vehicleTypes = [
   { label: "Small", hint: "Coupe, sedan", img: "./55205_cc640_001_300.webp", contain: true, zoom: 1.26 },
 
-  // ✅ ONLY Medium adjusted: slightly zoomed out to match visual scale
+  // ✅ ONLY Medium adjusted (zoomed out slightly)
   { label: "Medium", hint: "Small SUV, wagon", img: "./8a87c202-14fd-4492-b01f-dd41dc1f29b0.webp", contain: true, zoom: 1.16 },
 
-  // ✅ Keep Large as-is (do not change)
+  // ✅ Keep Large as-is
   { label: "Large", hint: "3-row SUV, large SUV", img: "./Chevrolet_Suburban_LT_6cd76558e4.png", contain: true, zoom: 1.12 },
 
   { label: "Truck", hint: "Pickup truck", img: "./silver-pickup-truck-side-view-svdvcb49lssczxnt.png", contain: true, zoom: 1.26 }
 ];
 
 const serviceCategories = [
-  // ✅ SWAPPED: Interior now uses the correct Interior image
+  // ✅ Correct swap
   { label: "Interior", hint: "Inside-only detailing", img: "./2017-05-22-07-32-26.jpg" },
-
-  // ✅ SWAPPED: Exterior now uses the correct Exterior image
   { label: "Exterior", hint: "Outside-only detailing", img: "./c36084da09340612d8431de0221ea985.jpg" },
-
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
 // ✅ Services list (service selection images)
-// GOAL: Exterior Wash card uses ORIGINAL image again (not the dirtiness/alternate set)
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
-  // ✅ Exterior Wash BACK to original image
-  // (Condition step images remain the dirtiness set below)
-  { label: "Exterior Wash", category: "Exterior", img: "./IMG_2469.jpg" },
+  // ✅ Exterior Wash on quote form uses IMG_2910.jpg (service selection image)
+  { label: "Exterior Wash", category: "Exterior", img: "./IMG_2910.jpg" },
 
-  // ✅ Upkeep shows everywhere
   { label: "Upkeep Plan", category: "Both", img: "./img_6480.webp" },
 
-  { label: "Ceramic Coating", category: "Exterior", img: "./shutterstock_2241164341.jpg", note: "Exterior detailing required" },
+  // ✅ Ceramic uses your new image (also used on services section)
+  { label: "Ceramic Coating", category: "Exterior", img: "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png", note: "Exterior detailing required" },
+
   { label: "Paint Correction", category: "Exterior", img: "./bee.jpg", note: "Exterior detailing required" }
 ];
 
@@ -105,7 +100,7 @@ const interiorConditions = [
 ];
 
 const exteriorConditions = [
-  // ✅ Keep alternate dirtiness images here (as requested)
+  // ✅ Keep dirtiness images here (this step is the “condition” step)
   { label: "Light", hint: "Light dirt • quick wash", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
   { label: "Normal", hint: "Road film • wheels need love", img: "./IMG_2469.jpg" },
   { label: "Heavy", hint: "Neglected • heavy buildup", img: "./dirty-car.jpg" }
@@ -262,12 +257,11 @@ function imgCard({ label, hint, img, contain = false, zoom = null, isSelected = 
   btn.className = `qCard qCard--img ${variant}`.trim() + (isSelected ? " isSel" : "");
   btn.addEventListener("click", onClick);
 
-  // ✅ Per-card zoom override for vehicle cards (Medium only uses different zoom value)
-  // We set a data attr to avoid changing other vehicles or global CSS.
-  const zoomAttr = typeof zoom === "number" ? `data-car-zoom="${zoom}"` : "";
+  // ✅ Reliable per-card zoom override (only Medium uses different zoom value)
+  const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
 
   btn.innerHTML = `
-    <div class="qCardMedia" ${zoomAttr}>
+    <div class="qCardMedia" ${zoomStyle}>
       <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
@@ -277,19 +271,6 @@ function imgCard({ label, hint, img, contain = false, zoom = null, isSelected = 
   return btn;
 }
 
-function textCard({ label, hint, isSelected = false, onClick }) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "qCard qCard--text" + (isSelected ? " isSel" : "");
-  btn.addEventListener("click", onClick);
-  btn.innerHTML = `
-    <div class="qCardLabel">${escapeHtml(label)}</div>
-    <div class="qCardHint">${escapeHtml(hint)}</div>
-  `;
-  return btn;
-}
-
-// ✅ Premium “Heard About” button (keeps logic the same)
 function heardCard({ label, hint, isSelected = false, onClick }) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -347,7 +328,6 @@ function computeEstimate() {
     return [ir[0] + er[0], ir[1] + er[1]];
   }
 
-  // Upkeep fallback if needed
   if (quoteState.service === "Upkeep Plan") {
     const ic = quoteState.interiorCondition;
     const ec = quoteState.exteriorCondition;
@@ -490,7 +470,6 @@ function renderStep() {
       return s.category === quoteState.serviceCategory;
     });
 
-    // auto-select if ONLY one option
     if (filtered.length === 1 && quoteState.service !== filtered[0].label) {
       quoteState.service = filtered[0].label;
       stepIndex = nextActiveStepIndex(stepIndex);
@@ -551,7 +530,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition (portrait)
+  // 5) Exterior condition (portrait) — ✅ remove grey hint text under cards
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -563,7 +542,7 @@ function renderStep() {
       cards.appendChild(
         imgCard({
           label: c.label,
-          hint: c.hint,
+          hint: "", // ✅ remove grey hint text
           img: c.img,
           variant: "qCard--portrait qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
@@ -575,7 +554,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Heard about (premium redesign)
+  // 6) Heard about (premium)
   if (step === "heardAbout") {
     title.textContent = "How did you hear about us?";
     sub.textContent = "Tap one option to continue.";
@@ -601,7 +580,7 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
   }
 
-  // 7) Estimate (better layout)
+  // 7) Estimate
   if (step === "estimate") {
     title.textContent = "Estimated price range";
     sub.textContent = "Based on your selections. Final price may adjust after assessment.";
@@ -640,7 +619,7 @@ function renderStep() {
     quoteBody.append(title, sub, box);
   }
 
-  // 8) Calendar / Slots (robust JSON handling)
+  // 8) Calendar / Slots
   if (step === "appointment") {
     title.textContent = "Pick an appointment time";
     sub.textContent = "Select an available slot. Once booked, it disappears for everyone else.";
