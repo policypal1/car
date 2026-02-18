@@ -86,7 +86,7 @@
 
 .qCardMedia{
   width:100%;
-  border-radius:14px;
+  border-radius:16px;
   overflow:hidden;
   border:1px solid rgba(0,0,0,.08);
   background:rgba(0,0,0,.04);
@@ -109,7 +109,7 @@
   aspect-ratio: 16 / 9;
   padding:10px;
   background:#fff;
-  --carZoom: 1.28;
+  --carZoom: 1.26;
 }
 .qCard--vehicle img.isContain{
   object-fit:contain;
@@ -118,26 +118,13 @@
   transform-origin:center;
 }
 
-/* Portrait cards (after vehicle selection) */
-.qCard--portrait .qCardMedia{
-  aspect-ratio: 3 / 4;
-}
-.qCard--portrait .qCardMedia img{
-  object-fit:cover;
-}
+/* Portrait cards */
+.qCard--portrait .qCardMedia{ aspect-ratio: 3 / 4; }
+.qCard--portrait .qCardMedia img{ object-fit:cover; }
 
-/* Square cards for service selection */
-.qCard--square .qCardMedia{
-  aspect-ratio: 1 / 1;
-}
-.qCard--square .qCardMedia img{
-  object-fit:cover;
-}
-
-/* Text card */
-.qCard--text{
-  box-shadow:0 12px 30px rgba(0,0,0,.06);
-}
+/* ✅ Square cards for service selection (Exterior step looks like service cards) */
+.qCard--square .qCardMedia{ aspect-ratio: 1 / 1; }
+.qCard--square .qCardMedia img{ object-fit:cover; }
 
 .qCardLabel{
   margin:10px 2px 2px;
@@ -150,6 +137,16 @@
   font-weight:700;
   font-size:.95rem;
   line-height:1.45;
+}
+.qCardNote{
+  margin:8px 2px 0;
+  font-weight:900;
+  font-size:.9rem;
+  color:rgba(0,0,0,.78);
+  padding:8px 10px;
+  border-radius:12px;
+  border:1px solid rgba(214,178,94,.45);
+  background:rgba(214,178,94,.10);
 }
 
 /* Fields */
@@ -188,14 +185,24 @@
   color:rgba(0,0,0,.65);
 }
 
-/* Fancy estimate */
+/* ✅ Better estimate UI */
 .qEstimateBox{
-  border-radius:18px;
+  border-radius:20px;
   padding:16px;
   border:2px solid rgba(214,178,94,.55);
-  box-shadow:0 14px 36px rgba(214,178,94,.18);
-  background: linear-gradient(180deg, rgba(214,178,94,.10), rgba(0,0,0,.02));
+  box-shadow:0 18px 50px rgba(214,178,94,.18);
+  background:
+    radial-gradient(900px 320px at 20% 15%, rgba(214,178,94,.18), rgba(255,255,255,0) 55%),
+    linear-gradient(180deg, rgba(214,178,94,.10), rgba(0,0,0,.02));
   text-align:center;
+}
+
+.qEstimateTop{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
 }
 
 .qEstimateBadge{
@@ -203,36 +210,58 @@
   padding:6px 10px;
   border-radius:999px;
   border:1px solid rgba(214,178,94,.55);
-  background:rgba(255,255,255,.85);
+  background:rgba(255,255,255,.9);
   font-weight:900;
   letter-spacing:.9px;
   font-size:.82rem;
   text-transform:uppercase;
 }
 
+.qEstimateNote{
+  display:inline-flex;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.04);
+  font-weight:900;
+  font-size:.85rem;
+  color:rgba(0,0,0,.70);
+}
+
 .qEstimateBig{
-  margin-top:10px;
+  margin-top:12px;
   font-weight:1000;
-  font-size:2rem;
+  font-size:2.25rem;
   line-height:1.1;
   color:#111;
 }
 
-.qEstimateMeta{
+.qEstimatePills{
   margin-top:12px;
-  border-top:1px solid rgba(0,0,0,.10);
-  padding-top:12px;
-  color:rgba(0,0,0,.72);
-  font-weight:800;
-  line-height:1.55;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
 }
 
-/* ✅ Center estimate details */
-.qEstimateMeta--center{
-  display:flex;
-  flex-direction:column;
+.qPill{
+  display:inline-flex;
+  gap:6px;
   align-items:center;
-  text-align:center;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(255,255,255,.78);
+  color:rgba(0,0,0,.78);
+  font-weight:800;
+  font-size:.92rem;
+}
+
+.qEstimateFine{
+  margin-top:12px;
+  color:rgba(0,0,0,.62);
+  font-weight:700;
+  line-height:1.6;
 }
 
 /* Slots */
@@ -261,6 +290,20 @@
   margin-top:12px;
   width:100%;
   justify-content:center;
+}
+
+/* Appointment summary */
+.qApptSummary{
+  margin-top:10px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.02);
+  padding:12px;
+}
+.qApptLine{
+  font-weight:900;
+  color:rgba(0,0,0,.70);
+  line-height:1.6;
 }
 
 /* Desktop layout */
