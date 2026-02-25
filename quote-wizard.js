@@ -5,7 +5,7 @@
 //
 // Apps Script URL
 const DEFAULT_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzqReZg1ewa_mjsKi7eymwfAtFJYxe2gPGtJiQaoCwJts0_tRis6QAxEc89hyWZvpFO6Q/exec";
+  "https://script.google.com/macros/s/AKfycbzGVU6qHtd6eVCYlvnBeZW15E-hkea6whfmKWUX7Fs-2Hsy2JXy5nmerF3NyTLaAezBHw/exec";
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
