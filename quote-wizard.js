@@ -1,5 +1,5 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7)
+// QUOTE WIZARD (Flow v7.1)
 // -------------------------
 // Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
@@ -75,19 +75,18 @@ const serviceCategories = [
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
-// ✅ Services list (service selection images)
-// Exterior Wash MUST use ONLY: 63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg
+// ✅ Services (Exterior Wash uses EXACT image you demanded)
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
-  // ✅ Command: Exterior Wash uses this image and NOTHING else
+  // ✅ command: Exterior Wash uses ONLY this image
   { label: "Exterior Wash", category: "Exterior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
   { label: "Upkeep Plan", category: "Both", img: "./img_6480.webp" },
 
-  // ✅ Command: no box note — just tiny * text
-  { label: "Ceramic Coating", category: "Exterior", img: "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png", footnote: "* Pre-wash required" },
-  { label: "Paint Correction", category: "Exterior", img: "./bee.jpg", footnote: "* Pre-wash required" }
+  // ✅ command: pre-wash indicator should NOT change layout -> use small badge over image
+  { label: "Ceramic Coating", category: "Exterior", img: "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png", prewash: true },
+  { label: "Paint Correction", category: "Exterior", img: "./bee.jpg", prewash: true }
 ];
 
 const interiorConditions = [
@@ -96,11 +95,11 @@ const interiorConditions = [
   { label: "Heavy", hint: "Stains/pet hair • deep work", img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png" }
 ];
 
-// ✅ Command: Exterior condition uses IMG_2910.jpg (same image)
+// ✅ command: ONLY Normal changes to IMG_2910.jpg. Light + Heavy revert to original.
 const exteriorConditions = [
-  { label: "Light", hint: "", img: "./IMG_2910.jpg" },
+  { label: "Light", hint: "", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
   { label: "Normal", hint: "", img: "./IMG_2910.jpg" },
-  { label: "Heavy", hint: "", img: "./IMG_2910.jpg" }
+  { label: "Heavy", hint: "", img: "./dirty-car.jpg" }
 ];
 
 const heardAboutOptions = [
@@ -112,7 +111,7 @@ const heardAboutOptions = [
 ];
 
 // -------------------------
-// ESTIMATES (base)
+// ESTIMATES
 // -------------------------
 const estimateTable = {
   Interior: {
@@ -265,7 +264,7 @@ function imgCard({
   isSelected = false,
   onClick,
   variant = "",
-  footnote = ""
+  badge = "" // ✅ small overlay badge (used for prewash)
 }) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -276,11 +275,11 @@ function imgCard({
 
   btn.innerHTML = `
     <div class="qCardMedia" ${zoomStyle}>
+      ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
       <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
     </div>
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
-    ${footnote ? `<div class="qCardFootnote">${escapeHtml(footnote)}</div>` : ""}
   `;
   return btn;
 }
@@ -314,10 +313,9 @@ function tightenAndHeavier(range) {
   const high = Number(range[1]);
   if (!Number.isFinite(low) || !Number.isFinite(high)) return range;
 
-  // client likes heavier pricing + shorter range
   const mid = (low + high) / 2;
   const delta = Math.max(50, Math.round((high - low) * 0.22)); // shorter range
-  const newLow = Math.round(mid + (high - mid) * 0.12); // push upward a bit
+  const newLow = Math.round(mid + (high - mid) * 0.12); // push upward
   const newHigh = Math.max(newLow + 30, newLow + delta);
   return [newLow, newHigh];
 }
@@ -326,7 +324,6 @@ function computeEstimate() {
   const type = quoteState.vehicleType;
   if (!type) return null;
 
-  // overrides first
   if (serviceOverrides[quoteState.service]) {
     const r = serviceOverrides[quoteState.service][type];
     return tightenAndHeavier(r || null);
@@ -420,6 +417,21 @@ window.closeQuoteModal = closeQuoteModal;
 document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
+// ✅ command: DO NOT close if they click outside the panel
+// This blocks backdrop click-to-close even if another script tries to use it.
+if (quoteModal) {
+  quoteModal.addEventListener(
+    "click",
+    (e) => {
+      if (e.target === quoteModal) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    },
+    true // capture
+  );
+}
+
 // -------------------------
 // Calendar state + helpers
 // -------------------------
@@ -452,10 +464,10 @@ function buildCalendarIndex(slots) {
   const map = new Map();
   slots.forEach((s) => {
     const k = s.date;
+    if (!k) return;
     if (!map.has(k)) map.set(k, []);
     map.get(k).push(s);
   });
-  // sort times per day
   for (const [k, arr] of map.entries()) {
     arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
   }
@@ -468,6 +480,33 @@ function findNextAvailableDate(fromDateISO) {
     if (!fromDateISO || d >= fromDateISO) return d;
   }
   return "";
+}
+
+// ✅ robust parsing for YOUR SHEET format:
+// Columns: id | label | status | bookedAt
+// Example id: "2026-02-20 10:00"
+// label: "Fri Feb 20 • 10:00 AM"
+function parseSlotToDateTime(slot) {
+  const id = String(slot.id || "").trim();
+  const label = String(slot.label || "").trim();
+
+  // try id first: YYYY-MM-DD HH:MM
+  const m1 = id.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/);
+  if (m1) return { date: m1[1], time: m1[2], pretty: label || id };
+
+  // try id: YYYY-MM-DDTHH:MM
+  const m2 = id.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+  if (m2) return { date: m2[1], time: m2[2], pretty: label || id };
+
+  // fallback: attempt to parse label
+  const d = new Date(label);
+  if (!isNaN(d.getTime())) {
+    const date = isoDate(d);
+    const time = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    return { date, time, pretty: label || id };
+  }
+
+  return { date: "", time: "", pretty: label || id };
 }
 
 // -------------------------
@@ -486,7 +525,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle type (2x2)
+  // 1) Vehicle type
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -512,7 +551,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category (portrait)
+  // 2) Category
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -555,7 +594,6 @@ function renderStep() {
       return s.category === quoteState.serviceCategory;
     });
 
-    // If only 1, auto-select
     if (filtered.length === 1 && quoteState.service !== filtered[0].label) {
       quoteState.service = filtered[0].label;
       stepIndex = nextActiveStepIndex(stepIndex);
@@ -567,8 +605,6 @@ function renderStep() {
     sub.textContent = "Pick the service you want. Tap to continue.";
 
     const cards = document.createElement("div");
-
-    // ✅ Command: for EXTERIOR category show ALL service cards in one horizontal line (no stacking)
     if (quoteState.serviceCategory === "Exterior") {
       cards.className = "qCards qCards--row";
     } else {
@@ -581,9 +617,8 @@ function renderStep() {
           label: s.label,
           hint: "Tap to select",
           img: s.img,
-          contain: false,
           variant: "qCard--square qCard--servicePick",
-          footnote: s.footnote || "",
+          badge: s.prewash ? "*" : "",
           isSelected: quoteState.service === s.label,
           onClick: () =>
             pickAndAdvance(() => {
@@ -602,7 +637,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition (portrait)
+  // 4) Interior condition
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -626,7 +661,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition (portrait)
+  // 5) Exterior condition (only Normal changed)
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -638,8 +673,8 @@ function renderStep() {
       cards.appendChild(
         imgCard({
           label: c.label,
-          hint: "", // keep clean
-          img: c.img, // ✅ IMG_2910.jpg
+          hint: "",
+          img: c.img,
           variant: "qCard--portrait qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
@@ -676,7 +711,7 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
   }
 
-  // 7) Estimate (simple)
+  // 7) Estimate
   if (step === "estimate") {
     title.textContent = "Estimated price";
     sub.textContent = "Starting estimate based on your selections.";
@@ -707,7 +742,7 @@ function renderStep() {
     quoteBody.append(title, sub, box);
   }
 
-  // 8) Appointment (calendar-style)
+  // 8) Appointment (calendar-style + loading bar + small reload)
   if (step === "appointment") {
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
@@ -715,13 +750,28 @@ function renderStep() {
     const wrap = document.createElement("div");
     wrap.className = "qCalWrap";
 
+    const topRow = document.createElement("div");
+    topRow.className = "qCalTopRow";
+
     const tz = document.createElement("div");
     tz.className = "qCalTz";
     tz.textContent = calendarCache.tzLabel || "Local Time";
 
+    const reload = document.createElement("button");
+    reload.type = "button";
+    reload.className = "qReloadLink";
+    reload.textContent = "Reload";
+    reload.addEventListener("click", () => loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz));
+
+    topRow.append(tz, reload);
+
     const status = document.createElement("div");
     status.className = "qStatus";
     status.textContent = "Loading availability...";
+
+    const loadBar = document.createElement("div");
+    loadBar.className = "qLoadBar";
+    loadBar.innerHTML = `<span class="qLoadBarFill" aria-hidden="true"></span>`;
 
     const cal = document.createElement("div");
     cal.className = "qCal";
@@ -744,19 +794,13 @@ function renderStep() {
       }
     });
 
-    const reload = document.createElement("button");
-    reload.type = "button";
-    reload.className = "btn btn--quote qReload";
-    reload.textContent = "Reload availability";
-    reload.addEventListener("click", () => loadAvailabilityAndRender(status, cal, timesBox, nextAvailBtn));
-
-    wrap.append(tz, status, cal, timesBox, nextAvailBtn, reload);
+    wrap.append(topRow, status, loadBar, cal, timesBox, nextAvailBtn);
     quoteBody.append(title, sub, wrap);
 
-    loadAvailabilityAndRender(status, cal, timesBox, nextAvailBtn);
+    loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
   }
 
-  // 9) Contact (Finish sends email)
+  // 9) Contact
   if (step === "contact") {
     title.textContent = "Your contact info";
     sub.textContent = "Required. We’ll confirm by text/call.";
@@ -870,7 +914,7 @@ function renderStep() {
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 10) Done (clean)
+  // 10) Done
   if (step === "done") {
     title.textContent = "You're booked";
     sub.textContent = "We received your request and will confirm shortly.";
@@ -913,12 +957,13 @@ function renderStep() {
 }
 
 // -------------------------
-// Availability (Apps Script) — calendar format
+// Availability (Apps Script)
 // -------------------------
-async function loadAvailabilityAndRender(statusEl, calEl, timesEl, nextAvailBtn) {
-  if (!statusEl || !calEl || !timesEl) return;
+async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, nextAvailBtn, tzEl) {
+  if (!statusEl || !calEl || !timesEl || !loadBarEl) return;
 
   statusEl.textContent = "Loading availability...";
+  loadBarEl.classList.add("isOn");
   calEl.innerHTML = "";
   timesEl.innerHTML = "";
   nextAvailBtn.style.display = "none";
@@ -936,27 +981,40 @@ async function loadAvailabilityAndRender(statusEl, calEl, timesEl, nextAvailBtn)
     } catch {
       statusEl.textContent =
         "Scheduling error: Apps Script did not return JSON. (Deploy Web App access: Anyone / Anyone with link)";
+      loadBarEl.classList.remove("isOn");
       return;
     }
 
     if (!data || data.ok !== true || !Array.isArray(data.slots)) {
       statusEl.textContent = "Couldn’t load availability. (Bad response format)";
+      loadBarEl.classList.remove("isOn");
       return;
     }
 
     calendarCache.tzLabel = data.tzLabel || "Local Time";
-    calendarCache.slots = data.slots.map((s) => ({
-      id: String(s.id || ""),
-      date: String(s.date || ""),
-      time: String(s.time || ""),
-      label: String(s.label || "")
-    }));
+    if (tzEl) tzEl.textContent = calendarCache.tzLabel;
 
+    // ✅ Robust: accept either {id,label,status} or {id,date,time,label}
+    const normalized = data.slots
+      .filter((s) => String(s.status || "open").toLowerCase() === "open" || !("status" in s))
+      .map((s) => {
+        const parsed = ("date" in s && "time" in s && s.date && s.time) ? { date: String(s.date), time: String(s.time), pretty: String(s.label || "") } : parseSlotToDateTime(s);
+        return {
+          id: String(s.id || ""),
+          date: parsed.date,
+          time: parsed.time,
+          label: String(s.label || parsed.pretty || s.id || "")
+        };
+      })
+      .filter((s) => s.id && s.date && s.time);
+
+    calendarCache.slots = normalized;
     calendarCache.byDate = buildCalendarIndex(calendarCache.slots);
 
     if (calendarCache.slots.length === 0) {
       statusEl.textContent = "No availability right now.";
       nextAvailBtn.style.display = "inline-flex";
+      loadBarEl.classList.remove("isOn");
       return;
     }
 
@@ -964,28 +1022,25 @@ async function loadAvailabilityAndRender(statusEl, calEl, timesEl, nextAvailBtn)
     if (!quoteState.slotDate) {
       quoteState.slotDate = findNextAvailableDate("");
     } else {
-      // if selected date has no slots, bump to next available
       if (!calendarCache.byDate.has(quoteState.slotDate)) {
         quoteState.slotDate = findNextAvailableDate(quoteState.slotDate);
       }
     }
 
     statusEl.textContent = "Select a date, then choose a time:";
-
     renderCalendar(calEl, timesEl, nextAvailBtn);
   } catch {
     statusEl.textContent = "Couldn’t load availability. Check Apps Script deployment + sheet rows.";
   } finally {
+    loadBarEl.classList.remove("isOn");
     updateNav();
   }
 }
 
 function renderCalendar(calEl, timesEl, nextAvailBtn) {
-  // month cursor anchored to selected date
   const selected = quoteState.slotDate ? new Date(`${quoteState.slotDate}T12:00:00`) : new Date();
   let cursor = startOfMonth(selected);
 
-  // header
   const head = document.createElement("div");
   head.className = "qCalHead";
 
@@ -1019,7 +1074,6 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
 
   head.append(prev, label, next);
 
-  // weekday row
   const week = document.createElement("div");
   week.className = "qCalWeek";
   ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((d) => {
@@ -1039,10 +1093,9 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     label.textContent = monthLabel(mStart);
     grid.innerHTML = "";
 
-    const firstDow = mStart.getDay(); // 0-6
+    const firstDow = mStart.getDay();
     const total = daysInMonth(mStart);
 
-    // blanks
     for (let i = 0; i < firstDow; i++) {
       const blank = document.createElement("div");
       blank.className = "qCalDay qCalDay--blank";
@@ -1052,7 +1105,6 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     for (let d = 1; d <= total; d++) {
       const date = new Date(mStart.getFullYear(), mStart.getMonth(), d);
       const dateISO = isoDate(date);
-
       const hasSlots = calendarCache.byDate.has(dateISO);
 
       const btn = document.createElement("button");
@@ -1127,7 +1179,7 @@ function renderTimes(timesEl, nextAvailBtn) {
 }
 
 // -------------------------
-// Submit (reserve + email)
+// Submit
 // -------------------------
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -1252,5 +1304,4 @@ function prevStep() {
 quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
 
-// init first render if modal is already open
 if (quoteModal?.classList.contains("isOpen")) renderStep();
