@@ -1219,8 +1219,9 @@ function buildPayload() {
 async function postJson(url, payload) {
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(payload),
+    cache: "no-store",
     redirect: "follow"
   });
 
@@ -1228,24 +1229,38 @@ async function postJson(url, payload) {
   try {
     return JSON.parse(text);
   } catch {
-    return { ok: false, message: "Apps Script returned non-JSON (deployment/permissions)" };
+    return { ok: false, message: "Apps Script returned non-JSON." };
   }
 }
 
 async function reserveAndSend() {
-  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
+  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) {
+    return { ok: true };
+  }
 
   const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
   const payload = buildPayload();
   const reserveUrl = `${script}?action=reserve`;
 
   try {
-    const result = await Promise.race([postJson(reserveUrl, payload), timeout(12000)]);
-    if (result && result.ok === true) return { ok: true };
-    if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked. Pick another." };
-  } catch (e) {}
+    const result = await Promise.race([
+      postJson(reserveUrl, payload),
+      timeout(12000)
+    ]);
 
-  return { ok: false, message: "Could not submit. Please try again." };
+    if (result && result.ok === true) return { ok: true };
+
+    if (result && result.ok === false) {
+      return {
+        ok: false,
+        message: result.message || "That time was just booked."
+      };
+    }
+
+    return { ok: false, message: "Submit failed." };
+  } catch (e) {
+    return { ok: false, message: "Submission blocked (CORS)." };
+  }
 }
 
 // -------------------------
