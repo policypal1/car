@@ -4,8 +4,7 @@
 // Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
 // Apps Script URL
-const DEFAULT_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwIATUQK9BpXJee5KxND7UFNzyugHGsvz5gXSXEWG6uGhGKZeC-VUM93DbKbejYTf90qQ/exec";
+const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
