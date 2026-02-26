@@ -87,24 +87,24 @@ body{
   border-radius: 2px;
 }
 
-/* ✅ UPDATED: full overlay dropdown panel (does not push page down) */
+/* ✅ FIXED: dropdown overlay only wraps content (no full-screen white canvas) */
 .nav{
   position: fixed;
   top: 72px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: calc(100vh - 72px);
+  left: 1rem;
+  right: 1rem;
 
   background: #fff;
+  border-radius: 18px;
   box-shadow: var(--shadow);
   padding: 14px;
 
   display:none;
+
+  /* if menu gets taller than the screen, it scrolls */
+  max-height: calc(100vh - 92px);
   overflow: auto;
 
-  /* matches that “panel overlay” feel */
-  border-radius: 0;
   z-index: 60;
 }
 .nav a{
@@ -116,7 +116,7 @@ body{
   font-weight:600;
 }
 .nav a:hover{ background: rgba(0,0,0,.04); }
-.nav__cta{ margin-top: 10px; width: 100%; }
+.nav__cta{ margin-top: 8px; width: 100%; }
 .nav.isOpen{ display:block; }
 
 /* Buttons */
@@ -223,6 +223,8 @@ body{
   flex-wrap: wrap;
   margin-top: 10px;
 }
+
+/* (trustPill styles kept — badges removed from HTML) */
 .hero__trust{
   display:flex;
   justify-content:center;
@@ -416,7 +418,7 @@ body{
   border-color: rgba(214,178,94,.85);
 }
 
-/* Before/After compare */
+/* ✅ Before/After compare */
 .compare{
   --pos: 12%;
   --ratio: 16 / 9;
@@ -547,7 +549,7 @@ body{
 }
 .stepCard--finish{ border-color: rgba(214,178,94,.32); }
 
-/* Service area */
+/* ✅ Service area (map + card aligned) */
 .areaGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -647,20 +649,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* ✅ UPDATED: About copy flows better on mobile (centered), desktop unchanged below */
-#about .aboutCopy{
-  text-align: center;
-}
-#about .aboutCopy .aboutText{
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 62ch;
-}
-#about .aboutActions{
-  justify-content: center;
-}
-
-/* Reviews (dark) */
+/* ✅ Reviews (dark) */
 .reviewsTopSimple{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
@@ -673,7 +662,6 @@ body{
   margin-top: 18px;
 }
 
-/* ✅ UPDATED: rating line bigger + same font size + same font */
 .reviewsTopSimple--center{
   background: none;
   border: 0;
@@ -693,13 +681,9 @@ body{
   flex-wrap: wrap;
   justify-content: center;
   text-align: center;
-
-  /* same font for all items */
   font-family: Oswald, Inter, sans-serif;
   text-transform: uppercase;
   letter-spacing: .6px;
-
-  /* same size for all items, bigger */
   font-size: clamp(1.35rem, 4.8vw, 2.15rem);
   font-weight: 800;
 }
@@ -860,6 +844,7 @@ body{
 .modal__content{ color: var(--muted); line-height: 1.7; }
 .modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
+/* Tier layout inside modals */
 .tiers{
   display:grid;
   grid-template-columns: 1fr;
@@ -991,18 +976,12 @@ body{
     box-shadow: none;
     padding: 0;
     inset:auto;
-    height: auto;
-    border-radius: 0;
+    max-height: none;
     overflow: visible;
   }
   .nav a{ padding: 10px 10px; }
   .navToggle{ display:none; }
   .nav__cta{ margin-left: 6px; margin-top: 0; width: auto; }
-
-  /* About desktop stays original (left aligned) */
-  #about .aboutCopy{ text-align: left; }
-  #about .aboutActions{ justify-content: flex-start; }
-  #about .aboutCopy .aboutText{ margin-left: 0; margin-right: 0; max-width: none; }
 
   .aboutGrid{ grid-template-columns: 1.1fr .9fr; gap: 22px; }
   .aboutMedia img{ height: 380px; }
@@ -1025,7 +1004,6 @@ body{
   }
   .footerMini__right{ align-items:flex-end; }
 
-  /* Reviews rail sizing */
   .reviewsRail--dark{
     --rail-pad: 22px;
     grid-auto-columns: calc((100% - (2 * var(--rail-pad)) - (2 * var(--rail-gap))) / 3);
@@ -1035,7 +1013,6 @@ body{
   .railArrow--left{ left: 0; }
   .railArrow--right{ right: 0; }
 
-  /* actions become 2 columns on desktop */
   .serviceCard__actions{
     grid-template-columns: 1fr 1fr;
     gap: 12px;
