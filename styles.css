@@ -29,7 +29,9 @@ body{
   z-index: 50;
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0,0,0,.06);
+
+  /* ✅ removed divider line so the dropdown feels merged */
+  border-bottom: 0;
 }
 .header__inner{
   display:flex;
@@ -87,23 +89,24 @@ body{
   border-radius: 2px;
 }
 
-/* ✅ FIXED: dropdown overlay only wraps content (no full-screen white canvas) */
+/* ✅ Mobile dropdown: merged with header */
 .nav{
   position: fixed;
   top: 72px;
-  left: 1rem;
-  right: 1rem;
+  left: 0;
+  right: 0;
 
   background: #fff;
-  border-radius: 18px;
   box-shadow: var(--shadow);
   padding: 14px;
 
   display:none;
 
-  /* if menu gets taller than the screen, it scrolls */
-  max-height: calc(100vh - 92px);
+  max-height: calc(100vh - 72px);
   overflow: auto;
+
+  /* ✅ no floating gap, feels attached */
+  border-radius: 0 0 18px 18px;
 
   z-index: 60;
 }
@@ -222,23 +225,6 @@ body{
   justify-content:center;
   flex-wrap: wrap;
   margin-top: 10px;
-}
-
-/* (trustPill styles kept — badges removed from HTML) */
-.hero__trust{
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top: 18px;
-}
-.trustPill{
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(214,178,94,.18);
-  padding: .55rem .8rem;
-  border-radius: 999px;
-  font-weight:700;
-  font-size: .92rem;
 }
 
 /* Sections */
@@ -418,7 +404,7 @@ body{
   border-color: rgba(214,178,94,.85);
 }
 
-/* ✅ Before/After compare */
+/* Compare */
 .compare{
   --pos: 12%;
   --ratio: 16 / 9;
@@ -449,11 +435,6 @@ body{
   background-position: var(--beforePos, center);
   background-repeat: no-repeat;
   border-right: 2px solid rgba(255,255,255,.70);
-}
-.compare--fixedReveal .compare__stage,
-.compare--fixedReveal .compare__stage::after{
-  transition: none;
-  transform: none;
 }
 .compare__range{
   position:absolute;
@@ -549,7 +530,7 @@ body{
 }
 .stepCard--finish{ border-color: rgba(214,178,94,.32); }
 
-/* ✅ Service area (map + card aligned) */
+/* Service area */
 .areaGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -649,7 +630,25 @@ body{
   flex-wrap:wrap;
 }
 
-/* ✅ Reviews (dark) */
+/* ✅ Mobile About: "Hey, I’m Dekun" acts like the title, center text after it */
+@media (max-width: 767px){
+  #about .aboutTitle{
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 12px;
+  }
+  #about .aboutText{
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 62ch;
+  }
+  #about .aboutActions{
+    justify-content: center;
+  }
+}
+
+/* Reviews */
 .reviewsTopSimple{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
@@ -661,7 +660,6 @@ body{
   gap: 14px;
   margin-top: 18px;
 }
-
 .reviewsTopSimple--center{
   background: none;
   border: 0;
@@ -703,32 +701,25 @@ body{
   color: rgba(255,255,255,.78);
 }
 
-/* Wrap holds arrows outside the review rail */
 .reviewsRailWrap{
   position: relative;
   margin-top: 16px;
   padding: 0 56px;
 }
-
-/* Track */
 .reviewsRail--dark{
   --rail-gap: 14px;
   --rail-pad: 18px;
-
   display:grid;
   grid-auto-flow: column;
   grid-auto-columns: 88%;
   gap: var(--rail-gap);
-
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-
   padding: 18px var(--rail-pad);
   border-radius: 22px;
   background: rgba(255,255,255,.03);
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: 0 18px 44px rgba(0,0,0,.35);
-
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   scroll-padding-left: var(--rail-pad);
@@ -766,7 +757,6 @@ body{
 .rStars{ color: var(--gold); letter-spacing: 1px; font-size: 1rem; }
 .rText--dark{ margin: 10px 0 0; line-height: 1.7; color: rgba(255,255,255,.74); }
 
-/* Rail arrows */
 .railArrow{
   position:absolute;
   top: 50%;
@@ -823,7 +813,6 @@ body{
   font-size: 1.2rem;
 }
 
-/* Service modal */
 .modal__panel{
   position:relative;
   width: min(680px, 100%);
@@ -844,7 +833,6 @@ body{
 .modal__content{ color: var(--muted); line-height: 1.7; }
 .modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
-/* Tier layout inside modals */
 .tiers{
   display:grid;
   grid-template-columns: 1fr;
@@ -877,7 +865,6 @@ body{
 }
 .tier ul{ margin: 10px 0 0 18px; padding: 0; }
 
-/* Call modal */
 .callPanel{
   position:relative;
   width: min(560px, 100%);
@@ -909,11 +896,11 @@ body{
 }
 .callHint{ margin: 10px 0 0; color: rgba(0,0,0,.60); line-height: 1.6; }
 
-/* Footer (dark – kept for fallback) */
-.footer--dark{
-  background: #070708;
-  color: #fff;
-  border-top: 1px solid rgba(255,255,255,.08);
+/* Footer (light) */
+.footer--light{
+  background: #fff;
+  color: #111;
+  border-top: 1px solid rgba(0,0,0,.08);
 }
 .footerMini{
   padding: 1.05rem 0;
@@ -927,30 +914,7 @@ body{
   text-transform: uppercase;
   font-size: 1.25rem;
 }
-.footerMini__meta{ color: rgba(255,255,255,.72); margin-top: 2px; }
-.footerMini__right{ display:flex; flex-direction:column; gap: 10px; }
-.footerMini__phone{ color: rgba(255,255,255,.82); text-decoration:none; font-weight: 900; }
 .footerMini__actions{ display:flex; gap: 10px; flex-wrap:wrap; }
-.footer__bottom--dark{ border-top: 1px solid rgba(255,255,255,.10); }
-.footer__bottomInner{
-  padding: 10px 0;
-  display:flex;
-  justify-content:space-between;
-  gap: 12px;
-  font-size: .95rem;
-  color: rgba(255,255,255,.72);
-}
-.footer__bottomLink{ text-decoration:none; color: rgba(255,255,255,.72); }
-.footer__bottomLink:hover{ color:#fff; }
-
-/* Footer (light) */
-.footer--light{
-  background: #fff;
-  color: #111;
-  border-top: 1px solid rgba(0,0,0,.08);
-}
-.footerMini--light{ padding: 1.05rem 0; }
-.footerMini__name--light{ color:#111; }
 .footer__bottom--light{ border-top: 1px solid rgba(0,0,0,.08); }
 .footer__bottomInner--light{
   padding: 10px 0;
@@ -978,6 +942,7 @@ body{
     inset:auto;
     max-height: none;
     overflow: visible;
+    border-radius: 0;
   }
   .nav a{ padding: 10px 10px; }
   .navToggle{ display:none; }
@@ -1002,7 +967,6 @@ body{
     justify-content:space-between;
     gap: 14px;
   }
-  .footerMini__right{ align-items:flex-end; }
 
   .reviewsRail--dark{
     --rail-pad: 22px;
@@ -1010,8 +974,6 @@ body{
   }
 
   .reviewsRailWrap{ padding: 0 64px; }
-  .railArrow--left{ left: 0; }
-  .railArrow--right{ right: 0; }
 
   .serviceCard__actions{
     grid-template-columns: 1fr 1fr;
