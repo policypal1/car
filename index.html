@@ -13,7 +13,8 @@
       rel="stylesheet"
     />
 
-    <link rel="icon" href="./Untitled design (4).png" type="image/png" />
+    <!-- ✅ Rounded-corner favicon (SVG wrapper around your PNG) -->
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./Untitled design (4).png" />
 
     <link rel="stylesheet" href="./styles.css" />
@@ -79,7 +80,6 @@
         </div>
 
         <div class="serviceWrap">
-          <!-- ✅ Interior (uses same image as Interior Detail in quote wizard) -->
           <article class="serviceCard" style="background-image:url('./2017-05-22-07-32-26.jpg')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
@@ -98,7 +98,6 @@
             </div>
           </article>
 
-          <!-- ✅ Exterior (correct exterior image) -->
           <article class="serviceCard" style="background-image:url('./c36084da09340612d8431de0221ea985.jpg')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
@@ -117,7 +116,6 @@
             </div>
           </article>
 
-          <!-- ✅ Upkeep -->
           <article class="serviceCard" style="background-image:url('./img_6480.webp')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
@@ -136,7 +134,6 @@
             </div>
           </article>
 
-          <!-- ✅ Ceramic (NEW IMAGE) -->
           <article class="serviceCard" style="background-image:url('./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
@@ -155,7 +152,6 @@
             </div>
           </article>
 
-          <!-- ✅ Paint Correction -->
           <article class="serviceCard" style="background-image:url('./bee.jpg')">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
@@ -332,7 +328,7 @@
       <div class="container">
         <div class="section__head">
           <h2 class="section__title section__title--dark">REVIEWS</h2>
-          <p class="section__sub section__sub--dark">Swipe through what people say after they see the results in person.</p>
+          <!-- ✅ Removed the “Swipe through…” line (per request) -->
         </div>
 
         <div class="reviewsTopSimple reviewsTopSimple--center">
@@ -349,10 +345,160 @@
           <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">‹</button>
 
           <div class="reviewsRail reviewsRail--dark" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
-            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">JR</div><div class="rMeta"><div class="rName rName--dark">J. Rivera</div><div class="rLoc rLoc--dark">Keizer</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Dog hair was packed into the back seats. They got it out and the car smells clean again. Cupholders and door jambs were spotless.</p></article>
-            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">AM</div><div class="rMeta"><div class="rName rName--dark">A. Monroe</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">Booked through text and got a real price fast. The carpets looked completely different and the dash looked clean without that greasy shine.</p></article>
-            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">BR</div><div class="rMeta"><div class="rName rName--dark">B. Reyes</div><div class="rLoc rLoc--dark">Salem</div></div><div class="rStars" aria-label="4 out of 5 stars">★★★★☆</div></div><p class="rText rText--dark">Really solid clean and the seats looked way better. Scheduling took a little back-and-forth, but the results were worth it.</p></article>
-            <article class="rCard rCard--rail rCard--dark"><div class="rHead"><div class="rAvatar rAvatar--dark">KS</div><div class="rMeta"><div class="rName rName--dark">K. Scott</div><div class="rLoc rLoc--dark">West Salem</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText rText--dark">I thought the stain in the passenger seat was permanent. It’s gone. The car feels newer inside and everything smells fresh.</p></article>
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">JR</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">J. Rivera</div>
+                  <div class="rLoc rLoc--dark">Keizer</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                Dog hair was packed into the back seats. They got it out and the car smells clean again. Cupholders and door jambs were spotless.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">AM</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">A. Monroe</div>
+                  <div class="rLoc rLoc--dark">Salem</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                Booked through text and got a real price fast. The carpets looked completely different and the dash looked clean without that greasy shine.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">BR</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">B. Reyes</div>
+                  <div class="rLoc rLoc--dark">Salem</div>
+                </div>
+                <div class="rStars" aria-label="4 out of 5 stars">★★★★☆</div>
+              </div>
+              <p class="rText rText--dark">
+                Really solid clean and the seats looked way better. Scheduling took a little back-and-forth, but the results were worth it.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">KS</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">K. Scott</div>
+                  <div class="rLoc rLoc--dark">West Salem</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                I thought the stain in the passenger seat was permanent. It’s gone. The car feels newer inside and everything smells fresh.
+              </p>
+            </article>
+
+            <!-- ✅ 7 NEW REVIEWS (generated) -->
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">LM</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">L. Martin</div>
+                  <div class="rLoc rLoc--dark">Keizer</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                Super easy to book and the quote was accurate. My interior went from dusty to “new car” clean. Seats, vents, and panels were all done right.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">CP</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">C. Parker</div>
+                  <div class="rLoc rLoc--dark">Salem</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                I have kids and the back seat was wrecked. Crumbs and sticky spots gone. Even the little creases in the seats looked clean again.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">TW</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">T. Wilson</div>
+                  <div class="rLoc rLoc--dark">West Salem</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                Showed up on time and didn’t rush. The paint looked brighter and the wheels actually looked black again. Clean work.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">HR</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">H. Ramirez</div>
+                  <div class="rLoc rLoc--dark">Salem</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                The dog smell was the main issue. After the interior detail it was completely gone. The carpets and mats look brand new.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">NB</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">N. Brooks</div>
+                  <div class="rLoc rLoc--dark">Keizer</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                Great communication and clear pricing. The dash and trim looked clean but not shiny/greasy. Exactly what I wanted.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">SG</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">S. Grant</div>
+                  <div class="rLoc rLoc--dark">West Salem</div>
+                </div>
+                <div class="rStars" aria-label="4 out of 5 stars">★★★★☆</div>
+              </div>
+              <p class="rText rText--dark">
+                Solid detail overall and the results were noticeable right away. A couple scheduling texts, but the finished work was worth it.
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">AD</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">A. Daniels</div>
+                  <div class="rLoc rLoc--dark">Salem</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">★★★★★</div>
+              </div>
+              <p class="rText rText--dark">
+                My headlights and paint looked tired. After the wash/detail, everything looked sharper and cleaner. Easy process from start to finish.
+              </p>
+            </article>
           </div>
 
           <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">›</button>
