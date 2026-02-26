@@ -86,14 +86,26 @@ body{
   display:block;
   border-radius: 2px;
 }
+
+/* ✅ UPDATED: full overlay dropdown panel (does not push page down) */
 .nav{
   position: fixed;
-  inset: 72px 1rem auto 1rem;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(100vh - 72px);
+
   background: #fff;
-  border-radius: 18px;
   box-shadow: var(--shadow);
   padding: 14px;
+
   display:none;
+  overflow: auto;
+
+  /* matches that “panel overlay” feel */
+  border-radius: 0;
+  z-index: 60;
 }
 .nav a{
   display:block;
@@ -104,7 +116,7 @@ body{
   font-weight:600;
 }
 .nav a:hover{ background: rgba(0,0,0,.04); }
-.nav__cta{ margin-top: 8px; }
+.nav__cta{ margin-top: 10px; width: 100%; }
 .nav.isOpen{ display:block; }
 
 /* Buttons */
@@ -343,7 +355,6 @@ body{
 }
 .tag--ghost{ visibility:hidden; }
 
-/* ✅ UPDATED: Learn More + Get Quote spacing (less cramped) */
 .serviceCard__actions{
   display:grid;
   grid-template-columns: 1fr;
@@ -405,7 +416,7 @@ body{
   border-color: rgba(214,178,94,.85);
 }
 
-/* ✅ Before/After compare */
+/* Before/After compare */
 .compare{
   --pos: 12%;
   --ratio: 16 / 9;
@@ -420,27 +431,21 @@ body{
 .compare__stage{
   width: 100%;
   aspect-ratio: var(--ratio);
-
-  /* AFTER is the base (full frame) */
   background-image: var(--after);
   background-size: var(--afterSize, var(--mediaSize, cover));
   background-position: var(--afterPos, center);
   background-repeat: no-repeat;
-
   position: relative;
 }
 .compare__stage::after{
   content:"";
   position:absolute;
   inset:0;
-
-  /* BEFORE clipped on the left */
   width: var(--pos);
   background-image: var(--before);
   background-size: var(--beforeSize, var(--mediaSize, cover));
   background-position: var(--beforePos, center);
   background-repeat: no-repeat;
-
   border-right: 2px solid rgba(255,255,255,.70);
 }
 .compare--fixedReveal .compare__stage,
@@ -542,7 +547,7 @@ body{
 }
 .stepCard--finish{ border-color: rgba(214,178,94,.32); }
 
-/* ✅ Service area (map + card aligned) */
+/* Service area */
 .areaGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -557,7 +562,6 @@ body{
   background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.14), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
   padding: 16px;
   box-shadow: 0 22px 60px rgba(0,0,0,.35);
-
   height: 100%;
   display:flex;
   flex-direction:column;
@@ -608,7 +612,7 @@ body{
   display:block;
 }
 
-/* About (light) */
+/* About */
 .aboutGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -643,7 +647,20 @@ body{
   flex-wrap:wrap;
 }
 
-/* ✅ Reviews (dark) */
+/* ✅ UPDATED: About copy flows better on mobile (centered), desktop unchanged below */
+#about .aboutCopy{
+  text-align: center;
+}
+#about .aboutCopy .aboutText{
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 62ch;
+}
+#about .aboutActions{
+  justify-content: center;
+}
+
+/* Reviews (dark) */
 .reviewsTopSimple{
   border-radius: 22px;
   border: 1px solid rgba(255,255,255,.10);
@@ -655,23 +672,8 @@ body{
   gap: 14px;
   margin-top: 18px;
 }
-.reviewsTopSimple__score{ display:flex; flex-direction: column; gap: 6px; }
-.reviewsTopSimple__big{
-  font-family: Oswald, Inter, sans-serif;
-  font-weight: 800;
-  font-size: 3rem;
-  line-height: 1;
-  color: #fff;
-}
-.reviewsTopSimple__stars{
-  color: var(--gold);
-  letter-spacing: 2px;
-  font-size: 1.15rem;
-}
-.reviewsTopSimple__small{ color: rgba(255,255,255,.72); }
-.reviewsTopSimple__cta{ display:flex; gap: 10px; flex-wrap:wrap; }
 
-/* ✅ Centered rating header (bigger) */
+/* ✅ UPDATED: rating line bigger + same font size + same font */
 .reviewsTopSimple--center{
   background: none;
   border: 0;
@@ -687,24 +689,34 @@ body{
 .reviewsTopSimple__line{
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   justify-content: center;
   text-align: center;
+
+  /* same font for all items */
+  font-family: Oswald, Inter, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+
+  /* same size for all items, bigger */
+  font-size: clamp(1.35rem, 4.8vw, 2.15rem);
+  font-weight: 800;
 }
-.reviewsTopSimple--center .reviewsTopSimple__big{
-  font-size: 1.85rem;
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight: 900;
+.reviewsTopSimple__big,
+.reviewsTopSimple__stars,
+.reviewsTopSimple__small{
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  line-height: 1.05;
 }
-.reviewsTopSimple--center .reviewsTopSimple__stars{
+.reviewsTopSimple__stars{
   color: var(--gold) !important;
-  font-size: 1.35rem;
   letter-spacing: 2px;
 }
-.reviewsTopSimple--center .reviewsTopSimple__small{
+.reviewsTopSimple__small{
   color: rgba(255,255,255,.78);
-  font-weight: 650;
 }
 
 /* Wrap holds arrows outside the review rail */
@@ -848,7 +860,6 @@ body{
 .modal__content{ color: var(--muted); line-height: 1.7; }
 .modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
-/* Tier layout inside modals */
 .tiers{
   display:grid;
   grid-template-columns: 1fr;
@@ -980,10 +991,18 @@ body{
     box-shadow: none;
     padding: 0;
     inset:auto;
+    height: auto;
+    border-radius: 0;
+    overflow: visible;
   }
   .nav a{ padding: 10px 10px; }
   .navToggle{ display:none; }
-  .nav__cta{ margin-left: 6px; margin-top: 0; }
+  .nav__cta{ margin-left: 6px; margin-top: 0; width: auto; }
+
+  /* About desktop stays original (left aligned) */
+  #about .aboutCopy{ text-align: left; }
+  #about .aboutActions{ justify-content: flex-start; }
+  #about .aboutCopy .aboutText{ margin-left: 0; margin-right: 0; max-width: none; }
 
   .aboutGrid{ grid-template-columns: 1.1fr .9fr; gap: 22px; }
   .aboutMedia img{ height: 380px; }
@@ -1006,7 +1025,7 @@ body{
   }
   .footerMini__right{ align-items:flex-end; }
 
-  /* ✅ Reviews rail sizing */
+  /* Reviews rail sizing */
   .reviewsRail--dark{
     --rail-pad: 22px;
     grid-auto-columns: calc((100% - (2 * var(--rail-pad)) - (2 * var(--rail-gap))) / 3);
@@ -1016,7 +1035,7 @@ body{
   .railArrow--left{ left: 0; }
   .railArrow--right{ right: 0; }
 
-  /* ✅ UPDATED: actions become 2 columns on desktop */
+  /* actions become 2 columns on desktop */
   .serviceCard__actions{
     grid-template-columns: 1fr 1fr;
     gap: 12px;
