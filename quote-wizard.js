@@ -4,7 +4,8 @@
 // Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
 // Apps Script URL
-const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
+const DEFAULT_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -550,13 +551,13 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category
+  // 2) Category  ✅ MOBILE FIX: compact 3-up grid
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards";
+    cards.className = "qCards qCards--compact3";
 
     serviceCategories.forEach((c) => {
       cards.appendChild(
@@ -636,13 +637,13 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition
+  // 4) Interior condition ✅ MOBILE FIX: compact 3-up grid
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards";
+    cards.className = "qCards qCards--compact3";
 
     interiorConditions.forEach((c) => {
       cards.appendChild(
@@ -660,13 +661,13 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition (only Normal changed)
+  // 5) Exterior condition ✅ MOBILE FIX: compact 3-up grid
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards";
+    cards.className = "qCards qCards--compact3";
 
     exteriorConditions.forEach((c) => {
       cards.appendChild(
@@ -997,7 +998,10 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
     const normalized = data.slots
       .filter((s) => String(s.status || "open").toLowerCase() === "open" || !("status" in s))
       .map((s) => {
-        const parsed = ("date" in s && "time" in s && s.date && s.time) ? { date: String(s.date), time: String(s.time), pretty: String(s.label || "") } : parseSlotToDateTime(s);
+        const parsed =
+          "date" in s && "time" in s && s.date && s.time
+            ? { date: String(s.date), time: String(s.time), pretty: String(s.label || "") }
+            : parseSlotToDateTime(s);
         return {
           id: String(s.id || ""),
           date: parsed.date,
@@ -1242,10 +1246,7 @@ async function reserveAndSend() {
   const reserveUrl = `${script}?action=reserve`;
 
   try {
-    const result = await Promise.race([
-      postJson(reserveUrl, payload),
-      timeout(12000)
-    ]);
+    const result = await Promise.race([postJson(reserveUrl, payload), timeout(12000)]);
 
     if (result && result.ok === true) return { ok: true };
 
