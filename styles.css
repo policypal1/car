@@ -245,11 +245,6 @@ body{
 .section__title--dark{ color: #fff; }
 .section__sub--dark{ color: rgba(255,255,255,.74); }
 
-/* ✅ Reels section gets its own slightly different dark background */
-.section--reels{
-  background: radial-gradient(900px 420px at 50% 0%, rgba(214,178,94,.08), rgba(255,255,255,0) 60%), #070708;
-}
-
 /* Services */
 .serviceWrap{
   display:flex;
@@ -276,7 +271,6 @@ body{
   box-shadow: 0 34px 95px rgba(0,0,0,.20);
   border-color: rgba(214,178,94,.28);
 }
-/* ✅ Mobile-only: slightly larger service cards */
 @media (max-width: 767px){
   .serviceCard{
     width: min(420px, 100%);
@@ -358,25 +352,59 @@ body{
   justify-content:center;
 }
 
-/* ✅ Reels: mobile snap scroller + desktop grid */
+/* ✅ Reels: mobile snap scroller + desktop click-to-play */
 .reels{
   width: min(980px, 100%);
   margin: 0 auto;
 }
 
-/* Mobile: Instagram-like internal scroll */
+/* Mobile: internal scroll + snap + chevrons cue */
 @media (max-width: 767px){
   .reels{
     height: 72vh;
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     border-radius: 22px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    box-shadow: 0 18px 44px rgba(0,0,0,.35);
+    border: 1px solid rgba(0,0,0,.08);
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(0,0,0,.12);
     -webkit-overflow-scrolling: touch;
+    position: relative;
   }
   .reels::-webkit-scrollbar{ display:none; }
+
+  .reels::after{
+    content:"";
+    position:absolute;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.55);
+    box-shadow: 0 14px 34px rgba(0,0,0,.25);
+    pointer-events:none;
+    opacity: .9;
+  }
+  .reels::before{
+    content:"";
+    position:absolute;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%) rotate(45deg);
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid rgba(255,255,255,.92);
+    border-bottom: 2px solid rgba(255,255,255,.92);
+    pointer-events:none;
+    animation: reelsCue 1.2s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes reelsCue{
+    0%,100%{ transform: translateX(-50%) translateY(0) rotate(45deg); opacity: .85; }
+    50%{ transform: translateX(-50%) translateY(6px) rotate(45deg); opacity: .45; }
+  }
 
   .reel{
     scroll-snap-align: start;
@@ -385,11 +413,12 @@ body{
     display:flex;
     align-items: stretch;
     justify-content: center;
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    background:#000;
   }
 }
 
-/* Desktop: 3-up grid */
+/* Desktop: 3-up grid, no autoplay, click to play */
 @media (min-width: 768px){
   .reels{
     display:grid;
@@ -400,11 +429,13 @@ body{
     position: relative;
     border-radius: 22px;
     overflow:hidden;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    box-shadow: 0 18px 44px rgba(0,0,0,.35);
+    border: 1px solid rgba(0,0,0,.08);
+    background: #000;
+    box-shadow: 0 18px 44px rgba(0,0,0,.12);
     aspect-ratio: 9 / 16;
   }
+  /* Desktop: hide text meta */
+  .reel__meta{ display:none; }
 }
 
 .reel__video{
@@ -416,6 +447,176 @@ body{
   cursor: pointer;
 }
 
+/* Desktop: play icon overlay (no text) */
+@media (min-width: 768px){
+  .reel::after{
+    content:"";
+    position:absolute;
+    inset: 0;
+    pointer-events:none;
+    background: radial-gradient(circle at 50% 60%, rgba(0,0,0,.15), rgba(0,0,0,.28));
+    opacity: 1;
+    transition: opacity .18s ease;
+  }
+  .reel::before{
+    content:"";
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.55);
+    border: 1px solid rgba(255,255,255,.22);
+    box-shadow: 0 18px 44px rgba(0,0,0,.28);
+    pointer-events:none;
+  }
+  .reel .reel__video{
+    outline: none;
+  }
+  .reel .reel__video + .reel__meta{ display:none; }
+
+  /* triangle */
+  .reel__video{
+    position: relative;
+  }
+  .reel::marker{ content:""; }
+
+  .reel.isPlaying::before,
+  .reel.isPlaying::after{
+    opacity: 0;
+  }
+
+  /* draw play triangle */
+  .reel:not(.isPlaying) .reel__video{
+    filter: none;
+  }
+  .reel:not(.isPlaying)::before{
+    background: rgba(0,0,0,.55);
+  }
+  .reel:not(.isPlaying) .reel__video{ }
+  .reel:not(.isPlaying)::before{
+    /* keep circle */
+  }
+  .reel:not(.isPlaying)::after{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying){
+    position: relative;
+  }
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying)::before{
+    /* circle stays */
+  }
+  .reel:not(.isPlaying) .reel__triangle{
+    display:none;
+  }
+  .reel:not(.isPlaying)::after{
+    /* gradient stays */
+  }
+
+  .reel:not(.isPlaying)::before{
+    /* circle already defined */
+  }
+  .reel:not(.isPlaying)::after{
+    /* gradient already defined */
+  }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying){
+    /* triangle using box-shadow trick */
+  }
+  .reel:not(.isPlaying)::before{
+    /* circle */
+  }
+  .reel:not(.isPlaying)::after{
+    /* gradient */
+  }
+
+  /* triangle element via background-image on circle using pseudo */
+  .reel:not(.isPlaying)::before{
+    background:
+      linear-gradient(transparent, transparent),
+      rgba(0,0,0,.55);
+  }
+  .reel:not(.isPlaying)::before{
+    /* we’ll add triangle with extra pseudo using box-shadow (below) */
+  }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying){
+    /* ensure triangle pseudo exists */
+  }
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying) .reel__video{ }
+
+  /* actual triangle */
+  .reel:not(.isPlaying) .reel__video{
+    /* nothing */
+  }
+  .reel:not(.isPlaying)::before{
+    /* circle */
+  }
+  .reel:not(.isPlaying)::after{
+    /* overlay */
+  }
+  .reel:not(.isPlaying) .reel__play{
+    display:none;
+  }
+
+  .reel:not(.isPlaying){
+    /* create triangle with yet another pseudo using CSS variables not needed */
+  }
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying)::before{
+    /* circle */
+  }
+  .reel:not(.isPlaying)::after{
+    /* overlay */
+  }
+
+  .reel:not(.isPlaying){
+    /* triangle pseudo */
+  }
+  .reel:not(.isPlaying) .reel__video{ }
+
+  .reel:not(.isPlaying){
+    /* triangle using background on an extra layer */
+  }
+  .reel:not(.isPlaying)::before{
+    /* keep circle, triangle via mask below */
+    -webkit-mask: none;
+    mask: none;
+  }
+
+  .reel:not(.isPlaying)::before{
+    /* triangle painted using conic gradient */
+    background:
+      conic-gradient(from 90deg at 56% 50%, transparent 0 320deg, rgba(255,255,255,.92) 320deg 360deg),
+      rgba(0,0,0,.55);
+  }
+}
+
+/* Mobile meta can stay */
 .reel__meta{
   position:absolute;
   left: 12px;
@@ -436,14 +637,6 @@ body{
   margin-top: 2px;
   font-size: .92rem;
   color: rgba(255,255,255,.72);
-}
-
-.reelsActions{
-  display:flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 14px;
 }
 
 /* Work carousel */
@@ -633,10 +826,10 @@ body{
 .areaMap{ height: 100%; }
 .areaCard{
   border-radius: 22px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: radial-gradient(900px 360px at 15% 10%, rgba(214,178,94,.14), rgba(255,255,255,0) 60%), rgba(255,255,255,.04);
+  border: 1px solid rgba(0,0,0,.08);
+  background: #fff;
   padding: 16px;
-  box-shadow: 0 22px 60px rgba(0,0,0,.35);
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
   height: 100%;
   display:flex;
   flex-direction:column;
@@ -649,25 +842,25 @@ body{
 }
 .areaText{
   margin: 0 0 12px;
-  color: rgba(255,255,255,.74);
+  color: var(--muted);
   line-height: 1.7;
 }
 .areaList{
   margin-top: 12px;
   border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(0,0,0,.02);
   padding: 12px 14px;
 }
 .areaList__title{
   font-weight: 900;
   margin-bottom: 8px;
-  color: rgba(255,255,255,.92);
+  color: var(--text);
 }
 .areaList__ul{
   margin: 0;
   padding-left: 18px;
-  color: rgba(255,255,255,.78);
+  color: var(--muted);
   line-height: 1.7;
 }
 .areaActions{
@@ -682,8 +875,8 @@ body{
   height: 320px;
   object-fit: cover;
   border-radius: 22px;
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
   display:block;
 }
 
@@ -701,19 +894,20 @@ body{
   letter-spacing: .6px;
   text-transform: uppercase;
   font-size: 1.6rem;
+  color: #fff;
 }
 .aboutText{
   margin: 0 0 10px;
   line-height: 1.7;
-  color: var(--muted);
+  color: rgba(255,255,255,.78);
 }
 .aboutMedia img{
   width:100%;
   height: 320px;
   object-fit: cover;
   border-radius: 22px;
-  border: 1px solid rgba(0,0,0,.08);
-  box-shadow: 0 26px 70px rgba(0,0,0,.16);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
 }
 .aboutActions{
   margin-top: 14px;
@@ -757,9 +951,9 @@ body{
   scroll-snap-type: x mandatory;
   padding: 18px var(--rail-pad);
   border-radius: 22px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 18px 44px rgba(0,0,0,.35);
+  background: rgba(0,0,0,.88);
+  border: 1px solid rgba(0,0,0,.12);
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   scroll-padding-left: var(--rail-pad);
@@ -804,13 +998,13 @@ body{
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.14);
+  border: 1px solid rgba(0,0,0,.14);
   background: rgba(0,0,0,.55);
   color: rgba(255,255,255,.92);
   font-size: 1.6rem;
   cursor:pointer;
   z-index: 3;
-  box-shadow: 0 14px 34px rgba(0,0,0,.35);
+  box-shadow: 0 14px 34px rgba(0,0,0,.25);
 }
 .railArrow--left{ left: 0; }
 .railArrow--right{ right: 0; }
@@ -1012,11 +1206,6 @@ body{
     align-items:center;
     justify-content:space-between;
     gap: 14px;
-  }
-
-  .reviewsRail--dark{
-    --rail-pad: 22px;
-    grid-auto-columns: calc((100% - (2 * var(--rail-pad)) - (2 * var(--rail-gap))) / 3);
   }
 
   .reviewsRailWrap{ padding: 0 64px; }
