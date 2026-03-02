@@ -1,7 +1,7 @@
 // Keizer Mobile Detailing — Site UI
 // Restores: mobile nav, service "Learn More" modal, Call/Text modal,
 // before/after reveal slider, work carousel, reviews rail arrows, footer year.
-// + Adds: Instagram-style reels section (snap + autoplay)
+// + Reels: mobile snap + autoplay, desktop click-to-play (no autoplay)
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -26,11 +26,8 @@
     };
 
     navToggle.addEventListener("click", () => setOpen(!nav.classList.contains("isOpen")));
-
-    // Close nav when clicking any anchor link in nav
     $$("a[href^='#']", nav).forEach((a) => a.addEventListener("click", () => setOpen(false)));
 
-    // Close on Escape
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setOpen(false);
     });
@@ -53,7 +50,6 @@
     document.body.style.overflow = "";
   };
 
-  // Close modal on overlay click (works for both service + call)
   const closeOnOverlay = (modalEl, overlaySelector) => {
     if (!modalEl) return;
     modalEl.addEventListener("click", (e) => {
@@ -69,7 +65,6 @@
   const serviceTitle = $("[data-modal-title]");
   const serviceContent = $("[data-modal-content]");
 
-  // Content map — keys match data-modal-open values in HTML
   const serviceCopy = {
     interior: {
       title: "Interior Detail",
@@ -170,7 +165,6 @@
     }
   };
 
-  // Open service modal
   $$("[data-modal-open]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const key = btn.getAttribute("data-modal-open");
@@ -184,7 +178,6 @@
     });
   });
 
-  // Close service modal (close buttons + overlay)
   $$("[data-modal-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(serviceModal)));
   closeOnOverlay(serviceModal, "[data-modal-close]");
 
@@ -196,7 +189,6 @@
   $$("[data-call-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(callModal)));
   closeOnOverlay(callModal, "[data-call-close]");
 
-  // Escape closes service + call modals (quote wizard handles itself)
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (serviceModal?.classList.contains("isOpen")) closeModal(serviceModal);
@@ -218,7 +210,6 @@
 
   // -------------------------
   // Work carousel (arrows + dots)
-  // Safe if only 1 slide.
   // -------------------------
   $$("[data-carousel]").forEach((carousel) => {
     const track = $("[data-carousel-track]", carousel);
@@ -248,7 +239,6 @@
       track.style.transform = `translateX(${-idx * 100}%)`;
       renderDots();
 
-      // Hide arrows if single slide
       const show = slides.length > 1;
       if (prev) prev.style.visibility = show ? "visible" : "hidden";
       if (next) next.style.visibility = show ? "visible" : "hidden";
@@ -256,7 +246,6 @@
 
     prev?.addEventListener("click", () => go(idx - 1));
     next?.addEventListener("click", () => go(idx + 1));
-
     go(0);
   });
 
@@ -281,60 +270,130 @@
   }
 
   // -------------------------
-  // Reels (Instagram-style): snap + autoplay/pause
-  // Mobile uses internal scroll container. Desktop grid shows all.
+  // Reels:
+  // - Mobile: snap scroller + autoplay in view
+  // - Desktop: NO autoplay, click to play/pause (and pauses others)
   // -------------------------
-  const reelsScroller = $("[data-reels]");
-  if (reelsScroller) {
-    const reels = $$("[data-reel]", reelsScroller)
-      .map((card) => ({
-        card,
-        video: $("video", card)
-      }))
+  const reelsRoot = $("[data-reels]");
+  if (reelsRoot) {
+    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
+
+    const reels = $$("[data-reel]", reelsRoot)
+      .map((card) => ({ card, video: $("video", card) }))
       .filter((x) => x.video);
 
-    const pauseAll = () => reels.forEach((r) => r.video.pause());
-
-    const tryPlay = async (vid) => {
-      try {
-        vid.muted = true;
-        vid.playsInline = true;
-        await vid.play();
-      } catch (_) {
-        // Autoplay can be blocked; user can tap to play.
-      }
+    const pauseAll = () => {
+      reels.forEach(({ card, video }) => {
+        video.pause();
+        card.classList.remove("isPlaying");
+      });
     };
 
-    // Tap video to toggle play/pause
-    reels.forEach(({ video }) => {
+    const markState = (video) => {
+      reels.forEach(({ card, video: v }) => {
+        card.classList.toggle("isPlaying", v === video && !v.paused);
+      });
+    };
+
+    const playVideo = async (video) => {
+      try {
+        // On mobile we keep muted autoplay.
+        // On desktop user gesture is required; click triggers play.
+        await video.play();
+      } catch (_) {}
+      markState(video);
+    };
+
+    // Click behavior (desktop + mobile)
+    reels.forEach(({ card, video }) => {
+      video.addEventListener("play", () => card.classList.add("isPlaying"));
+      video.addEventListener("pause", () => card.classList.remove("isPlaying"));
+
       video.addEventListener("click", () => {
-        if (video.paused) tryPlay(video);
+        // Desktop: click plays this, pauses others
+        if (isDesktop()) {
+          if (video.paused) {
+            pauseAll();
+            video.muted = false;
+            playVideo(video);
+          } else {
+            video.pause();
+          }
+          return;
+        }
+
+        // Mobile: tap toggles (still muted/inline)
+        if (video.paused) playVideo(video);
         else video.pause();
       });
     });
 
-    // Autoplay when mostly in view (within the reels scroller)
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const vid = entry.target;
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-            pauseAll();
-            tryPlay(vid);
-          } else {
-            vid.pause();
-          }
-        });
-      },
-      { root: reelsScroller, threshold: [0, 0.25, 0.6, 0.85, 1] }
-    );
+    // Mobile autoplay via IntersectionObserver (only when NOT desktop)
+    const setupMobileAutoplay = () => {
+      if (isDesktop()) return null;
 
-    reels.forEach(({ video }) => io.observe(video));
+      // Find the scroll container if it exists (mobile)
+      // If it doesn't, root=null still works, but we only use this on mobile anyway.
+      const scroller = reelsRoot;
 
-    // Start the first one (after layout)
-    requestAnimationFrame(() => {
-      const first = reels[0]?.video;
-      if (first) tryPlay(first);
+      const tryAuto = async (vid) => {
+        try {
+          vid.muted = true;
+          vid.playsInline = true;
+          await vid.play();
+        } catch (_) {}
+      };
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          if (isDesktop()) return;
+          entries.forEach((entry) => {
+            const vid = entry.target;
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+              pauseAll();
+              tryAuto(vid);
+            } else {
+              vid.pause();
+            }
+          });
+        },
+        { root: scroller, threshold: [0, 0.25, 0.6, 0.85, 1] }
+      );
+
+      reels.forEach(({ video }) => io.observe(video));
+
+      requestAnimationFrame(() => {
+        if (isDesktop()) return;
+        const first = reels[0]?.video;
+        if (first) {
+          first.muted = true;
+          first.playsInline = true;
+          tryAuto(first);
+        }
+      });
+
+      return io;
+    };
+
+    let io = setupMobileAutoplay();
+
+    // On resize breakpoint changes, re-init autoplay rules
+    window.addEventListener("resize", () => {
+      const nowDesktop = isDesktop();
+
+      // Stop everything
+      pauseAll();
+
+      // If moving to desktop, disconnect IO
+      if (nowDesktop && io) {
+        io.disconnect();
+        io = null;
+      }
+
+      // If moving to mobile, set up IO
+      if (!nowDesktop && !io) {
+        io = setupMobileAutoplay();
+      }
     });
   }
 })();
