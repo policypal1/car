@@ -57,7 +57,7 @@
 }
 .quoteNext{ min-width:160px; }
 
-/* Cards grid */
+/* Cards base grid */
 .qCards{
   display:grid;
   grid-template-columns:1fr;
@@ -69,62 +69,47 @@
   grid-template-columns: 1fr 1fr;
 }
 
-/* ✅ NEW: compact 3-up grid for mobile (category + conditions) */
-.qCards--compact3{
-  grid-template-columns: repeat(3, 1fr);
-  gap:8px;
-}
-.qCards--compact3 .qCard{
-  padding:10px;
-  border-radius:16px;
-  box-shadow:0 10px 26px rgba(0,0,0,.06);
-}
-.qCards--compact3 .qCardMedia{
-  border-radius:14px;
-}
-
-/* Make “portrait” cards shorter ONLY in compact grids (fixes giant scroll issue) */
-.qCards--compact3 .qCard--portrait .qCardMedia{
-  aspect-ratio: 4 / 3;
-}
-
-/* Tighten text in compact grid so it stays scannable */
-.qCards--compact3 .qCardLabel{
-  margin:8px 2px 2px;
-  font-size:.95rem;
-  line-height:1.15;
-}
-.qCards--compact3 .qCardHint{
-  font-size:.80rem;
-  line-height:1.25;
-}
-
-/* If phone is super narrow, go 2 columns + last card full width */
-@media (max-width:360px){
-  .qCards--compact3{
-    grid-template-columns: 1fr 1fr;
-  }
-  .qCards--compact3 .qCard:last-child{
-    grid-column: 1 / -1;
-  }
-}
-
-/* Exterior services: one horizontal row */
-.qCards--row{
+/* -----------------------------
+   ✅ NEW: "scroll row" pattern
+   Used on: Service Category, Service Select, Conditions
+   Mobile = horizontal scroll
+   Desktop = normal 3-up grid
+------------------------------ */
+.qCards--scroll{
   display:flex;
   gap:12px;
   flex-wrap:nowrap;
   overflow-x:auto;
-  padding-bottom:6px;
+  padding-bottom:8px;
   -webkit-overflow-scrolling:touch;
   scroll-snap-type:x mandatory;
 }
-.qCards--row .qCard{
-  flex:0 0 78%;
+.qCards--scroll .qCard{
+  flex:0 0 82%;
   scroll-snap-align:start;
 }
+@media (min-width:520px){
+  .qCards--scroll .qCard{ flex:0 0 62%; }
+}
 @media (min-width:768px){
-  .qCards--row .qCard{ flex:0 0 260px; }
+  .qCards--scroll{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    overflow:visible;
+    scroll-snap-type:none;
+    padding-bottom:0;
+  }
+  .qCards--scroll .qCard{ flex:initial; }
+}
+
+/* ✅ Slightly bigger “hero” cards (matches your select-service visual weight) */
+.qCards--big .qCard{
+  padding:12px;
+  border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
+.qCards--big .qCardMedia{
+  border-radius:16px;
 }
 
 /* Card base */
@@ -169,7 +154,7 @@
   display:block;
 }
 
-/* ✅ tiny badge for pre-wash (keeps all cards aligned) */
+/* ✅ tiny badge for pre-wash */
 .qCardBadge{
   position:absolute;
   top:8px;
@@ -202,11 +187,11 @@
   transform-origin:center;
 }
 
-/* Portrait cards */
+/* Portrait cards (kept for anything else you use later) */
 .qCard--portrait .qCardMedia{ aspect-ratio: 3 / 4; }
 .qCard--portrait .qCardMedia img{ object-fit:cover; }
 
-/* Square cards for service selection */
+/* ✅ Square cards (used for category/service/conditions so images look bigger) */
 .qCard--square .qCardMedia{ aspect-ratio: 1 / 1; }
 .qCard--square .qCardMedia img{ object-fit:cover; }
 
@@ -452,7 +437,7 @@
   background:rgba(0,0,0,.05);
 }
 
-/* ✅ loading bar */
+/* loading bar */
 .qLoadBar{
   height:10px;
   border-radius:999px;
