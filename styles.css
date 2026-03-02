@@ -279,6 +279,15 @@ body{
   box-shadow: 0 34px 95px rgba(0,0,0,.20);
   border-color: rgba(214,178,94,.28);
 }
+
+/* ✅ Mobile-only: slightly larger service cards */
+@media (max-width: 767px){
+  .serviceCard{
+    width: min(420px, 100%);
+    min-height: 380px;
+  }
+}
+
 .serviceCard__overlay{
   position:absolute;
   inset:0;
@@ -730,6 +739,13 @@ body{
 .railArrow:focus-visible{
   outline: 3px solid var(--ring);
   outline-offset: 2px;
+}
+
+/* ✅ Reviews CTA button */
+.reviewsCta{
+  display:flex;
+  justify-content:center;
+  margin-top: 14px;
 }
 
 /* Modals */
