@@ -1,6 +1,7 @@
 // Keizer Mobile Detailing — Site UI
 // Restores: mobile nav, service "Learn More" modal, Call/Text modal,
 // before/after reveal slider, work carousel, reviews rail arrows, footer year.
+// + Adds: Instagram-style reels section (snap + autoplay)
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -277,5 +278,63 @@
 
     prev?.addEventListener("click", () => scrollByAmount(-1));
     next?.addEventListener("click", () => scrollByAmount(1));
+  }
+
+  // -------------------------
+  // Reels (Instagram-style): snap + autoplay/pause
+  // Mobile uses internal scroll container. Desktop grid shows all.
+  // -------------------------
+  const reelsScroller = $("[data-reels]");
+  if (reelsScroller) {
+    const reels = $$("[data-reel]", reelsScroller)
+      .map((card) => ({
+        card,
+        video: $("video", card)
+      }))
+      .filter((x) => x.video);
+
+    const pauseAll = () => reels.forEach((r) => r.video.pause());
+
+    const tryPlay = async (vid) => {
+      try {
+        vid.muted = true;
+        vid.playsInline = true;
+        await vid.play();
+      } catch (_) {
+        // Autoplay can be blocked; user can tap to play.
+      }
+    };
+
+    // Tap video to toggle play/pause
+    reels.forEach(({ video }) => {
+      video.addEventListener("click", () => {
+        if (video.paused) tryPlay(video);
+        else video.pause();
+      });
+    });
+
+    // Autoplay when mostly in view (within the reels scroller)
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const vid = entry.target;
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+            pauseAll();
+            tryPlay(vid);
+          } else {
+            vid.pause();
+          }
+        });
+      },
+      { root: reelsScroller, threshold: [0, 0.25, 0.6, 0.85, 1] }
+    );
+
+    reels.forEach(({ video }) => io.observe(video));
+
+    // Start the first one (after layout)
+    requestAnimationFrame(() => {
+      const first = reels[0]?.video;
+      if (first) tryPlay(first);
+    });
   }
 })();
