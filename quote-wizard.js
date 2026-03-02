@@ -1,5 +1,5 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7.1)
+// QUOTE WIZARD (Flow v7.2)
 // -------------------------
 // Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
@@ -75,9 +75,10 @@ const serviceCategories = [
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
-// ✅ Services (Exterior Wash uses EXACT image you demanded)
+// ✅ Services
+// NOTE: Interior Detail image updated per your request
 const servicesAll = [
-  { label: "Interior Detail", category: "Interior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
+  { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
 
   // ✅ command: Exterior Wash uses ONLY this image
   { label: "Exterior Wash", category: "Exterior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
@@ -264,7 +265,7 @@ function imgCard({
   isSelected = false,
   onClick,
   variant = "",
-  badge = "" // ✅ small overlay badge (used for prewash)
+  badge = ""
 }) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -418,7 +419,6 @@ document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventList
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
 // ✅ command: DO NOT close if they click outside the panel
-// This blocks backdrop click-to-close even if another script tries to use it.
 if (quoteModal) {
   quoteModal.addEventListener(
     "click",
@@ -428,7 +428,7 @@ if (quoteModal) {
         e.stopPropagation();
       }
     },
-    true // capture
+    true
   );
 }
 
@@ -437,7 +437,7 @@ if (quoteModal) {
 // -------------------------
 let calendarCache = {
   tzLabel: "Local Time",
-  slots: [], // [{id,date,time,label}]
+  slots: [],
   byDate: new Map()
 };
 
@@ -482,23 +482,17 @@ function findNextAvailableDate(fromDateISO) {
   return "";
 }
 
-// ✅ robust parsing for YOUR SHEET format:
 // Columns: id | label | status | bookedAt
-// Example id: "2026-02-20 10:00"
-// label: "Fri Feb 20 • 10:00 AM"
 function parseSlotToDateTime(slot) {
   const id = String(slot.id || "").trim();
   const label = String(slot.label || "").trim();
 
-  // try id first: YYYY-MM-DD HH:MM
   const m1 = id.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/);
   if (m1) return { date: m1[1], time: m1[2], pretty: label || id };
 
-  // try id: YYYY-MM-DDTHH:MM
   const m2 = id.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
   if (m2) return { date: m2[1], time: m2[2], pretty: label || id };
 
-  // fallback: attempt to parse label
   const d = new Date(label);
   if (!isNaN(d.getTime())) {
     const date = isoDate(d);
@@ -551,13 +545,13 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category  ✅ MOBILE FIX: compact 3-up grid
+  // 2) Category ✅ Bigger + mobile scroll row
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards qCards--compact3";
+    cards.className = "qCards qCards--scroll qCards--big";
 
     serviceCategories.forEach((c) => {
       cards.appendChild(
@@ -566,7 +560,7 @@ function renderStep() {
           hint: c.hint,
           img: c.img,
           contain: false,
-          variant: "qCard--portrait qCard--serviceCat",
+          variant: "qCard--square qCard--serviceCat",
           isSelected: quoteState.serviceCategory === c.label,
           onClick: () =>
             pickAndAdvance(() => {
@@ -586,7 +580,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Service
+  // 3) Service ✅ Always scroll row on mobile (including Interior)
   if (step === "service") {
     const filtered = servicesAll.filter((s) => {
       if (s.category === "Both") return true;
@@ -605,11 +599,7 @@ function renderStep() {
     sub.textContent = "Pick the service you want. Tap to continue.";
 
     const cards = document.createElement("div");
-    if (quoteState.serviceCategory === "Exterior") {
-      cards.className = "qCards qCards--row";
-    } else {
-      cards.className = "qCards";
-    }
+    cards.className = "qCards qCards--scroll qCards--big";
 
     filtered.forEach((s) => {
       cards.appendChild(
@@ -637,13 +627,13 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition ✅ MOBILE FIX: compact 3-up grid
+  // 4) Interior condition ✅ Bigger + mobile scroll row
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards qCards--compact3";
+    cards.className = "qCards qCards--scroll qCards--big";
 
     interiorConditions.forEach((c) => {
       cards.appendChild(
@@ -651,7 +641,7 @@ function renderStep() {
           label: c.label,
           hint: c.hint,
           img: c.img,
-          variant: "qCard--portrait qCard--condition",
+          variant: "qCard--square qCard--condition",
           isSelected: quoteState.interiorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.interiorCondition = c.label))
         })
@@ -661,13 +651,13 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition ✅ MOBILE FIX: compact 3-up grid
+  // 5) Exterior condition ✅ Bigger + mobile scroll row
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
 
     const cards = document.createElement("div");
-    cards.className = "qCards qCards--compact3";
+    cards.className = "qCards qCards--scroll qCards--big";
 
     exteriorConditions.forEach((c) => {
       cards.appendChild(
@@ -675,7 +665,7 @@ function renderStep() {
           label: c.label,
           hint: "",
           img: c.img,
-          variant: "qCard--portrait qCard--condition",
+          variant: "qCard--square qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
         })
@@ -742,7 +732,7 @@ function renderStep() {
     quoteBody.append(title, sub, box);
   }
 
-  // 8) Appointment (calendar-style + loading bar + small reload)
+  // 8) Appointment
   if (step === "appointment") {
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
@@ -994,7 +984,6 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
     calendarCache.tzLabel = data.tzLabel || "Local Time";
     if (tzEl) tzEl.textContent = calendarCache.tzLabel;
 
-    // ✅ Robust: accept either {id,label,status} or {id,date,time,label}
     const normalized = data.slots
       .filter((s) => String(s.status || "open").toLowerCase() === "open" || !("status" in s))
       .map((s) => {
@@ -1021,7 +1010,6 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
       return;
     }
 
-    // default selected date
     if (!quoteState.slotDate) {
       quoteState.slotDate = findNextAvailableDate("");
     } else {
