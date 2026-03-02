@@ -1,5 +1,5 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7.2)
+// QUOTE WIZARD (Flow v7.3)
 // -------------------------
 // Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
@@ -76,7 +76,6 @@ const serviceCategories = [
 ];
 
 // ✅ Services
-// NOTE: Interior Detail image updated per your request
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
 
@@ -96,7 +95,6 @@ const interiorConditions = [
   { label: "Heavy", hint: "Stains/pet hair • deep work", img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png" }
 ];
 
-// ✅ command: ONLY Normal changes to IMG_2910.jpg. Light + Heavy revert to original.
 const exteriorConditions = [
   { label: "Light", hint: "", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
   { label: "Normal", hint: "", img: "./IMG_2910.jpg" },
@@ -545,7 +543,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category ✅ Bigger + mobile scroll row
+  // 2) Category
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -580,7 +578,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Service ✅ Always scroll row on mobile (including Interior)
+  // 3) Service
   if (step === "service") {
     const filtered = servicesAll.filter((s) => {
       if (s.category === "Both") return true;
@@ -627,7 +625,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition ✅ Bigger + mobile scroll row
+  // 4) Interior condition
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -651,7 +649,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition ✅ Bigger + mobile scroll row
+  // 5) Exterior condition
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -790,7 +788,7 @@ function renderStep() {
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
   }
 
-  // 9) Contact
+  // 9) Contact  ✅ deposit wording updated (last section only)
   if (step === "contact") {
     title.textContent = "Your contact info";
     sub.textContent = "Required. We’ll confirm by text/call.";
@@ -846,13 +844,14 @@ function renderStep() {
       <div class="qCheck">
         <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
         <label for="qAck">
-          <strong>Acknowledgement *</strong><br/>
-          I understand that a $25 booking deposit is required to reserve my appointment and will be applied to the total.
-          All listed prices are starting prices and may adjust after a vehicle assessment based on condition.
+          <strong>$25 Booking Deposit Required *</strong><br/>
+          A $25 deposit is required to reserve your appointment so customers don’t bail last minute.
+          This deposit is applied to your total (example: if the job is $170, you’ll pay $25 now and the remaining $145 at service).<br/><br/>
+          You can reschedule with at least <strong>2 days notice</strong>. If rescheduled with less than 2 days notice or canceled last minute, the deposit is kept.
         </label>
       </div>
       <div class="qStatus" data-q-status>
-        ${canContinue() ? "" : "Required: name, phone, email, and acknowledgement."}
+        ${canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement."}
       </div>
       <div style="display:none;">
         <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
@@ -871,7 +870,7 @@ function renderStep() {
 
     const updateStatus = () => {
       if (!statusEl) return;
-      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and acknowledgement.";
+      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement.";
     };
 
     nameEl?.addEventListener("input", (e) => {
@@ -1010,6 +1009,7 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
       return;
     }
 
+    // default selected date
     if (!quoteState.slotDate) {
       quoteState.slotDate = findNextAvailableDate("");
     } else {
@@ -1133,6 +1133,13 @@ function renderTimes(timesEl, nextAvailBtn) {
 
   timesEl.appendChild(title);
 
+  // ✅ small "selected" line (instant feedback, no reload)
+  const selectedLine = document.createElement("div");
+  selectedLine.className = "qTimesNone";
+  selectedLine.setAttribute("data-q-selected-line", "true");
+  selectedLine.textContent = quoteState.slotLabel ? `Selected: ${quoteState.slotLabel}` : "Selected: —";
+  timesEl.appendChild(selectedLine);
+
   if (!list.length) {
     const none = document.createElement("div");
     none.className = "qTimesNone";
@@ -1154,12 +1161,21 @@ function renderTimes(timesEl, nextAvailBtn) {
     b.className = "qTimeBtn" + (quoteState.slotId === s.id ? " isSel" : "");
     b.textContent = s.time;
 
+    // ✅ SPEED FIX: DO NOT re-render appointment step on time click
     b.addEventListener("click", () => {
       quoteState.slotId = s.id;
       quoteState.slotDate = s.date;
       quoteState.slotTime = s.time;
       quoteState.slotLabel = s.label || `${s.date} ${s.time}`;
-      renderStep();
+
+      // instant UI update (no fetch, no reload)
+      grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
+      b.classList.add("isSel");
+
+      const line = timesEl.querySelector('[data-q-selected-line="true"]');
+      if (line) line.textContent = `Selected: ${quoteState.slotLabel}`;
+
+      updateNav(); // enables Continue immediately
     });
 
     grid.appendChild(b);
