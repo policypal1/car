@@ -7,15 +7,11 @@
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-  // -------------------------
   // Footer year
-  // -------------------------
   const yearEl = $("[data-year]");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-  // -------------------------
   // Mobile nav toggle
-  // -------------------------
   const navToggle = $("[data-nav-toggle]");
   const nav = $("[data-nav]");
 
@@ -33,9 +29,7 @@
     });
   }
 
-  // -------------------------
   // Generic modal helpers
-  // -------------------------
   const openModal = (modalEl) => {
     if (!modalEl) return;
     modalEl.classList.add("isOpen");
@@ -58,9 +52,7 @@
     });
   };
 
-  // -------------------------
   // Service details modal (Learn More buttons)
-  // -------------------------
   const serviceModal = $("[data-modal]");
   const serviceTitle = $("[data-modal-title]");
   const serviceContent = $("[data-modal-content]");
@@ -181,9 +173,7 @@
   $$("[data-modal-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(serviceModal)));
   closeOnOverlay(serviceModal, "[data-modal-close]");
 
-  // -------------------------
   // Call/Text modal
-  // -------------------------
   const callModal = $("[data-call-modal]");
   $$("[data-call-open]").forEach((btn) => btn.addEventListener("click", () => openModal(callModal)));
   $$("[data-call-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(callModal)));
@@ -195,9 +185,7 @@
     if (callModal?.classList.contains("isOpen")) closeModal(callModal);
   });
 
-  // -------------------------
   // Before/After compare slider
-  // -------------------------
   $$("[data-compare]").forEach((wrap) => {
     const range = $("[data-compare-range]", wrap);
     if (!range) return;
@@ -208,9 +196,7 @@
     range.addEventListener("input", (e) => setPos(e.target.value));
   });
 
-  // -------------------------
   // Work carousel (arrows + dots)
-  // -------------------------
   $$("[data-carousel]").forEach((carousel) => {
     const track = $("[data-carousel-track]", carousel);
     const dotsWrap = $("[data-carousel-dots]", carousel);
@@ -249,9 +235,7 @@
     go(0);
   });
 
-  // -------------------------
   // Reviews rail arrows (scroll)
-  // -------------------------
   const rail = $("[data-rail]");
   if (rail) {
     const track = $("[data-rail-track]", rail);
@@ -269,11 +253,9 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // -------------------------
   // Reels:
   // - Mobile: snap scroller + autoplay in view
   // - Desktop: NO autoplay, click to play/pause (and pauses others)
-  // -------------------------
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
@@ -297,8 +279,6 @@
 
     const playVideo = async (video) => {
       try {
-        // On mobile we keep muted autoplay.
-        // On desktop user gesture is required; click triggers play.
         await video.play();
       } catch (_) {}
       markState(video);
@@ -332,8 +312,6 @@
     const setupMobileAutoplay = () => {
       if (isDesktop()) return null;
 
-      // Find the scroll container if it exists (mobile)
-      // If it doesn't, root=null still works, but we only use this on mobile anyway.
       const scroller = reelsRoot;
 
       const tryAuto = async (vid) => {
@@ -381,16 +359,13 @@
     window.addEventListener("resize", () => {
       const nowDesktop = isDesktop();
 
-      // Stop everything
       pauseAll();
 
-      // If moving to desktop, disconnect IO
       if (nowDesktop && io) {
         io.disconnect();
         io = null;
       }
 
-      // If moving to mobile, set up IO
       if (!nowDesktop && !io) {
         io = setupMobileAutoplay();
       }
