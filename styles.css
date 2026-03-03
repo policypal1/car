@@ -245,6 +245,16 @@ body{
 .section__title--dark{ color: #fff; }
 .section__sub--dark{ color: rgba(255,255,255,.74); }
 
+/* Shared CTA row */
+.sectionCtas{
+  display:flex;
+  justify-content:center;
+  gap: 12px;
+  flex-wrap:wrap;
+  margin-top: 16px;
+}
+.sectionCtas--dark{ margin-top: 18px; }
+
 /* Services */
 .serviceWrap{
   display:flex;
@@ -340,7 +350,6 @@ body{
   white-space: nowrap;
 }
 .tag--ghost{ visibility:hidden; }
-
 .serviceCard__actions{
   display:grid;
   grid-template-columns: 1fr;
@@ -352,294 +361,7 @@ body{
   justify-content:center;
 }
 
-/* ✅ Reels: mobile snap scroller + desktop click-to-play */
-.reels{
-  width: min(980px, 100%);
-  margin: 0 auto;
-}
-
-/* Mobile: internal scroll + snap + chevrons cue */
-@media (max-width: 767px){
-  .reels{
-    height: 72vh;
-    overflow-y: auto;
-    scroll-snap-type: y mandatory;
-    border-radius: 22px;
-    border: 1px solid rgba(0,0,0,.08);
-    background: #fff;
-    box-shadow: 0 18px 44px rgba(0,0,0,.12);
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-  }
-  .reels::-webkit-scrollbar{ display:none; }
-
-  .reels::after{
-    content:"";
-    position:absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
-    width: 34px;
-    height: 34px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.55);
-    box-shadow: 0 14px 34px rgba(0,0,0,.25);
-    pointer-events:none;
-    opacity: .9;
-  }
-  .reels::before{
-    content:"";
-    position:absolute;
-    left: 50%;
-    bottom: 20px;
-    transform: translateX(-50%) rotate(45deg);
-    width: 10px;
-    height: 10px;
-    border-right: 2px solid rgba(255,255,255,.92);
-    border-bottom: 2px solid rgba(255,255,255,.92);
-    pointer-events:none;
-    animation: reelsCue 1.2s ease-in-out infinite;
-    z-index: 2;
-  }
-  @keyframes reelsCue{
-    0%,100%{ transform: translateX(-50%) translateY(0) rotate(45deg); opacity: .85; }
-    50%{ transform: translateX(-50%) translateY(6px) rotate(45deg); opacity: .45; }
-  }
-
-  .reel{
-    scroll-snap-align: start;
-    position: relative;
-    height: 72vh;
-    display:flex;
-    align-items: stretch;
-    justify-content: center;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-    background:#000;
-  }
-}
-
-/* Desktop: 3-up grid, no autoplay, click to play */
-@media (min-width: 768px){
-  .reels{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
-  .reel{
-    position: relative;
-    border-radius: 22px;
-    overflow:hidden;
-    border: 1px solid rgba(0,0,0,.08);
-    background: #000;
-    box-shadow: 0 18px 44px rgba(0,0,0,.12);
-    aspect-ratio: 9 / 16;
-  }
-  /* Desktop: hide text meta */
-  .reel__meta{ display:none; }
-}
-
-.reel__video{
-  width:100%;
-  height:100%;
-  object-fit: cover;
-  display:block;
-  background: #000;
-  cursor: pointer;
-}
-
-/* Desktop: play icon overlay (no text) */
-@media (min-width: 768px){
-  .reel::after{
-    content:"";
-    position:absolute;
-    inset: 0;
-    pointer-events:none;
-    background: radial-gradient(circle at 50% 60%, rgba(0,0,0,.15), rgba(0,0,0,.28));
-    opacity: 1;
-    transition: opacity .18s ease;
-  }
-  .reel::before{
-    content:"";
-    position:absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-    width: 64px;
-    height: 64px;
-    border-radius: 999px;
-    background: rgba(0,0,0,.55);
-    border: 1px solid rgba(255,255,255,.22);
-    box-shadow: 0 18px 44px rgba(0,0,0,.28);
-    pointer-events:none;
-  }
-  .reel .reel__video{
-    outline: none;
-  }
-  .reel .reel__video + .reel__meta{ display:none; }
-
-  /* triangle */
-  .reel__video{
-    position: relative;
-  }
-  .reel::marker{ content:""; }
-
-  .reel.isPlaying::before,
-  .reel.isPlaying::after{
-    opacity: 0;
-  }
-
-  /* draw play triangle */
-  .reel:not(.isPlaying) .reel__video{
-    filter: none;
-  }
-  .reel:not(.isPlaying)::before{
-    background: rgba(0,0,0,.55);
-  }
-  .reel:not(.isPlaying) .reel__video{ }
-  .reel:not(.isPlaying)::before{
-    /* keep circle */
-  }
-  .reel:not(.isPlaying)::after{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying){
-    position: relative;
-  }
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying)::before{
-    /* circle stays */
-  }
-  .reel:not(.isPlaying) .reel__triangle{
-    display:none;
-  }
-  .reel:not(.isPlaying)::after{
-    /* gradient stays */
-  }
-
-  .reel:not(.isPlaying)::before{
-    /* circle already defined */
-  }
-  .reel:not(.isPlaying)::after{
-    /* gradient already defined */
-  }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying){
-    /* triangle using box-shadow trick */
-  }
-  .reel:not(.isPlaying)::before{
-    /* circle */
-  }
-  .reel:not(.isPlaying)::after{
-    /* gradient */
-  }
-
-  /* triangle element via background-image on circle using pseudo */
-  .reel:not(.isPlaying)::before{
-    background:
-      linear-gradient(transparent, transparent),
-      rgba(0,0,0,.55);
-  }
-  .reel:not(.isPlaying)::before{
-    /* we’ll add triangle with extra pseudo using box-shadow (below) */
-  }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying){
-    /* ensure triangle pseudo exists */
-  }
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying) .reel__video{ }
-
-  /* actual triangle */
-  .reel:not(.isPlaying) .reel__video{
-    /* nothing */
-  }
-  .reel:not(.isPlaying)::before{
-    /* circle */
-  }
-  .reel:not(.isPlaying)::after{
-    /* overlay */
-  }
-  .reel:not(.isPlaying) .reel__play{
-    display:none;
-  }
-
-  .reel:not(.isPlaying){
-    /* create triangle with yet another pseudo using CSS variables not needed */
-  }
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying)::before{
-    /* circle */
-  }
-  .reel:not(.isPlaying)::after{
-    /* overlay */
-  }
-
-  .reel:not(.isPlaying){
-    /* triangle pseudo */
-  }
-  .reel:not(.isPlaying) .reel__video{ }
-
-  .reel:not(.isPlaying){
-    /* triangle using background on an extra layer */
-  }
-  .reel:not(.isPlaying)::before{
-    /* keep circle, triangle via mask below */
-    -webkit-mask: none;
-    mask: none;
-  }
-
-  .reel:not(.isPlaying)::before{
-    /* triangle painted using conic gradient */
-    background:
-      conic-gradient(from 90deg at 56% 50%, transparent 0 320deg, rgba(255,255,255,.92) 320deg 360deg),
-      rgba(0,0,0,.55);
-  }
-}
-
-/* Mobile meta can stay */
-.reel__meta{
-  position:absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  padding: 12px 12px;
-  border-radius: 16px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid rgba(214,178,94,.22);
-  backdrop-filter: blur(8px);
-}
-.reel__title{
-  font-weight: 900;
-  letter-spacing: .4px;
-  color: rgba(255,255,255,.94);
-}
-.reel__hint{
-  margin-top: 2px;
-  font-size: .92rem;
-  color: rgba(255,255,255,.72);
-}
-
-/* Work carousel */
+/* Recent Transformations (carousel + compare) */
 .carousel{ margin: 18px auto 0; width: min(980px, 100%); }
 .carousel__frame{
   display:grid;
@@ -652,7 +374,7 @@ body{
   border-radius: 22px;
   position: relative;
   background: rgba(255,255,255,.02);
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 4 / 5; /* mobile */
 }
 .carousel__track{ display:flex; transition: transform .28s ease; }
 .carousel__slide{ flex: 0 0 100%; }
@@ -692,7 +414,7 @@ body{
 /* Compare */
 .compare{
   --pos: 12%;
-  --ratio: 4 / 5;
+  --ratio: 4 / 5; /* mobile */
   position: relative;
   width: 100%;
   border-radius: 22px;
@@ -759,6 +481,216 @@ body{
   transform: translate(-50%,-50%);
   font-weight: 900;
   color: rgba(255,255,255,.92);
+}
+
+/* ✅ Desktop: shrink transformations so it’s not huge */
+@media (min-width: 768px){
+  .carousel{
+    width: min(760px, 100%);
+  }
+  .carousel__viewport{
+    aspect-ratio: 16 / 10;
+  }
+  .compare{
+    --ratio: 16 / 10;
+  }
+}
+
+/* Reels */
+.reelsWrap{ width: min(980px, 100%); margin: 0 auto; position: relative; }
+.reels{
+  width: 100%;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Mobile: snap scroller */
+@media (max-width: 767px){
+  .reels{
+    height: 72vh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    border-radius: 22px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: #fff;
+    box-shadow: 0 18px 44px rgba(0,0,0,.12);
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  .reels::-webkit-scrollbar{ display:none; }
+
+  .reel{
+    scroll-snap-align: start;
+    position: relative;
+    height: 72vh;
+    display:flex;
+    align-items: stretch;
+    justify-content: center;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    background:#000;
+  }
+
+  /* Stronger “scroll down” cue */
+  .reelsCue{
+    position: sticky;
+    left: 0;
+    right: 0;
+    bottom: 14px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap: 10px;
+    z-index: 5;
+    pointer-events:none;
+    margin-top: 10px;
+  }
+  .reelsCue__box{
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.75);
+    color: rgba(255,255,255,.95);
+    font-weight: 900;
+    letter-spacing: .2px;
+    border: 1px solid rgba(214,178,94,.45);
+    box-shadow: 0 18px 44px rgba(0,0,0,.28);
+  }
+  .reelsCue__arrow{
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.75);
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 18px 44px rgba(0,0,0,.28);
+    position: relative;
+    animation: reelsCueBounce 1.1s ease-in-out infinite;
+  }
+  .reelsCue__arrow::after{
+    content:"";
+    position:absolute;
+    left: 50%;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    transform: translate(-50%,-62%) rotate(45deg);
+    border-right: 3px solid rgba(255,255,255,.92);
+    border-bottom: 3px solid rgba(255,255,255,.92);
+  }
+  @keyframes reelsCueBounce{
+    0%,100%{ transform: translateY(0); opacity: .92; }
+    50%{ transform: translateY(6px); opacity: .55; }
+  }
+}
+
+/* Desktop: 3-up grid */
+@media (min-width: 768px){
+  .reels{
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .reel{
+    position: relative;
+    border-radius: 22px;
+    overflow:hidden;
+    border: 1px solid rgba(0,0,0,.08);
+    background: #000;
+    box-shadow: 0 18px 44px rgba(0,0,0,.12);
+    aspect-ratio: 9 / 16;
+  }
+  /* Hide mobile cue on desktop */
+  .reelsCue{ display:none; }
+}
+
+.reel__video{
+  width:100%;
+  height:100%;
+  object-fit: cover;
+  display:block;
+  background: #000;
+  cursor: pointer;
+}
+
+/* Make it OBVIOUS it’s a video */
+.reel__badge{
+  position:absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: .82rem;
+  letter-spacing: .6px;
+  color: rgba(255,255,255,.95);
+  background: rgba(0,0,0,.65);
+  border: 1px solid rgba(214,178,94,.45);
+  box-shadow: 0 14px 34px rgba(0,0,0,.28);
+}
+
+.reel__overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 2;
+  background: radial-gradient(circle at 50% 60%, rgba(0,0,0,.05), rgba(0,0,0,.35));
+  transition: opacity .18s ease;
+  pointer-events:none;
+}
+
+.reel__play{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 999px;
+  background: rgba(0,0,0,.70);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 18px 44px rgba(0,0,0,.28);
+}
+
+.reel__playIcon{
+  width: 0;
+  height: 0;
+  border-left: 14px solid rgba(255,255,255,.92);
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  margin-left: 2px;
+}
+
+.reel__playText{
+  font-weight: 900;
+  letter-spacing: .8px;
+  color: rgba(255,255,255,.95);
+}
+
+.reel.isPlaying .reel__overlay{
+  opacity: 0;
+}
+
+/* Mobile meta can stay */
+.reel__meta{
+  position:absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 12px 12px;
+  border-radius: 16px;
+  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(214,178,94,.22);
+  backdrop-filter: blur(8px);
+}
+.reel__title{
+  font-weight: 900;
+  letter-spacing: .4px;
+  color: rgba(255,255,255,.94);
+}
+.reel__hint{
+  margin-top: 2px;
+  font-size: .92rem;
+  color: rgba(255,255,255,.72);
 }
 
 /* How it works */
@@ -875,12 +807,12 @@ body{
   height: 320px;
   object-fit: cover;
   border-radius: 22px;
-  border: 1px solid rgba(0,0,0,.08);
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 26px 70px rgba(0,0,0,.35);
   display:block;
 }
 
-/* About */
+/* About (now LIGHT section) */
 .aboutGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -894,20 +826,20 @@ body{
   letter-spacing: .6px;
   text-transform: uppercase;
   font-size: 1.6rem;
-  color: #fff;
+  color: var(--black);
 }
 .aboutText{
   margin: 0 0 10px;
   line-height: 1.7;
-  color: rgba(255,255,255,.78);
+  color: var(--muted);
 }
 .aboutMedia img{
   width:100%;
   height: 320px;
   object-fit: cover;
   border-radius: 22px;
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 26px 70px rgba(0,0,0,.35);
+  border: 1px solid rgba(0,0,0,.10);
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
 }
 .aboutActions{
   margin-top: 14px;
@@ -934,7 +866,7 @@ body{
   }
 }
 
-/* Reviews */
+/* Reviews rail */
 .reviewsRailWrap{
   position: relative;
   margin-top: 16px;
@@ -952,8 +884,8 @@ body{
   padding: 18px var(--rail-pad);
   border-radius: 22px;
   background: rgba(0,0,0,.88);
-  border: 1px solid rgba(0,0,0,.12);
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 44px rgba(0,0,0,.25);
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   scroll-padding-left: var(--rail-pad);
@@ -998,8 +930,8 @@ body{
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,.14);
-  background: rgba(0,0,0,.55);
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.65);
   color: rgba(255,255,255,.92);
   font-size: 1.6rem;
   cursor:pointer;
@@ -1011,12 +943,6 @@ body{
 .railArrow:focus-visible{
   outline: 3px solid var(--ring);
   outline-offset: 2px;
-}
-
-.reviewsCta{
-  display:flex;
-  justify-content:center;
-  margin-top: 14px;
 }
 
 /* Modals */
@@ -1218,5 +1144,5 @@ body{
 
 /* Larger desktop */
 @media (min-width: 1024px){
-  /* kept for future expansions */
+  /* reserved */
 }
