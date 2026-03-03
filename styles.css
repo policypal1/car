@@ -37,7 +37,7 @@ body{
   justify-content:space-between;
   padding: .85rem 0;
   gap: 12px;
-  flex-wrap: nowrap; /* ✅ prevents weird wrapping */
+  flex-wrap: nowrap;
   min-width: 0;
 }
 .brand{
@@ -65,6 +65,7 @@ body{
   font-weight:700;
   letter-spacing:.4px;
 }
+.brand__nameLine{ display:block; } /* ✅ stacked lines (desktop + mobile) */
 .brand__tag{
   display:block;
   font-size:.85rem;
@@ -413,45 +414,9 @@ body{
   cursor: pointer;
 }
 
-/* ✅ Less-dark overlay so you can actually see paused state */
-.reel__overlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: rgba(0,0,0,.18); /* was too dark */
-  opacity: 1;
-  transition: opacity .18s ease, background .18s ease;
-  pointer-events:none;
-}
-.reel.isPlaying .reel__overlay{
-  opacity: 0;
-}
-.reel__play{
-  display:inline-flex;
-  align-items:center;
-  gap: 10px;
-  padding: .6rem .95rem;
-  border-radius: 999px;
-  background: rgba(0,0,0,.55);
-  border: 1px solid rgba(255,255,255,.20);
-  box-shadow: 0 18px 44px rgba(0,0,0,.28);
-}
-.reel__playIcon{
-  width:0;
-  height:0;
-  border-left: 10px solid rgba(255,255,255,.92);
-  border-top: 7px solid transparent;
-  border-bottom: 7px solid transparent;
-}
-.reel__playText{
-  font-weight: 900;
-  letter-spacing:.4px;
-  color: rgba(255,255,255,.92);
-}
+/* ✅ Remove the black overlay entirely */
+.reel__overlay{ display:none; }
 
-/* Keep just the title pill */
 .reel__meta{
   position:absolute;
   left: 12px;
@@ -709,6 +674,21 @@ body{
   box-shadow: 0 18px 44px rgba(0,0,0,.12);
   display:block;
 }
+
+/* ✅ Service Area: make the right card black with gold trim */
+#service-area .areaCard{
+  background: #0b0b0c;
+  border: 1px solid rgba(214,178,94,.40);
+  box-shadow: 0 18px 44px rgba(0,0,0,.35);
+}
+#service-area .areaTitle{ color: rgba(255,255,255,.92); }
+#service-area .areaText{ color: rgba(255,255,255,.74); }
+#service-area .areaList{
+  border: 1px solid rgba(214,178,94,.22);
+  background: rgba(255,255,255,.04);
+}
+#service-area .areaList__title{ color: rgba(255,255,255,.92); }
+#service-area .areaList__ul{ color: rgba(255,255,255,.74); }
 
 /* About */
 .aboutGrid{
@@ -1008,22 +988,12 @@ body{
     max-height: none;
     overflow: visible;
     border-radius: 0;
-    white-space: nowrap; /* ✅ keep nav flat */
+    white-space: nowrap;
     flex-wrap: nowrap;
   }
   .nav a{ padding: 10px 10px; white-space: nowrap; }
   .navToggle{ display:none; }
   .nav__cta{ margin-left: 6px; margin-top: 0; width: auto; }
-
-  /* ✅ Brand text inline on desktop (stops “stacked” look) */
-  .brand__text{
-    display:flex;
-    align-items:baseline;
-    gap: 10px;
-    white-space: nowrap;
-  }
-  .brand__name, .brand__tag{ display:inline; margin:0; }
-  .brand__tag{ margin-top:0; }
 
   .aboutGrid{ grid-template-columns: 1.1fr .9fr; gap: 22px; }
   .aboutMedia img{ height: 380px; }
@@ -1052,7 +1022,7 @@ body{
     gap: 12px;
   }
 
-  /* ✅ Recent Transformations: shrink to ~3/4 size on desktop */
+  /* Recent Transformations: shrink to ~3/4 size on desktop */
   #work .carousel{ width: min(760px, 100%); }
   #work .carousel__viewport{ aspect-ratio: 4 / 5; }
 }
