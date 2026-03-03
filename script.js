@@ -1,7 +1,9 @@
 // Keizer Mobile Detailing — Site UI
 // Restores: mobile nav, service "Learn More" modal, Call/Text modal,
 // before/after reveal slider, work carousel, reviews rail arrows, footer year.
-// + Reels: mobile snap + autoplay, desktop click-to-play (no autoplay)
+// Reels:
+// - Desktop: click to play/pause (pauses others)
+// - Mobile: NO autoplay. Scroll locked until first play.
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -14,16 +16,13 @@
   // Mobile nav toggle
   const navToggle = $("[data-nav-toggle]");
   const nav = $("[data-nav]");
-
   if (navToggle && nav) {
     const setOpen = (open) => {
       nav.classList.toggle("isOpen", open);
       navToggle.setAttribute("aria-expanded", open ? "true" : "false");
     };
-
     navToggle.addEventListener("click", () => setOpen(!nav.classList.contains("isOpen")));
     $$("a[href^='#']", nav).forEach((a) => a.addEventListener("click", () => setOpen(false)));
-
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setOpen(false);
     });
@@ -253,9 +252,7 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels:
-  // - Mobile: snap scroller + autoplay in view
-  // - Desktop: NO autoplay, click to play/pause (and pauses others)
+  // Reels (desktop click-to-play, mobile locked scroll until first play)
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
@@ -271,26 +268,32 @@
       });
     };
 
-    const markState = (video) => {
-      reels.forEach(({ card, video: v }) => {
-        card.classList.toggle("isPlaying", v === video && !v.paused);
-      });
+    // lock mobile scroll until first play
+    const applyLock = () => {
+      if (!isDesktop()) reelsRoot.classList.add("isLocked");
+      else reelsRoot.classList.remove("isLocked");
+    };
+    applyLock();
+
+    let unlocked = false;
+    const unlock = () => {
+      if (unlocked) return;
+      unlocked = true;
+      reelsRoot.classList.remove("isLocked");
     };
 
     const playVideo = async (video) => {
-      try {
-        await video.play();
-      } catch (_) {}
-      markState(video);
+      try { await video.play(); } catch (_) {}
     };
 
-    // Click behavior (desktop + mobile)
     reels.forEach(({ card, video }) => {
-      video.addEventListener("play", () => card.classList.add("isPlaying"));
+      video.addEventListener("play", () => {
+        card.classList.add("isPlaying");
+        if (!isDesktop()) unlock();
+      });
       video.addEventListener("pause", () => card.classList.remove("isPlaying"));
 
       video.addEventListener("click", () => {
-        // Desktop: click plays this, pauses others
         if (isDesktop()) {
           if (video.paused) {
             pauseAll();
@@ -302,73 +305,16 @@
           return;
         }
 
-        // Mobile: tap toggles (still muted/inline)
+        // Mobile: tap to play/pause (no autoplay)
         if (video.paused) playVideo(video);
         else video.pause();
       });
     });
 
-    // Mobile autoplay via IntersectionObserver (only when NOT desktop)
-    const setupMobileAutoplay = () => {
-      if (isDesktop()) return null;
-
-      const scroller = reelsRoot;
-
-      const tryAuto = async (vid) => {
-        try {
-          vid.muted = true;
-          vid.playsInline = true;
-          await vid.play();
-        } catch (_) {}
-      };
-
-      const io = new IntersectionObserver(
-        (entries) => {
-          if (isDesktop()) return;
-          entries.forEach((entry) => {
-            const vid = entry.target;
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
-              pauseAll();
-              tryAuto(vid);
-            } else {
-              vid.pause();
-            }
-          });
-        },
-        { root: scroller, threshold: [0, 0.25, 0.6, 0.85, 1] }
-      );
-
-      reels.forEach(({ video }) => io.observe(video));
-
-      requestAnimationFrame(() => {
-        if (isDesktop()) return;
-        const first = reels[0]?.video;
-        if (first) {
-          first.muted = true;
-          first.playsInline = true;
-          tryAuto(first);
-        }
-      });
-
-      return io;
-    };
-
-    let io = setupMobileAutoplay();
-
-    // On resize breakpoint changes, re-init autoplay rules
     window.addEventListener("resize", () => {
-      const nowDesktop = isDesktop();
-
       pauseAll();
-
-      if (nowDesktop && io) {
-        io.disconnect();
-        io = null;
-      }
-
-      if (!nowDesktop && !io) {
-        io = setupMobileAutoplay();
-      }
+      unlocked = false;
+      applyLock();
     });
   }
 })();
