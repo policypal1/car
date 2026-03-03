@@ -1,9 +1,7 @@
 // Keizer Mobile Detailing — Site UI
 // Restores: mobile nav, service "Learn More" modal, Call/Text modal,
 // before/after reveal slider, work carousel, reviews rail arrows, footer year.
-// Reels:
-// - Desktop: click to play/pause (pauses others)
-// - Mobile: NO autoplay. Scroll locked until first play.
+// Reels: click-to-play with visible PLAY overlay via CSS (overlay fades when playing).
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -16,13 +14,16 @@
   // Mobile nav toggle
   const navToggle = $("[data-nav-toggle]");
   const nav = $("[data-nav]");
+
   if (navToggle && nav) {
     const setOpen = (open) => {
       nav.classList.toggle("isOpen", open);
       navToggle.setAttribute("aria-expanded", open ? "true" : "false");
     };
+
     navToggle.addEventListener("click", () => setOpen(!nav.classList.contains("isOpen")));
     $$("a[href^='#']", nav).forEach((a) => a.addEventListener("click", () => setOpen(false)));
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setOpen(false);
     });
@@ -252,11 +253,9 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels (desktop click-to-play, mobile locked scroll until first play)
+  // Reels: click-to-play (pauses others) + toggles .isPlaying for overlay fade
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
-    const isDesktop = () => window.matchMedia("(min-width: 768px)").matches;
-
     const reels = $$("[data-reel]", reelsRoot)
       .map((card) => ({ card, video: $("video", card) }))
       .filter((x) => x.video);
@@ -268,53 +267,29 @@
       });
     };
 
-    // lock mobile scroll until first play
-    const applyLock = () => {
-      if (!isDesktop()) reelsRoot.classList.add("isLocked");
-      else reelsRoot.classList.remove("isLocked");
-    };
-    applyLock();
-
-    let unlocked = false;
-    const unlock = () => {
-      if (unlocked) return;
-      unlocked = true;
-      reelsRoot.classList.remove("isLocked");
+    const markState = () => {
+      reels.forEach(({ card, video }) => {
+        card.classList.toggle("isPlaying", !video.paused);
+      });
     };
 
     const playVideo = async (video) => {
       try { await video.play(); } catch (_) {}
+      markState();
     };
 
     reels.forEach(({ card, video }) => {
-      video.addEventListener("play", () => {
-        card.classList.add("isPlaying");
-        if (!isDesktop()) unlock();
-      });
-      video.addEventListener("pause", () => card.classList.remove("isPlaying"));
+      video.addEventListener("play", () => { card.classList.add("isPlaying"); });
+      video.addEventListener("pause", () => { card.classList.remove("isPlaying"); });
 
       video.addEventListener("click", () => {
-        if (isDesktop()) {
-          if (video.paused) {
-            pauseAll();
-            video.muted = false;
-            playVideo(video);
-          } else {
-            video.pause();
-          }
-          return;
+        if (video.paused) {
+          pauseAll();
+          playVideo(video);
+        } else {
+          video.pause();
         }
-
-        // Mobile: tap to play/pause (no autoplay)
-        if (video.paused) playVideo(video);
-        else video.pause();
       });
-    });
-
-    window.addEventListener("resize", () => {
-      pauseAll();
-      unlocked = false;
-      applyLock();
     });
   }
 })();
