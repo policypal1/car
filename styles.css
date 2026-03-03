@@ -156,6 +156,12 @@ body{
   border: 1px solid rgba(214,178,94,.60);
   box-shadow: 0 10px 22px rgba(0,0,0,.18);
 }
+.btn--dark{
+  background: #000;
+  color:#fff;
+  border: 2px solid rgba(214,178,94,.45);
+  box-shadow: 0 16px 28px rgba(0,0,0,.22);
+}
 .btn--lg{ padding: 1rem 1.25rem; }
 
 /* Hero */
@@ -245,7 +251,7 @@ body{
 .section__title--dark{ color: #fff; }
 .section__sub--dark{ color: rgba(255,255,255,.74); }
 
-/* Shared CTA row */
+/* CTA row */
 .sectionCtas{
   display:flex;
   justify-content:center;
@@ -361,7 +367,7 @@ body{
   justify-content:center;
 }
 
-/* Recent Transformations (carousel + compare) */
+/* Work carousel */
 .carousel{ margin: 18px auto 0; width: min(980px, 100%); }
 .carousel__frame{
   display:grid;
@@ -374,7 +380,7 @@ body{
   border-radius: 22px;
   position: relative;
   background: rgba(255,255,255,.02);
-  aspect-ratio: 4 / 5; /* mobile */
+  aspect-ratio: 4 / 5; /* default portrait */
 }
 .carousel__track{ display:flex; transition: transform .28s ease; }
 .carousel__slide{ flex: 0 0 100%; }
@@ -414,7 +420,7 @@ body{
 /* Compare */
 .compare{
   --pos: 12%;
-  --ratio: 4 / 5; /* mobile */
+  --ratio: 4 / 5;
   position: relative;
   width: 100%;
   border-radius: 22px;
@@ -427,8 +433,8 @@ body{
   width: 100%;
   aspect-ratio: var(--ratio);
   background-image: var(--after);
-  background-size: var(--afterSize, var(--mediaSize, cover));
-  background-position: var(--afterPos, center);
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   position: relative;
 }
@@ -438,8 +444,8 @@ body{
   inset:0;
   width: var(--pos);
   background-image: var(--before);
-  background-size: var(--beforeSize, var(--mediaSize, cover));
-  background-position: var(--beforePos, center);
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   border-right: 2px solid rgba(255,255,255,.70);
 }
@@ -483,17 +489,18 @@ body{
   color: rgba(255,255,255,.92);
 }
 
-/* ✅ Desktop: shrink transformations so it’s not huge */
+/* ✅ Desktop: BIGGER + portrait (not landscape) */
 @media (min-width: 768px){
-  .carousel{
-    width: min(760px, 100%);
-  }
-  .carousel__viewport{
-    aspect-ratio: 16 / 10;
-  }
-  .compare{
-    --ratio: 16 / 10;
-  }
+  .carousel{ width: min(980px, 100%); }
+  .carousel__viewport{ aspect-ratio: 4 / 5; }
+  .compare{ --ratio: 4 / 5; }
+}
+
+/* ✅ Mobile: slightly taller/bigger */
+@media (max-width: 767px){
+  .carousel{ width: min(1040px, 100%); }
+  .carousel__viewport{ aspect-ratio: 3 / 4; }
+  .compare{ --ratio: 3 / 4; }
 }
 
 /* Reels */
@@ -517,6 +524,9 @@ body{
     -webkit-overflow-scrolling: touch;
     position: relative;
   }
+  .reels.isLocked{
+    overflow-y: hidden; /* locked until first play */
+  }
   .reels::-webkit-scrollbar{ display:none; }
 
   .reel{
@@ -530,7 +540,6 @@ body{
     background:#000;
   }
 
-  /* Stronger “scroll down” cue */
   .reelsCue{
     position: sticky;
     left: 0;
@@ -580,6 +589,9 @@ body{
     0%,100%{ transform: translateY(0); opacity: .92; }
     50%{ transform: translateY(6px); opacity: .55; }
   }
+
+  /* once unlocked, hide the cue */
+  .reels:not(.isLocked) .reelsCue{ display:none; }
 }
 
 /* Desktop: 3-up grid */
@@ -598,7 +610,6 @@ body{
     box-shadow: 0 18px 44px rgba(0,0,0,.12);
     aspect-ratio: 9 / 16;
   }
-  /* Hide mobile cue on desktop */
   .reelsCue{ display:none; }
 }
 
@@ -609,23 +620,6 @@ body{
   display:block;
   background: #000;
   cursor: pointer;
-}
-
-/* Make it OBVIOUS it’s a video */
-.reel__badge{
-  position:absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 3;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-weight: 900;
-  font-size: .82rem;
-  letter-spacing: .6px;
-  color: rgba(255,255,255,.95);
-  background: rgba(0,0,0,.65);
-  border: 1px solid rgba(214,178,94,.45);
-  box-shadow: 0 14px 34px rgba(0,0,0,.28);
 }
 
 .reel__overlay{
@@ -639,7 +633,6 @@ body{
   transition: opacity .18s ease;
   pointer-events:none;
 }
-
 .reel__play{
   display:flex;
   align-items:center;
@@ -650,7 +643,6 @@ body{
   border: 1px solid rgba(255,255,255,.18);
   box-shadow: 0 18px 44px rgba(0,0,0,.28);
 }
-
 .reel__playIcon{
   width: 0;
   height: 0;
@@ -659,18 +651,14 @@ body{
   border-bottom: 10px solid transparent;
   margin-left: 2px;
 }
-
 .reel__playText{
   font-weight: 900;
   letter-spacing: .8px;
   color: rgba(255,255,255,.95);
 }
+.reel.isPlaying .reel__overlay{ opacity: 0; }
 
-.reel.isPlaying .reel__overlay{
-  opacity: 0;
-}
-
-/* Mobile meta can stay */
+/* meta now only shows title */
 .reel__meta{
   position:absolute;
   left: 12px;
@@ -686,11 +674,6 @@ body{
   font-weight: 900;
   letter-spacing: .4px;
   color: rgba(255,255,255,.94);
-}
-.reel__hint{
-  margin-top: 2px;
-  font-size: .92rem;
-  color: rgba(255,255,255,.72);
 }
 
 /* How it works */
@@ -758,41 +741,43 @@ body{
 .areaMap{ height: 100%; }
 .areaCard{
   border-radius: 22px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: #fff;
+  border: 1px solid rgba(255,255,255,.10);
+  background: #0b0b0c; /* ✅ black card again */
   padding: 16px;
-  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  box-shadow: 0 18px 44px rgba(0,0,0,.22);
   height: 100%;
   display:flex;
   flex-direction:column;
+  color: rgba(255,255,255,.92);
 }
 .areaTitle{
   margin: 0 0 8px;
   font-family: Oswald, Inter, sans-serif;
   letter-spacing: .7px;
   text-transform: uppercase;
+  color: #fff;
 }
 .areaText{
   margin: 0 0 12px;
-  color: var(--muted);
+  color: rgba(255,255,255,.74);
   line-height: 1.7;
 }
 .areaList{
   margin-top: 12px;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(0,0,0,.02);
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(255,255,255,.04);
   padding: 12px 14px;
 }
 .areaList__title{
   font-weight: 900;
   margin-bottom: 8px;
-  color: var(--text);
+  color: rgba(255,255,255,.92);
 }
 .areaList__ul{
   margin: 0;
   padding-left: 18px;
-  color: var(--muted);
+  color: rgba(255,255,255,.74);
   line-height: 1.7;
 }
 .areaActions{
@@ -812,7 +797,7 @@ body{
   display:block;
 }
 
-/* About (now LIGHT section) */
+/* About */
 .aboutGrid{
   display:grid;
   grid-template-columns: 1fr;
@@ -848,25 +833,7 @@ body{
   flex-wrap:wrap;
 }
 
-/* Mobile About */
-@media (max-width: 767px){
-  #about .aboutTitle{
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 12px;
-  }
-  #about .aboutText{
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 62ch;
-  }
-  #about .aboutActions{
-    justify-content: center;
-  }
-}
-
-/* Reviews rail */
+/* Reviews */
 .reviewsRailWrap{
   position: relative;
   margin-top: 16px;
@@ -978,7 +945,6 @@ body{
   cursor:pointer;
   font-size: 1.2rem;
 }
-
 .modal__panel{
   position:relative;
   width: min(680px, 100%);
@@ -999,70 +965,7 @@ body{
 .modal__content{ color: var(--muted); line-height: 1.7; }
 .modal__actions{ display:flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
-.tiers{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  margin-top: 12px;
-}
-.tier{
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.12), rgba(255,255,255,0) 60%), #fff;
-  padding: 12px;
-  box-shadow: 0 16px 38px rgba(0,0,0,.08);
-}
-.tier__top{
-  display:flex;
-  justify-content:space-between;
-  gap: 10px;
-  align-items:flex-start;
-}
-.tier__name{ font-weight: 900; color: #111; }
-.tier__tag{
-  font-weight: 900;
-  font-size: .85rem;
-  padding: .25rem .55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(214,178,94,.40);
-  background: rgba(214,178,94,.12);
-  color: #111;
-  white-space: nowrap;
-}
-.tier ul{ margin: 10px 0 0 18px; padding: 0; }
-
-.callPanel{
-  position:relative;
-  width: min(560px, 100%);
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 18px;
-  max-height: calc(100vh - 3rem);
-  overflow:auto;
-}
-.callTitle{
-  margin: 0 0 6px;
-  font-family: Oswald, Inter, sans-serif;
-  letter-spacing: .7px;
-  text-transform: uppercase;
-  color: var(--black);
-}
-.callText{ margin: 0 0 10px; color: var(--muted); line-height: 1.6; }
-.callNumber{
-  display:inline-block;
-  font-weight: 900;
-  font-size: 1.35rem;
-  color: var(--gold);
-  text-decoration: none;
-  padding: 10px 12px;
-  border-radius: 12px;
-  background: rgba(214,178,94,.10);
-  border: 1px solid rgba(214,178,94,.35);
-}
-.callHint{ margin: 10px 0 0; color: rgba(0,0,0,.60); line-height: 1.6; }
-
-/* Footer (light) */
+/* Footer */
 .footer--light{
   background: #fff;
   color: #111;
@@ -1114,6 +1017,18 @@ body{
   .navToggle{ display:none; }
   .nav__cta{ margin-left: 6px; margin-top: 0; width: auto; }
 
+  /* ✅ brand text side-by-side again on desktop */
+  .brand__text{
+    display:flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .brand__tag{
+    margin-top: 0;
+    font-size: .92rem;
+  }
+
   .aboutGrid{ grid-template-columns: 1.1fr .9fr; gap: 22px; }
   .aboutMedia img{ height: 380px; }
 
@@ -1124,8 +1039,6 @@ body{
     height: 100%;
     min-height: 380px;
   }
-
-  .tiers{ grid-template-columns: repeat(3, 1fr); }
 
   .footerMini{
     flex-direction:row;
@@ -1140,9 +1053,4 @@ body{
     grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
-}
-
-/* Larger desktop */
-@media (min-width: 1024px){
-  /* reserved */
 }
