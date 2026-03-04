@@ -233,23 +233,27 @@
 
         <div class="reelsWrap">
           <div class="reels" data-reels aria-label="Short video clips of detailing work">
-                <div class="reelsHint" aria-hidden="true">
-      <div class="reelsHint__pill">SCROLL THROUGH VIDEOS</div>
-      <div class="reelsHint__arrow"></div>
-    </div>
             <article class="reel" data-reel>
+              <!-- ✅ Mobile hint on the FIRST reel only -->
+              <div class="reelScrollHint" aria-hidden="true">
+                <div class="reelScrollHint__pill">SCROLL DOWN TO SEE MORE VIDEOS OF OUR WORK</div>
+                <div class="reelScrollHint__arrow"></div>
+              </div>
+
               <video class="reel__video" muted playsinline loop preload="metadata" aria-label="Detailing video clip 1">
                 <source
                   src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
                   type="video/mp4"
                 />
               </video>
+
               <div class="reel__overlay" aria-hidden="true">
                 <div class="reel__play">
                   <span class="reel__playIcon"></span>
                   <span class="reel__playText">PLAY</span>
                 </div>
               </div>
+
               <div class="reel__meta">
                 <div class="reel__title">Interior Reset</div>
               </div>
@@ -262,12 +266,14 @@
                   type="video/mp4"
                 />
               </video>
+
               <div class="reel__overlay" aria-hidden="true">
                 <div class="reel__play">
                   <span class="reel__playIcon"></span>
                   <span class="reel__playText">PLAY</span>
                 </div>
               </div>
+
               <div class="reel__meta">
                 <div class="reel__title">Deep Clean Moment</div>
               </div>
@@ -280,12 +286,14 @@
                   type="video/mp4"
                 />
               </video>
+
               <div class="reel__overlay" aria-hidden="true">
                 <div class="reel__play">
                   <span class="reel__playIcon"></span>
                   <span class="reel__playText">PLAY</span>
                 </div>
               </div>
+
               <div class="reel__meta">
                 <div class="reel__title">Finish &amp; Shine</div>
               </div>
