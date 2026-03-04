@@ -10,6 +10,9 @@
   overflow:auto;
 }
 
+/* ✅ kill switch: if any old bottom price pill exists, never show it */
+.qNavPrice{ display:none !important; }
+
 .quoteTop{
   display:flex;
   align-items:flex-start;
