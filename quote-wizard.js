@@ -1,5 +1,5 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7.5)
+// QUOTE WIZARD (Flow v7.6)
 // -------------------------
 // Vehicle -> Category -> Service -> Conditions -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Calendar -> Done
@@ -78,15 +78,13 @@ const serviceCategories = [
 ];
 
 // Upkeep plan image rules
-const INTERIOR_UPKEEP_IMG = "./img_6480.webp"; // your interior upkeep image
+const INTERIOR_UPKEEP_IMG = "./img_6480.webp";
 const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp"; // required
 
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
-
   { label: "Exterior Wash", category: "Exterior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
-  // Upkeep variants
   { label: "Interior Upkeep Plan", category: "Interior", img: INTERIOR_UPKEEP_IMG, upkeep: "interior" },
   { label: "Exterior Upkeep Plan", category: "Exterior", img: EXTERIOR_UPKEEP_IMG, upkeep: "exterior" },
   {
@@ -138,22 +136,16 @@ const estimateTable = {
 
 const serviceOverrides = {
   "Ceramic Coating": {
-    Small: [450, 900],
-    Medium: [550, 1100],
-    Large: [650, 1400],
-    Truck: [650, 1400]
+    Small: [450, 900], Medium: [550, 1100], Large: [650, 1400], Truck: [650, 1400]
   },
   "Paint Correction": {
-    Small: [350, 800],
-    Medium: [450, 950],
-    Large: [550, 1200],
-    Truck: [550, 1200]
+    Small: [350, 800], Medium: [450, 950], Large: [550, 1200], Truck: [550, 1200]
   },
 
-  // Upkeep plans
+  // Upkeep base ranges (we apply condition factors to these)
   "Interior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] },
   "Exterior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] },
-  "Interior + Exterior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] }
+  "Interior + Exterior Upkeep Plan": { Small: [140, 260], Medium: [170, 310], Large: [200, 360], Truck: [200, 390] }
 };
 
 // -------------------------
@@ -199,7 +191,6 @@ function nextActiveStepIndex(fromIndex) {
   for (let i = fromIndex + 1; i < steps.length; i++) if (stepIsActive(steps[i])) return i;
   return steps.length - 1;
 }
-
 function prevActiveStepIndex(fromIndex) {
   for (let i = fromIndex - 1; i >= 0; i--) if (stepIsActive(steps[i])) return i;
   return 0;
@@ -221,41 +212,67 @@ function escapeHtml(str) {
 }
 
 // -------------------------
-// PRICE LOGIC (Starting at)
+// Upkeep condition factor (for "starting at" and estimate consistency)
 // -------------------------
-function minFromRange(range) {
+function conditionFactor(cond) {
+  if (cond === "Light") return 0.92;
+  if (cond === "Normal") return 1.0;
+  if (cond === "Heavy") return 1.14;
+  return 1.0;
+}
+
+function clampInt(n) {
+  const x = Math.round(Number(n));
+  return Number.isFinite(x) ? x : null;
+}
+
+// -------------------------
+// Estimate tighten
+// -------------------------
+function tightenAndHeavier(range) {
   if (!range) return null;
-  const n = Number(range[0]);
-  return Number.isFinite(n) ? n : null;
+  const low = Number(range[0]);
+  const high = Number(range[1]);
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return range;
+
+  const mid = (low + high) / 2;
+  const delta = Math.max(50, Math.round((high - low) * 0.22));
+  const newLow = Math.round(mid + (high - mid) * 0.12);
+  const newHigh = Math.max(newLow + 30, newLow + delta);
+  return [newLow, newHigh];
 }
 
-function minAcross(obj) {
-  // obj can be: {Small:{Light:[...]}...} OR {Small:[...],...}
-  let mins = [];
-  for (const k of Object.keys(obj || {})) {
-    const v = obj[k];
-    if (Array.isArray(v)) {
-      const m = minFromRange(v);
-      if (m != null) mins.push(m);
-    } else if (typeof v === "object" && v) {
-      for (const kk of Object.keys(v)) {
-        const vv = v[kk];
-        if (Array.isArray(vv)) {
-          const m = minFromRange(vv);
-          if (m != null) mins.push(m);
-        }
-      }
-    }
-  }
-  if (!mins.length) return null;
-  return Math.min(...mins);
-}
-
+// -------------------------
+// Estimate computation
+// -------------------------
 function computeEstimate() {
   const type = quoteState.vehicleType;
   if (!type) return null;
 
-  if (serviceOverrides[quoteState.service]) {
+  // Upkeep: use base range + condition factor(s)
+  if (isUpkeepPlan() && serviceOverrides[quoteState.service]) {
+    const base = serviceOverrides[quoteState.service][type];
+    if (!base) return null;
+
+    // require the needed conditions
+    if (serviceRequiresInteriorCondition() && !quoteState.interiorCondition) return null;
+    if (serviceRequiresExteriorCondition() && !quoteState.exteriorCondition) return null;
+
+    let f = 1.0;
+    if (quoteState.service === "Interior Upkeep Plan") f = conditionFactor(quoteState.interiorCondition);
+    if (quoteState.service === "Exterior Upkeep Plan") f = conditionFactor(quoteState.exteriorCondition);
+    if (quoteState.service === "Interior + Exterior Upkeep Plan") {
+      const fi = conditionFactor(quoteState.interiorCondition);
+      const fe = conditionFactor(quoteState.exteriorCondition);
+      f = (fi + fe) / 2;
+    }
+
+    const r = [base[0] * f, base[1] * f].map((n) => clampInt(n));
+    return tightenAndHeavier(r);
+  }
+
+  // Coating/correction overrides (no conditions needed)
+  if (serviceOverrides[quoteState.service] && !isUpkeepPlan()) {
     const r = serviceOverrides[quoteState.service][type];
     return tightenAndHeavier(r || null);
   }
@@ -286,45 +303,59 @@ function computeEstimate() {
   return null;
 }
 
-function computeStartingAt() {
-  if (!quoteState.service) return null;
-
-  // If we can compute full estimate, prefer it
-  const est = computeEstimate();
-  if (est) return { mode: "range", low: est[0], high: est[1] };
-
+// -------------------------
+// Starting-at under each condition card
+// -------------------------
+function startingAtForInteriorCondition(icLabel) {
   const type = quoteState.vehicleType;
+  if (!type) return null;
 
-  // Overrides (coating / correction / upkeep variants)
-  if (serviceOverrides[quoteState.service]) {
-    const table = serviceOverrides[quoteState.service];
-    const min = type ? minFromRange(table[type]) : minAcross(table);
-    if (min != null) return { mode: "starting", start: min };
+  // Upkeep (interior-only)
+  if (quoteState.service === "Interior Upkeep Plan") {
+    const base = serviceOverrides["Interior Upkeep Plan"]?.[type];
+    if (!base) return null;
+    return clampInt(base[0] * conditionFactor(icLabel));
   }
 
-  // Interior Detail / category-based tables
-  if (quoteState.service === "Interior Detail") {
-    const t = estimateTable.Interior;
-    const min = type ? minAcross(t[type]) : minAcross(t);
-    if (min != null) return { mode: "starting", start: min };
+  // Upkeep (combo): show combined starting point even before exterior is chosen
+  if (quoteState.service === "Interior + Exterior Upkeep Plan") {
+    const base = serviceOverrides["Interior + Exterior Upkeep Plan"]?.[type];
+    if (!base) return null;
+    // assume exterior Light for "starting at" on interior step
+    const f = (conditionFactor(icLabel) + conditionFactor("Light")) / 2;
+    return clampInt(base[0] * f);
   }
 
-  if (quoteState.service === "Exterior Wash") {
-    const t = estimateTable.Exterior;
-    const min = type ? minAcross(t[type]) : minAcross(t);
-    if (min != null) return { mode: "starting", start: min };
-  }
-
-  // Interior+Exterior general fallback: sum minimums
-  if (quoteState.serviceCategory === "Interior + Exterior") {
-    const minI = type ? minAcross(estimateTable.Interior[type]) : minAcross(estimateTable.Interior);
-    const minE = type ? minAcross(estimateTable.Exterior[type]) : minAcross(estimateTable.Exterior);
-    if (minI != null && minE != null) return { mode: "starting", start: minI + minE };
-  }
-
-  return null;
+  // Normal interior pricing
+  const r = estimateTable.Interior?.[type]?.[icLabel];
+  return r ? clampInt(r[0]) : null;
 }
 
+function startingAtForExteriorCondition(ecLabel) {
+  const type = quoteState.vehicleType;
+  if (!type) return null;
+
+  if (quoteState.service === "Exterior Upkeep Plan") {
+    const base = serviceOverrides["Exterior Upkeep Plan"]?.[type];
+    if (!base) return null;
+    return clampInt(base[0] * conditionFactor(ecLabel));
+  }
+
+  if (quoteState.service === "Interior + Exterior Upkeep Plan") {
+    const base = serviceOverrides["Interior + Exterior Upkeep Plan"]?.[type];
+    if (!base) return null;
+    // assume interior Light for "starting at" on exterior step
+    const f = (conditionFactor("Light") + conditionFactor(ecLabel)) / 2;
+    return clampInt(base[0] * f);
+  }
+
+  const r = estimateTable.Exterior?.[type]?.[ecLabel];
+  return r ? clampInt(r[0]) : null;
+}
+
+// -------------------------
+// Bottom nav price pill
+// -------------------------
 function ensureNavPrice() {
   if (!quoteNav) return null;
 
@@ -332,13 +363,9 @@ function ensureNavPrice() {
   if (!el) {
     el = document.createElement("div");
     el.className = "qNavPrice";
-    // Insert between back and next (center)
     const back = quoteNav.querySelector(".quoteBack");
-    if (back && back.nextSibling) {
-      quoteNav.insertBefore(el, back.nextSibling);
-    } else {
-      quoteNav.insertBefore(el, quoteNav.firstChild);
-    }
+    if (back && back.nextSibling) quoteNav.insertBefore(el, back.nextSibling);
+    else quoteNav.insertBefore(el, quoteNav.firstChild);
   }
   return el;
 }
@@ -347,36 +374,116 @@ function renderNavPrice() {
   const el = ensureNavPrice();
   if (!el) return;
 
-  const p = computeStartingAt();
+  const step = steps[stepIndex];
 
-  if (!quoteState.service || !p) {
+  // ✅ Hide the pill on contact form (and beyond) so price isn't revealed until AFTER info is filled
+  if (step === "contact" || step === "appointment" || step === "done") {
+    el.style.display = "none";
+    return;
+  }
+
+  // Also hide it on estimate step to avoid duplicate; estimate box already shows it
+  if (step === "estimate") {
+    el.style.display = "none";
+    return;
+  }
+
+  // Only show during earlier selection steps
+  if (!quoteState.service) {
+    el.style.display = "none";
+    return;
+  }
+
+  // If estimate is fully computable already, show range, otherwise show a basic starting at based on best-known info
+  const est = computeEstimate();
+  if (est) {
+    el.style.display = "flex";
+    el.innerHTML = `<span>Estimated:</span> $${escapeHtml(est[0])}–$${escapeHtml(est[1])}`;
+    return;
+  }
+
+  // fallback: if we can show something reasonable
+  const type = quoteState.vehicleType;
+  if (!type) {
+    el.style.display = "none";
+    return;
+  }
+
+  let start = null;
+
+  if (serviceOverrides[quoteState.service]) {
+    start = serviceOverrides[quoteState.service][type]?.[0] ?? null;
+  } else if (quoteState.service === "Interior Detail") {
+    start = estimateTable.Interior?.[type]?.Light?.[0] ?? null;
+  } else if (quoteState.service === "Exterior Wash") {
+    start = estimateTable.Exterior?.[type]?.Light?.[0] ?? null;
+  }
+
+  if (start == null) {
     el.style.display = "none";
     return;
   }
 
   el.style.display = "flex";
-
-  if (p.mode === "range") {
-    el.innerHTML = `<span>Estimated:</span> $${escapeHtml(p.low)}–$${escapeHtml(p.high)}`;
-  } else {
-    el.innerHTML = `<span>Starting at:</span> $${escapeHtml(p.start)}`;
-  }
+  el.innerHTML = `<span>Starting at:</span> $${escapeHtml(start)}`;
 }
 
 // -------------------------
-// Estimate tighten
+// Continue rules
 // -------------------------
-function tightenAndHeavier(range) {
-  if (!range) return null;
-  const low = Number(range[0]);
-  const high = Number(range[1]);
-  if (!Number.isFinite(low) || !Number.isFinite(high)) return range;
+function canContinue() {
+  const step = steps[stepIndex];
 
-  const mid = (low + high) / 2;
-  const delta = Math.max(50, Math.round((high - low) * 0.22));
-  const newLow = Math.round(mid + (high - mid) * 0.12);
-  const newHigh = Math.max(newLow + 30, newLow + delta);
-  return [newLow, newHigh];
+  if (step === "vehicleType") return !!quoteState.vehicleType;
+  if (step === "serviceCategory") return !!quoteState.serviceCategory;
+  if (step === "service") return !!quoteState.service;
+
+  if (step === "conditionInterior") return !serviceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
+  if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
+
+  if (step === "upkeepFrequency") return !isUpkeepPlan() ? true : !!quoteState.upkeepFrequency;
+
+  if (step === "contact") {
+    return (
+      quoteState.name.trim().length >= 2 &&
+      quoteState.phone.trim().length >= 7 &&
+      quoteState.email.trim().includes("@") &&
+      quoteState.ackDeposit === true
+    );
+  }
+
+  if (step === "appointment") return !!quoteState.slotId;
+
+  return true;
+}
+
+function updateNav() {
+  if (!quoteBackBtn || !quoteNextBtn) return;
+
+  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
+  const step = steps[stepIndex];
+
+  if (step === "done") {
+    quoteNextBtn.style.display = "none";
+    quoteBackBtn.textContent = "Close";
+    quoteBackBtn.style.visibility = "visible";
+    renderNavPrice();
+    return;
+  }
+
+  quoteNextBtn.style.display = "inline-flex";
+  quoteBackBtn.textContent = "Back";
+
+  quoteNextBtn.textContent = step === "appointment" ? "Finish" : "Continue";
+  quoteNextBtn.disabled = !canContinue();
+
+  renderNavPrice();
+}
+
+function pickAndAdvance(pickFn) {
+  pickFn();
+  renderStep();
+  setTimeout(() => nextStep(true), 80);
 }
 
 // -------------------------
@@ -496,7 +603,6 @@ window.closeQuoteModal = closeQuoteModal;
 document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
-// DO NOT close on outside click
 if (quoteModal) {
   quoteModal.addEventListener(
     "click",
@@ -513,11 +619,7 @@ if (quoteModal) {
 // -------------------------
 // Calendar state + helpers
 // -------------------------
-let calendarCache = {
-  tzLabel: "Local Time",
-  slots: [],
-  byDate: new Map()
-};
+let calendarCache = { tzLabel: "Local Time", slots: [], byDate: new Map() };
 
 function isoDate(d) {
   const y = d.getFullYear();
@@ -540,13 +642,11 @@ function buildCalendarIndex(slots) {
   for (const [k, arr] of map.entries()) arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
   return map;
 }
-
 function findNextAvailableDate(fromDateISO) {
   const dates = Array.from(calendarCache.byDate.keys()).sort();
   for (const d of dates) if (!fromDateISO || d >= fromDateISO) return d;
   return "";
 }
-
 function parseSlotToDateTime(slot) {
   const id = String(slot.id || "").trim();
   const label = String(slot.label || "").trim();
@@ -564,67 +664,6 @@ function parseSlotToDateTime(slot) {
     return { date, time, pretty: label || id };
   }
   return { date: "", time: "", pretty: label || id };
-}
-
-// -------------------------
-// Continue rules
-// -------------------------
-function canContinue() {
-  const step = steps[stepIndex];
-
-  if (step === "vehicleType") return !!quoteState.vehicleType;
-  if (step === "serviceCategory") return !!quoteState.serviceCategory;
-  if (step === "service") return !!quoteState.service;
-
-  if (step === "conditionInterior") return !serviceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
-  if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
-
-  if (step === "upkeepFrequency") return !isUpkeepPlan() ? true : !!quoteState.upkeepFrequency;
-
-  if (step === "contact") {
-    return (
-      quoteState.name.trim().length >= 2 &&
-      quoteState.phone.trim().length >= 7 &&
-      quoteState.email.trim().includes("@") &&
-      quoteState.ackDeposit === true
-    );
-  }
-
-  if (step === "appointment") return !!quoteState.slotId;
-
-  return true;
-}
-
-function updateNav() {
-  if (!quoteBackBtn || !quoteNextBtn) return;
-
-  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
-
-  const step = steps[stepIndex];
-
-  if (step === "done") {
-    quoteNextBtn.style.display = "none";
-    quoteBackBtn.textContent = "Close";
-    quoteBackBtn.style.visibility = "visible";
-    return;
-  }
-
-  quoteNextBtn.style.display = "inline-flex";
-  quoteBackBtn.textContent = "Back";
-
-  // ✅ Calendar step finalizes
-  quoteNextBtn.textContent = step === "appointment" ? "Finish" : "Continue";
-
-  quoteNextBtn.disabled = !canContinue();
-
-  // keep bottom bar updated
-  renderNavPrice();
-}
-
-function pickAndAdvance(pickFn) {
-  pickFn();
-  renderStep();
-  setTimeout(() => nextStep(true), 80);
 }
 
 // -------------------------
@@ -717,15 +756,19 @@ function renderStep() {
       if (quoteState.serviceCategory === "Exterior") return s.category === "Exterior";
 
       // ✅ Interior + Exterior category:
-      // - allow Interior Detail, Exterior Wash, Ceramic, Paint Correction
-      // - allow ONLY the combined upkeep plan (NOT interior/exterior upkeep)
+      // - allow only combined upkeep plan (NOT interior/exterior upkeep)
+      // - allow the rest of services normally
       if (quoteState.serviceCategory === "Interior + Exterior") {
         if (s.label === "Interior Upkeep Plan") return false;
         if (s.label === "Exterior Upkeep Plan") return false;
         if (s.label === "Interior + Exterior Upkeep Plan") return true;
 
-        // other services allowed
-        return s.label === "Interior Detail" || s.label === "Exterior Wash" || s.label === "Ceramic Coating" || s.label === "Paint Correction";
+        return (
+          s.label === "Interior Detail" ||
+          s.label === "Exterior Wash" ||
+          s.label === "Ceramic Coating" ||
+          s.label === "Paint Correction"
+        );
       }
 
       return false;
@@ -758,7 +801,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition
+  // 4) Interior condition (✅ "Starting at" under each card)
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -767,10 +810,13 @@ function renderStep() {
     cards.className = "qCards qCards--scroll qCards--big";
 
     interiorConditions.forEach((c) => {
+      const start = startingAtForInteriorCondition(c.label);
+      const hint = `${c.hint || ""}${start ? `\nStarting at $${start}` : ""}`.trim();
+
       cards.appendChild(
         imgCard({
           label: c.label,
-          hint: c.hint,
+          hint,
           img: c.img,
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.interiorCondition === c.label,
@@ -782,7 +828,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition
+  // 5) Exterior condition (✅ "Starting at" under each card)
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -791,10 +837,13 @@ function renderStep() {
     cards.className = "qCards qCards--scroll qCards--big";
 
     exteriorConditions.forEach((c) => {
+      const start = startingAtForExteriorCondition(c.label);
+      const hint = `${c.hint || ""}${start ? `\nStarting at $${start}` : ""}`.trim();
+
       cards.appendChild(
         imgCard({
           label: c.label,
-          hint: "",
+          hint,
           img: c.img,
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
@@ -806,7 +855,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Upkeep frequency
+  // 6) Upkeep frequency (✅ bubble boxes fixed via CSS restore)
   if (step === "upkeepFrequency") {
     title.textContent = "Upkeep frequency";
     sub.textContent = "How often would you like us to come out? Tap one to continue.";
@@ -832,7 +881,7 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
   }
 
-  // 7) Contact (moved BEFORE estimate + calendar)
+  // 7) Contact
   if (step === "contact") {
     title.textContent = "Your contact info";
     sub.textContent = "Required. We’ll confirm by text/call.";
@@ -906,37 +955,17 @@ function renderStep() {
       statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement.";
     };
 
-    nameEl?.addEventListener("input", (e) => {
-      quoteState.name = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-    phoneEl?.addEventListener("input", (e) => {
-      quoteState.phone = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-    emailEl?.addEventListener("input", (e) => {
-      quoteState.email = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-    notesEl?.addEventListener("input", (e) => {
-      quoteState.notes = e.target.value || "";
-    });
-    ackEl?.addEventListener("change", (e) => {
-      quoteState.ackDeposit = !!e.target.checked;
-      updateNav();
-      updateStatus();
-    });
-    hpEl?.addEventListener("input", (e) => {
-      quoteState.honeypot = e.target.value || "";
-    });
+    nameEl?.addEventListener("input", (e) => { quoteState.name = e.target.value || ""; updateNav(); updateStatus(); });
+    phoneEl?.addEventListener("input", (e) => { quoteState.phone = e.target.value || ""; updateNav(); updateStatus(); });
+    emailEl?.addEventListener("input", (e) => { quoteState.email = e.target.value || ""; updateNav(); updateStatus(); });
+    notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
+    ackEl?.addEventListener("change", (e) => { quoteState.ackDeposit = !!e.target.checked; updateNav(); updateStatus(); });
+    hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
 
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 8) Estimate (moved AFTER contact)
+  // 8) Estimate (after contact ✅)
   if (step === "estimate") {
     title.textContent = "Estimated price";
     sub.textContent = "Estimate based on your selections.";
@@ -949,9 +978,8 @@ function renderStep() {
     box.className = "qEstimateBox qEstimateBox--simple";
     box.innerHTML = `
       <div class="qEstimateBig">
-        ${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "Starting estimate will be confirmed after assessment"}
+        ${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "We’ll confirm after assessment"}
       </div>
-
       <div class="qEstimatePills">
         <span class="qPill"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType)}</span>
         <span class="qPill"><strong>Service:</strong> ${escapeHtml(quoteState.service)}</span>
@@ -959,16 +987,12 @@ function renderStep() {
         ${quoteState.interiorCondition ? `<span class="qPill"><strong>Interior:</strong> ${escapeHtml(quoteState.interiorCondition)}</span>` : ""}
         ${quoteState.exteriorCondition ? `<span class="qPill"><strong>Exterior:</strong> ${escapeHtml(quoteState.exteriorCondition)}</span>` : ""}
       </div>
-
-      <div class="qEstimateFine">
-        Final price confirmed after quick assessment.
-      </div>
+      <div class="qEstimateFine">Final price confirmed after quick assessment.</div>
     `;
-
     quoteBody.append(title, sub, box);
   }
 
-  // 9) Appointment (finalizes on Finish)
+  // 9) Appointment
   if (step === "appointment") {
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
@@ -1067,7 +1091,6 @@ function renderStep() {
     quoteBody.append(title, sub, box, actions);
   }
 
-  renderNavPrice();
   updateNav();
 }
 
@@ -1355,6 +1378,7 @@ async function reserveAndSend() {
 
   try {
     const result = await Promise.race([postJson(reserveUrl, payload), timeout(12000)]);
+
     if (result && result.ok === true) return { ok: true };
     if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked." };
     return { ok: false, message: "Submit failed." };
@@ -1371,15 +1395,13 @@ function nextStep(fromAutoAdvance = false) {
 
   const step = steps[stepIndex];
 
-  // When leaving estimate step, nothing special
-
   // ✅ Finish submits on appointment step
   if (step === "appointment") {
     quoteNextBtn.disabled = true;
     const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
 
-    // lock estimate values right before submit
+    // lock estimate values before submit
     const est = computeEstimate();
     quoteState.estimateLow = est ? est[0] : "";
     quoteState.estimateHigh = est ? est[1] : "";
