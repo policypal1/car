@@ -1,7 +1,7 @@
 // Keizer Mobile Detailing — Site UI
 // Restores: mobile nav, service "Learn More" modal, Call/Text modal,
 // before/after reveal slider, work carousel, reviews rail arrows, footer year.
-// Reels: click-to-play (no autoplay) and force first frame to render (prevents black poster).
+// Reels: click-to-play (pauses others) + ensure first frame is visible (no black thumbnails).
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -253,38 +253,54 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels: click-to-play (pauses others) + force first frame render (fixes black look)
+  // Reels: make sure we show a thumbnail (first frame) instead of black
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const reels = $$("[data-reel]", reelsRoot)
       .map((card) => ({ card, video: $("video", card) }))
       .filter((x) => x.video);
 
-    const pauseAll = () => {
-      reels.forEach(({ video }) => video.pause());
-    };
-
-    // Force a tiny seek so browsers paint a frame (no autoplay)
-    const primeFrame = (video) => {
+    const warmThumb = (video) => {
+      // Load enough to render a frame without playing audio/video
       try {
         video.muted = true;
-        const onLoaded = () => {
-          // Some browsers won't paint until a time change happens.
-          try { video.currentTime = 0.01; } catch (_) {}
+        video.playsInline = true;
+        video.preload = "metadata";
+        video.load();
+
+        const onLoaded = async () => {
+          // Seek a hair forward so a real frame is painted (works in most browsers)
+          try { video.currentTime = 0.05; } catch (_) {}
+          try { await video.play(); } catch (_) {}
+          video.pause();
           video.removeEventListener("loadeddata", onLoaded);
         };
+
         video.addEventListener("loadeddata", onLoaded, { once: true });
-        video.load();
       } catch (_) {}
     };
 
-    reels.forEach(({ video }) => primeFrame(video));
+    reels.forEach(({ video }) => warmThumb(video));
 
-    reels.forEach(({ video }) => {
-      video.addEventListener("click", async () => {
+    const pauseAll = () => {
+      reels.forEach(({ card, video }) => {
+        video.pause();
+        card.classList.remove("isPlaying");
+      });
+    };
+
+    const playVideo = async (video) => {
+      try { await video.play(); } catch (_) {}
+    };
+
+    reels.forEach(({ card, video }) => {
+      video.addEventListener("play", () => { card.classList.add("isPlaying"); });
+      video.addEventListener("pause", () => { card.classList.remove("isPlaying"); });
+
+      video.addEventListener("click", () => {
         if (video.paused) {
           pauseAll();
-          try { await video.play(); } catch (_) {}
+          playVideo(video);
         } else {
           video.pause();
         }
