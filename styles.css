@@ -370,24 +370,34 @@ body{
   margin: 0 auto;
 }
 
-/* ✅ MOBILE: no inner scroll container, page scrolls normally */
+/* ✅ MOBILE: scrollable reels area (like before) */
 @media (max-width: 767px){
   .reels{
-    display:grid;
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-  .reel{
-    position: relative;
+    height: 72vh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
     border-radius: 22px;
-    overflow:hidden;
     border: 1px solid rgba(0,0,0,.08);
-    background: #000;
+    background: #fff;
     box-shadow: 0 18px 44px rgba(0,0,0,.12);
-    aspect-ratio: 9 / 16;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  .reels::-webkit-scrollbar{ display:none; }
+
+  .reel{
+    scroll-snap-align: start;
+    position: relative;
+    height: 72vh;
+    display:flex;
+    align-items: stretch;
+    justify-content: center;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    background:#000;
   }
 }
 
+/* Desktop grid stays the same */
 @media (min-width: 768px){
   .reels{
     display:grid;
@@ -410,15 +420,14 @@ body{
   height:100%;
   object-fit: cover;
   display:block;
-  background: transparent; /* ✅ prevent “solid black block” feel */
+  background: transparent;
   cursor: pointer;
 }
 
-/* ✅ Keep overlay element out of the way visually */
-.reel__overlay{
-  display:none;
-}
+/* ✅ remove overlay completely */
+.reel__overlay{ display:none; }
 
+/* Keep title pill */
 .reel__meta{
   position:absolute;
   left: 12px;
@@ -700,9 +709,7 @@ body{
   margin-top: 22px;
   align-items:center;
 }
-.aboutCopy{
-  text-align: center; /* ✅ center about section content */
-}
+.aboutCopy{ text-align: center; }
 .aboutTitle{
   margin: 0 0 10px;
   font-family: Oswald, Inter, sans-serif;
@@ -730,7 +737,7 @@ body{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
-  justify-content: center; /* ✅ center buttons */
+  justify-content: center;
 }
 
 /* Reviews */
@@ -982,6 +989,7 @@ body{
 
 /* Desktop */
 @media (min-width: 768px){
+  /* ✅ Desktop header: links centered, CTA pinned right */
   .nav{
     position: static;
     display:flex !important;
@@ -996,17 +1004,22 @@ body{
     white-space: nowrap;
     flex-wrap: nowrap;
 
-    /* ✅ fill the space between logo and CTA */
     flex: 1;
     justify-content: center;
     gap: 26px;
+
+    /* reserve room so the centered links don't drift toward the logo */
+    padding-right: 220px;
+    position: relative;
   }
-  .nav a{
-    padding: 10px 6px;
-    white-space: nowrap;
-  }
+  .nav a{ padding: 10px 6px; white-space: nowrap; }
+
   .nav__cta{
-    margin-left: auto; /* ✅ pushes CTA to far right */
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
     width: auto;
   }
 
