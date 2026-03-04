@@ -1,8 +1,6 @@
 // Keizer Mobile Detailing — Site UI
-// Restores: mobile nav, service "Learn More" modal, Call/Text modal,
-// before/after reveal slider, work carousel, reviews rail arrows, footer year.
+// Mobile nav, modals, compare slider, work carousel, reviews rail, footer year.
 // Reels: click-to-play (pauses others) + ensure first frame is visible (no black thumbnails).
-// NEW: Mobile reels are locked until a video actually plays (so page scrolling isn't trapped).
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -15,7 +13,6 @@
   // Mobile nav toggle
   const navToggle = $("[data-nav-toggle]");
   const nav = $("[data-nav]");
-
   if (navToggle && nav) {
     const setOpen = (open) => {
       nav.classList.toggle("isOpen", open);
@@ -53,7 +50,7 @@
     });
   };
 
-  // Service details modal (Learn More buttons)
+  // Service details modal
   const serviceModal = $("[data-modal]");
   const serviceTitle = $("[data-modal-title]");
   const serviceContent = $("[data-modal-content]");
@@ -193,7 +190,6 @@
 
     const setPos = (val) => wrap.style.setProperty("--pos", `${val}%`);
     setPos(range.value || 12);
-
     range.addEventListener("input", (e) => setPos(e.target.value));
   });
 
@@ -204,7 +200,6 @@
     const prev = $("[data-carousel-prev]", carousel);
     const next = $("[data-carousel-next]", carousel);
     const slides = track ? $$(":scope .carousel__slide", track) : [];
-
     if (!track || slides.length === 0) return;
 
     let idx = 0;
@@ -236,7 +231,7 @@
     go(0);
   });
 
-  // Reviews rail arrows (scroll)
+  // Reviews rail arrows
   const rail = $("[data-rail]");
   if (rail) {
     const track = $("[data-rail-track]", rail);
@@ -254,17 +249,9 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels
+  // Reels: thumbnails + click-to-play (pauses others)
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
-    const reelsContainer = reelsRoot; // this is the scrollable container on mobile
-    const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
-
-    const unlockReelsScroll = () => {
-      if (!isMobile()) return;
-      reelsContainer.classList.add("isUnlocked");
-    };
-
     const reels = $$("[data-reel]", reelsRoot)
       .map((card) => ({ card, video: $("video", card) }))
       .filter((x) => x.video);
@@ -297,21 +284,12 @@
     };
 
     const playVideo = async (video) => {
-      try {
-        await video.play();
-        // ✅ Only unlock once it actually starts playing
-        unlockReelsScroll();
-      } catch (_) {}
+      try { await video.play(); } catch (_) {}
     };
 
     reels.forEach(({ card, video }) => {
-      video.addEventListener("play", () => {
-        card.classList.add("isPlaying");
-        unlockReelsScroll(); // also unlock on any play event
-      });
-      video.addEventListener("pause", () => {
-        card.classList.remove("isPlaying");
-      });
+      video.addEventListener("play", () => card.classList.add("isPlaying"));
+      video.addEventListener("pause", () => card.classList.remove("isPlaying"));
 
       video.addEventListener("click", () => {
         if (video.paused) {
