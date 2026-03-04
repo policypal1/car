@@ -1,7 +1,7 @@
 // Keizer Mobile Detailing — Site UI
 // Restores: mobile nav, service "Learn More" modal, Call/Text modal,
 // before/after reveal slider, work carousel, reviews rail arrows, footer year.
-// Reels: click-to-play with visible PLAY overlay via CSS (overlay fades when playing).
+// Reels: click-to-play (no autoplay) and force first frame to render (prevents black poster).
 
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
@@ -253,7 +253,7 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels: click-to-play (pauses others) + toggles .isPlaying for overlay fade
+  // Reels: click-to-play (pauses others) + force first frame render (fixes black look)
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const reels = $$("[data-reel]", reelsRoot)
@@ -261,31 +261,30 @@
       .filter((x) => x.video);
 
     const pauseAll = () => {
-      reels.forEach(({ card, video }) => {
-        video.pause();
-        card.classList.remove("isPlaying");
-      });
+      reels.forEach(({ video }) => video.pause());
     };
 
-    const markState = () => {
-      reels.forEach(({ card, video }) => {
-        card.classList.toggle("isPlaying", !video.paused);
-      });
+    // Force a tiny seek so browsers paint a frame (no autoplay)
+    const primeFrame = (video) => {
+      try {
+        video.muted = true;
+        const onLoaded = () => {
+          // Some browsers won't paint until a time change happens.
+          try { video.currentTime = 0.01; } catch (_) {}
+          video.removeEventListener("loadeddata", onLoaded);
+        };
+        video.addEventListener("loadeddata", onLoaded, { once: true });
+        video.load();
+      } catch (_) {}
     };
 
-    const playVideo = async (video) => {
-      try { await video.play(); } catch (_) {}
-      markState();
-    };
+    reels.forEach(({ video }) => primeFrame(video));
 
-    reels.forEach(({ card, video }) => {
-      video.addEventListener("play", () => { card.classList.add("isPlaying"); });
-      video.addEventListener("pause", () => { card.classList.remove("isPlaying"); });
-
-      video.addEventListener("click", () => {
+    reels.forEach(({ video }) => {
+      video.addEventListener("click", async () => {
         if (video.paused) {
           pauseAll();
-          playVideo(video);
+          try { await video.play(); } catch (_) {}
         } else {
           video.pause();
         }
