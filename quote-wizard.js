@@ -1,7 +1,7 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7.6)
+// QUOTE WIZARD (Flow v7.7)
 // -------------------------
-// Vehicle -> Category -> Service -> Conditions -> Upkeep Frequency (if upkeep)
+// Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Calendar -> Done
 //
 // Apps Script URL
@@ -21,7 +21,9 @@ let lastActiveElQuote = null;
 const quoteState = {
   vehicleType: "",
   serviceCategory: "",
-  service: "",
+
+  // ✅ multi-select services
+  services: [],
 
   interiorCondition: "",
   exteriorCondition: "",
@@ -151,39 +153,76 @@ const serviceOverrides = {
 // -------------------------
 // HELPERS
 // -------------------------
-function isUpkeepPlan() {
-  return (
-    quoteState.service === "Interior Upkeep Plan" ||
-    quoteState.service === "Exterior Upkeep Plan" ||
-    quoteState.service === "Interior + Exterior Upkeep Plan"
-  );
+function escapeHtml(str) {
+  return String(str || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function serviceRequiresInteriorCondition() {
-  if (quoteState.service === "Interior Upkeep Plan") return true;
-  if (quoteState.service === "Exterior Upkeep Plan") return false;
-  if (quoteState.service === "Interior + Exterior Upkeep Plan") return true;
-
-  if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return false;
-
-  return quoteState.serviceCategory === "Interior" || quoteState.serviceCategory === "Interior + Exterior";
+function setProgress() {
+  const dots = quoteDots();
+  if (!dots.length) return;
+  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
 }
 
-function serviceRequiresExteriorCondition() {
-  if (quoteState.service === "Interior Upkeep Plan") return false;
-  if (quoteState.service === "Exterior Upkeep Plan") return true;
-  if (quoteState.service === "Interior + Exterior Upkeep Plan") return true;
+// -------------------------
+// ✅ Upkeep / requirement rules (multi-service)
+// -------------------------
+const UPKEEP_SET = new Set([
+  "Interior Upkeep Plan",
+  "Exterior Upkeep Plan",
+  "Interior + Exterior Upkeep Plan"
+]);
 
-  if (quoteState.service === "Interior Detail") return false;
-  if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return true;
+function isUpkeepService(label) {
+  return UPKEEP_SET.has(label);
+}
 
-  return quoteState.serviceCategory === "Exterior" || quoteState.serviceCategory === "Interior + Exterior";
+function isUpkeepPlanSelected() {
+  return quoteState.services.some((s) => isUpkeepService(s));
+}
+
+// If any upkeep plan is selected, it must be the ONLY service (keeps the flow sane)
+function enforceUpkeepExclusivity() {
+  const upkeep = quoteState.services.find((s) => isUpkeepService(s));
+  if (upkeep) quoteState.services = [upkeep];
+}
+
+function anyServiceRequiresInteriorCondition() {
+  const svcs = quoteState.services || [];
+  if (!svcs.length) return quoteState.serviceCategory === "Interior" || quoteState.serviceCategory === "Interior + Exterior";
+
+  if (svcs.includes("Interior Upkeep Plan")) return true;
+  if (svcs.includes("Interior + Exterior Upkeep Plan")) return true;
+
+  // Interior Detail needs interior condition
+  if (svcs.includes("Interior Detail")) return true;
+
+  return false;
+}
+
+function anyServiceRequiresExteriorCondition() {
+  const svcs = quoteState.services || [];
+  if (!svcs.length) return quoteState.serviceCategory === "Exterior" || quoteState.serviceCategory === "Interior + Exterior";
+
+  if (svcs.includes("Exterior Upkeep Plan")) return true;
+  if (svcs.includes("Interior + Exterior Upkeep Plan")) return true;
+
+  // Exterior services needing exterior condition
+  if (svcs.includes("Exterior Wash")) return true;
+  if (svcs.includes("Ceramic Coating")) return true;
+  if (svcs.includes("Paint Correction")) return true;
+
+  return false;
 }
 
 function stepIsActive(stepName) {
-  if (stepName === "conditionInterior") return serviceRequiresInteriorCondition();
-  if (stepName === "conditionExterior") return serviceRequiresExteriorCondition();
-  if (stepName === "upkeepFrequency") return isUpkeepPlan();
+  if (stepName === "conditionInterior") return anyServiceRequiresInteriorCondition();
+  if (stepName === "conditionExterior") return anyServiceRequiresExteriorCondition();
+  if (stepName === "upkeepFrequency") return isUpkeepPlanSelected();
   return true;
 }
 
@@ -196,23 +235,8 @@ function prevActiveStepIndex(fromIndex) {
   return 0;
 }
 
-function setProgress() {
-  const dots = quoteDots();
-  if (!dots.length) return;
-  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
-}
-
-function escapeHtml(str) {
-  return String(str || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
 // -------------------------
-// Upkeep condition factor (for "starting at" and estimate consistency)
+// Pricing helpers
 // -------------------------
 function conditionFactor(cond) {
   if (cond === "Light") return 0.92;
@@ -220,15 +244,10 @@ function conditionFactor(cond) {
   if (cond === "Heavy") return 1.14;
   return 1.0;
 }
-
 function clampInt(n) {
   const x = Math.round(Number(n));
   return Number.isFinite(x) ? x : null;
 }
-
-// -------------------------
-// Estimate tighten
-// -------------------------
 function tightenAndHeavier(range) {
   if (!range) return null;
   const low = Number(range[0]);
@@ -242,91 +261,99 @@ function tightenAndHeavier(range) {
   return [newLow, newHigh];
 }
 
-// -------------------------
-// Estimate computation
-// -------------------------
-function computeEstimate() {
+// ✅ compute a range for ONE selected service, then we sum ranges
+function computeRangeForService(serviceLabel) {
   const type = quoteState.vehicleType;
   if (!type) return null;
 
-  // Upkeep: use base range + condition factor(s)
-  if (isUpkeepPlan() && serviceOverrides[quoteState.service]) {
-    const base = serviceOverrides[quoteState.service][type];
+  // Upkeep plans (need relevant condition(s))
+  if (isUpkeepService(serviceLabel) && serviceOverrides[serviceLabel]) {
+    const base = serviceOverrides[serviceLabel][type];
     if (!base) return null;
 
-    // require the needed conditions
-    if (serviceRequiresInteriorCondition() && !quoteState.interiorCondition) return null;
-    if (serviceRequiresExteriorCondition() && !quoteState.exteriorCondition) return null;
+    // require conditions
+    if (serviceLabel === "Interior Upkeep Plan" && !quoteState.interiorCondition) return null;
+    if (serviceLabel === "Exterior Upkeep Plan" && !quoteState.exteriorCondition) return null;
+    if (serviceLabel === "Interior + Exterior Upkeep Plan" && (!quoteState.interiorCondition || !quoteState.exteriorCondition)) return null;
 
     let f = 1.0;
-    if (quoteState.service === "Interior Upkeep Plan") f = conditionFactor(quoteState.interiorCondition);
-    if (quoteState.service === "Exterior Upkeep Plan") f = conditionFactor(quoteState.exteriorCondition);
-    if (quoteState.service === "Interior + Exterior Upkeep Plan") {
+    if (serviceLabel === "Interior Upkeep Plan") f = conditionFactor(quoteState.interiorCondition);
+    if (serviceLabel === "Exterior Upkeep Plan") f = conditionFactor(quoteState.exteriorCondition);
+    if (serviceLabel === "Interior + Exterior Upkeep Plan") {
       const fi = conditionFactor(quoteState.interiorCondition);
       const fe = conditionFactor(quoteState.exteriorCondition);
       f = (fi + fe) / 2;
     }
 
-    const r = [base[0] * f, base[1] * f].map((n) => clampInt(n));
-    return tightenAndHeavier(r);
+    return [base[0] * f, base[1] * f].map((n) => clampInt(n));
   }
 
-  // Coating/correction overrides (no conditions needed)
-  if (serviceOverrides[quoteState.service] && !isUpkeepPlan()) {
-    const r = serviceOverrides[quoteState.service][type];
-    return tightenAndHeavier(r || null);
+  // Ceramic / Paint overrides (need exterior condition step selection, but range doesn't vary by condition)
+  if ((serviceLabel === "Ceramic Coating" || serviceLabel === "Paint Correction") && serviceOverrides[serviceLabel]) {
+    const r = serviceOverrides[serviceLabel][type];
+    return r ? [clampInt(r[0]), clampInt(r[1])] : null;
   }
 
-  const cat = quoteState.serviceCategory;
-
-  if (cat === "Interior") {
+  // Interior Detail range depends on interior condition
+  if (serviceLabel === "Interior Detail") {
     if (!quoteState.interiorCondition) return null;
-    return tightenAndHeavier(estimateTable.Interior?.[type]?.[quoteState.interiorCondition] || null);
+    const r = estimateTable.Interior?.[type]?.[quoteState.interiorCondition];
+    return r ? [clampInt(r[0]), clampInt(r[1])] : null;
   }
 
-  if (cat === "Exterior") {
+  // Exterior Wash range depends on exterior condition
+  if (serviceLabel === "Exterior Wash") {
     if (!quoteState.exteriorCondition) return null;
-    return tightenAndHeavier(estimateTable.Exterior?.[type]?.[quoteState.exteriorCondition] || null);
-  }
-
-  if (cat === "Interior + Exterior") {
-    const ic = quoteState.interiorCondition;
-    const ec = quoteState.exteriorCondition;
-    if (!ic || !ec) return null;
-
-    const ir = estimateTable.Interior?.[type]?.[ic];
-    const er = estimateTable.Exterior?.[type]?.[ec];
-    if (!ir || !er) return null;
-    return tightenAndHeavier([ir[0] + er[0], ir[1] + er[1]]);
+    const r = estimateTable.Exterior?.[type]?.[quoteState.exteriorCondition];
+    return r ? [clampInt(r[0]), clampInt(r[1])] : null;
   }
 
   return null;
 }
 
+function computeEstimate() {
+  const type = quoteState.vehicleType;
+  if (!type) return null;
+
+  const svcs = quoteState.services || [];
+  if (!svcs.length) return null;
+
+  let low = 0;
+  let high = 0;
+
+  for (const s of svcs) {
+    const r = computeRangeForService(s);
+    if (!r) return null; // can't compute yet until conditions are chosen
+    low += Number(r[0] || 0);
+    high += Number(r[1] || 0);
+  }
+
+  return tightenAndHeavier([low, high]);
+}
+
 // -------------------------
-// Starting-at under each condition card
+// ✅ Starting-at ONLY on condition cards
 // -------------------------
 function startingAtForInteriorCondition(icLabel) {
   const type = quoteState.vehicleType;
   if (!type) return null;
 
   // Upkeep (interior-only)
-  if (quoteState.service === "Interior Upkeep Plan") {
+  if (quoteState.services.includes("Interior Upkeep Plan")) {
     const base = serviceOverrides["Interior Upkeep Plan"]?.[type];
     if (!base) return null;
     return clampInt(base[0] * conditionFactor(icLabel));
   }
 
   // Upkeep (combo): show combined starting point even before exterior is chosen
-  if (quoteState.service === "Interior + Exterior Upkeep Plan") {
+  if (quoteState.services.includes("Interior + Exterior Upkeep Plan")) {
     const base = serviceOverrides["Interior + Exterior Upkeep Plan"]?.[type];
     if (!base) return null;
-    // assume exterior Light for "starting at" on interior step
     const f = (conditionFactor(icLabel) + conditionFactor("Light")) / 2;
     return clampInt(base[0] * f);
   }
 
-  // Normal interior pricing
+  // Normal interior pricing (Interior Detail selected OR interior category implies it)
   const r = estimateTable.Interior?.[type]?.[icLabel];
   return r ? clampInt(r[0]) : null;
 }
@@ -335,54 +362,21 @@ function startingAtForExteriorCondition(ecLabel) {
   const type = quoteState.vehicleType;
   if (!type) return null;
 
-  if (quoteState.service === "Exterior Upkeep Plan") {
+  if (quoteState.services.includes("Exterior Upkeep Plan")) {
     const base = serviceOverrides["Exterior Upkeep Plan"]?.[type];
     if (!base) return null;
     return clampInt(base[0] * conditionFactor(ecLabel));
   }
 
-  if (quoteState.service === "Interior + Exterior Upkeep Plan") {
+  if (quoteState.services.includes("Interior + Exterior Upkeep Plan")) {
     const base = serviceOverrides["Interior + Exterior Upkeep Plan"]?.[type];
     if (!base) return null;
-    // assume interior Light for "starting at" on exterior step
     const f = (conditionFactor("Light") + conditionFactor(ecLabel)) / 2;
     return clampInt(base[0] * f);
   }
 
   const r = estimateTable.Exterior?.[type]?.[ecLabel];
   return r ? clampInt(r[0]) : null;
-}
-
-// -------------------------
-// ✅ Starting-at on SERVICE CARDS (Ceramic / Paint fixed here)
-// -------------------------
-function startingAtForService(serviceLabel) {
-  const type = quoteState.vehicleType;
-  if (!type) return null;
-
-  // Overrides (Ceramic / Paint / Upkeep plans)
-  if (serviceOverrides[serviceLabel] && serviceOverrides[serviceLabel][type]) {
-    return clampInt(serviceOverrides[serviceLabel][type][0]);
-  }
-
-  // Base services
-  if (serviceLabel === "Interior Detail") {
-    return clampInt(estimateTable.Interior?.[type]?.Light?.[0] ?? null);
-  }
-  if (serviceLabel === "Exterior Wash") {
-    return clampInt(estimateTable.Exterior?.[type]?.Light?.[0] ?? null);
-  }
-
-  return null;
-}
-
-// -------------------------
-// ✅ REMOVE BOTTOM PRICE / ESTIMATE PILL COMPLETELY
-// -------------------------
-function renderNavPrice() {
-  // Intentionally disabled.
-  // No bottom "Starting at" or "Estimated" should appear anywhere.
-  return;
 }
 
 // -------------------------
@@ -393,12 +387,14 @@ function canContinue() {
 
   if (step === "vehicleType") return !!quoteState.vehicleType;
   if (step === "serviceCategory") return !!quoteState.serviceCategory;
-  if (step === "service") return !!quoteState.service;
 
-  if (step === "conditionInterior") return !serviceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
-  if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
+  // ✅ must pick at least 1 service
+  if (step === "service") return Array.isArray(quoteState.services) && quoteState.services.length > 0;
 
-  if (step === "upkeepFrequency") return !isUpkeepPlan() ? true : !!quoteState.upkeepFrequency;
+  if (step === "conditionInterior") return !anyServiceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
+  if (step === "conditionExterior") return !anyServiceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
+
+  if (step === "upkeepFrequency") return !isUpkeepPlanSelected() ? true : !!quoteState.upkeepFrequency;
 
   if (step === "contact") {
     return (
@@ -418,29 +414,63 @@ function updateNav() {
   if (!quoteBackBtn || !quoteNextBtn) return;
 
   quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
+
   const step = steps[stepIndex];
 
   if (step === "done") {
     quoteNextBtn.style.display = "none";
     quoteBackBtn.textContent = "Close";
     quoteBackBtn.style.visibility = "visible";
-    renderNavPrice();
     return;
   }
 
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
-
   quoteNextBtn.textContent = step === "appointment" ? "Finish" : "Continue";
   quoteNextBtn.disabled = !canContinue();
-
-  renderNavPrice();
 }
 
-function pickAndAdvance(pickFn) {
-  pickFn();
-  renderStep();
-  setTimeout(() => nextStep(true), 80);
+// -------------------------
+// Selection helpers (✅ NO AUTO ADVANCE)
+// -------------------------
+function setSingleChoice(key, value) {
+  quoteState[key] = value;
+  updateNav();
+}
+
+function toggleService(label) {
+  const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
+
+  const isSelected = current.includes(label);
+
+  // If selecting an upkeep plan: make it exclusive
+  if (!isSelected && isUpkeepService(label)) {
+    quoteState.services = [label];
+  } else {
+    // If selecting any non-upkeep service, remove upkeep plans
+    let next = current.filter((s) => !isUpkeepService(s));
+
+    if (isSelected) next = next.filter((s) => s !== label);
+    else next.push(label);
+
+    quoteState.services = next;
+  }
+
+  // upkeep exclusivity safety
+  enforceUpkeepExclusivity();
+
+  // clear conditions that no longer apply
+  if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
+  if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
+  if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
+
+  // clear calendar selection if services change
+  quoteState.slotId = "";
+  quoteState.slotLabel = "";
+  quoteState.slotDate = "";
+  quoteState.slotTime = "";
+
+  updateNav();
 }
 
 // -------------------------
@@ -519,7 +549,7 @@ function openQuoteModal() {
   Object.assign(quoteState, {
     vehicleType: "",
     serviceCategory: "",
-    service: "",
+    services: [],
     interiorCondition: "",
     exteriorCondition: "",
     upkeepFrequency: "",
@@ -642,7 +672,7 @@ function renderStep() {
   // 1) Vehicle
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
-    sub.textContent = "Pick the closest match. Tap to continue.";
+    sub.textContent = "Pick the closest match, then press Continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--vehicle2x2";
@@ -657,7 +687,7 @@ function renderStep() {
           zoom: v.zoom,
           variant: "qCard--vehicle",
           isSelected: quoteState.vehicleType === v.label,
-          onClick: () => pickAndAdvance(() => (quoteState.vehicleType = v.label))
+          onClick: () => setSingleChoice("vehicleType", v.label)
         })
       );
     });
@@ -668,7 +698,7 @@ function renderStep() {
   // 2) Category
   if (step === "serviceCategory") {
     title.textContent = "Service category";
-    sub.textContent = "Choose what you want detailed. Tap to continue.";
+    sub.textContent = "Choose what you want detailed, then press Continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
@@ -681,18 +711,20 @@ function renderStep() {
           img: c.img,
           variant: "qCard--square qCard--serviceCat",
           isSelected: quoteState.serviceCategory === c.label,
-          onClick: () =>
-            pickAndAdvance(() => {
-              quoteState.serviceCategory = c.label;
-              quoteState.service = "";
-              quoteState.interiorCondition = "";
-              quoteState.exteriorCondition = "";
-              quoteState.upkeepFrequency = "";
-              quoteState.slotId = "";
-              quoteState.slotLabel = "";
-              quoteState.slotDate = "";
-              quoteState.slotTime = "";
-            })
+          onClick: () => {
+            // selecting category resets downstream
+            quoteState.serviceCategory = c.label;
+            quoteState.services = [];
+            quoteState.interiorCondition = "";
+            quoteState.exteriorCondition = "";
+            quoteState.upkeepFrequency = "";
+            quoteState.slotId = "";
+            quoteState.slotLabel = "";
+            quoteState.slotDate = "";
+            quoteState.slotTime = "";
+            updateNav();
+            renderStep();
+          }
         })
       );
     });
@@ -700,31 +732,39 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Service (✅ now shows Starting At on the cards)
+  // 3) Service(s) (✅ multi-select, NO starting-at here)
   if (step === "service") {
-    title.textContent = "Select service";
-    sub.textContent = "Pick the service you want. Tap to continue.";
+    title.textContent = "Select service(s)";
+    sub.textContent = "Tap one or more services, then press Continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
 
     const filtered = servicesAll.filter((s) => {
-      if (quoteState.serviceCategory === "Interior") return s.category === "Interior";
-      if (quoteState.serviceCategory === "Exterior") return s.category === "Exterior";
+      if (quoteState.serviceCategory === "Interior") {
+        return (
+          s.label === "Interior Detail" ||
+          s.label === "Interior Upkeep Plan"
+        );
+      }
 
-      // ✅ Interior + Exterior category:
-      // - allow only combined upkeep plan (NOT interior/exterior upkeep)
-      // - allow the rest of services normally
+      if (quoteState.serviceCategory === "Exterior") {
+        return (
+          s.label === "Exterior Wash" ||
+          s.label === "Exterior Upkeep Plan" ||
+          s.label === "Ceramic Coating" ||
+          s.label === "Paint Correction"
+        );
+      }
+
       if (quoteState.serviceCategory === "Interior + Exterior") {
-        if (s.label === "Interior Upkeep Plan") return false;
-        if (s.label === "Exterior Upkeep Plan") return false;
-        if (s.label === "Interior + Exterior Upkeep Plan") return true;
-
+        // allow everything relevant (and upkeep combo plan)
         return (
           s.label === "Interior Detail" ||
           s.label === "Exterior Wash" ||
           s.label === "Ceramic Coating" ||
-          s.label === "Paint Correction"
+          s.label === "Paint Correction" ||
+          s.label === "Interior + Exterior Upkeep Plan"
         );
       }
 
@@ -732,9 +772,7 @@ function renderStep() {
     });
 
     filtered.forEach((s) => {
-      const start = startingAtForService(s.label);
-      const hint = `${"Tap to select"}${start ? `\nStarting at $${start}` : ""}`.trim();
-
+      const hint = "Tap to select";
       cards.appendChild(
         imgCard({
           label: s.label,
@@ -742,18 +780,11 @@ function renderStep() {
           img: s.img,
           variant: "qCard--square qCard--servicePick",
           badge: s.prewash ? "*" : "",
-          isSelected: quoteState.service === s.label,
-          onClick: () =>
-            pickAndAdvance(() => {
-              quoteState.service = s.label;
-              quoteState.interiorCondition = "";
-              quoteState.exteriorCondition = "";
-              quoteState.upkeepFrequency = "";
-              quoteState.slotId = "";
-              quoteState.slotLabel = "";
-              quoteState.slotDate = "";
-              quoteState.slotTime = "";
-            })
+          isSelected: quoteState.services.includes(s.label),
+          onClick: () => {
+            toggleService(s.label);
+            renderStep(); // re-render to update selected states immediately
+          }
         })
       );
     });
@@ -761,10 +792,10 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition
+  // 4) Interior condition (✅ ONLY place we show Starting At)
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
-    sub.textContent = "Choose the closest match. Tap to continue.";
+    sub.textContent = "Choose the closest match, then press Continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
@@ -780,7 +811,7 @@ function renderStep() {
           img: c.img,
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.interiorCondition === c.label,
-          onClick: () => pickAndAdvance(() => (quoteState.interiorCondition = c.label))
+          onClick: () => setSingleChoice("interiorCondition", c.label)
         })
       );
     });
@@ -788,10 +819,10 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition
+  // 5) Exterior condition (✅ ONLY place we show Starting At)
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
-    sub.textContent = "Choose the closest match. Tap to continue.";
+    sub.textContent = "Choose the closest match, then press Continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
@@ -807,7 +838,7 @@ function renderStep() {
           img: c.img,
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
-          onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
+          onClick: () => setSingleChoice("exteriorCondition", c.label)
         })
       );
     });
@@ -818,7 +849,7 @@ function renderStep() {
   // 6) Upkeep frequency
   if (step === "upkeepFrequency") {
     title.textContent = "Upkeep frequency";
-    sub.textContent = "How often would you like us to come out? Tap one to continue.";
+    sub.textContent = "How often would you like us to come out? Choose one, then press Continue.";
 
     const wrap = document.createElement("div");
     wrap.className = "qHearWrap";
@@ -832,7 +863,7 @@ function renderStep() {
           label: o.label,
           hint: o.hint,
           isSelected: quoteState.upkeepFrequency === o.label,
-          onClick: () => pickAndAdvance(() => (quoteState.upkeepFrequency = o.label))
+          onClick: () => setSingleChoice("upkeepFrequency", o.label)
         })
       );
     });
@@ -925,7 +956,7 @@ function renderStep() {
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 8) Estimate (still after contact)
+  // 8) Estimate (after contact)
   if (step === "estimate") {
     title.textContent = "Estimated price";
     sub.textContent = "Estimate based on your selections.";
@@ -942,7 +973,7 @@ function renderStep() {
       </div>
       <div class="qEstimatePills">
         <span class="qPill"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType)}</span>
-        <span class="qPill"><strong>Service:</strong> ${escapeHtml(quoteState.service)}</span>
+        <span class="qPill"><strong>Services:</strong> ${escapeHtml((quoteState.services || []).join(", "))}</span>
         ${quoteState.upkeepFrequency ? `<span class="qPill"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</span>` : ""}
         ${quoteState.interiorCondition ? `<span class="qPill"><strong>Interior:</strong> ${escapeHtml(quoteState.interiorCondition)}</span>` : ""}
         ${quoteState.exteriorCondition ? `<span class="qPill"><strong>Exterior:</strong> ${escapeHtml(quoteState.exteriorCondition)}</span>` : ""}
@@ -1019,7 +1050,7 @@ function renderStep() {
     box.className = "qDoneBox";
     box.innerHTML = `
       <div class="qDoneBig">✅ Request submitted</div>
-      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(quoteState.service || "—")}</div>
+      <div class="qDoneLine"><strong>Services:</strong> ${escapeHtml((quoteState.services || []).join(", ") || "—")}</div>
       ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
       <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
       <div class="qDoneLine"><strong>Estimate:</strong> ${
@@ -1291,7 +1322,7 @@ function buildPayload() {
 
     vehicleType: quoteState.vehicleType,
     serviceCategory: quoteState.serviceCategory,
-    service: quoteState.service,
+    services: quoteState.services,
 
     interiorCondition: quoteState.interiorCondition,
     exteriorCondition: quoteState.exteriorCondition,
@@ -1350,7 +1381,7 @@ async function reserveAndSend() {
 // -------------------------
 // Nav actions
 // -------------------------
-function nextStep(fromAutoAdvance = false) {
+function nextStep() {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
@@ -1385,8 +1416,6 @@ function nextStep(fromAutoAdvance = false) {
 
   stepIndex = nextActiveStepIndex(stepIndex);
   renderStep();
-
-  if (fromAutoAdvance) updateNav();
 }
 
 function prevStep() {
@@ -1398,7 +1427,7 @@ function prevStep() {
   renderStep();
 }
 
-quoteNextBtn?.addEventListener("click", () => nextStep(false));
+quoteNextBtn?.addEventListener("click", nextStep);
 quoteBackBtn?.addEventListener("click", prevStep);
 
 if (quoteModal?.classList.contains("isOpen")) renderStep();
