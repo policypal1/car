@@ -57,28 +57,6 @@
 }
 .quoteNext{ min-width:160px; }
 
-/* ✅ NEW: bottom sticky price line (inside nav) */
-.qNavPrice{
-  flex:1 1 auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:10px 12px;
-  border-radius:999px;
-  border:1px solid rgba(0,0,0,.10);
-  background:rgba(255,255,255,.92);
-  box-shadow:0 10px 26px rgba(0,0,0,.06);
-  font-weight:1000;
-  color:#111;
-  min-height:44px;
-}
-.qNavPrice span{
-  color:rgba(0,0,0,.65);
-  font-weight:900;
-  margin-right:6px;
-}
-
 /* Cards base grid */
 .qCards{
   display:grid;
@@ -92,7 +70,10 @@
 }
 
 /* -----------------------------
-   ✅ "scroll row" pattern
+   ✅ NEW: "scroll row" pattern
+   Used on: Service Category, Service Select, Conditions
+   Mobile = horizontal scroll
+   Desktop = normal 3-up grid
 ------------------------------ */
 .qCards--scroll{
   display:flex;
@@ -121,7 +102,7 @@
   .qCards--scroll .qCard{ flex:initial; }
 }
 
-/* ✅ Slightly bigger “hero” cards */
+/* ✅ Slightly bigger “hero” cards (matches your select-service visual weight) */
 .qCards--big .qCard{
   padding:12px;
   border-radius:18px;
@@ -173,22 +154,6 @@
   display:block;
 }
 
-/* ✅ split media (for Interior+Exterior Upkeep Plan card) */
-.qCardMediaSplit{
-  display:flex;
-  width:100%;
-  height:100%;
-}
-.qCardMediaSplit img{
-  width:50%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-.qCardMediaSplit img + img{
-  border-left:1px solid rgba(0,0,0,.10);
-}
-
 /* ✅ tiny badge for pre-wash */
 .qCardBadge{
   position:absolute;
@@ -208,7 +173,7 @@
   box-shadow:0 8px 18px rgba(0,0,0,.14);
 }
 
-/* Vehicle cards */
+/* Vehicle cards: contain + normalized zoom */
 .qCard--vehicle .qCardMedia{
   aspect-ratio: 16 / 9;
   padding:10px;
@@ -222,9 +187,29 @@
   transform-origin:center;
 }
 
-/* Square cards */
+/* Portrait cards (kept for anything else you use later) */
+.qCard--portrait .qCardMedia{ aspect-ratio: 3 / 4; }
+.qCard--portrait .qCardMedia img{ object-fit:cover; }
+
+/* ✅ Square cards (used for category/service/conditions so images look bigger) */
 .qCard--square .qCardMedia{ aspect-ratio: 1 / 1; }
 .qCard--square .qCardMedia img{ object-fit:cover; }
+
+/* ✅ NEW: split media (used only for Interior+Exterior Upkeep Plan card) */
+.qCardMediaSplit{
+  display:flex;
+  width:100%;
+  height:100%;
+}
+.qCardMediaSplit img{
+  width:50%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.qCardMediaSplit img + img{
+  border-left:1px solid rgba(0,0,0,.10);
+}
 
 .qCardLabel{
   margin:10px 2px 2px;
@@ -337,6 +322,101 @@
   font-weight:900;
   color:rgba(0,0,0,.70);
   line-height:1.6;
+}
+
+/* Heard About */
+.qHearWrap{
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:
+    radial-gradient(700px 240px at 10% 0%, rgba(214,178,94,.12), rgba(255,255,255,0) 55%),
+    rgba(0,0,0,.02);
+  padding:12px;
+}
+.qHearGrid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-top:10px;
+}
+.qHearBtn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  text-align:left;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.92);
+  cursor:pointer;
+  box-shadow:0 10px 26px rgba(0,0,0,.06);
+  transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+}
+.qHearBtn:hover{ transform: translateY(-1px); }
+.qHearBtn.isSel{
+  border-color:rgba(214,178,94,.72);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18), 0 18px 44px rgba(214,178,94,.14);
+}
+.qHearBtn:focus-visible{
+  outline:none;
+  border-color:rgba(214,178,94,.85);
+  box-shadow:0 0 0 4px rgba(214,178,94,.22), 0 10px 26px rgba(0,0,0,.08);
+}
+.qHearLeft{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.qHearLabel{
+  font-weight:1000;
+  letter-spacing:.2px;
+  color:#111;
+  line-height:1.1;
+}
+.qHearHint{
+  color:rgba(0,0,0,.62);
+  font-weight:750;
+  font-size:.95rem;
+  line-height:1.35;
+}
+.qHearRight{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+}
+.qHearPill{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.04);
+  color:rgba(0,0,0,.72);
+  font-weight:950;
+  font-size:.82rem;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.qHearCheck{
+  width:18px; height:18px;
+  border-radius:999px;
+  border:2px solid rgba(0,0,0,.16);
+  background:#fff;
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,1);
+}
+.qHearBtn.isSel .qHearPill{
+  border-color:rgba(214,178,94,.55);
+  background:rgba(214,178,94,.12);
+  color:rgba(0,0,0,.82);
+}
+.qHearBtn.isSel .qHearCheck{
+  border-color:rgba(214,178,94,.85);
+  background:rgba(214,178,94,.85);
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,1);
 }
 
 /* Calendar */
@@ -530,8 +610,14 @@
   .qCards{ grid-template-columns:repeat(3, 1fr); }
   .qCards--vehicle2x2{ grid-template-columns:repeat(2, 1fr); }
   .qGrid2{ grid-template-columns:1fr 1fr 1fr; }
+
+  .qHearWrap{ padding:14px; }
+  .qHearGrid{ grid-template-columns:repeat(2, 1fr); }
+  .qHearBtn{ padding:14px; }
+
   .qTimesGrid{ grid-template-columns:repeat(3, 1fr); }
 }
 @media (min-width:1024px){
+  .qHearGrid{ grid-template-columns:repeat(3, 1fr); }
   .qTimesGrid{ grid-template-columns:repeat(4, 1fr); }
 }
