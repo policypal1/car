@@ -354,78 +354,35 @@ function startingAtForExteriorCondition(ecLabel) {
 }
 
 // -------------------------
-// Bottom nav price pill
+// ✅ Starting-at on SERVICE CARDS (Ceramic / Paint fixed here)
 // -------------------------
-function ensureNavPrice() {
-  if (!quoteNav) return null;
+function startingAtForService(serviceLabel) {
+  const type = quoteState.vehicleType;
+  if (!type) return null;
 
-  let el = quoteNav.querySelector(".qNavPrice");
-  if (!el) {
-    el = document.createElement("div");
-    el.className = "qNavPrice";
-    const back = quoteNav.querySelector(".quoteBack");
-    if (back && back.nextSibling) quoteNav.insertBefore(el, back.nextSibling);
-    else quoteNav.insertBefore(el, quoteNav.firstChild);
+  // Overrides (Ceramic / Paint / Upkeep plans)
+  if (serviceOverrides[serviceLabel] && serviceOverrides[serviceLabel][type]) {
+    return clampInt(serviceOverrides[serviceLabel][type][0]);
   }
-  return el;
+
+  // Base services
+  if (serviceLabel === "Interior Detail") {
+    return clampInt(estimateTable.Interior?.[type]?.Light?.[0] ?? null);
+  }
+  if (serviceLabel === "Exterior Wash") {
+    return clampInt(estimateTable.Exterior?.[type]?.Light?.[0] ?? null);
+  }
+
+  return null;
 }
 
+// -------------------------
+// ✅ REMOVE BOTTOM PRICE / ESTIMATE PILL COMPLETELY
+// -------------------------
 function renderNavPrice() {
-  const el = ensureNavPrice();
-  if (!el) return;
-
-  const step = steps[stepIndex];
-
-  // ✅ Hide the pill on contact form (and beyond) so price isn't revealed until AFTER info is filled
-  if (step === "contact" || step === "appointment" || step === "done") {
-    el.style.display = "none";
-    return;
-  }
-
-  // Also hide it on estimate step to avoid duplicate; estimate box already shows it
-  if (step === "estimate") {
-    el.style.display = "none";
-    return;
-  }
-
-  // Only show during earlier selection steps
-  if (!quoteState.service) {
-    el.style.display = "none";
-    return;
-  }
-
-  // If estimate is fully computable already, show range, otherwise show a basic starting at based on best-known info
-  const est = computeEstimate();
-  if (est) {
-    el.style.display = "flex";
-    el.innerHTML = `<span>Estimated:</span> $${escapeHtml(est[0])}–$${escapeHtml(est[1])}`;
-    return;
-  }
-
-  // fallback: if we can show something reasonable
-  const type = quoteState.vehicleType;
-  if (!type) {
-    el.style.display = "none";
-    return;
-  }
-
-  let start = null;
-
-  if (serviceOverrides[quoteState.service]) {
-    start = serviceOverrides[quoteState.service][type]?.[0] ?? null;
-  } else if (quoteState.service === "Interior Detail") {
-    start = estimateTable.Interior?.[type]?.Light?.[0] ?? null;
-  } else if (quoteState.service === "Exterior Wash") {
-    start = estimateTable.Exterior?.[type]?.Light?.[0] ?? null;
-  }
-
-  if (start == null) {
-    el.style.display = "none";
-    return;
-  }
-
-  el.style.display = "flex";
-  el.innerHTML = `<span>Starting at:</span> $${escapeHtml(start)}`;
+  // Intentionally disabled.
+  // No bottom "Starting at" or "Estimated" should appear anywhere.
+  return;
 }
 
 // -------------------------
@@ -743,7 +700,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Service
+  // 3) Service (✅ now shows Starting At on the cards)
   if (step === "service") {
     title.textContent = "Select service";
     sub.textContent = "Pick the service you want. Tap to continue.";
@@ -775,10 +732,13 @@ function renderStep() {
     });
 
     filtered.forEach((s) => {
+      const start = startingAtForService(s.label);
+      const hint = `${"Tap to select"}${start ? `\nStarting at $${start}` : ""}`.trim();
+
       cards.appendChild(
         imgCard({
           label: s.label,
-          hint: "Tap to select",
+          hint,
           img: s.img,
           variant: "qCard--square qCard--servicePick",
           badge: s.prewash ? "*" : "",
@@ -801,7 +761,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 4) Interior condition (✅ "Starting at" under each card)
+  // 4) Interior condition
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -828,7 +788,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition (✅ "Starting at" under each card)
+  // 5) Exterior condition
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -855,7 +815,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Upkeep frequency (✅ bubble boxes fixed via CSS restore)
+  // 6) Upkeep frequency
   if (step === "upkeepFrequency") {
     title.textContent = "Upkeep frequency";
     sub.textContent = "How often would you like us to come out? Tap one to continue.";
@@ -965,7 +925,7 @@ function renderStep() {
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 8) Estimate (after contact ✅)
+  // 8) Estimate (still after contact)
   if (step === "estimate") {
     title.textContent = "Estimated price";
     sub.textContent = "Estimate based on your selections.";
