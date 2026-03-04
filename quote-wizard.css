@@ -211,10 +211,7 @@
   color:#111;
 }
 
-/* ✅ allow newline so we can do:
-   "Tap to select"
-   "Starting at $X"
-*/
+/* ✅ allow newline (used ONLY on condition cards for Starting at) */
 .qCardHint{
   margin:0 2px 0;
   color:rgba(0,0,0,.62);
