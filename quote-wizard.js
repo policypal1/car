@@ -1,7 +1,7 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7.3)
+// QUOTE WIZARD (Flow v7.4)
 // -------------------------
-// Vehicle -> Category -> Service -> Conditions -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
+// Vehicle -> Category -> Service -> Conditions -> Upkeep Frequency (if needed) -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
 //
 // Apps Script URL
 const DEFAULT_SCRIPT_URL =
@@ -23,6 +23,9 @@ const quoteState = {
 
   interiorCondition: "",
   exteriorCondition: "",
+
+  // ✅ NEW
+  upkeepFrequency: "",
 
   heardAbout: "",
 
@@ -50,6 +53,7 @@ const steps = [
   "service",
   "conditionInterior",
   "conditionExterior",
+  "upkeepFrequency", // ✅ NEW step
   "heardAbout",
   "estimate",
   "appointment",
@@ -75,14 +79,27 @@ const serviceCategories = [
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
+// ✅ Upkeep plan image rules
+const INTERIOR_UPKEEP_IMG = "./img_6480.webp"; // keep your existing interior upkeep image
+const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp"; // ✅ required
+
 // ✅ Services
+// Note: Upkeep is now 3 different services (labels + images) depending on category.
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
 
   // ✅ command: Exterior Wash uses ONLY this image
   { label: "Exterior Wash", category: "Exterior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
-  { label: "Upkeep Plan", category: "Both", img: "./img_6480.webp" },
+  // ✅ Upkeep variants (what the user requested)
+  { label: "Interior Upkeep Plan", category: "Interior", img: INTERIOR_UPKEEP_IMG, upkeep: "interior" },
+  { label: "Exterior Upkeep Plan", category: "Exterior", img: EXTERIOR_UPKEEP_IMG, upkeep: "exterior" },
+  {
+    label: "Interior + Exterior Upkeep Plan",
+    category: "Both",
+    img: [INTERIOR_UPKEEP_IMG, EXTERIOR_UPKEEP_IMG], // ✅ split image
+    upkeep: "both"
+  },
 
   // ✅ command: pre-wash indicator should NOT change layout -> use small badge over image
   { label: "Ceramic Coating", category: "Exterior", img: "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png", prewash: true },
@@ -99,6 +116,12 @@ const exteriorConditions = [
   { label: "Light", hint: "", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
   { label: "Normal", hint: "", img: "./IMG_2910.jpg" },
   { label: "Heavy", hint: "", img: "./dirty-car.jpg" }
+];
+
+const upkeepFrequencies = [
+  { label: "Weekly", hint: "Best for staying spotless" },
+  { label: "Biweekly", hint: "Most popular" },
+  { label: "Monthly", hint: "Maintenance refresh" }
 ];
 
 const heardAboutOptions = [
@@ -140,7 +163,21 @@ const serviceOverrides = {
     Large: [550, 1200],
     Truck: [550, 1200]
   },
-  "Upkeep Plan": {
+
+  // ✅ Upkeep plans (keep your existing upkeep pricing logic)
+  "Interior Upkeep Plan": {
+    Small: [90, 160],
+    Medium: [110, 190],
+    Large: [130, 220],
+    Truck: [130, 240]
+  },
+  "Exterior Upkeep Plan": {
+    Small: [90, 160],
+    Medium: [110, 190],
+    Large: [130, 220],
+    Truck: [130, 240]
+  },
+  "Interior + Exterior Upkeep Plan": {
     Small: [90, 160],
     Medium: [110, 190],
     Large: [130, 220],
@@ -151,9 +188,21 @@ const serviceOverrides = {
 // -------------------------
 // FLOW HELPERS
 // -------------------------
+function isUpkeepPlan() {
+  return (
+    quoteState.service === "Interior Upkeep Plan" ||
+    quoteState.service === "Exterior Upkeep Plan" ||
+    quoteState.service === "Interior + Exterior Upkeep Plan"
+  );
+}
+
 function serviceRequiresInteriorCondition() {
-  if (quoteState.service === "Upkeep Plan") return true;
+  if (quoteState.service === "Interior Upkeep Plan") return true;
+  if (quoteState.service === "Exterior Upkeep Plan") return false;
+  if (quoteState.service === "Interior + Exterior Upkeep Plan") return true;
+
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return false;
+
   return (
     quoteState.serviceCategory === "Interior" ||
     quoteState.serviceCategory === "Interior + Exterior" ||
@@ -162,9 +211,13 @@ function serviceRequiresInteriorCondition() {
 }
 
 function serviceRequiresExteriorCondition() {
-  if (quoteState.service === "Upkeep Plan") return true;
+  if (quoteState.service === "Interior Upkeep Plan") return false;
+  if (quoteState.service === "Exterior Upkeep Plan") return true;
+  if (quoteState.service === "Interior + Exterior Upkeep Plan") return true;
+
   if (quoteState.service === "Interior Detail") return false;
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return true;
+
   return (
     quoteState.serviceCategory === "Exterior" ||
     quoteState.serviceCategory === "Interior + Exterior" ||
@@ -175,6 +228,7 @@ function serviceRequiresExteriorCondition() {
 function stepIsActive(stepName) {
   if (stepName === "conditionInterior") return serviceRequiresInteriorCondition();
   if (stepName === "conditionExterior") return serviceRequiresExteriorCondition();
+  if (stepName === "upkeepFrequency") return isUpkeepPlan();
   return true;
 }
 
@@ -203,6 +257,8 @@ function canContinue() {
 
   if (step === "conditionInterior") return !serviceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
   if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
+
+  if (step === "upkeepFrequency") return !isUpkeepPlan() ? true : !!quoteState.upkeepFrequency;
 
   if (step === "heardAbout") return !!quoteState.heardAbout;
   if (step === "appointment") return !!quoteState.slotId;
@@ -272,11 +328,25 @@ function imgCard({
 
   const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
 
+  const mediaHtml = Array.isArray(img)
+    ? `
+      <div class="qCardMedia" ${zoomStyle}>
+        ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
+        <div class="qCardMediaSplit" aria-hidden="true">
+          <img src="${escapeHtml(img[0])}" alt="" loading="lazy" />
+          <img src="${escapeHtml(img[1])}" alt="" loading="lazy" />
+        </div>
+      </div>
+    `
+    : `
+      <div class="qCardMedia" ${zoomStyle}>
+        ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
+        <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
+      </div>
+    `;
+
   btn.innerHTML = `
-    <div class="qCardMedia" ${zoomStyle}>
-      ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
-      <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
-    </div>
+    ${mediaHtml}
     <div class="qCardLabel">${escapeHtml(label)}</div>
     <div class="qCardHint">${escapeHtml(hint)}</div>
   `;
@@ -287,7 +357,7 @@ function heardCard({ label, hint, isSelected = false, onClick }) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "qHearBtn" + (isSelected ? " isSel" : "");
-  btn.setAttribute("aria-label", `Heard about us: ${label}`);
+  btn.setAttribute("aria-label", label);
   btn.addEventListener("click", onClick);
 
   btn.innerHTML = `
@@ -353,15 +423,6 @@ function computeEstimate() {
     return tightenAndHeavier([ir[0] + er[0], ir[1] + er[1]]);
   }
 
-  if (quoteState.service === "Upkeep Plan") {
-    const ic = quoteState.interiorCondition;
-    const ec = quoteState.exteriorCondition;
-    if (!ic || !ec) return null;
-    const ir = estimateTable.Interior?.[type]?.[ic];
-    const er = estimateTable.Exterior?.[type]?.[ec];
-    if (ir && er) return tightenAndHeavier([ir[0] + er[0], ir[1] + er[1]]);
-  }
-
   return null;
 }
 
@@ -378,6 +439,7 @@ function openQuoteModal() {
     service: "",
     interiorCondition: "",
     exteriorCondition: "",
+    upkeepFrequency: "", // ✅ NEW reset
     heardAbout: "",
     estimateLow: "",
     estimateHigh: "",
@@ -566,6 +628,7 @@ function renderStep() {
               quoteState.service = "";
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
+              quoteState.upkeepFrequency = "";
               quoteState.slotId = "";
               quoteState.slotLabel = "";
               quoteState.slotDate = "";
@@ -581,9 +644,10 @@ function renderStep() {
   // 3) Service
   if (step === "service") {
     const filtered = servicesAll.filter((s) => {
-      if (s.category === "Both") return true;
-      if (quoteState.serviceCategory === "Interior + Exterior") return true;
-      return s.category === quoteState.serviceCategory;
+      if (quoteState.serviceCategory === "Interior") return s.category === "Interior";
+      if (quoteState.serviceCategory === "Exterior") return s.category === "Exterior";
+      // Interior + Exterior
+      return s.category === "Both" || s.category === "Interior" || s.category === "Exterior";
     });
 
     if (filtered.length === 1 && quoteState.service !== filtered[0].label) {
@@ -613,6 +677,7 @@ function renderStep() {
               quoteState.service = s.label;
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
+              quoteState.upkeepFrequency = "";
               quoteState.slotId = "";
               quoteState.slotLabel = "";
               quoteState.slotDate = "";
@@ -673,7 +738,33 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Heard about
+  // ✅ NEW: 6) Upkeep frequency (only shows for upkeep plans)
+  if (step === "upkeepFrequency") {
+    title.textContent = "Upkeep frequency";
+    sub.textContent = "How often would you like us to come out? Tap one to continue.";
+
+    const wrap = document.createElement("div");
+    wrap.className = "qHearWrap";
+
+    const grid = document.createElement("div");
+    grid.className = "qHearGrid";
+
+    upkeepFrequencies.forEach((o) => {
+      grid.appendChild(
+        heardCard({
+          label: o.label,
+          hint: o.hint,
+          isSelected: quoteState.upkeepFrequency === o.label,
+          onClick: () => pickAndAdvance(() => (quoteState.upkeepFrequency = o.label))
+        })
+      );
+    });
+
+    wrap.appendChild(grid);
+    quoteBody.append(title, sub, wrap);
+  }
+
+  // 7) Heard about
   if (step === "heardAbout") {
     title.textContent = "How did you hear about us?";
     sub.textContent = "Tap one option to continue.";
@@ -699,7 +790,7 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
   }
 
-  // 7) Estimate
+  // 8) Estimate
   if (step === "estimate") {
     title.textContent = "Estimated price";
     sub.textContent = "Starting estimate based on your selections.";
@@ -718,6 +809,7 @@ function renderStep() {
       <div class="qEstimatePills">
         <span class="qPill"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType)}</span>
         <span class="qPill"><strong>Service:</strong> ${escapeHtml(quoteState.service)}</span>
+        ${quoteState.upkeepFrequency ? `<span class="qPill"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</span>` : ""}
         ${quoteState.interiorCondition ? `<span class="qPill"><strong>Interior:</strong> ${escapeHtml(quoteState.interiorCondition)}</span>` : ""}
         ${quoteState.exteriorCondition ? `<span class="qPill"><strong>Exterior:</strong> ${escapeHtml(quoteState.exteriorCondition)}</span>` : ""}
       </div>
@@ -730,7 +822,7 @@ function renderStep() {
     quoteBody.append(title, sub, box);
   }
 
-  // 8) Appointment
+  // 9) Appointment
   if (step === "appointment") {
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
@@ -788,7 +880,7 @@ function renderStep() {
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
   }
 
-  // 9) Contact  ✅ deposit wording updated (last section only)
+  // 10) Contact  ✅ deposit wording updated (last section only)
   if (step === "contact") {
     title.textContent = "Your contact info";
     sub.textContent = "Required. We’ll confirm by text/call.";
@@ -823,6 +915,8 @@ function renderStep() {
     appt.className = "qApptSummary";
     appt.innerHTML = `
       <div class="qApptLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
+      <div class="qApptLine"><strong>Service:</strong> ${escapeHtml(quoteState.service || "—")}</div>
+      ${quoteState.upkeepFrequency ? `<div class="qApptLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
       <div class="qApptLine"><strong>Estimated:</strong> ${
         quoteState.estimateLow && quoteState.estimateHigh
           ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
@@ -903,7 +997,7 @@ function renderStep() {
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 10) Done
+  // 11) Done
   if (step === "done") {
     title.textContent = "You're booked";
     sub.textContent = "We received your request and will confirm shortly.";
@@ -913,6 +1007,8 @@ function renderStep() {
     box.innerHTML = `
       <div class="qDoneBig">✅ Request submitted</div>
       <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
+      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(quoteState.service || "—")}</div>
+      ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
       <div class="qDoneLine"><strong>Estimate:</strong> ${
         quoteState.estimateLow && quoteState.estimateHigh
           ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
@@ -1203,6 +1299,9 @@ function buildPayload() {
 
     interiorCondition: quoteState.interiorCondition,
     exteriorCondition: quoteState.exteriorCondition,
+
+    // ✅ NEW
+    upkeepFrequency: quoteState.upkeepFrequency,
 
     heardAbout: quoteState.heardAbout,
 
