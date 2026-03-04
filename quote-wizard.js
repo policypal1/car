@@ -1,7 +1,8 @@
 // -------------------------
-// QUOTE WIZARD (Flow v7.4)
+// QUOTE WIZARD (Flow v7.5)
 // -------------------------
-// Vehicle -> Category -> Service -> Conditions -> Upkeep Frequency (if needed) -> HeardAbout -> Estimate -> Calendar -> Contact -> Done
+// Vehicle -> Category -> Service -> Conditions -> Upkeep Frequency (if upkeep)
+// -> Contact -> Estimate -> Calendar -> Done
 //
 // Apps Script URL
 const DEFAULT_SCRIPT_URL =
@@ -13,6 +14,7 @@ const quoteNextBtn = document.querySelector("[data-quote-next]");
 const quoteBackBtn = document.querySelector("[data-quote-back]");
 const quoteCloseBtns = document.querySelectorAll("[data-quote-close]");
 const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
+const quoteNav = document.querySelector(".quoteNav");
 
 let lastActiveElQuote = null;
 
@@ -24,10 +26,7 @@ const quoteState = {
   interiorCondition: "",
   exteriorCondition: "",
 
-  // ✅ NEW
   upkeepFrequency: "",
-
-  heardAbout: "",
 
   estimateLow: "",
   estimateHigh: "",
@@ -53,11 +52,10 @@ const steps = [
   "service",
   "conditionInterior",
   "conditionExterior",
-  "upkeepFrequency", // ✅ NEW step
-  "heardAbout",
+  "upkeepFrequency",
+  "contact",
   "estimate",
   "appointment",
-  "contact",
   "done"
 ];
 
@@ -79,29 +77,25 @@ const serviceCategories = [
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
 ];
 
-// ✅ Upkeep plan image rules
-const INTERIOR_UPKEEP_IMG = "./img_6480.webp"; // keep your existing interior upkeep image
-const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp"; // ✅ required
+// Upkeep plan image rules
+const INTERIOR_UPKEEP_IMG = "./img_6480.webp"; // your interior upkeep image
+const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp"; // required
 
-// ✅ Services
-// Note: Upkeep is now 3 different services (labels + images) depending on category.
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
 
-  // ✅ command: Exterior Wash uses ONLY this image
   { label: "Exterior Wash", category: "Exterior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
 
-  // ✅ Upkeep variants (what the user requested)
+  // Upkeep variants
   { label: "Interior Upkeep Plan", category: "Interior", img: INTERIOR_UPKEEP_IMG, upkeep: "interior" },
   { label: "Exterior Upkeep Plan", category: "Exterior", img: EXTERIOR_UPKEEP_IMG, upkeep: "exterior" },
   {
     label: "Interior + Exterior Upkeep Plan",
     category: "Both",
-    img: [INTERIOR_UPKEEP_IMG, EXTERIOR_UPKEEP_IMG], // ✅ split image
+    img: [INTERIOR_UPKEEP_IMG, EXTERIOR_UPKEEP_IMG],
     upkeep: "both"
   },
 
-  // ✅ command: pre-wash indicator should NOT change layout -> use small badge over image
   { label: "Ceramic Coating", category: "Exterior", img: "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png", prewash: true },
   { label: "Paint Correction", category: "Exterior", img: "./bee.jpg", prewash: true }
 ];
@@ -122,14 +116,6 @@ const upkeepFrequencies = [
   { label: "Weekly", hint: "Best for staying spotless" },
   { label: "Biweekly", hint: "Most popular" },
   { label: "Monthly", hint: "Maintenance refresh" }
-];
-
-const heardAboutOptions = [
-  { label: "Returning Client", hint: "Welcome back" },
-  { label: "Family / Friend", hint: "Referral" },
-  { label: "Social Media", hint: "Instagram / TikTok" },
-  { label: "Google Search", hint: "Maps / Search" },
-  { label: "Other", hint: "Another source" }
 ];
 
 // -------------------------
@@ -164,29 +150,14 @@ const serviceOverrides = {
     Truck: [550, 1200]
   },
 
-  // ✅ Upkeep plans (keep your existing upkeep pricing logic)
-  "Interior Upkeep Plan": {
-    Small: [90, 160],
-    Medium: [110, 190],
-    Large: [130, 220],
-    Truck: [130, 240]
-  },
-  "Exterior Upkeep Plan": {
-    Small: [90, 160],
-    Medium: [110, 190],
-    Large: [130, 220],
-    Truck: [130, 240]
-  },
-  "Interior + Exterior Upkeep Plan": {
-    Small: [90, 160],
-    Medium: [110, 190],
-    Large: [130, 220],
-    Truck: [130, 240]
-  }
+  // Upkeep plans
+  "Interior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] },
+  "Exterior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] },
+  "Interior + Exterior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] }
 };
 
 // -------------------------
-// FLOW HELPERS
+// HELPERS
 // -------------------------
 function isUpkeepPlan() {
   return (
@@ -203,11 +174,7 @@ function serviceRequiresInteriorCondition() {
 
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return false;
 
-  return (
-    quoteState.serviceCategory === "Interior" ||
-    quoteState.serviceCategory === "Interior + Exterior" ||
-    quoteState.service === "Interior Detail"
-  );
+  return quoteState.serviceCategory === "Interior" || quoteState.serviceCategory === "Interior + Exterior";
 }
 
 function serviceRequiresExteriorCondition() {
@@ -218,11 +185,7 @@ function serviceRequiresExteriorCondition() {
   if (quoteState.service === "Interior Detail") return false;
   if (quoteState.service === "Ceramic Coating" || quoteState.service === "Paint Correction") return true;
 
-  return (
-    quoteState.serviceCategory === "Exterior" ||
-    quoteState.serviceCategory === "Interior + Exterior" ||
-    quoteState.service === "Exterior Wash"
-  );
+  return quoteState.serviceCategory === "Exterior" || quoteState.serviceCategory === "Interior + Exterior";
 }
 
 function stepIsActive(stepName) {
@@ -248,58 +211,6 @@ function setProgress() {
   dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
 }
 
-function canContinue() {
-  const step = steps[stepIndex];
-
-  if (step === "vehicleType") return !!quoteState.vehicleType;
-  if (step === "serviceCategory") return !!quoteState.serviceCategory;
-  if (step === "service") return !!quoteState.service;
-
-  if (step === "conditionInterior") return !serviceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
-  if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
-
-  if (step === "upkeepFrequency") return !isUpkeepPlan() ? true : !!quoteState.upkeepFrequency;
-
-  if (step === "heardAbout") return !!quoteState.heardAbout;
-  if (step === "appointment") return !!quoteState.slotId;
-
-  if (step === "contact") {
-    return (
-      quoteState.name.trim().length >= 2 &&
-      quoteState.phone.trim().length >= 7 &&
-      quoteState.email.trim().includes("@") &&
-      quoteState.ackDeposit === true
-    );
-  }
-
-  return true;
-}
-
-function updateNav() {
-  if (!quoteBackBtn || !quoteNextBtn) return;
-
-  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
-  const step = steps[stepIndex];
-
-  if (step === "done") {
-    quoteNextBtn.style.display = "none";
-    quoteBackBtn.textContent = "Close";
-    quoteBackBtn.style.visibility = "visible";
-    return;
-  }
-
-  quoteNextBtn.style.display = "inline-flex";
-  quoteBackBtn.textContent = "Back";
-  quoteNextBtn.textContent = step === "contact" ? "Finish" : "Continue";
-  quoteNextBtn.disabled = !canContinue();
-}
-
-function pickAndAdvance(pickFn) {
-  pickFn();
-  renderStep();
-  setTimeout(() => nextStep(true), 80);
-}
-
 function escapeHtml(str) {
   return String(str || "")
     .replaceAll("&", "&amp;")
@@ -309,7 +220,168 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+// -------------------------
+// PRICE LOGIC (Starting at)
+// -------------------------
+function minFromRange(range) {
+  if (!range) return null;
+  const n = Number(range[0]);
+  return Number.isFinite(n) ? n : null;
+}
+
+function minAcross(obj) {
+  // obj can be: {Small:{Light:[...]}...} OR {Small:[...],...}
+  let mins = [];
+  for (const k of Object.keys(obj || {})) {
+    const v = obj[k];
+    if (Array.isArray(v)) {
+      const m = minFromRange(v);
+      if (m != null) mins.push(m);
+    } else if (typeof v === "object" && v) {
+      for (const kk of Object.keys(v)) {
+        const vv = v[kk];
+        if (Array.isArray(vv)) {
+          const m = minFromRange(vv);
+          if (m != null) mins.push(m);
+        }
+      }
+    }
+  }
+  if (!mins.length) return null;
+  return Math.min(...mins);
+}
+
+function computeEstimate() {
+  const type = quoteState.vehicleType;
+  if (!type) return null;
+
+  if (serviceOverrides[quoteState.service]) {
+    const r = serviceOverrides[quoteState.service][type];
+    return tightenAndHeavier(r || null);
+  }
+
+  const cat = quoteState.serviceCategory;
+
+  if (cat === "Interior") {
+    if (!quoteState.interiorCondition) return null;
+    return tightenAndHeavier(estimateTable.Interior?.[type]?.[quoteState.interiorCondition] || null);
+  }
+
+  if (cat === "Exterior") {
+    if (!quoteState.exteriorCondition) return null;
+    return tightenAndHeavier(estimateTable.Exterior?.[type]?.[quoteState.exteriorCondition] || null);
+  }
+
+  if (cat === "Interior + Exterior") {
+    const ic = quoteState.interiorCondition;
+    const ec = quoteState.exteriorCondition;
+    if (!ic || !ec) return null;
+
+    const ir = estimateTable.Interior?.[type]?.[ic];
+    const er = estimateTable.Exterior?.[type]?.[ec];
+    if (!ir || !er) return null;
+    return tightenAndHeavier([ir[0] + er[0], ir[1] + er[1]]);
+  }
+
+  return null;
+}
+
+function computeStartingAt() {
+  if (!quoteState.service) return null;
+
+  // If we can compute full estimate, prefer it
+  const est = computeEstimate();
+  if (est) return { mode: "range", low: est[0], high: est[1] };
+
+  const type = quoteState.vehicleType;
+
+  // Overrides (coating / correction / upkeep variants)
+  if (serviceOverrides[quoteState.service]) {
+    const table = serviceOverrides[quoteState.service];
+    const min = type ? minFromRange(table[type]) : minAcross(table);
+    if (min != null) return { mode: "starting", start: min };
+  }
+
+  // Interior Detail / category-based tables
+  if (quoteState.service === "Interior Detail") {
+    const t = estimateTable.Interior;
+    const min = type ? minAcross(t[type]) : minAcross(t);
+    if (min != null) return { mode: "starting", start: min };
+  }
+
+  if (quoteState.service === "Exterior Wash") {
+    const t = estimateTable.Exterior;
+    const min = type ? minAcross(t[type]) : minAcross(t);
+    if (min != null) return { mode: "starting", start: min };
+  }
+
+  // Interior+Exterior general fallback: sum minimums
+  if (quoteState.serviceCategory === "Interior + Exterior") {
+    const minI = type ? minAcross(estimateTable.Interior[type]) : minAcross(estimateTable.Interior);
+    const minE = type ? minAcross(estimateTable.Exterior[type]) : minAcross(estimateTable.Exterior);
+    if (minI != null && minE != null) return { mode: "starting", start: minI + minE };
+  }
+
+  return null;
+}
+
+function ensureNavPrice() {
+  if (!quoteNav) return null;
+
+  let el = quoteNav.querySelector(".qNavPrice");
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "qNavPrice";
+    // Insert between back and next (center)
+    const back = quoteNav.querySelector(".quoteBack");
+    if (back && back.nextSibling) {
+      quoteNav.insertBefore(el, back.nextSibling);
+    } else {
+      quoteNav.insertBefore(el, quoteNav.firstChild);
+    }
+  }
+  return el;
+}
+
+function renderNavPrice() {
+  const el = ensureNavPrice();
+  if (!el) return;
+
+  const p = computeStartingAt();
+
+  if (!quoteState.service || !p) {
+    el.style.display = "none";
+    return;
+  }
+
+  el.style.display = "flex";
+
+  if (p.mode === "range") {
+    el.innerHTML = `<span>Estimated:</span> $${escapeHtml(p.low)}–$${escapeHtml(p.high)}`;
+  } else {
+    el.innerHTML = `<span>Starting at:</span> $${escapeHtml(p.start)}`;
+  }
+}
+
+// -------------------------
+// Estimate tighten
+// -------------------------
+function tightenAndHeavier(range) {
+  if (!range) return null;
+  const low = Number(range[0]);
+  const high = Number(range[1]);
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return range;
+
+  const mid = (low + high) / 2;
+  const delta = Math.max(50, Math.round((high - low) * 0.22));
+  const newLow = Math.round(mid + (high - mid) * 0.12);
+  const newHigh = Math.max(newLow + 30, newLow + delta);
+  return [newLow, newHigh];
+}
+
+// -------------------------
 // Cards
+// -------------------------
 function imgCard({
   label,
   hint,
@@ -353,7 +425,7 @@ function imgCard({
   return btn;
 }
 
-function heardCard({ label, hint, isSelected = false, onClick }) {
+function optionCard({ label, hint, isSelected = false, onClick }) {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.className = "qHearBtn" + (isSelected ? " isSel" : "");
@@ -374,59 +446,6 @@ function heardCard({ label, hint, isSelected = false, onClick }) {
 }
 
 // -------------------------
-// Estimate (shorter + heavier)
-// -------------------------
-function tightenAndHeavier(range) {
-  if (!range) return null;
-  const low = Number(range[0]);
-  const high = Number(range[1]);
-  if (!Number.isFinite(low) || !Number.isFinite(high)) return range;
-
-  const mid = (low + high) / 2;
-  const delta = Math.max(50, Math.round((high - low) * 0.22)); // shorter range
-  const newLow = Math.round(mid + (high - mid) * 0.12); // push upward
-  const newHigh = Math.max(newLow + 30, newLow + delta);
-  return [newLow, newHigh];
-}
-
-function computeEstimate() {
-  const type = quoteState.vehicleType;
-  if (!type) return null;
-
-  if (serviceOverrides[quoteState.service]) {
-    const r = serviceOverrides[quoteState.service][type];
-    return tightenAndHeavier(r || null);
-  }
-
-  const cat = quoteState.serviceCategory;
-
-  if (cat === "Interior") {
-    const ic = quoteState.interiorCondition;
-    if (!ic) return null;
-    return tightenAndHeavier(estimateTable.Interior?.[type]?.[ic] || null);
-  }
-
-  if (cat === "Exterior") {
-    const ec = quoteState.exteriorCondition;
-    if (!ec) return null;
-    return tightenAndHeavier(estimateTable.Exterior?.[type]?.[ec] || null);
-  }
-
-  if (cat === "Interior + Exterior") {
-    const ic = quoteState.interiorCondition;
-    const ec = quoteState.exteriorCondition;
-    if (!ic || !ec) return null;
-
-    const ir = estimateTable.Interior?.[type]?.[ic];
-    const er = estimateTable.Exterior?.[type]?.[ec];
-    if (!ir || !er) return null;
-    return tightenAndHeavier([ir[0] + er[0], ir[1] + er[1]]);
-  }
-
-  return null;
-}
-
-// -------------------------
 // Modal open/close
 // -------------------------
 function openQuoteModal() {
@@ -439,8 +458,7 @@ function openQuoteModal() {
     service: "",
     interiorCondition: "",
     exteriorCondition: "",
-    upkeepFrequency: "", // ✅ NEW reset
-    heardAbout: "",
+    upkeepFrequency: "",
     estimateLow: "",
     estimateHigh: "",
     slotId: "",
@@ -478,7 +496,7 @@ window.closeQuoteModal = closeQuoteModal;
 document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
 
-// ✅ command: DO NOT close if they click outside the panel
+// DO NOT close on outside click
 if (quoteModal) {
   quoteModal.addEventListener(
     "click",
@@ -507,18 +525,9 @@ function isoDate(d) {
   const da = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${da}`;
 }
-
-function startOfMonth(date) {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-function daysInMonth(date) {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-}
-
-function monthLabel(date) {
-  return date.toLocaleString(undefined, { month: "long", year: "numeric" });
-}
+function startOfMonth(date) { return new Date(date.getFullYear(), date.getMonth(), 1); }
+function daysInMonth(date) { return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(); }
+function monthLabel(date) { return date.toLocaleString(undefined, { month: "long", year: "numeric" }); }
 
 function buildCalendarIndex(slots) {
   const map = new Map();
@@ -528,21 +537,16 @@ function buildCalendarIndex(slots) {
     if (!map.has(k)) map.set(k, []);
     map.get(k).push(s);
   });
-  for (const [k, arr] of map.entries()) {
-    arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
-  }
+  for (const [k, arr] of map.entries()) arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
   return map;
 }
 
 function findNextAvailableDate(fromDateISO) {
   const dates = Array.from(calendarCache.byDate.keys()).sort();
-  for (const d of dates) {
-    if (!fromDateISO || d >= fromDateISO) return d;
-  }
+  for (const d of dates) if (!fromDateISO || d >= fromDateISO) return d;
   return "";
 }
 
-// Columns: id | label | status | bookedAt
 function parseSlotToDateTime(slot) {
   const id = String(slot.id || "").trim();
   const label = String(slot.label || "").trim();
@@ -559,8 +563,68 @@ function parseSlotToDateTime(slot) {
     const time = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
     return { date, time, pretty: label || id };
   }
-
   return { date: "", time: "", pretty: label || id };
+}
+
+// -------------------------
+// Continue rules
+// -------------------------
+function canContinue() {
+  const step = steps[stepIndex];
+
+  if (step === "vehicleType") return !!quoteState.vehicleType;
+  if (step === "serviceCategory") return !!quoteState.serviceCategory;
+  if (step === "service") return !!quoteState.service;
+
+  if (step === "conditionInterior") return !serviceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
+  if (step === "conditionExterior") return !serviceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
+
+  if (step === "upkeepFrequency") return !isUpkeepPlan() ? true : !!quoteState.upkeepFrequency;
+
+  if (step === "contact") {
+    return (
+      quoteState.name.trim().length >= 2 &&
+      quoteState.phone.trim().length >= 7 &&
+      quoteState.email.trim().includes("@") &&
+      quoteState.ackDeposit === true
+    );
+  }
+
+  if (step === "appointment") return !!quoteState.slotId;
+
+  return true;
+}
+
+function updateNav() {
+  if (!quoteBackBtn || !quoteNextBtn) return;
+
+  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
+
+  const step = steps[stepIndex];
+
+  if (step === "done") {
+    quoteNextBtn.style.display = "none";
+    quoteBackBtn.textContent = "Close";
+    quoteBackBtn.style.visibility = "visible";
+    return;
+  }
+
+  quoteNextBtn.style.display = "inline-flex";
+  quoteBackBtn.textContent = "Back";
+
+  // ✅ Calendar step finalizes
+  quoteNextBtn.textContent = step === "appointment" ? "Finish" : "Continue";
+
+  quoteNextBtn.disabled = !canContinue();
+
+  // keep bottom bar updated
+  renderNavPrice();
+}
+
+function pickAndAdvance(pickFn) {
+  pickFn();
+  renderStep();
+  setTimeout(() => nextStep(true), 80);
 }
 
 // -------------------------
@@ -579,7 +643,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle type
+  // 1) Vehicle
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -619,7 +683,6 @@ function renderStep() {
           label: c.label,
           hint: c.hint,
           img: c.img,
-          contain: false,
           variant: "qCard--square qCard--serviceCat",
           isSelected: quoteState.serviceCategory === c.label,
           onClick: () =>
@@ -643,25 +706,30 @@ function renderStep() {
 
   // 3) Service
   if (step === "service") {
-    const filtered = servicesAll.filter((s) => {
-      if (quoteState.serviceCategory === "Interior") return s.category === "Interior";
-      if (quoteState.serviceCategory === "Exterior") return s.category === "Exterior";
-      // Interior + Exterior
-      return s.category === "Both" || s.category === "Interior" || s.category === "Exterior";
-    });
-
-    if (filtered.length === 1 && quoteState.service !== filtered[0].label) {
-      quoteState.service = filtered[0].label;
-      stepIndex = nextActiveStepIndex(stepIndex);
-      renderStep();
-      return;
-    }
-
     title.textContent = "Select service";
     sub.textContent = "Pick the service you want. Tap to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
+
+    const filtered = servicesAll.filter((s) => {
+      if (quoteState.serviceCategory === "Interior") return s.category === "Interior";
+      if (quoteState.serviceCategory === "Exterior") return s.category === "Exterior";
+
+      // ✅ Interior + Exterior category:
+      // - allow Interior Detail, Exterior Wash, Ceramic, Paint Correction
+      // - allow ONLY the combined upkeep plan (NOT interior/exterior upkeep)
+      if (quoteState.serviceCategory === "Interior + Exterior") {
+        if (s.label === "Interior Upkeep Plan") return false;
+        if (s.label === "Exterior Upkeep Plan") return false;
+        if (s.label === "Interior + Exterior Upkeep Plan") return true;
+
+        // other services allowed
+        return s.label === "Interior Detail" || s.label === "Exterior Wash" || s.label === "Ceramic Coating" || s.label === "Paint Correction";
+      }
+
+      return false;
+    });
 
     filtered.forEach((s) => {
       cards.appendChild(
@@ -738,7 +806,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // ✅ NEW: 6) Upkeep frequency (only shows for upkeep plans)
+  // 6) Upkeep frequency
   if (step === "upkeepFrequency") {
     title.textContent = "Upkeep frequency";
     sub.textContent = "How often would you like us to come out? Tap one to continue.";
@@ -751,7 +819,7 @@ function renderStep() {
 
     upkeepFrequencies.forEach((o) => {
       grid.appendChild(
-        heardCard({
+        optionCard({
           label: o.label,
           hint: o.hint,
           isSelected: quoteState.upkeepFrequency === o.label,
@@ -764,36 +832,114 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
   }
 
-  // 7) Heard about
-  if (step === "heardAbout") {
-    title.textContent = "How did you hear about us?";
-    sub.textContent = "Tap one option to continue.";
+  // 7) Contact (moved BEFORE estimate + calendar)
+  if (step === "contact") {
+    title.textContent = "Your contact info";
+    sub.textContent = "Required. We’ll confirm by text/call.";
 
-    const wrap = document.createElement("div");
-    wrap.className = "qHearWrap";
+    const grid = document.createElement("div");
+    grid.className = "qGrid2";
 
-    const cards = document.createElement("div");
-    cards.className = "qHearGrid";
+    const f1 = document.createElement("div");
+    f1.className = "qField";
+    f1.innerHTML = `
+      <label for="qName">Name *</label>
+      <input id="qName" autocomplete="name" placeholder="Your name" value="${escapeHtml(quoteState.name)}" />
+    `;
 
-    heardAboutOptions.forEach((o) => {
-      cards.appendChild(
-        heardCard({
-          label: o.label,
-          hint: o.hint,
-          isSelected: quoteState.heardAbout === o.label,
-          onClick: () => pickAndAdvance(() => (quoteState.heardAbout = o.label))
-        })
-      );
+    const f2 = document.createElement("div");
+    f2.className = "qField";
+    f2.innerHTML = `
+      <label for="qPhone">Phone number *</label>
+      <input id="qPhone" autocomplete="tel" inputmode="tel" placeholder="(555) 555-5555" value="${escapeHtml(quoteState.phone)}" />
+    `;
+
+    const f3 = document.createElement("div");
+    f3.className = "qField";
+    f3.innerHTML = `
+      <label for="qEmail">Email *</label>
+      <input id="qEmail" autocomplete="email" inputmode="email" placeholder="you@email.com" value="${escapeHtml(quoteState.email)}" />
+    `;
+
+    grid.append(f1, f2, f3);
+
+    const notes = document.createElement("div");
+    notes.className = "qField";
+    notes.style.marginTop = "10px";
+    notes.innerHTML = `
+      <label for="qNotes">Anything else we should know?</label>
+      <textarea id="qNotes" placeholder="Pet hair, stains, address notes, etc.">${escapeHtml(quoteState.notes)}</textarea>
+    `;
+
+    const ack = document.createElement("div");
+    ack.style.marginTop = "10px";
+    ack.innerHTML = `
+      <div class="qCheck">
+        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
+        <label for="qAck">
+          <strong>$25 Booking Deposit Required *</strong><br/>
+          A $25 deposit is required to reserve your appointment.
+          This deposit is applied to your total (example: if the job is $170, you’ll pay $25 now and the remaining $145 at service).<br/><br/>
+          You can reschedule with at least <strong>2 days notice</strong>. If rescheduled with less than 2 days notice or canceled last minute, the deposit is kept.
+        </label>
+      </div>
+      <div class="qStatus" data-q-status>
+        ${canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement."}
+      </div>
+      <div style="display:none;">
+        <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
+      </div>
+    `;
+
+    quoteBody.append(title, sub, grid, notes, ack);
+
+    const nameEl = quoteBody.querySelector("#qName");
+    const phoneEl = quoteBody.querySelector("#qPhone");
+    const emailEl = quoteBody.querySelector("#qEmail");
+    const notesEl = quoteBody.querySelector("#qNotes");
+    const ackEl = quoteBody.querySelector("#qAck");
+    const hpEl = quoteBody.querySelector("#qCompany");
+    const statusEl = quoteBody.querySelector("[data-q-status]");
+
+    const updateStatus = () => {
+      if (!statusEl) return;
+      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement.";
+    };
+
+    nameEl?.addEventListener("input", (e) => {
+      quoteState.name = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+    phoneEl?.addEventListener("input", (e) => {
+      quoteState.phone = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+    emailEl?.addEventListener("input", (e) => {
+      quoteState.email = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+    notesEl?.addEventListener("input", (e) => {
+      quoteState.notes = e.target.value || "";
+    });
+    ackEl?.addEventListener("change", (e) => {
+      quoteState.ackDeposit = !!e.target.checked;
+      updateNav();
+      updateStatus();
+    });
+    hpEl?.addEventListener("input", (e) => {
+      quoteState.honeypot = e.target.value || "";
     });
 
-    wrap.appendChild(cards);
-    quoteBody.append(title, sub, wrap);
+    setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 8) Estimate
+  // 8) Estimate (moved AFTER contact)
   if (step === "estimate") {
     title.textContent = "Estimated price";
-    sub.textContent = "Starting estimate based on your selections.";
+    sub.textContent = "Estimate based on your selections.";
 
     const est = computeEstimate();
     quoteState.estimateLow = est ? est[0] : "";
@@ -803,7 +949,7 @@ function renderStep() {
     box.className = "qEstimateBox qEstimateBox--simple";
     box.innerHTML = `
       <div class="qEstimateBig">
-        ${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "We’ll confirm after assessment"}
+        ${est ? `$${escapeHtml(est[0])}–$${escapeHtml(est[1])}` : "Starting estimate will be confirmed after assessment"}
       </div>
 
       <div class="qEstimatePills">
@@ -822,7 +968,7 @@ function renderStep() {
     quoteBody.append(title, sub, box);
   }
 
-  // 9) Appointment
+  // 9) Appointment (finalizes on Finish)
   if (step === "appointment") {
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
@@ -880,124 +1026,7 @@ function renderStep() {
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
   }
 
-  // 10) Contact  ✅ deposit wording updated (last section only)
-  if (step === "contact") {
-    title.textContent = "Your contact info";
-    sub.textContent = "Required. We’ll confirm by text/call.";
-
-    const grid = document.createElement("div");
-    grid.className = "qGrid2";
-
-    const f1 = document.createElement("div");
-    f1.className = "qField";
-    f1.innerHTML = `
-      <label for="qName">Name *</label>
-      <input id="qName" autocomplete="name" placeholder="Your name" value="${escapeHtml(quoteState.name)}" />
-    `;
-
-    const f2 = document.createElement("div");
-    f2.className = "qField";
-    f2.innerHTML = `
-      <label for="qPhone">Phone number *</label>
-      <input id="qPhone" autocomplete="tel" inputmode="tel" placeholder="(555) 555-5555" value="${escapeHtml(quoteState.phone)}" />
-    `;
-
-    const f3 = document.createElement("div");
-    f3.className = "qField";
-    f3.innerHTML = `
-      <label for="qEmail">Email *</label>
-      <input id="qEmail" autocomplete="email" inputmode="email" placeholder="you@email.com" value="${escapeHtml(quoteState.email)}" />
-    `;
-
-    grid.append(f1, f2, f3);
-
-    const appt = document.createElement("div");
-    appt.className = "qApptSummary";
-    appt.innerHTML = `
-      <div class="qApptLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
-      <div class="qApptLine"><strong>Service:</strong> ${escapeHtml(quoteState.service || "—")}</div>
-      ${quoteState.upkeepFrequency ? `<div class="qApptLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
-      <div class="qApptLine"><strong>Estimated:</strong> ${
-        quoteState.estimateLow && quoteState.estimateHigh
-          ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
-          : "—"
-      }</div>
-    `;
-
-    const notes = document.createElement("div");
-    notes.className = "qField";
-    notes.style.marginTop = "10px";
-    notes.innerHTML = `
-      <label for="qNotes">Anything else we should know?</label>
-      <textarea id="qNotes" placeholder="Pet hair, stains, address notes, etc.">${escapeHtml(quoteState.notes)}</textarea>
-    `;
-
-    const ack = document.createElement("div");
-    ack.style.marginTop = "10px";
-    ack.innerHTML = `
-      <div class="qCheck">
-        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
-        <label for="qAck">
-          <strong>$25 Booking Deposit Required *</strong><br/>
-          A $25 deposit is required to reserve your appointment so customers don’t bail last minute.
-          This deposit is applied to your total (example: if the job is $170, you’ll pay $25 now and the remaining $145 at service).<br/><br/>
-          You can reschedule with at least <strong>2 days notice</strong>. If rescheduled with less than 2 days notice or canceled last minute, the deposit is kept.
-        </label>
-      </div>
-      <div class="qStatus" data-q-status>
-        ${canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement."}
-      </div>
-      <div style="display:none;">
-        <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
-      </div>
-    `;
-
-    quoteBody.append(title, sub, grid, appt, notes, ack);
-
-    const nameEl = quoteBody.querySelector("#qName");
-    const phoneEl = quoteBody.querySelector("#qPhone");
-    const emailEl = quoteBody.querySelector("#qEmail");
-    const notesEl = quoteBody.querySelector("#qNotes");
-    const ackEl = quoteBody.querySelector("#qAck");
-    const hpEl = quoteBody.querySelector("#qCompany");
-    const statusEl = quoteBody.querySelector("[data-q-status]");
-
-    const updateStatus = () => {
-      if (!statusEl) return;
-      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement.";
-    };
-
-    nameEl?.addEventListener("input", (e) => {
-      quoteState.name = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-    phoneEl?.addEventListener("input", (e) => {
-      quoteState.phone = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-    emailEl?.addEventListener("input", (e) => {
-      quoteState.email = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-    notesEl?.addEventListener("input", (e) => {
-      quoteState.notes = e.target.value || "";
-    });
-    ackEl?.addEventListener("change", (e) => {
-      quoteState.ackDeposit = !!e.target.checked;
-      updateNav();
-      updateStatus();
-    });
-    hpEl?.addEventListener("input", (e) => {
-      quoteState.honeypot = e.target.value || "";
-    });
-
-    setTimeout(() => nameEl?.focus(), 50);
-  }
-
-  // 11) Done
+  // 10) Done
   if (step === "done") {
     title.textContent = "You're booked";
     sub.textContent = "We received your request and will confirm shortly.";
@@ -1006,9 +1035,9 @@ function renderStep() {
     box.className = "qDoneBox";
     box.innerHTML = `
       <div class="qDoneBig">✅ Request submitted</div>
-      <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
       <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(quoteState.service || "—")}</div>
       ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
+      <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
       <div class="qDoneLine"><strong>Estimate:</strong> ${
         quoteState.estimateLow && quoteState.estimateHigh
           ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
@@ -1038,6 +1067,7 @@ function renderStep() {
     quoteBody.append(title, sub, box, actions);
   }
 
+  renderNavPrice();
   updateNav();
 }
 
@@ -1061,11 +1091,9 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
     const text = await res.text();
 
     let data = null;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      statusEl.textContent =
-        "Scheduling error: Apps Script did not return JSON. (Deploy Web App access: Anyone / Anyone with link)";
+    try { data = JSON.parse(text); }
+    catch {
+      statusEl.textContent = "Scheduling error: Apps Script did not return JSON. (Deploy Web App access: Anyone / Anyone with link)";
       loadBarEl.classList.remove("isOn");
       return;
     }
@@ -1086,12 +1114,7 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
           "date" in s && "time" in s && s.date && s.time
             ? { date: String(s.date), time: String(s.time), pretty: String(s.label || "") }
             : parseSlotToDateTime(s);
-        return {
-          id: String(s.id || ""),
-          date: parsed.date,
-          time: parsed.time,
-          label: String(s.label || parsed.pretty || s.id || "")
-        };
+        return { id: String(s.id || ""), date: parsed.date, time: parsed.time, label: String(s.label || parsed.pretty || s.id || "") };
       })
       .filter((s) => s.id && s.date && s.time);
 
@@ -1105,14 +1128,8 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
       return;
     }
 
-    // default selected date
-    if (!quoteState.slotDate) {
-      quoteState.slotDate = findNextAvailableDate("");
-    } else {
-      if (!calendarCache.byDate.has(quoteState.slotDate)) {
-        quoteState.slotDate = findNextAvailableDate(quoteState.slotDate);
-      }
-    }
+    if (!quoteState.slotDate) quoteState.slotDate = findNextAvailableDate("");
+    else if (!calendarCache.byDate.has(quoteState.slotDate)) quoteState.slotDate = findNextAvailableDate(quoteState.slotDate);
 
     statusEl.textContent = "Select a date, then choose a time:";
     renderCalendar(calEl, timesEl, nextAvailBtn);
@@ -1226,10 +1243,8 @@ function renderTimes(timesEl, nextAvailBtn) {
   const title = document.createElement("div");
   title.className = "qTimesTitle";
   title.textContent = selectedDate ? `Availability for ${selectedDate}` : "Availability";
-
   timesEl.appendChild(title);
 
-  // ✅ small "selected" line (instant feedback, no reload)
   const selectedLine = document.createElement("div");
   selectedLine.className = "qTimesNone";
   selectedLine.setAttribute("data-q-selected-line", "true");
@@ -1257,21 +1272,19 @@ function renderTimes(timesEl, nextAvailBtn) {
     b.className = "qTimeBtn" + (quoteState.slotId === s.id ? " isSel" : "");
     b.textContent = s.time;
 
-    // ✅ SPEED FIX: DO NOT re-render appointment step on time click
     b.addEventListener("click", () => {
       quoteState.slotId = s.id;
       quoteState.slotDate = s.date;
       quoteState.slotTime = s.time;
       quoteState.slotLabel = s.label || `${s.date} ${s.time}`;
 
-      // instant UI update (no fetch, no reload)
       grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
       b.classList.add("isSel");
 
       const line = timesEl.querySelector('[data-q-selected-line="true"]');
       if (line) line.textContent = `Selected: ${quoteState.slotLabel}`;
 
-      updateNav(); // enables Continue immediately
+      updateNav();
     });
 
     grid.appendChild(b);
@@ -1300,10 +1313,7 @@ function buildPayload() {
     interiorCondition: quoteState.interiorCondition,
     exteriorCondition: quoteState.exteriorCondition,
 
-    // ✅ NEW
     upkeepFrequency: quoteState.upkeepFrequency,
-
-    heardAbout: quoteState.heardAbout,
 
     estimateLow: quoteState.estimateLow,
     estimateHigh: quoteState.estimateHigh,
@@ -1332,17 +1342,12 @@ async function postJson(url, payload) {
   });
 
   const text = await res.text();
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { ok: false, message: "Apps Script returned non-JSON." };
-  }
+  try { return JSON.parse(text); }
+  catch { return { ok: false, message: "Apps Script returned non-JSON." }; }
 }
 
 async function reserveAndSend() {
-  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) {
-    return { ok: true };
-  }
+  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
 
   const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
   const payload = buildPayload();
@@ -1350,52 +1355,44 @@ async function reserveAndSend() {
 
   try {
     const result = await Promise.race([postJson(reserveUrl, payload), timeout(12000)]);
-
     if (result && result.ok === true) return { ok: true };
-
-    if (result && result.ok === false) {
-      return {
-        ok: false,
-        message: result.message || "That time was just booked."
-      };
-    }
-
+    if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked." };
     return { ok: false, message: "Submit failed." };
-  } catch (e) {
+  } catch {
     return { ok: false, message: "Submission blocked (CORS)." };
   }
 }
 
 // -------------------------
-// Nav
+// Nav actions
 // -------------------------
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
 
-  if (step === "heardAbout") {
-    const est = computeEstimate();
-    quoteState.estimateLow = est ? est[0] : "";
-    quoteState.estimateHigh = est ? est[1] : "";
-  }
+  // When leaving estimate step, nothing special
 
-  if (step === "contact") {
+  // ✅ Finish submits on appointment step
+  if (step === "appointment") {
     quoteNextBtn.disabled = true;
     const old = quoteNextBtn.textContent;
     quoteNextBtn.textContent = "Sending...";
 
+    // lock estimate values right before submit
+    const est = computeEstimate();
+    quoteState.estimateLow = est ? est[0] : "";
+    quoteState.estimateHigh = est ? est[1] : "";
+
     reserveAndSend().then((result) => {
       if (result && result.ok === false) {
         alert(result.message || "That time was just booked. Pick another slot.");
-        stepIndex = steps.indexOf("appointment");
-        renderStep();
         quoteNextBtn.textContent = old;
         quoteNextBtn.disabled = false;
         return;
       }
 
-      stepIndex = nextActiveStepIndex(stepIndex);
+      stepIndex = steps.indexOf("done");
       renderStep();
       quoteNextBtn.textContent = old;
       quoteNextBtn.disabled = false;
