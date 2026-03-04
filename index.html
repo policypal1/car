@@ -232,14 +232,14 @@
         </div>
 
         <div class="reelsWrap">
+          <!-- Mobile helper: swipe rail + skip button -->
+          <div class="reelsBar" aria-hidden="true">
+            <div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div>
+            <a class="reelsBar__skip" href="#process">SKIP CLIPS ↓</a>
+          </div>
+
           <div class="reels" data-reels aria-label="Short video clips of detailing work">
             <article class="reel" data-reel>
-              <!-- ✅ Mobile hint on the FIRST reel only -->
-              <div class="reelScrollHint" aria-hidden="true">
-                <div class="reelScrollHint__pill">SCROLL DOWN TO SEE MORE VIDEOS OF OUR WORK</div>
-                <div class="reelScrollHint__arrow"></div>
-              </div>
-
               <video class="reel__video" muted playsinline loop preload="metadata" aria-label="Detailing video clip 1">
                 <source
                   src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
@@ -247,10 +247,11 @@
                 />
               </video>
 
+              <!-- ✅ Desktop-visible play overlay -->
               <div class="reel__overlay" aria-hidden="true">
-                <div class="reel__play">
+                <div class="reel__playBadge">
                   <span class="reel__playIcon"></span>
-                  <span class="reel__playText">PLAY</span>
+                  <span class="reel__playText">PLAY VIDEO</span>
                 </div>
               </div>
 
@@ -268,9 +269,9 @@
               </video>
 
               <div class="reel__overlay" aria-hidden="true">
-                <div class="reel__play">
+                <div class="reel__playBadge">
                   <span class="reel__playIcon"></span>
-                  <span class="reel__playText">PLAY</span>
+                  <span class="reel__playText">PLAY VIDEO</span>
                 </div>
               </div>
 
@@ -288,9 +289,9 @@
               </video>
 
               <div class="reel__overlay" aria-hidden="true">
-                <div class="reel__play">
+                <div class="reel__playBadge">
                   <span class="reel__playIcon"></span>
-                  <span class="reel__playText">PLAY</span>
+                  <span class="reel__playText">PLAY VIDEO</span>
                 </div>
               </div>
 
