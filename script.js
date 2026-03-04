@@ -1,7 +1,6 @@
 // Keizer Mobile Detailing — Site UI
 // Mobile nav, modals, compare slider, work carousel, reviews rail, footer year.
-// Reels: click-to-play (pauses others) + ensure first frame is visible (no black thumbnails).
-
+// Reels: click-to-play anywhere on the card + autoplay when visible (muted).
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -18,13 +17,9 @@
       nav.classList.toggle("isOpen", open);
       navToggle.setAttribute("aria-expanded", open ? "true" : "false");
     };
-
     navToggle.addEventListener("click", () => setOpen(!nav.classList.contains("isOpen")));
     $$("a[href^='#']", nav).forEach((a) => a.addEventListener("click", () => setOpen(false)));
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") setOpen(false);
-    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
   }
 
   // Generic modal helpers
@@ -34,14 +29,12 @@
     modalEl.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
   };
-
   const closeModal = (modalEl) => {
     if (!modalEl) return;
     modalEl.classList.remove("isOpen");
     modalEl.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
   };
-
   const closeOnOverlay = (modalEl, overlaySelector) => {
     if (!modalEl) return;
     modalEl.addEventListener("click", (e) => {
@@ -63,27 +56,15 @@
         <div class="tiers">
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Tier 1 — Refresh</div><div class="tier__tag">Light</div></div>
-            <ul>
-              <li>Thorough vacuum</li>
-              <li>Wipe down of surfaces</li>
-              <li>Glass cleaned</li>
-            </ul>
+            <ul><li>Thorough vacuum</li><li>Wipe down of surfaces</li><li>Glass cleaned</li></ul>
           </div>
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Tier 2 — Reset</div><div class="tier__tag">Normal</div></div>
-            <ul>
-              <li>Deep vacuum (seams/edges)</li>
-              <li>Dash/console/doors detailed</li>
-              <li>Cupholders + cracks cleaned</li>
-            </ul>
+            <ul><li>Deep vacuum (seams/edges)</li><li>Dash/console/doors detailed</li><li>Cupholders + cracks cleaned</li></ul>
           </div>
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Tier 3 — Deep Clean</div><div class="tier__tag">Heavy</div></div>
-            <ul>
-              <li>Stains / pet hair focus</li>
-              <li>Deep agitation + extraction (as needed)</li>
-              <li>Most dramatic transformations</li>
-            </ul>
+            <ul><li>Stains / pet hair focus</li><li>Deep agitation + extraction (as needed)</li><li>Most dramatic transformations</li></ul>
           </div>
         </div>
       `
@@ -95,27 +76,15 @@
         <div class="tiers">
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Level 1 — Safe Wash</div><div class="tier__tag">Light</div></div>
-            <ul>
-              <li>Foam + hand wash</li>
-              <li>Wheels + tires cleaned</li>
-              <li>Dry + finish wipe</li>
-            </ul>
+            <ul><li>Foam + hand wash</li><li>Wheels + tires cleaned</li><li>Dry + finish wipe</li></ul>
           </div>
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Level 2 — Decon Wash</div><div class="tier__tag">Normal</div></div>
-            <ul>
-              <li>Road film removal</li>
-              <li>Extra wheel attention</li>
-              <li>Improved gloss & clarity</li>
-            </ul>
+            <ul><li>Road film removal</li><li>Extra wheel attention</li><li>Improved gloss & clarity</li></ul>
           </div>
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Level 3 — Premium</div><div class="tier__tag">Heavy</div></div>
-            <ul>
-              <li>Neglected cleanup</li>
-              <li>More detail work</li>
-              <li>Best “new look” finish</li>
-            </ul>
+            <ul><li>Neglected cleanup</li><li>More detail work</li><li>Best “new look” finish</li></ul>
           </div>
         </div>
       `
@@ -124,33 +93,21 @@
       title: "Upkeep Plan",
       html: `
         <p>For returning clients who want their car staying clean all the time.</p>
-        <ul>
-          <li>Maintenance interior touch-up</li>
-          <li>Exterior wash + quick protection (as needed)</li>
-          <li>Recommended every 2–4 weeks</li>
-        </ul>
+        <ul><li>Maintenance interior touch-up</li><li>Exterior wash + quick protection (as needed)</li><li>Recommended every 2–4 weeks</li></ul>
       `
     },
     ceramic: {
       title: "Ceramic Coating",
       html: `
         <p>Longer-lasting gloss and easier washes. Great for protection and a consistent shine.</p>
-        <ul>
-          <li>Wash + decontamination</li>
-          <li>Prep work before coating</li>
-          <li>Coating applied + cure guidance</li>
-        </ul>
+        <ul><li>Wash + decontamination</li><li>Prep work before coating</li><li>Coating applied + cure guidance</li></ul>
       `
     },
     paint: {
       title: "Paint Correction",
       html: `
         <p>Swirl removal and clarity improvement for deeper, cleaner reflections.</p>
-        <ul>
-          <li>Wash + decontamination</li>
-          <li>Machine polishing (as needed)</li>
-          <li>Finish refinement for gloss</li>
-        </ul>
+        <ul><li>Wash + decontamination</li><li>Machine polishing (as needed)</li><li>Finish refinement for gloss</li></ul>
       `
     }
   };
@@ -160,10 +117,8 @@
       const key = btn.getAttribute("data-modal-open");
       const data = key ? serviceCopy[key] : null;
       if (!serviceModal || !data) return;
-
       if (serviceTitle) serviceTitle.textContent = data.title;
       if (serviceContent) serviceContent.innerHTML = data.html;
-
       openModal(serviceModal);
     });
   });
@@ -187,7 +142,6 @@
   $$("[data-compare]").forEach((wrap) => {
     const range = $("[data-compare-range]", wrap);
     if (!range) return;
-
     const setPos = (val) => wrap.style.setProperty("--pos", `${val}%`);
     setPos(range.value || 12);
     range.addEventListener("input", (e) => setPos(e.target.value));
@@ -220,7 +174,6 @@
       idx = Math.max(0, Math.min(i, slides.length - 1));
       track.style.transform = `translateX(${-idx * 100}%)`;
       renderDots();
-
       const show = slides.length > 1;
       if (prev) prev.style.visibility = show ? "visible" : "hidden";
       if (next) next.style.visibility = show ? "visible" : "hidden";
@@ -249,13 +202,31 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels: thumbnails + click-to-play (pauses others)
+  // Reels: click-to-play anywhere + autoplay when visible
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const reels = $$("[data-reel]", reelsRoot)
       .map((card) => ({ card, video: $("video", card) }))
       .filter((x) => x.video);
 
+    const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
+
+    const pauseAll = () => {
+      reels.forEach(({ card, video }) => {
+        video.pause();
+        card.classList.remove("isPlaying");
+      });
+    };
+
+    const safePlay = async (video) => {
+      try {
+        video.muted = true;
+        video.playsInline = true;
+        await video.play();
+      } catch (_) {}
+    };
+
+    // Ensure a frame is visible (no black)
     const warmThumb = (video) => {
       try {
         video.muted = true;
@@ -276,29 +247,58 @@
 
     reels.forEach(({ video }) => warmThumb(video));
 
-    const pauseAll = () => {
-      reels.forEach(({ card, video }) => {
-        video.pause();
-        card.classList.remove("isPlaying");
-      });
-    };
-
-    const playVideo = async (video) => {
-      try { await video.play(); } catch (_) {}
-    };
-
+    // ✅ Clicking the CARD (not the video) toggles play/pause
     reels.forEach(({ card, video }) => {
       video.addEventListener("play", () => card.classList.add("isPlaying"));
       video.addEventListener("pause", () => card.classList.remove("isPlaying"));
 
-      video.addEventListener("click", () => {
+      card.addEventListener("click", () => {
         if (video.paused) {
           pauseAll();
-          playVideo(video);
+          safePlay(video);
         } else {
           video.pause();
         }
       });
     });
+
+    // ✅ Autoplay when a reel becomes visible (mobile + desktop OK)
+    const io = new IntersectionObserver(
+      (entries) => {
+        // On mobile swipe rail: play the most-visible reel, pause the rest
+        if (isMobile()) {
+          const visible = entries
+            .filter((e) => e.isIntersecting)
+            .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
+
+          if (!visible) return;
+
+          reels.forEach(({ video, card }) => {
+            if (card === visible.target) {
+              if (video.paused) safePlay(video);
+            } else {
+              video.pause();
+            }
+          });
+          return;
+        }
+
+        // Desktop: optional gentle autoplay if in view (kept minimal)
+        entries.forEach((e) => {
+          const card = e.target;
+          const item = reels.find((r) => r.card === card);
+          if (!item) return;
+
+          if (e.isIntersecting && e.intersectionRatio >= 0.65) {
+            if (item.video.paused) safePlay(item.video);
+          } else {
+            item.video.pause();
+          }
+        });
+      },
+      { threshold: [0, 0.35, 0.65, 0.85] }
+    );
+
+    reels.forEach(({ card }) => io.observe(card));
   }
 })();
