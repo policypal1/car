@@ -1,6 +1,6 @@
 // Keizer Mobile Detailing — Site UI
 // Mobile nav, modals, compare slider, work carousel, reviews rail, footer year.
-// Reels: click-to-play anywhere on the card + autoplay when visible (muted).
+// Reels: click-to-play anywhere on the card + autoplay when visible (muted, mobile only).
 (() => {
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
@@ -84,7 +84,7 @@
           </div>
           <div class="tier">
             <div class="tier__top"><div class="tier__name">Level 3 — Premium</div><div class="tier__tag">Heavy</div></div>
-            <ul><li>Neglected cleanup</li><li>More detail work</li><li>Best “new look” finish</li></ul>
+            <ul><li>Neglected cleanup</li><li>More detail work</li><li>Best "new look" finish</li></ul>
           </div>
         </div>
       `
@@ -202,7 +202,7 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels: click-to-play anywhere + autoplay when visible
+  // Reels: click-to-play on desktop; autoplay on mobile when visible (swipe freely)
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const reels = $$("[data-reel]", reelsRoot)
@@ -226,7 +226,7 @@
       } catch (_) {}
     };
 
-    // Ensure a frame is visible (no black)
+    // Ensure a frame is visible (no black thumbnail)
     const warmThumb = (video) => {
       try {
         video.muted = true;
@@ -236,8 +236,7 @@
 
         const onLoaded = async () => {
           try { video.currentTime = 0.05; } catch (_) {}
-          try { await video.play(); } catch (_) {}
-          video.pause();
+          // Do NOT auto-play — just seek to get a thumbnail frame
           video.removeEventListener("loadeddata", onLoaded);
         };
 
@@ -247,26 +246,43 @@
 
     reels.forEach(({ video }) => warmThumb(video));
 
-    // ✅ Clicking the CARD (not the video) toggles play/pause
+    // play/pause state class
     reels.forEach(({ card, video }) => {
       video.addEventListener("play", () => card.classList.add("isPlaying"));
       video.addEventListener("pause", () => card.classList.remove("isPlaying"));
-
-      card.addEventListener("click", () => {
-        if (video.paused) {
-          pauseAll();
-          safePlay(video);
-        } else {
-          video.pause();
-        }
-      });
     });
 
-    // ✅ Autoplay when a reel becomes visible (mobile + desktop OK)
-    const io = new IntersectionObserver(
-      (entries) => {
-        // On mobile swipe rail: play the most-visible reel, pause the rest
-        if (isMobile()) {
+    // ── DESKTOP: click card to toggle play/pause (no autoplay) ──
+    if (!isMobile()) {
+      reels.forEach(({ card, video }) => {
+        card.addEventListener("click", () => {
+          if (video.paused) {
+            pauseAll();
+            safePlay(video);
+          } else {
+            video.pause();
+          }
+        });
+      });
+    }
+
+    // ── MOBILE: autoplay the most-visible reel; swiping pauses naturally ──
+    if (isMobile()) {
+      // Click still toggles on mobile too
+      reels.forEach(({ card, video }) => {
+        card.addEventListener("click", () => {
+          if (video.paused) {
+            pauseAll();
+            safePlay(video);
+          } else {
+            video.pause();
+          }
+        });
+      });
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          // Find the most-visible reel
           const visible = entries
             .filter((e) => e.isIntersecting)
             .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
@@ -280,25 +296,11 @@
               video.pause();
             }
           });
-          return;
-        }
+        },
+        { threshold: [0, 0.35, 0.65, 0.85] }
+      );
 
-        // Desktop: optional gentle autoplay if in view (kept minimal)
-        entries.forEach((e) => {
-          const card = e.target;
-          const item = reels.find((r) => r.card === card);
-          if (!item) return;
-
-          if (e.isIntersecting && e.intersectionRatio >= 0.65) {
-            if (item.video.paused) safePlay(item.video);
-          } else {
-            item.video.pause();
-          }
-        });
-      },
-      { threshold: [0, 0.35, 0.65, 0.85] }
-    );
-
-    reels.forEach(({ card }) => io.observe(card));
+      reels.forEach(({ card }) => io.observe(card));
+    }
   }
 })();
