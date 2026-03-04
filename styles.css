@@ -65,7 +65,7 @@ body{
   font-weight:700;
   letter-spacing:.4px;
 }
-.brand__nameLine{ display:block; } /* ✅ stacked lines (desktop + mobile) */
+.brand__nameLine{ display:block; } /* stacked */
 .brand__tag{
   display:block;
   font-size:.85rem;
@@ -107,6 +107,9 @@ body{
   overflow: auto;
   border-radius: 0 0 18px 18px;
   z-index: 60;
+}
+.nav__links{
+  display:block;
 }
 .nav a{
   display:block;
@@ -362,49 +365,23 @@ body{
 .reels{
   width: min(980px, 100%);
   margin: 0 auto;
-}
-@media (max-width: 767px){
-  .reels{
-    height: 72vh;
-    overflow-y: auto;
-    scroll-snap-type: y mandatory;
-    border-radius: 22px;
-    border: 1px solid rgba(0,0,0,.08);
-    background: #fff;
-    box-shadow: 0 18px 44px rgba(0,0,0,.12);
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-  }
-  .reels::-webkit-scrollbar{ display:none; }
-
-  .reel{
-    scroll-snap-align: start;
-    position: relative;
-    height: 72vh;
-    display:flex;
-    align-items: stretch;
-    justify-content: center;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-    background:#000;
-  }
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 @media (min-width: 768px){
-  .reels{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-  }
-  .reel{
-    position: relative;
-    border-radius: 22px;
-    overflow:hidden;
-    border: 1px solid rgba(0,0,0,.08);
-    background: #000;
-    box-shadow: 0 18px 44px rgba(0,0,0,.12);
-    aspect-ratio: 9 / 16;
-  }
+  .reels{ grid-template-columns: repeat(3, 1fr); }
 }
 
+.reel{
+  position: relative;
+  border-radius: 22px;
+  overflow:hidden;
+  border: 1px solid rgba(0,0,0,.08);
+  background: #000;
+  box-shadow: 0 18px 44px rgba(0,0,0,.12);
+  aspect-ratio: 9 / 16;
+}
 .reel__video{
   width:100%;
   height:100%;
@@ -413,9 +390,6 @@ body{
   background: #000;
   cursor: pointer;
 }
-
-/* ✅ Remove the black overlay entirely */
-.reel__overlay{ display:none; }
 
 .reel__meta{
   position:absolute;
@@ -675,7 +649,7 @@ body{
   display:block;
 }
 
-/* ✅ Service Area: make the right card black with gold trim */
+/* Service Area: right card black with gold trim */
 #service-area .areaCard{
   background: #0b0b0c;
   border: 1px solid rgba(214,178,94,.40);
@@ -698,6 +672,9 @@ body{
   margin-top: 22px;
   align-items:center;
 }
+.aboutCopy{
+  text-align:center; /* ✅ center requested */
+}
 .aboutTitle{
   margin: 0 0 10px;
   font-family: Oswald, Inter, sans-serif;
@@ -707,7 +684,8 @@ body{
   color: #000;
 }
 .aboutText{
-  margin: 0 0 10px;
+  margin: 0 auto 10px;
+  max-width: 70ch;
   line-height: 1.7;
   color: var(--muted);
 }
@@ -724,6 +702,7 @@ body{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
+  justify-content:center; /* ✅ center buttons */
 }
 
 /* Reviews */
@@ -811,7 +790,6 @@ body{
   gap: 10px;
   margin-top: 14px;
 }
-.sectionCtas--dark{ }
 
 /* Modals */
 .modal{
@@ -949,85 +927,4 @@ body{
   font-size: 1.25rem;
 }
 .footerMini__actions{ display:flex; gap: 10px; flex-wrap:wrap; }
-.footer__bottom--light{ border-top: 1px solid rgba(0,0,0,.08); }
-.footer__bottomInner--light{
-  padding: 10px 0;
-  display:flex;
-  justify-content:space-between;
-  gap: 12px;
-  font-size: .95rem;
-  color: rgba(0,0,0,.65);
-}
-.footerProduced{
-  color: rgba(0,0,0,.65);
-  font-weight: 600;
-  display:inline-flex;
-  align-items:center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.footerLink{
-  color: rgba(0,0,0,.78);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.footerLink:hover{ color: rgba(0,0,0,.95); }
-.footerSep{ opacity: .55; }
-
-/* Desktop */
-@media (min-width: 768px){
-  .nav{
-    position: static;
-    display:flex !important;
-    align-items:center;
-    gap: 10px;
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-    inset:auto;
-    max-height: none;
-    overflow: visible;
-    border-radius: 0;
-    white-space: nowrap;
-    flex-wrap: nowrap;
-  }
-  .nav a{ padding: 10px 10px; white-space: nowrap; }
-  .navToggle{ display:none; }
-  .nav__cta{ margin-left: 6px; margin-top: 0; width: auto; }
-
-  .aboutGrid{ grid-template-columns: 1.1fr .9fr; gap: 22px; }
-  .aboutMedia img{ height: 380px; }
-
-  .steps{ grid-template-columns: repeat(2, 1fr); gap: 16px; }
-
-  .areaGrid{ grid-template-columns: 1fr 1fr; gap: 18px; }
-  .areaMap img{
-    height: 100%;
-    min-height: 380px;
-  }
-
-  .tiers{ grid-template-columns: repeat(3, 1fr); }
-
-  .footerMini{
-    flex-direction:row;
-    align-items:center;
-    justify-content:space-between;
-    gap: 14px;
-  }
-
-  .reviewsRailWrap{ padding: 0 64px; }
-
-  .serviceCard__actions{
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  /* Recent Transformations: shrink to ~3/4 size on desktop */
-  #work .carousel{ width: min(760px, 100%); }
-  #work .carousel__viewport{ aspect-ratio: 4 / 5; }
-}
-
-/* Larger desktop */
-@media (min-width: 1024px){
-  /* kept for future expansions */
-}
+.footer__bottom--light{ border
