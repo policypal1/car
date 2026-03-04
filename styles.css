@@ -142,9 +142,13 @@ body{
   user-select:none;
   -webkit-tap-highlight-color: transparent;
   transition: transform .18s ease, background .18s ease, box-shadow .18s ease, border-color .18s ease, color .18s ease;
+
+  /* ✅ key fix: allow per-button baseline Y transform (prevents header CTA jump) */
+  --btn-y: 0px;
+  transform: translateY(var(--btn-y)) scale(1);
 }
-.btn:hover{ transform: translateY(-1px) scale(1.03); }
-.btn:active{ transform: scale(1.01); }
+.btn:hover{ transform: translateY(calc(var(--btn-y) - 1px)) scale(1.03); }
+.btn:active{ transform: translateY(var(--btn-y)) scale(1.01); }
 .btn:focus{ outline:none; }
 .btn:focus-visible{
   outline: 3px solid var(--ring);
@@ -445,23 +449,25 @@ body{
   color: rgba(255,255,255,.94);
 }
 
-/* Mobile-only "scroll through videos" hint */
-.reelsHint{ display:none; }
+/* ✅ NEW: Mobile-only hint on FIRST reel */
+.reelScrollHint{ display:none; }
 
 @media (max-width: 767px){
-  .reelsHint{
+  .reelScrollHint{
     display:flex;
     flex-direction:column;
     align-items:center;
     gap: 10px;
-    position: sticky;
-    bottom: 12px;
+    position:absolute;
+    left: 0;
+    right: 0;
+    bottom: 78px; /* sits above your title pill */
     z-index: 5;
     pointer-events:none;
     padding: 10px 0;
   }
 
-  .reelsHint__pill{
+  .reelScrollHint__pill{
     padding: .55rem .9rem;
     border-radius: 999px;
     font-weight: 900;
@@ -472,9 +478,11 @@ body{
     border: 1px solid rgba(214,178,94,.35);
     box-shadow: 0 18px 44px rgba(0,0,0,.22);
     backdrop-filter: blur(8px);
+    text-align:center;
+    max-width: min(92%, 520px);
   }
 
-  .reelsHint__arrow{
+  .reelScrollHint__arrow{
     width: 34px;
     height: 34px;
     border-radius: 999px;
@@ -485,7 +493,7 @@ body{
     animation: reelsBounce 1.2s ease-in-out infinite;
   }
 
-  .reelsHint__arrow::before{
+  .reelScrollHint__arrow::before{
     content:"";
     position:absolute;
     left: 50%;
@@ -494,7 +502,7 @@ body{
     height: 10px;
     border-right: 3px solid rgba(255,255,255,.92);
     border-bottom: 3px solid rgba(255,255,255,.92);
-    transform: translate(-50%,-55%) rotate(45deg);
+    transform: translate(-50%,-45%) rotate(45deg); /* down arrow */
   }
 
   @keyframes reelsBounce{
@@ -1076,7 +1084,9 @@ body{
     position: absolute;
     right: 0;
     top: 50%;
-    transform: translateY(-50%);
+
+    /* ✅ critical: keep button vertically centered without transform override jump */
+    --btn-y: -50%;
     margin: 0;
     width: auto;
   }
@@ -1113,6 +1123,9 @@ body{
   /* Recent Transformations: shrink to ~3/4 size on desktop */
   #work .carousel{ width: min(760px, 100%); }
   #work .carousel__viewport{ aspect-ratio: 4 / 5; }
+
+  /* Desktop: hide the reels hint entirely */
+  .reelScrollHint{ display:none !important; }
 }
 
 /* Larger desktop */
