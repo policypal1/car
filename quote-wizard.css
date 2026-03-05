@@ -1,3 +1,4 @@
+/* quote-wizard.css */
 /* Quote wizard */
 .quotePanel{
   position:relative;
@@ -197,7 +198,7 @@
   border-top:1px solid rgba(0,0,0,.10);
 }
 
-/* ✅ badge */
+/* ✅ badge (existing) */
 .qCardBadge{
   position:absolute;
   top:8px;
@@ -214,6 +215,25 @@
   background:rgba(255,255,255,.92);
   border:1px solid rgba(0,0,0,.14);
   box-shadow:0 8px 18px rgba(0,0,0,.14);
+}
+
+/* ✅ NEW: "Requires Exterior Wash" pill badge (ONLY used on Ceramic Coating + Paint Correction) */
+.requires-badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:#ffffff;
+  color:#111;
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  font-weight:500;
+  z-index:2;
+  border:1px solid rgba(0,0,0,.10);
+  pointer-events:none;
+  max-width:calc(100% - 20px);
+  white-space:nowrap;
 }
 
 /* Vehicle cards */
