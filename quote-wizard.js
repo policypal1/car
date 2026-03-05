@@ -1,3 +1,4 @@
+/* quote-wizard.js
 // -------------------------
 // QUOTE WIZARD (Flow v8.1)
 // -------------------------
@@ -5,6 +6,7 @@
 // -> Contact -> Estimate -> Calendar -> Done
 //
 // Apps Script URL
+*/
 const DEFAULT_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
 
@@ -125,30 +127,74 @@ const upkeepFrequencies = [
 ];
 
 // -------------------------
-// ESTIMATES
+// ESTIMATES (UPDATED PRICING)
 // -------------------------
-const estimateTable = {
-  Interior: {
-    Small: { Light: [120, 160], Normal: [160, 220], Heavy: [220, 320] },
-    Medium: { Light: [140, 190], Normal: [190, 260], Heavy: [260, 380] },
-    Large: { Light: [170, 230], Normal: [230, 320], Heavy: [320, 450] },
-    Truck: { Light: [170, 240], Normal: [240, 340], Heavy: [340, 480] }
-  },
-  Exterior: {
-    Small: { Light: [60, 90], Normal: [90, 130], Heavy: [130, 180] },
-    Medium: { Light: [70, 100], Normal: [100, 150], Heavy: [150, 210] },
-    Large: { Light: [90, 120], Normal: [120, 180], Heavy: [180, 260] },
-    Truck: { Light: [90, 130], Normal: [130, 200], Heavy: [200, 290] }
-  }
+
+// Vehicle size add-ons
+const VEHICLE_ADDON = {
+  Small: 0,
+  Medium: 20,
+  Large: 40,
+  Truck: 30
 };
 
-const serviceOverrides = {
-  "Ceramic Coating": { Small: [450, 900], Medium: [550, 1100], Large: [650, 1400], Truck: [650, 1400] },
-  "Paint Correction": { Small: [350, 800], Medium: [450, 950], Large: [550, 1200], Truck: [550, 1200] },
+// Base prices by condition (Normal == "Medium condition" from your prompt)
+const INTERIOR_BASE_BY_COND = { Light: 150, Normal: 190, Heavy: 240 };
+const EXTERIOR_BASE_BY_COND = { Light: 80, Normal: 95, Heavy: 115 };
 
-  "Interior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] },
-  "Exterior Upkeep Plan": { Small: [90, 160], Medium: [110, 190], Large: [130, 220], Truck: [130, 240] },
-  "Interior + Exterior Upkeep Plan": { Small: [140, 260], Medium: [170, 310], Large: [200, 360], Truck: [200, 390] }
+// Ranges (keeps existing range-based estimate behavior without changing flow)
+const INTERIOR_SPREAD = 70;
+const EXTERIOR_SPREAD = 45;
+
+function buildConditionTable(baseByCond, spread) {
+  return {
+    Small: {
+      Light: [baseByCond.Light + VEHICLE_ADDON.Small, baseByCond.Light + VEHICLE_ADDON.Small + spread],
+      Normal: [baseByCond.Normal + VEHICLE_ADDON.Small, baseByCond.Normal + VEHICLE_ADDON.Small + spread],
+      Heavy: [baseByCond.Heavy + VEHICLE_ADDON.Small, baseByCond.Heavy + VEHICLE_ADDON.Small + spread]
+    },
+    Medium: {
+      Light: [baseByCond.Light + VEHICLE_ADDON.Medium, baseByCond.Light + VEHICLE_ADDON.Medium + spread],
+      Normal: [baseByCond.Normal + VEHICLE_ADDON.Medium, baseByCond.Normal + VEHICLE_ADDON.Medium + spread],
+      Heavy: [baseByCond.Heavy + VEHICLE_ADDON.Medium, baseByCond.Heavy + VEHICLE_ADDON.Medium + spread]
+    },
+    Large: {
+      Light: [baseByCond.Light + VEHICLE_ADDON.Large, baseByCond.Light + VEHICLE_ADDON.Large + spread],
+      Normal: [baseByCond.Normal + VEHICLE_ADDON.Large, baseByCond.Normal + VEHICLE_ADDON.Large + spread],
+      Heavy: [baseByCond.Heavy + VEHICLE_ADDON.Large, baseByCond.Heavy + VEHICLE_ADDON.Large + spread]
+    },
+    Truck: {
+      Light: [baseByCond.Light + VEHICLE_ADDON.Truck, baseByCond.Light + VEHICLE_ADDON.Truck + spread],
+      Normal: [baseByCond.Normal + VEHICLE_ADDON.Truck, baseByCond.Normal + VEHICLE_ADDON.Truck + spread],
+      Heavy: [baseByCond.Heavy + VEHICLE_ADDON.Truck, baseByCond.Heavy + VEHICLE_ADDON.Truck + spread]
+    }
+  };
+}
+
+const estimateTable = {
+  Interior: buildConditionTable(INTERIOR_BASE_BY_COND, INTERIOR_SPREAD),
+  Exterior: buildConditionTable(EXTERIOR_BASE_BY_COND, EXTERIOR_SPREAD)
+};
+
+// Overrides / Upkeep / Ceramic / Paint (UPDATED)
+const serviceOverrides = {
+  // Ceramic + Paint (requires wash)
+  "Paint Correction": { Small: [450, 450], Medium: [500, 500], Large: [550, 550], Truck: [520, 520] },
+  "Ceramic Coating": { Small: [700, 700], Medium: [750, 750], Large: [800, 800], Truck: [770, 770] },
+
+  // Upkeep plans
+  "Interior Upkeep Plan": { Small: [85, 85], Medium: [95, 95], Large: [110, 110], Truck: [100, 100] },
+  "Exterior Upkeep Plan": { Small: [55, 55], Medium: [65, 65], Large: [75, 75], Truck: [70, 70] },
+
+  // Keep this plan in place (still used by your flow)
+  // (No new pricing was provided for this plan specifically, so leaving it as-is would violate "update all pricing values".
+  // To align with your pricing model, this uses Interior base + Exterior base - $20 at "Normal" baseline, per vehicle addon, as a flat plan.)
+  "Interior + Exterior Upkeep Plan": {
+    Small: [INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small - 20, INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small - 20],
+    Medium: [INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium - 20, INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium - 20],
+    Large: [INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Large + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Large - 20, INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Large + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Large - 20],
+    Truck: [INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Truck + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Truck - 20, INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Truck + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Truck - 20]
+  }
 };
 
 // -------------------------
@@ -347,6 +393,17 @@ function computeEstimateWithOverrides(overrides = {}) {
     high += Number(r[1] || 0);
   }
 
+  // ✅ Interior + Exterior Combo discount (-$20) ONLY when selecting Interior Detail + Exterior Wash together
+  // (does not apply to upkeep plans or ceramic/paint flows)
+  const hasInterior = svcs.includes("Interior Detail");
+  const hasExterior = svcs.includes("Exterior Wash");
+  const hasUpkeep = svcs.some(isUpkeepService);
+  const hasCeramicOrPaint = svcs.includes("Ceramic Coating") || svcs.includes("Paint Correction");
+  if (hasInterior && hasExterior && !hasUpkeep && !hasCeramicOrPaint) {
+    low = Math.max(0, low - 20);
+    high = Math.max(0, high - 20);
+  }
+
   return tightenAndHeavier([low, high]);
 }
 
@@ -525,7 +582,7 @@ function imgCard({
   const mediaZoomStyle = typeof imgZoom === "number" ? `style="--imgZoom:${imgZoom}"` : "";
 
   const badgeHtml = badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : "";
-  const tagHtml = tag ? `<span class="qCardTag" aria-hidden="true">${escapeHtml(tag)}</span>` : "";
+  const tagHtml = tag ? `<span class="requires-badge" aria-hidden="true">${escapeHtml(tag)}</span>` : "";
 
   const mediaHtml = Array.isArray(img)
     ? `
@@ -767,8 +824,8 @@ function renderStep() {
             img: s.img,
             split: s.split || "h",
             variant: "qCard--square qCard--servicePick",
-            badge: needsWash ? "*" : "",
-            tag: needsWash ? "Requires Exterior Wash" : "",
+            badge: "",
+            tag: needsWash ? "* Requires Exterior Wash" : "",
             isSelected: quoteState.services.includes(s.label),
             onClick: () => pickSingleServiceAndAdvance(s.label)
           })
@@ -835,8 +892,8 @@ function renderStep() {
           img: s.img,
           split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
-          badge: needsWash ? "*" : "",
-          tag: needsWash ? "Requires Exterior Wash" : "",
+          badge: "",
+          tag: needsWash ? "* Requires Exterior Wash" : "",
           isSelected: quoteState.services.includes(s.label),
           onClick: () => {
             toggleService(s.label);
