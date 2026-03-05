@@ -22,7 +22,7 @@ const quoteState = {
   vehicleType: "",
   serviceCategory: "",
 
-  // multi-select services (we will restrict by category)
+  // ✅ multi-select services (Exterior + Interior+Exterior only; Interior will behave single-select)
   services: [],
 
   interiorCondition: "",
@@ -73,17 +73,16 @@ const vehicleTypes = [
   { label: "Truck", hint: "Pickup truck", img: "./silver-pickup-truck-side-view-svdvcb49lssczxnt.png", contain: true, zoom: 1.26 }
 ];
 
-const serviceCategories = [
-  { label: "Interior", hint: "Inside-only detailing", img: "./2017-05-22-07-32-26.jpg" },
-  { label: "Exterior", hint: "Outside-only detailing", img: "./c36084da09340612d8431de0221ea985.jpg" },
+// service category images
+const SERVICECAT_INTERIOR_IMG = "./2017-05-22-07-32-26.jpg";
+const SERVICECAT_EXTERIOR_IMG = "./c36084da09340612d8431de0221ea985.jpg";
 
-  // ✅ combined image: interior (top) + exterior (bottom)
-  {
-    label: "Interior + Exterior",
-    hint: "Full detail inside + out",
-    img: ["./2017-05-22-07-32-26.jpg", "./c36084da09340612d8431de0221ea985.jpg"],
-    split: "vertical"
-  }
+const serviceCategories = [
+  { label: "Interior", hint: "Inside-only detailing", img: SERVICECAT_INTERIOR_IMG },
+  { label: "Exterior", hint: "Outside-only detailing", img: SERVICECAT_EXTERIOR_IMG },
+
+  // ✅ vertical stacked image (interior on top, exterior on bottom)
+  { label: "Interior + Exterior", hint: "Full detail inside + out", img: [SERVICECAT_INTERIOR_IMG, SERVICECAT_EXTERIOR_IMG], split: "v" }
 ];
 
 // Upkeep plan images
@@ -96,7 +95,7 @@ const servicesAll = [
 
   { label: "Interior Upkeep Plan", category: "Interior", img: INTERIOR_UPKEEP_IMG, upkeep: "interior" },
   { label: "Exterior Upkeep Plan", category: "Exterior", img: EXTERIOR_UPKEEP_IMG, upkeep: "exterior" },
-  { label: "Interior + Exterior Upkeep Plan", category: "Both", img: [INTERIOR_UPKEEP_IMG, EXTERIOR_UPKEEP_IMG], upkeep: "both" },
+  { label: "Interior + Exterior Upkeep Plan", category: "Both", img: [INTERIOR_UPKEEP_IMG, EXTERIOR_UPKEEP_IMG], split: "h", upkeep: "both" },
 
   { label: "Ceramic Coating", category: "Exterior", img: "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png", prewash: true },
   { label: "Paint Correction", category: "Exterior", img: "./bee.jpg", prewash: true }
@@ -110,7 +109,8 @@ const interiorConditions = [
 
 const exteriorConditions = [
   { label: "Light", hint: "Light grime • quick reset", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
-  { label: "Normal", hint: "Daily driver • full wash", img: "./IMG_2910.jpg" },
+  // ✅ zoom in more on Normal only
+  { label: "Normal", hint: "Daily driver • full wash", img: "./IMG_2910.jpg", zoom: 1.28 },
   { label: "Heavy", hint: "Build-up • extra prep", img: "./dirty-car.jpg" }
 ];
 
@@ -165,7 +165,7 @@ function setProgress() {
   dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
 }
 
-// No bottom price pill
+// ✅ No bottom price pill
 function renderNavPrice() { return; }
 
 // -------------------------
@@ -175,7 +175,7 @@ const UPKEEP_SET = new Set(["Interior Upkeep Plan", "Exterior Upkeep Plan", "Int
 function isUpkeepService(label) { return UPKEEP_SET.has(label); }
 function isUpkeepPlanSelected() { return quoteState.services.some(isUpkeepService); }
 
-// If any upkeep plan selected, it becomes exclusive
+// If any upkeep plan selected, it becomes exclusive (keeps flow clean)
 function enforceUpkeepExclusivity() {
   const upkeep = quoteState.services.find(isUpkeepService);
   if (upkeep) quoteState.services = [upkeep];
@@ -243,6 +243,9 @@ function tightenAndHeavier(range) {
   return [newLow, newHigh];
 }
 
+/**
+ * Compute range for a service with optional condition overrides
+ */
 function computeRangeForService(serviceLabel, opts = {}) {
   const type = quoteState.vehicleType;
   if (!type) return null;
@@ -392,7 +395,7 @@ function updateNav() {
 }
 
 // -------------------------
-// AUTO-ADVANCE (everything except services step)
+// ✅ AUTO-ADVANCE (everything except multi-select services step)
 // -------------------------
 function pickAndAdvance(pickFn) {
   pickFn();
@@ -401,34 +404,20 @@ function pickAndAdvance(pickFn) {
 }
 
 // -------------------------
-// Service select logic
-// - Interior: SINGLE select only
-// - Exterior + Interior+Exterior: MULTI select
-// - Upkeep plans remain exclusive
+// Service selection rules
 // -------------------------
+
+// ✅ multi-select toggle (Exterior + Interior+Exterior only)
 function toggleService(label) {
   const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
   const isSelected = current.includes(label);
 
-  // Upkeep plans always exclusive
   if (!isSelected && isUpkeepService(label)) {
     quoteState.services = [label];
   } else {
-    // Remove any upkeep from mix when toggling normal services
     let next = current.filter((s) => !isUpkeepService(s));
-
-    // ✅ Interior category = single select
-    const isInteriorCategory = quoteState.serviceCategory === "Interior";
-
-    if (isInteriorCategory) {
-      // clicking selected -> deselect (optional), else replace with single
-      next = isSelected ? next.filter((s) => s !== label) : [label];
-    } else {
-      // Exterior + Interior+Exterior = multi-select
-      if (isSelected) next = next.filter((s) => s !== label);
-      else next.push(label);
-    }
-
+    if (isSelected) next = next.filter((s) => s !== label);
+    else next.push(label);
     quoteState.services = next;
   }
 
@@ -461,6 +450,24 @@ function removeService(label) {
   updateNav();
 }
 
+// ✅ single-select (Interior only) + auto-advance
+function pickInteriorServiceAndAdvance(label) {
+  quoteState.services = [label];
+  enforceUpkeepExclusivity();
+
+  if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
+  if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
+  if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
+
+  quoteState.slotId = "";
+  quoteState.slotLabel = "";
+  quoteState.slotDate = "";
+  quoteState.slotTime = "";
+
+  renderStep();
+  setTimeout(() => nextStep(true), 80);
+}
+
 // -------------------------
 // Cards
 // -------------------------
@@ -470,11 +477,12 @@ function imgCard({
   img,
   contain = false,
   zoom = null,
+  imgZoom = null,
+  split = "h",
   isSelected = false,
   onClick,
   variant = "",
-  badge = "",
-  split = "" // "vertical" supported for array images
+  badge = ""
 }) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -482,19 +490,20 @@ function imgCard({
   btn.addEventListener("click", onClick);
 
   const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
+  const mediaZoomStyle = typeof imgZoom === "number" ? `style="--imgZoom:${imgZoom}"` : "";
 
   const mediaHtml = Array.isArray(img)
     ? `
       <div class="qCardMedia" ${zoomStyle}>
         ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
-        <div class="qCardMediaSplit ${split === "vertical" ? "isVert" : ""}" aria-hidden="true">
+        <div class="qCardMediaSplit ${split === "v" ? "qCardMediaSplit--v" : ""}" aria-hidden="true">
           <img src="${escapeHtml(img[0])}" alt="" loading="lazy" />
           <img src="${escapeHtml(img[1])}" alt="" loading="lazy" />
         </div>
       </div>
     `
     : `
-      <div class="qCardMedia" ${zoomStyle}>
+      <div class="qCardMedia ${typeof imgZoom === "number" ? "isZoom" : ""}" ${mediaZoomStyle} ${zoomStyle}>
         ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
         <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
       </div>
@@ -608,7 +617,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle
+  // 1) Vehicle (✅ auto-advance)
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -634,7 +643,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category
+  // 2) Category (✅ auto-advance)
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -648,13 +657,14 @@ function renderStep() {
           label: c.label,
           hint: c.hint,
           img: c.img,
-          split: c.split || "",
+          split: c.split || "h",
           variant: "qCard--square qCard--serviceCat",
           isSelected: quoteState.serviceCategory === c.label,
           onClick: () =>
             pickAndAdvance(() => {
               quoteState.serviceCategory = c.label;
 
+              // reset downstream
               quoteState.services = [];
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
@@ -673,53 +683,14 @@ function renderStep() {
 
   // 3) Services
   if (step === "service") {
+    const isInterior = quoteState.serviceCategory === "Interior";
+
     title.textContent = "Select service(s)";
-    sub.textContent = "Select one or more services. When you’re done, press Continue.";
 
-    const tray = document.createElement("div");
-    tray.className = "qServiceTray";
-
-    const trayTop = document.createElement("div");
-    trayTop.className = "qServiceTrayTop";
-
-    const trayTitle = document.createElement("div");
-    trayTitle.className = "qServiceTrayTitle";
-    trayTitle.textContent = "Selected services";
-
-    const trayHint = document.createElement("div");
-    trayHint.className = "qServiceTrayHint";
-    const n = (quoteState.services || []).length;
-    trayHint.textContent = n ? `${n} selected • tap × to remove` : "None yet • tap cards below";
-
-    trayTop.append(trayTitle, trayHint);
-
-    const chips = document.createElement("div");
-    chips.className = "qChips";
-
-    if (!n) {
-      const empty = document.createElement("div");
-      empty.className = "qChipEmpty";
-      empty.textContent = "Tip: you can choose multiple services on this step.";
-      chips.appendChild(empty);
-    } else {
-      (quoteState.services || []).forEach((lbl) => {
-        const chip = document.createElement("span");
-        chip.className = "qChip";
-        chip.innerHTML = `
-          <span>${escapeHtml(lbl)}</span>
-          <button type="button" aria-label="Remove ${escapeHtml(lbl)}">×</button>
-        `;
-        chip.querySelector("button")?.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          removeService(lbl);
-          renderStep();
-        });
-        chips.appendChild(chip);
-      });
-    }
-
-    tray.append(trayTop, chips);
+    // ✅ remove repetitive lines for multi-select categories; tray contains instructions
+    sub.textContent = isInterior
+      ? "Tap one service to continue."
+      : "";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
@@ -748,12 +719,80 @@ function renderStep() {
       return false;
     });
 
+    // ✅ Interior: NO tray, single select, auto advance
+    if (isInterior) {
+      filtered.forEach((s) => {
+        cards.appendChild(
+          imgCard({
+            label: s.label,
+            hint: "Tap to select",
+            img: s.img,
+            variant: "qCard--square qCard--servicePick",
+            badge: s.prewash ? "*" : "",
+            isSelected: quoteState.services.includes(s.label),
+            onClick: () => pickInteriorServiceAndAdvance(s.label)
+          })
+        );
+      });
+
+      quoteBody.append(title, sub, cards);
+      updateNav();
+      return;
+    }
+
+    // ✅ Exterior + Interior+Exterior: keep tray + multi-select
+    const tray = document.createElement("div");
+    tray.className = "qServiceTray";
+
+    const trayTop = document.createElement("div");
+    trayTop.className = "qServiceTrayTop";
+
+    const trayTitle = document.createElement("div");
+    trayTitle.className = "qServiceTrayTitle";
+    trayTitle.textContent = "Pick all that apply";
+
+    const trayHint = document.createElement("div");
+    trayHint.className = "qServiceTrayHint";
+    const n = (quoteState.services || []).length;
+    trayHint.textContent = n ? `${n} selected • tap × to remove` : "Select one or more services below";
+
+    trayTop.append(trayTitle, trayHint);
+
+    const chips = document.createElement("div");
+    chips.className = "qChips";
+
+    if (!n) {
+      const empty = document.createElement("div");
+      empty.className = "qChipEmpty";
+      empty.textContent = "Tip: for Ceramic Coating / Paint Correction, select just what you want and continue.";
+      chips.appendChild(empty);
+    } else {
+      (quoteState.services || []).forEach((lbl) => {
+        const chip = document.createElement("span");
+        chip.className = "qChip";
+        chip.innerHTML = `
+          <span>${escapeHtml(lbl)}</span>
+          <button type="button" aria-label="Remove ${escapeHtml(lbl)}">×</button>
+        `;
+        chip.querySelector("button")?.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          removeService(lbl);
+          renderStep();
+        });
+        chips.appendChild(chip);
+      });
+    }
+
+    tray.append(trayTop, chips);
+
     filtered.forEach((s) => {
       cards.appendChild(
         imgCard({
           label: s.label,
           hint: quoteState.services.includes(s.label) ? "Selected" : "Tap to select",
           img: s.img,
+          split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
           badge: s.prewash ? "*" : "",
           isSelected: quoteState.services.includes(s.label),
@@ -822,6 +861,7 @@ function renderStep() {
           label: c.label,
           hint,
           img: c.img,
+          imgZoom: c.zoom || null, // ✅ zoom only for Normal
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
