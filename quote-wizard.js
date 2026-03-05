@@ -1,5 +1,5 @@
 // -------------------------
-// QUOTE WIZARD (Flow v8.0)
+// QUOTE WIZARD (Flow v8.1)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Calendar -> Done
@@ -22,7 +22,7 @@ const quoteState = {
   vehicleType: "",
   serviceCategory: "",
 
-  // ✅ multi-select services (Exterior + Interior+Exterior only; Interior will behave single-select)
+  // ✅ multi-select services (ONLY for Interior + Exterior; Interior/Exterior behave single-select)
   services: [],
 
   interiorCondition: "",
@@ -81,13 +81,17 @@ const serviceCategories = [
   { label: "Interior", hint: "Inside-only detailing", img: SERVICECAT_INTERIOR_IMG },
   { label: "Exterior", hint: "Outside-only detailing", img: SERVICECAT_EXTERIOR_IMG },
 
-  // ✅ vertical stacked image (interior on top, exterior on bottom)
-  { label: "Interior + Exterior", hint: "Full detail inside + out", img: [SERVICECAT_INTERIOR_IMG, SERVICECAT_EXTERIOR_IMG], split: "v" }
+  // ✅ side-by-side split (left/right) with a vertical divider
+  { label: "Interior + Exterior", hint: "Full detail inside + out", img: [SERVICECAT_INTERIOR_IMG, SERVICECAT_EXTERIOR_IMG], split: "h" }
 ];
 
 // Upkeep plan images
 const INTERIOR_UPKEEP_IMG = "./img_6480.webp";
 const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp";
+
+// ✅ dependency: these require Exterior Wash
+const REQUIRES_WASH = new Set(["Ceramic Coating", "Paint Correction"]);
+const REQUIRED_WASH_LABEL = "Exterior Wash";
 
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
@@ -169,16 +173,30 @@ function setProgress() {
 function renderNavPrice() { return; }
 
 // -------------------------
-// Upkeep / requirement rules (multi-service)
+// Upkeep / requirement rules
 // -------------------------
 const UPKEEP_SET = new Set(["Interior Upkeep Plan", "Exterior Upkeep Plan", "Interior + Exterior Upkeep Plan"]);
 function isUpkeepService(label) { return UPKEEP_SET.has(label); }
 function isUpkeepPlanSelected() { return quoteState.services.some(isUpkeepService); }
 
-// If any upkeep plan selected, it becomes exclusive (keeps flow clean)
+// If any upkeep plan selected, it becomes exclusive
 function enforceUpkeepExclusivity() {
   const upkeep = quoteState.services.find(isUpkeepService);
   if (upkeep) quoteState.services = [upkeep];
+}
+
+// ✅ ensure ceramic/paint always have Exterior Wash included
+function enforceWashDependencies() {
+  const hasReq = quoteState.services.some((s) => REQUIRES_WASH.has(s));
+  if (hasReq && !quoteState.services.includes(REQUIRED_WASH_LABEL)) {
+    quoteState.services = [REQUIRED_WASH_LABEL, ...quoteState.services.filter((s) => s !== REQUIRED_WASH_LABEL)];
+  }
+
+  // If user removes wash while a requiring service remains, drop the requiring services
+  if (!quoteState.services.includes(REQUIRED_WASH_LABEL)) {
+    const still = quoteState.services.filter((s) => !REQUIRES_WASH.has(s));
+    quoteState.services = still;
+  }
 }
 
 function anyServiceRequiresInteriorCondition() {
@@ -395,7 +413,7 @@ function updateNav() {
 }
 
 // -------------------------
-// ✅ AUTO-ADVANCE (everything except multi-select services step)
+// ✅ AUTO-ADVANCE helper
 // -------------------------
 function pickAndAdvance(pickFn) {
   pickFn();
@@ -407,7 +425,7 @@ function pickAndAdvance(pickFn) {
 // Service selection rules
 // -------------------------
 
-// ✅ multi-select toggle (Exterior + Interior+Exterior only)
+// ✅ multi-select toggle (ONLY Interior + Exterior)
 function toggleService(label) {
   const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
   const isSelected = current.includes(label);
@@ -422,6 +440,9 @@ function toggleService(label) {
   }
 
   enforceUpkeepExclusivity();
+
+  // ✅ dependency enforcement (Ceramic/Paint need Exterior Wash)
+  enforceWashDependencies();
 
   if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
@@ -438,6 +459,9 @@ function toggleService(label) {
 function removeService(label) {
   quoteState.services = (quoteState.services || []).filter((s) => s !== label);
 
+  // ✅ keep dependencies clean if someone removes wash
+  enforceWashDependencies();
+
   if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
@@ -450,10 +474,17 @@ function removeService(label) {
   updateNav();
 }
 
-// ✅ single-select (Interior only) + auto-advance
-function pickInteriorServiceAndAdvance(label) {
-  quoteState.services = [label];
+// ✅ single-select (Interior + Exterior) + auto-advance
+function pickSingleServiceAndAdvance(label) {
+  // If ceramic/paint chosen, auto-include Exterior Wash behind the scenes
+  if (REQUIRES_WASH.has(label)) {
+    quoteState.services = [REQUIRED_WASH_LABEL, label];
+  } else {
+    quoteState.services = [label];
+  }
+
   enforceUpkeepExclusivity();
+  enforceWashDependencies();
 
   if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
@@ -482,7 +513,8 @@ function imgCard({
   isSelected = false,
   onClick,
   variant = "",
-  badge = ""
+  badge = "",
+  tag = ""
 }) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -492,10 +524,14 @@ function imgCard({
   const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
   const mediaZoomStyle = typeof imgZoom === "number" ? `style="--imgZoom:${imgZoom}"` : "";
 
+  const badgeHtml = badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : "";
+  const tagHtml = tag ? `<span class="qCardTag" aria-hidden="true">${escapeHtml(tag)}</span>` : "";
+
   const mediaHtml = Array.isArray(img)
     ? `
       <div class="qCardMedia" ${zoomStyle}>
-        ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
+        ${badgeHtml}
+        ${tagHtml}
         <div class="qCardMediaSplit ${split === "v" ? "qCardMediaSplit--v" : ""}" aria-hidden="true">
           <img src="${escapeHtml(img[0])}" alt="" loading="lazy" />
           <img src="${escapeHtml(img[1])}" alt="" loading="lazy" />
@@ -504,7 +540,8 @@ function imgCard({
     `
     : `
       <div class="qCardMedia ${typeof imgZoom === "number" ? "isZoom" : ""}" ${mediaZoomStyle} ${zoomStyle}>
-        ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
+        ${badgeHtml}
+        ${tagHtml}
         <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
       </div>
     `;
@@ -684,22 +721,22 @@ function renderStep() {
   // 3) Services
   if (step === "service") {
     const isInterior = quoteState.serviceCategory === "Interior";
+    const isExterior = quoteState.serviceCategory === "Exterior";
+    const isBoth = quoteState.serviceCategory === "Interior + Exterior";
 
     title.textContent = "Select service(s)";
 
-    // ✅ remove repetitive lines for multi-select categories; tray contains instructions
-    sub.textContent = isInterior
-      ? "Tap one service to continue."
-      : "";
+    // ✅ only show a simple line for single-select categories
+    sub.textContent = isBoth ? "" : "Tap one service to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
 
     const filtered = servicesAll.filter((s) => {
-      if (quoteState.serviceCategory === "Interior") {
+      if (isInterior) {
         return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
       }
-      if (quoteState.serviceCategory === "Exterior") {
+      if (isExterior) {
         return (
           s.label === "Exterior Wash" ||
           s.label === "Exterior Upkeep Plan" ||
@@ -707,7 +744,7 @@ function renderStep() {
           s.label === "Paint Correction"
         );
       }
-      if (quoteState.serviceCategory === "Interior + Exterior") {
+      if (isBoth) {
         return (
           s.label === "Interior Detail" ||
           s.label === "Exterior Wash" ||
@@ -719,18 +756,21 @@ function renderStep() {
       return false;
     });
 
-    // ✅ Interior: NO tray, single select, auto advance
-    if (isInterior) {
+    // ✅ Interior OR Exterior: single select + auto-advance (NO tray)
+    if (isInterior || isExterior) {
       filtered.forEach((s) => {
+        const needsWash = REQUIRES_WASH.has(s.label);
         cards.appendChild(
           imgCard({
             label: s.label,
             hint: "Tap to select",
             img: s.img,
+            split: s.split || "h",
             variant: "qCard--square qCard--servicePick",
-            badge: s.prewash ? "*" : "",
+            badge: needsWash ? "*" : "",
+            tag: needsWash ? "Requires Exterior Wash" : "",
             isSelected: quoteState.services.includes(s.label),
-            onClick: () => pickInteriorServiceAndAdvance(s.label)
+            onClick: () => pickSingleServiceAndAdvance(s.label)
           })
         );
       });
@@ -740,7 +780,7 @@ function renderStep() {
       return;
     }
 
-    // ✅ Exterior + Interior+Exterior: keep tray + multi-select
+    // ✅ Interior + Exterior: multi-select tray + multi-select behavior
     const tray = document.createElement("div");
     tray.className = "qServiceTray";
 
@@ -764,7 +804,7 @@ function renderStep() {
     if (!n) {
       const empty = document.createElement("div");
       empty.className = "qChipEmpty";
-      empty.textContent = "Tip: for Ceramic Coating / Paint Correction, select just what you want and continue.";
+      empty.textContent = "Tip: tap everything you want, then press Continue.";
       chips.appendChild(empty);
     } else {
       (quoteState.services || []).forEach((lbl) => {
@@ -787,6 +827,7 @@ function renderStep() {
     tray.append(trayTop, chips);
 
     filtered.forEach((s) => {
+      const needsWash = REQUIRES_WASH.has(s.label);
       cards.appendChild(
         imgCard({
           label: s.label,
@@ -794,7 +835,8 @@ function renderStep() {
           img: s.img,
           split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
-          badge: s.prewash ? "*" : "",
+          badge: needsWash ? "*" : "",
+          tag: needsWash ? "Requires Exterior Wash" : "",
           isSelected: quoteState.services.includes(s.label),
           onClick: () => {
             toggleService(s.label);
@@ -861,7 +903,7 @@ function renderStep() {
           label: c.label,
           hint,
           img: c.img,
-          imgZoom: c.zoom || null, // ✅ zoom only for Normal
+          imgZoom: c.zoom || null,
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.exteriorCondition === c.label,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorCondition = c.label))
