@@ -304,10 +304,8 @@
     }
   }
 })();
-
 /* ==========================
    CONTACT MODAL + SUBMIT
-   FIXED: toggle .isOpen so the modal actually displays
    ========================== */
 (function () {
   const modal = document.querySelector("[data-contact-modal]");
@@ -322,7 +320,6 @@
   const endpoint = window.CONTACT_ENDPOINT || "";
 
   function openContact() {
-    // ✅ THIS WAS THE BUG: your CSS needs .isOpen to show the modal
     modal.classList.add("isOpen");
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
@@ -347,11 +344,9 @@
   openBtns.forEach((b) => b.addEventListener("click", openContact));
   closeBtns.forEach((b) => b.addEventListener("click", closeContact));
 
-  // close on overlay click (matches your other modals behavior)
+  // close on overlay click
   modal.addEventListener("click", (e) => {
-    if (e.target && e.target.matches && e.target.matches("[data-contact-close]")) {
-      closeContact();
-    }
+    if (e.target && e.target.matches && e.target.matches("[data-contact-close]")) closeContact();
   });
 
   // close on ESC
@@ -374,7 +369,7 @@
     const honeypot = (form.querySelector("input[name='website']")?.value || "").trim();
 
     if (honeypot) {
-      setStatus("Thanks! We’ll be in touch.", "Ok");
+      setStatus("✅ Sent! We’ll reach out shortly.", "Ok");
       if (submitBtn) submitBtn.disabled = true;
       setTimeout(closeContact, 800);
       return;
@@ -393,32 +388,32 @@
     if (submitBtn) submitBtn.disabled = true;
     setStatus("Sending…", "");
 
-    try {
-      const payload = {
-        name,
-        phone,
-        message,
-        page: location.href,
-        userAgent: navigator.userAgent,
-        submittedAt: new Date().toISOString(),
-      };
+    const payload = {
+      name,
+      phone,
+      message,
+      page: location.href,
+      userAgent: navigator.userAgent,
+      submittedAt: new Date().toISOString(),
+    };
 
-      const res = await fetch(endpoint, {
+    try {
+      // ✅ CORS-safe send to Apps Script:
+      // no-cors prevents the browser from blocking the request.
+      await fetch(endpoint, {
         method: "POST",
-        mode: "cors",
+        mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
       });
 
-      // Apps Script can return text; 200 is what matters.
-      if (!res.ok) throw new Error("Request failed");
-
+      // With no-cors we can't read the response, so assume success.
       setStatus("✅ Sent! We’ll reach out shortly.", "Ok");
       setTimeout(closeContact, 1100);
     } catch (err) {
+      console.error(err);
       if (submitBtn) submitBtn.disabled = false;
       setStatus("Something went wrong. Please call/text (971) 286-5503.", "Err");
-      console.error(err);
     }
   });
 })();
