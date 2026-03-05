@@ -887,3 +887,148 @@ body{
   #work .carousel{ width: min(760px, 100%); }
   #work .carousel__viewport{ aspect-ratio: 4 / 5; }
 }
+
+/* ==========================
+   CONTACT CTA (mid-page)
+   ========================== */
+.contactCta{
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:
+    radial-gradient(900px 260px at 12% 0%, rgba(214,178,94,.14), rgba(255,255,255,0) 55%),
+    rgba(0,0,0,.02);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.contactCta__title{
+  margin:0;
+  font-family:Oswald, Inter, sans-serif;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+  color:#111;
+}
+.contactCta__sub{
+  margin:6px 0 0;
+  color:rgba(0,0,0,.65);
+  line-height:1.6;
+  font-weight:600;
+}
+.contactCta__actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+@media (min-width:768px){
+  .contactCta{
+    flex-direction:row;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px;
+  }
+  .contactCta__copy{ max-width:60%; }
+}
+
+/* ==========================
+   CONTACT MODAL + FORM
+   ========================== */
+.contactPanel{
+  position:relative;
+  width:min(620px, 100%);
+  background:#fff;
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:18px;
+  max-height:calc(100vh - 3rem);
+  overflow:auto;
+}
+
+.contactTitle{
+  margin:0;
+  font-family:Oswald, Inter, sans-serif;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+  color:#111;
+}
+.contactText{
+  margin:8px 0 14px;
+  color:rgba(0,0,0,.62);
+  line-height:1.6;
+  font-weight:600;
+}
+
+.contactForm{ display:block; }
+
+.contactGrid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-bottom:10px;
+}
+@media (min-width:768px){
+  .contactGrid{ grid-template-columns:1fr 1fr; }
+}
+
+.cField label{
+  display:block;
+  font-weight:900;
+  margin-bottom:6px;
+  color:#111;
+}
+.cField input,
+.cField textarea{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.12);
+  outline:none;
+  font-weight:600;
+  font-family:inherit;
+}
+.cField textarea{
+  min-height:120px;
+  resize:vertical;
+}
+.cField input:focus,
+.cField textarea:focus{
+  border-color:rgba(214,178,94,.70);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18);
+}
+
+.hpField{
+  position:absolute;
+  left:-9999px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+
+.contactSubmit{
+  width:100%;
+  margin-top:12px;
+  justify-content:center;
+}
+
+.contactStatus{
+  margin-top:10px;
+  font-weight:850;
+  color:rgba(0,0,0,.65);
+  line-height:1.5;
+}
+.contactStatus.isErr{ color:#8b1e1e; }
+.contactStatus.isOk{ color:#0b5a2a; }
+
+.contactFine{
+  margin:12px 0 0;
+  color:rgba(0,0,0,.55);
+  font-weight:750;
+}
+.contactFine a{
+  color:inherit;
+  font-weight:900;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
