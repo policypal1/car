@@ -304,3 +304,117 @@
     }
   }
 })();
+
+/* ==========================
+   CONTACT MODAL + SUBMIT
+   ========================== */
+(function () {
+  const modal = document.querySelector("[data-contact-modal]");
+  if (!modal) return;
+
+  const openBtns = document.querySelectorAll("[data-contact-open]");
+  const closeBtns = document.querySelectorAll("[data-contact-close]");
+  const form = document.querySelector("[data-contact-form]");
+  const statusEl = document.querySelector("[data-contact-status]");
+  const submitBtn = document.querySelector("[data-contact-submit]");
+
+  const endpoint = window.CONTACT_ENDPOINT || "";
+
+  function openModal() {
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("isModalOpen");
+    // focus first input for faster conversion
+    setTimeout(() => {
+      const first = form?.querySelector("input[name='name']");
+      first?.focus();
+    }, 50);
+  }
+
+  function closeModal() {
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("isModalOpen");
+    if (statusEl) statusEl.textContent = "";
+    if (statusEl) statusEl.className = "contactStatus";
+    form?.reset();
+    submitBtn && (submitBtn.disabled = false);
+  }
+
+  openBtns.forEach((b) => b.addEventListener("click", openModal));
+  closeBtns.forEach((b) => b.addEventListener("click", closeModal));
+
+  // close on ESC
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal();
+  });
+
+  function setStatus(msg, type) {
+    if (!statusEl) return;
+    statusEl.textContent = msg;
+    statusEl.className = "contactStatus" + (type ? ` is${type}` : "");
+  }
+
+  function normalizePhone(p) {
+    return (p || "").trim();
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = (form.querySelector("input[name='name']")?.value || "").trim();
+    const phone = normalizePhone(form.querySelector("input[name='phone']")?.value || "");
+    const message = (form.querySelector("textarea[name='message']")?.value || "").trim();
+    const honeypot = (form.querySelector("input[name='website']")?.value || "").trim();
+
+    if (honeypot) {
+      setStatus("Thanks! We’ll be in touch.", "Ok");
+      submitBtn && (submitBtn.disabled = true);
+      setTimeout(closeModal, 800);
+      return;
+    }
+
+    if (!name || !phone || !message) {
+      setStatus("Please fill out name, phone, and your message.", "Err");
+      return;
+    }
+
+    if (!endpoint || endpoint.includes("PASTE_YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE")) {
+      setStatus("Form is not connected yet. Add your Google Script URL (CONTACT_ENDPOINT).", "Err");
+      return;
+    }
+
+    submitBtn && (submitBtn.disabled = true);
+    setStatus("Sending…", "");
+
+    try {
+      const payload = {
+        name,
+        phone,
+        message,
+        page: location.href,
+        userAgent: navigator.userAgent,
+        submittedAt: new Date().toISOString(),
+      };
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch (_) {}
+
+      if (!res.ok || (data && data.ok === false)) {
+        throw new Error((data && data.error) || "Request failed.");
+      }
+
+      setStatus("✅ Sent! We’ll reach out shortly.", "Ok");
+      setTimeout(closeModal, 1100);
+    } catch (err) {
+      submitBtn && (submitBtn.disabled = false);
+      setStatus("Something went wrong. Please call/text (971) 286-5503.", "Err");
+      console.error(err);
+    }
+  });
+})();
