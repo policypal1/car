@@ -307,6 +307,7 @@
 
 /* ==========================
    CONTACT MODAL + SUBMIT
+   FIXED: toggle .isOpen so the modal actually displays
    ========================== */
 (function () {
   const modal = document.querySelector("[data-contact-modal]");
@@ -320,31 +321,42 @@
 
   const endpoint = window.CONTACT_ENDPOINT || "";
 
-  function openModal() {
+  function openContact() {
+    // ✅ THIS WAS THE BUG: your CSS needs .isOpen to show the modal
+    modal.classList.add("isOpen");
     modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("isModalOpen");
-    // focus first input for faster conversion
+    document.body.style.overflow = "hidden";
+
     setTimeout(() => {
       const first = form?.querySelector("input[name='name']");
       first?.focus();
     }, 50);
   }
 
-  function closeModal() {
+  function closeContact() {
+    modal.classList.remove("isOpen");
     modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("isModalOpen");
+    document.body.style.overflow = "";
+
     if (statusEl) statusEl.textContent = "";
     if (statusEl) statusEl.className = "contactStatus";
     form?.reset();
-    submitBtn && (submitBtn.disabled = false);
+    if (submitBtn) submitBtn.disabled = false;
   }
 
-  openBtns.forEach((b) => b.addEventListener("click", openModal));
-  closeBtns.forEach((b) => b.addEventListener("click", closeModal));
+  openBtns.forEach((b) => b.addEventListener("click", openContact));
+  closeBtns.forEach((b) => b.addEventListener("click", closeContact));
+
+  // close on overlay click (matches your other modals behavior)
+  modal.addEventListener("click", (e) => {
+    if (e.target && e.target.matches && e.target.matches("[data-contact-close]")) {
+      closeContact();
+    }
+  });
 
   // close on ESC
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal();
+    if (e.key === "Escape" && modal.classList.contains("isOpen")) closeContact();
   });
 
   function setStatus(msg, type) {
@@ -353,22 +365,18 @@
     statusEl.className = "contactStatus" + (type ? ` is${type}` : "");
   }
 
-  function normalizePhone(p) {
-    return (p || "").trim();
-  }
-
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const name = (form.querySelector("input[name='name']")?.value || "").trim();
-    const phone = normalizePhone(form.querySelector("input[name='phone']")?.value || "");
+    const phone = (form.querySelector("input[name='phone']")?.value || "").trim();
     const message = (form.querySelector("textarea[name='message']")?.value || "").trim();
     const honeypot = (form.querySelector("input[name='website']")?.value || "").trim();
 
     if (honeypot) {
       setStatus("Thanks! We’ll be in touch.", "Ok");
-      submitBtn && (submitBtn.disabled = true);
-      setTimeout(closeModal, 800);
+      if (submitBtn) submitBtn.disabled = true;
+      setTimeout(closeContact, 800);
       return;
     }
 
@@ -377,12 +385,12 @@
       return;
     }
 
-    if (!endpoint || endpoint.includes("PASTE_YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE")) {
-      setStatus("Form is not connected yet. Add your Google Script URL (CONTACT_ENDPOINT).", "Err");
+    if (!endpoint) {
+      setStatus("Form is not connected yet (missing CONTACT_ENDPOINT).", "Err");
       return;
     }
 
-    submitBtn && (submitBtn.disabled = true);
+    if (submitBtn) submitBtn.disabled = true;
     setStatus("Sending…", "");
 
     try {
@@ -397,22 +405,18 @@
 
       const res = await fetch(endpoint, {
         method: "POST",
+        mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
       });
 
-      const text = await res.text();
-      let data = null;
-      try { data = JSON.parse(text); } catch (_) {}
-
-      if (!res.ok || (data && data.ok === false)) {
-        throw new Error((data && data.error) || "Request failed.");
-      }
+      // Apps Script can return text; 200 is what matters.
+      if (!res.ok) throw new Error("Request failed");
 
       setStatus("✅ Sent! We’ll reach out shortly.", "Ok");
-      setTimeout(closeModal, 1100);
+      setTimeout(closeContact, 1100);
     } catch (err) {
-      submitBtn && (submitBtn.disabled = false);
+      if (submitBtn) submitBtn.disabled = false;
       setStatus("Something went wrong. Please call/text (971) 286-5503.", "Err");
       console.error(err);
     }
