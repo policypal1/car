@@ -66,6 +66,9 @@
           <div class="hero__actions">
             <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
             <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
+
+            <!-- ✅ NEW: Contact button (1 of 3) -->
+            <button class="btn btn--ghostGold btn--lg" type="button" data-contact-open>CONTACT US</button>
           </div>
         </div>
       </div>
@@ -173,6 +176,24 @@
       </div>
     </section>
 
+    <!-- ✅ NEW: Mid-page Contact CTA (2 of 3) -->
+    <section class="section section--light" id="contact-cta" aria-label="Quick contact callout">
+      <div class="container">
+        <div class="contactCta">
+          <div class="contactCta__copy">
+            <h2 class="contactCta__title">Have a question?</h2>
+            <p class="contactCta__sub">
+              Send a quick message and we’ll get back to you fast. Best for special requests, pricing questions, or scheduling help.
+            </p>
+          </div>
+          <div class="contactCta__actions">
+            <button class="btn btn--quote" type="button" data-contact-open>CONTACT US</button>
+            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Recent Transformations (BLACK) -->
     <section class="section section--dark" id="work">
       <div class="container">
@@ -232,7 +253,6 @@
         </div>
 
         <div class="reelsWrap">
-          <!-- Mobile helper: centered only, no skip badge -->
           <div class="reelsBar" aria-hidden="true">
             <div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div>
           </div>
@@ -473,6 +493,9 @@
           <div class="footerMini__actions">
             <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+
+            <!-- ✅ NEW: Contact button (3 of 3) -->
+            <button class="btn btn--ghostGold" type="button" data-contact-open>CONTACT</button>
           </div>
         </div>
       </div>
@@ -521,6 +544,50 @@
       </div>
     </div>
 
+    <!-- ✅ NEW: Contact modal (quick form) -->
+    <div class="modal modal--contact" aria-hidden="true" data-contact-modal>
+      <div class="modal__overlay" data-contact-close></div>
+
+      <div class="contactPanel" role="dialog" aria-modal="true" aria-label="Contact us">
+        <button class="modal__close" aria-label="Close" data-contact-close>&#215;</button>
+
+        <h3 class="contactTitle">CONTACT US</h3>
+        <p class="contactText">Ask a question or send a message. We usually reply fast.</p>
+
+        <form class="contactForm" data-contact-form novalidate>
+          <div class="contactGrid">
+            <div class="cField">
+              <label for="cName">Name</label>
+              <input id="cName" name="name" type="text" autocomplete="name" required placeholder="Your name" />
+            </div>
+
+            <div class="cField">
+              <label for="cPhone">Phone</label>
+              <input id="cPhone" name="phone" type="tel" autocomplete="tel" required placeholder="(971) 555-1234" />
+            </div>
+          </div>
+
+          <div class="cField">
+            <label for="cMessage">Message</label>
+            <textarea id="cMessage" name="message" required placeholder="What can we help with?"></textarea>
+          </div>
+
+          <!-- honeypot (spam bot trap) -->
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hpField" aria-hidden="true" />
+
+          <button class="btn btn--quote contactSubmit" type="submit" data-contact-submit>
+            SEND MESSAGE
+          </button>
+
+          <div class="contactStatus" data-contact-status aria-live="polite"></div>
+        </form>
+
+        <p class="contactFine">
+          Prefer texting? <a href="tel:+19712865503">(971) 286-5503</a>
+        </p>
+      </div>
+    </div>
+
     <!-- Quote Wizard -->
     <div class="modal modal--quote" aria-hidden="true" data-quote-modal>
       <div class="modal__overlay" data-quote-close></div>
@@ -540,6 +607,11 @@
         </div>
       </div>
     </div>
+
+    <!-- ✅ IMPORTANT: put your Apps Script URL here (also in script.js section below if you prefer) -->
+    <script>
+      window.CONTACT_ENDPOINT = "PASTE_YOUR_GOOGLE_SCRIPT_WEB_APP_URL_HERE";
+    </script>
 
     <script src="./script.js"></script>
     <script src="./quote-wizard.js"></script>
