@@ -64,11 +64,10 @@
           <p class="hero__sub">Interior and exterior detailing that feels clean the moment you sit down.</p>
 
           <div class="hero__actions">
-            <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
+            <!-- ✅ order: CALL (left), QUOTE (middle), CONTACT (right) -->
             <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
-
-            <!-- ✅ NEW: Contact button (1 of 3) -->
-            <button class="btn btn--ghostGold btn--lg" type="button" data-contact-open>CONTACT US</button>
+            <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
+            <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
           </div>
         </div>
       </div>
@@ -176,7 +175,7 @@
       </div>
     </section>
 
-    <!-- ✅ NEW: Mid-page Contact CTA (2 of 3) -->
+    <!-- Mid-page Contact CTA -->
     <section class="section section--light" id="contact-cta" aria-label="Quick contact callout">
       <div class="container">
         <div class="contactCta">
@@ -187,7 +186,8 @@
             </p>
           </div>
           <div class="contactCta__actions">
-            <button class="btn btn--quote" type="button" data-contact-open>CONTACT US</button>
+            <!-- ✅ contact button looks like CALL/TEXT -->
+            <button class="btn btn--call" type="button" data-contact-open>CONTACT US</button>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
           </div>
         </div>
@@ -494,8 +494,8 @@
             <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
 
-            <!-- ✅ NEW: Contact button (3 of 3) -->
-            <button class="btn btn--ghostGold" type="button" data-contact-open>CONTACT</button>
+            <!-- ✅ contact button looks like CALL/TEXT -->
+            <button class="btn btn--call" type="button" data-contact-open>CONTACT</button>
           </div>
         </div>
       </div>
@@ -544,7 +544,7 @@
       </div>
     </div>
 
-    <!-- ✅ NEW: Contact modal (quick form) -->
+    <!-- Contact modal -->
     <div class="modal modal--contact" aria-hidden="true" data-contact-modal>
       <div class="modal__overlay" data-contact-close></div>
 
@@ -572,7 +572,6 @@
             <textarea id="cMessage" name="message" required placeholder="What can we help with?"></textarea>
           </div>
 
-          <!-- honeypot (spam bot trap) -->
           <input type="text" name="website" tabindex="-1" autocomplete="off" class="hpField" aria-hidden="true" />
 
           <button class="btn btn--quote contactSubmit" type="submit" data-contact-submit>
@@ -608,7 +607,6 @@
       </div>
     </div>
 
-    <!-- ✅ IMPORTANT: put your Apps Script URL here (also in script.js section below if you prefer) -->
     <script>
       window.CONTACT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZQ_Jf4Rp27mL9nyRn_2oAVtwt_RIhXskoB2GjTmyJYGLBdkd7LKgKNNOK457clicn/exec";
     </script>
