@@ -22,7 +22,7 @@ const quoteState = {
   vehicleType: "",
   serviceCategory: "",
 
-  // ✅ multi-select services
+  // multi-select services (we will restrict by category)
   services: [],
 
   interiorCondition: "",
@@ -76,7 +76,14 @@ const vehicleTypes = [
 const serviceCategories = [
   { label: "Interior", hint: "Inside-only detailing", img: "./2017-05-22-07-32-26.jpg" },
   { label: "Exterior", hint: "Outside-only detailing", img: "./c36084da09340612d8431de0221ea985.jpg" },
-  { label: "Interior + Exterior", hint: "Full detail inside + out", img: "./Untitled design (3).png" }
+
+  // ✅ combined image: interior (top) + exterior (bottom)
+  {
+    label: "Interior + Exterior",
+    hint: "Full detail inside + out",
+    img: ["./2017-05-22-07-32-26.jpg", "./c36084da09340612d8431de0221ea985.jpg"],
+    split: "vertical"
+  }
 ];
 
 // Upkeep plan images
@@ -158,7 +165,7 @@ function setProgress() {
   dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
 }
 
-// ✅ No bottom price pill
+// No bottom price pill
 function renderNavPrice() { return; }
 
 // -------------------------
@@ -168,7 +175,7 @@ const UPKEEP_SET = new Set(["Interior Upkeep Plan", "Exterior Upkeep Plan", "Int
 function isUpkeepService(label) { return UPKEEP_SET.has(label); }
 function isUpkeepPlanSelected() { return quoteState.services.some(isUpkeepService); }
 
-// If any upkeep plan selected, it becomes exclusive (keeps flow clean)
+// If any upkeep plan selected, it becomes exclusive
 function enforceUpkeepExclusivity() {
   const upkeep = quoteState.services.find(isUpkeepService);
   if (upkeep) quoteState.services = [upkeep];
@@ -189,8 +196,6 @@ function anyServiceRequiresExteriorCondition() {
   if (s.includes("Exterior Upkeep Plan")) return true;
   if (s.includes("Interior + Exterior Upkeep Plan")) return true;
   if (s.includes("Exterior Wash")) return true;
-  // Ceramic + Paint: you *can* still show condition step as "prep level"
-  // but pricing preview won't be broken anymore.
   if (s.includes("Ceramic Coating")) return true;
   if (s.includes("Paint Correction")) return true;
   return false;
@@ -238,10 +243,6 @@ function tightenAndHeavier(range) {
   return [newLow, newHigh];
 }
 
-/**
- * Compute range for a service with optional condition overrides
- * (prevents "Starting at $60" when Ceramic is selected).
- */
 function computeRangeForService(serviceLabel, opts = {}) {
   const type = quoteState.vehicleType;
   if (!type) return null;
@@ -270,7 +271,7 @@ function computeRangeForService(serviceLabel, opts = {}) {
     return [base[0] * f, base[1] * f].map(clampInt);
   }
 
-  // Overrides (Ceramic / Paint) – condition doesn't change base range here
+  // Overrides (Ceramic / Paint)
   if ((serviceLabel === "Ceramic Coating" || serviceLabel === "Paint Correction") && serviceOverrides[serviceLabel]) {
     const r = serviceOverrides[serviceLabel][type];
     return r ? [clampInt(r[0]), clampInt(r[1])] : null;
@@ -293,10 +294,6 @@ function computeRangeForService(serviceLabel, opts = {}) {
   return null;
 }
 
-/**
- * Estimate using current services + optional condition overrides.
- * If a needed condition is not chosen yet, we assume Light for preview only.
- */
 function computeEstimateWithOverrides(overrides = {}) {
   const type = quoteState.vehicleType;
   if (!type) return null;
@@ -307,14 +304,12 @@ function computeEstimateWithOverrides(overrides = {}) {
   const ic = overrides.interiorCondition ?? quoteState.interiorCondition;
   const ec = overrides.exteriorCondition ?? quoteState.exteriorCondition;
 
-  // Preview defaults: if a service requires a condition and we don't have it yet, assume Light
   const icPreview = ic || "Light";
   const ecPreview = ec || "Light";
 
   let low = 0, high = 0;
 
   for (const s of svcs) {
-    // Determine what this service needs
     let useIc = ic;
     let useEc = ec;
 
@@ -325,7 +320,6 @@ function computeEstimateWithOverrides(overrides = {}) {
       useEc = ecPreview;
     }
 
-    // Ceramic/Paint: no condition needed for base (still included)
     const r = computeRangeForService(s, { interiorCondition: useIc, exteriorCondition: useEc });
     if (!r) return null;
     low += Number(r[0] || 0);
@@ -348,7 +342,6 @@ function canContinue() {
   if (step === "vehicleType") return !!quoteState.vehicleType;
   if (step === "serviceCategory") return !!quoteState.serviceCategory;
 
-  // ✅ must pick at least 1 service on the service step
   if (step === "service") return Array.isArray(quoteState.services) && quoteState.services.length > 0;
 
   if (step === "conditionInterior") return !anyServiceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
@@ -386,7 +379,6 @@ function updateNav() {
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
 
-  // ✅ clearer Continue label on Services step
   if (step === "service") {
     const n = Array.isArray(quoteState.services) ? quoteState.services.length : 0;
     quoteNextBtn.textContent = n > 0 ? `Continue (${n} selected)` : "Continue";
@@ -400,7 +392,7 @@ function updateNav() {
 }
 
 // -------------------------
-// ✅ AUTO-ADVANCE (everything except services step)
+// AUTO-ADVANCE (everything except services step)
 // -------------------------
 function pickAndAdvance(pickFn) {
   pickFn();
@@ -409,31 +401,43 @@ function pickAndAdvance(pickFn) {
 }
 
 // -------------------------
-// Service multi-select (NO AUTO ADVANCE)
+// Service select logic
+// - Interior: SINGLE select only
+// - Exterior + Interior+Exterior: MULTI select
+// - Upkeep plans remain exclusive
 // -------------------------
 function toggleService(label) {
   const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
   const isSelected = current.includes(label);
 
-  // If selecting an upkeep plan, make it exclusive
+  // Upkeep plans always exclusive
   if (!isSelected && isUpkeepService(label)) {
     quoteState.services = [label];
   } else {
-    // Otherwise: allow multi select, but remove upkeep plans from mix
+    // Remove any upkeep from mix when toggling normal services
     let next = current.filter((s) => !isUpkeepService(s));
-    if (isSelected) next = next.filter((s) => s !== label);
-    else next.push(label);
+
+    // ✅ Interior category = single select
+    const isInteriorCategory = quoteState.serviceCategory === "Interior";
+
+    if (isInteriorCategory) {
+      // clicking selected -> deselect (optional), else replace with single
+      next = isSelected ? next.filter((s) => s !== label) : [label];
+    } else {
+      // Exterior + Interior+Exterior = multi-select
+      if (isSelected) next = next.filter((s) => s !== label);
+      else next.push(label);
+    }
+
     quoteState.services = next;
   }
 
   enforceUpkeepExclusivity();
 
-  // clear downstream if no longer needed
   if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  // reset calendar selection when services change
   quoteState.slotId = "";
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
@@ -469,7 +473,8 @@ function imgCard({
   isSelected = false,
   onClick,
   variant = "",
-  badge = ""
+  badge = "",
+  split = "" // "vertical" supported for array images
 }) {
   const btn = document.createElement("button");
   btn.type = "button";
@@ -482,7 +487,7 @@ function imgCard({
     ? `
       <div class="qCardMedia" ${zoomStyle}>
         ${badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : ""}
-        <div class="qCardMediaSplit" aria-hidden="true">
+        <div class="qCardMediaSplit ${split === "vertical" ? "isVert" : ""}" aria-hidden="true">
           <img src="${escapeHtml(img[0])}" alt="" loading="lazy" />
           <img src="${escapeHtml(img[1])}" alt="" loading="lazy" />
         </div>
@@ -603,7 +608,7 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle (✅ auto-advance)
+  // 1) Vehicle
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -629,7 +634,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category (✅ auto-advance)
+  // 2) Category
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -643,13 +648,13 @@ function renderStep() {
           label: c.label,
           hint: c.hint,
           img: c.img,
+          split: c.split || "",
           variant: "qCard--square qCard--serviceCat",
           isSelected: quoteState.serviceCategory === c.label,
           onClick: () =>
             pickAndAdvance(() => {
               quoteState.serviceCategory = c.label;
 
-              // reset downstream
               quoteState.services = [];
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
@@ -666,12 +671,11 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Services (✅ multi-select, NO auto-advance)
+  // 3) Services
   if (step === "service") {
     title.textContent = "Select service(s)";
     sub.textContent = "Select one or more services. When you’re done, press Continue.";
 
-    // ✅ Selected tray (chips)
     const tray = document.createElement("div");
     tray.className = "qServiceTray";
 
@@ -764,7 +768,7 @@ function renderStep() {
     quoteBody.append(title, sub, tray, cards);
   }
 
-  // 4) Interior condition (✅ auto-advance, ✅ accurate "Starting at" preview)
+  // 4) Interior condition
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -775,7 +779,6 @@ function renderStep() {
     interiorConditions.forEach((c) => {
       const est = computeEstimateWithOverrides({
         interiorCondition: c.label,
-        // preview exterior as Light if not selected yet (prevents null + keeps numbers stable)
         exteriorCondition: quoteState.exteriorCondition || "Light"
       });
 
@@ -797,7 +800,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition (✅ auto-advance, ✅ accurate "Starting at" preview)
+  // 5) Exterior condition
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -808,7 +811,6 @@ function renderStep() {
     exteriorConditions.forEach((c) => {
       const est = computeEstimateWithOverrides({
         exteriorCondition: c.label,
-        // preview interior as Light if not selected yet
         interiorCondition: quoteState.interiorCondition || "Light"
       });
 
@@ -830,7 +832,7 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Upkeep frequency (✅ auto-advance)
+  // 6) Upkeep frequency
   if (step === "upkeepFrequency") {
     title.textContent = "Upkeep frequency";
     sub.textContent = "How often would you like us to come out? Tap one to continue.";
