@@ -343,7 +343,7 @@
 .qGrid2{ display:grid; grid-template-columns:1fr; gap:10px; }
 
 .qField label{ display:block; font-weight:900; margin-bottom:6px; color:#111; }
-.qField input, .qField textarea{
+.qField input, .qField textarea, .qField select{
   width:100%;
   padding:12px;
   border-radius:14px;
@@ -351,9 +351,10 @@
   outline:none;
   font-weight:600;
   font-family:inherit;
+  background:#fff;
 }
 .qField textarea{ min-height:92px; resize:vertical; }
-.qField input:focus, .qField textarea:focus{
+.qField input:focus, .qField textarea:focus, .qField select:focus{
   border-color:rgba(214,178,94,.70);
   box-shadow:0 0 0 4px rgba(214,178,94,.18);
 }
