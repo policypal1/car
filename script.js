@@ -147,7 +147,7 @@
     range.addEventListener("input", (e) => setPos(e.target.value));
   });
 
-  // Work carousel (arrows + dots)
+  // Work carousel
   $$("[data-carousel]").forEach((carousel) => {
     const track = $("[data-carousel-track]", carousel);
     const dotsWrap = $("[data-carousel-dots]", carousel);
@@ -202,7 +202,7 @@
     next?.addEventListener("click", () => scrollByAmount(1));
   }
 
-  // Reels: click-to-play on desktop; autoplay on mobile when visible (swipe freely)
+  // Reels
   const reelsRoot = $("[data-reels]");
   if (reelsRoot) {
     const reels = $$("[data-reel]", reelsRoot)
@@ -226,7 +226,6 @@
       } catch (_) {}
     };
 
-    // Ensure a frame is visible (no black thumbnail)
     const warmThumb = (video) => {
       try {
         video.muted = true;
@@ -236,7 +235,6 @@
 
         const onLoaded = async () => {
           try { video.currentTime = 0.05; } catch (_) {}
-          // Do NOT auto-play — just seek to get a thumbnail frame
           video.removeEventListener("loadeddata", onLoaded);
         };
 
@@ -246,13 +244,11 @@
 
     reels.forEach(({ video }) => warmThumb(video));
 
-    // play/pause state class
     reels.forEach(({ card, video }) => {
       video.addEventListener("play", () => card.classList.add("isPlaying"));
       video.addEventListener("pause", () => card.classList.remove("isPlaying"));
     });
 
-    // ── DESKTOP: click card to toggle play/pause (no autoplay) ──
     if (!isMobile()) {
       reels.forEach(({ card, video }) => {
         card.addEventListener("click", () => {
@@ -266,9 +262,7 @@
       });
     }
 
-    // ── MOBILE: autoplay the most-visible reel; swiping pauses naturally ──
     if (isMobile()) {
-      // Click still toggles on mobile too
       reels.forEach(({ card, video }) => {
         card.addEventListener("click", () => {
           if (video.paused) {
@@ -282,7 +276,6 @@
 
       const io = new IntersectionObserver(
         (entries) => {
-          // Find the most-visible reel
           const visible = entries
             .filter((e) => e.isIntersecting)
             .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
@@ -304,9 +297,8 @@
     }
   }
 })();
-/* ==========================
-   CONTACT MODAL + SUBMIT
-   ========================== */
+
+/* CONTACT MODAL + SUBMIT */
 (function () {
   const modal = document.querySelector("[data-contact-modal]");
   if (!modal) return;
@@ -344,12 +336,10 @@
   openBtns.forEach((b) => b.addEventListener("click", openContact));
   closeBtns.forEach((b) => b.addEventListener("click", closeContact));
 
-  // close on overlay click
   modal.addEventListener("click", (e) => {
     if (e.target && e.target.matches && e.target.matches("[data-contact-close]")) closeContact();
   });
 
-  // close on ESC
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && modal.classList.contains("isOpen")) closeContact();
   });
@@ -365,6 +355,8 @@
 
     const name = (form.querySelector("input[name='name']")?.value || "").trim();
     const phone = (form.querySelector("input[name='phone']")?.value || "").trim();
+    const email = (form.querySelector("input[name='email']")?.value || "").trim();
+    const preferredContact = (form.querySelector("select[name='preferredContact']")?.value || "phone").trim();
     const message = (form.querySelector("textarea[name='message']")?.value || "").trim();
     const honeypot = (form.querySelector("input[name='website']")?.value || "").trim();
 
@@ -375,8 +367,18 @@
       return;
     }
 
-    if (!name || !phone || !message) {
-      setStatus("Please fill out name, phone, and your message.", "Err");
+    if (!name || !message) {
+      setStatus("Please fill out your name and message.", "Err");
+      return;
+    }
+
+    if (preferredContact === "phone" && !phone) {
+      setStatus("Please enter your phone number if you want to be contacted by phone.", "Err");
+      return;
+    }
+
+    if (preferredContact === "email" && !email) {
+      setStatus("Please enter your email if you want to be contacted by email.", "Err");
       return;
     }
 
@@ -391,6 +393,8 @@
     const payload = {
       name,
       phone,
+      email,
+      preferredContact,
       message,
       page: location.href,
       userAgent: navigator.userAgent,
@@ -398,8 +402,6 @@
     };
 
     try {
-      // ✅ CORS-safe send to Apps Script:
-      // no-cors prevents the browser from blocking the request.
       await fetch(endpoint, {
         method: "POST",
         mode: "no-cors",
@@ -407,7 +409,6 @@
         body: JSON.stringify(payload),
       });
 
-      // With no-cors we can't read the response, so assume success.
       setStatus("✅ Sent! We’ll reach out shortly.", "Ok");
       setTimeout(closeContact, 1100);
     } catch (err) {
