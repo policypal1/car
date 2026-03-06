@@ -19,7 +19,6 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./quote-wizard.css" />
 
-    <!-- Vercel Web Analytics -->
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
@@ -27,7 +26,6 @@
   </head>
 
   <body>
-    <!-- Header -->
     <header class="header" id="top">
       <div class="container header__inner">
         <a class="brand" href="#top" aria-label="Home">
@@ -55,7 +53,6 @@
       </div>
     </header>
 
-    <!-- Hero (BLACK) -->
     <section class="hero" aria-label="Hero">
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__inner">
@@ -64,7 +61,6 @@
           <p class="hero__sub">Interior and exterior detailing that feels clean the moment you sit down.</p>
 
           <div class="hero__actions">
-            <!-- ✅ order: CALL (left), QUOTE (middle), CONTACT (right) -->
             <button class="btn btn--call btn--lg" type="button" data-call-open>CALL / TEXT</button>
             <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
             <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
@@ -73,7 +69,6 @@
       </div>
     </section>
 
-    <!-- Services (WHITE) -->
     <section class="section section--light" id="services">
       <div class="container">
         <div class="section__head">
@@ -175,7 +170,6 @@
       </div>
     </section>
 
-    <!-- Recent Transformations (BLACK) -->
     <section class="section section--dark" id="work">
       <div class="container">
         <div class="section__head">
@@ -225,7 +219,6 @@
       </div>
     </section>
 
-    <!-- REAL JOB CLIPS (WHITE) -->
     <section class="section section--light" id="reels">
       <div class="container">
         <div class="section__head">
@@ -303,7 +296,6 @@
       </div>
     </section>
 
-    <!-- HOW IT WORKS (WHITE) -->
     <section class="section section--light" id="process">
       <div class="container">
         <div class="section__head">
@@ -347,7 +339,6 @@
       </div>
     </section>
 
-    <!-- Service Area (BLACK) -->
     <section class="section section--dark" id="service-area">
       <div class="container">
         <div class="section__head">
@@ -388,7 +379,6 @@
       </div>
     </section>
 
-    <!-- About (WHITE) -->
     <section class="section section--light" id="about">
       <div class="container">
         <div class="aboutGrid">
@@ -413,7 +403,6 @@
       </div>
     </section>
 
-    <!-- Reviews (BLACK) -->
     <section class="section section--dark" id="reviews">
       <div class="container">
         <div class="section__head">
@@ -464,7 +453,6 @@
       </div>
     </section>
 
-    <!-- Footer (WHITE) -->
     <footer class="footer footer--light">
       <div class="container footerMini footerMini--light">
         <div class="footerMini__left">
@@ -474,8 +462,6 @@
           <div class="footerMini__actions">
             <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
-
-            <!-- ✅ contact button looks like CALL/TEXT -->
             <button class="btn btn--call" type="button" data-contact-open>CONTACT</button>
           </div>
         </div>
@@ -499,7 +485,6 @@
       </div>
     </footer>
 
-    <!-- Service details modal -->
     <div class="modal" aria-hidden="true" data-modal>
       <div class="modal__overlay" data-modal-close></div>
       <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
@@ -513,7 +498,6 @@
       </div>
     </div>
 
-    <!-- Call/Text modal -->
     <div class="modal modal--call" aria-hidden="true" data-call-modal>
       <div class="modal__overlay" data-call-close></div>
       <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
@@ -525,7 +509,6 @@
       </div>
     </div>
 
-    <!-- Contact modal -->
     <div class="modal modal--contact" aria-hidden="true" data-contact-modal>
       <div class="modal__overlay" data-contact-close></div>
 
@@ -544,7 +527,22 @@
 
             <div class="cField">
               <label for="cPhone">Phone</label>
-              <input id="cPhone" name="phone" type="tel" autocomplete="tel" required placeholder="(971) 555-1234" />
+              <input id="cPhone" name="phone" type="tel" autocomplete="tel" placeholder="(971) 555-1234" />
+            </div>
+          </div>
+
+          <div class="contactGrid">
+            <div class="cField">
+              <label for="cEmail">Email</label>
+              <input id="cEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+            </div>
+
+            <div class="cField">
+              <label for="cPreferredContact">Preferred Contact Method</label>
+              <select id="cPreferredContact" name="preferredContact">
+                <option value="phone">Phone</option>
+                <option value="email">Email</option>
+              </select>
             </div>
           </div>
 
@@ -568,7 +566,6 @@
       </div>
     </div>
 
-    <!-- Quote Wizard -->
     <div class="modal modal--quote" aria-hidden="true" data-quote-modal>
       <div class="modal__overlay" data-quote-close></div>
       <div class="quotePanel" role="dialog" aria-modal="true" aria-label="Get a quote">
