@@ -825,7 +825,7 @@ function renderStep() {
             split: s.split || "h",
             variant: "qCard--square qCard--servicePick",
             badge: "",
-            tag: needsWash ? "* Requires Exterior Wash" : "",
+            tag: "",
             isSelected: quoteState.services.includes(s.label),
             onClick: () => pickSingleServiceAndAdvance(s.label)
           })
@@ -893,7 +893,7 @@ function renderStep() {
           split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
           badge: "",
-          tag: needsWash ? "* Requires Exterior Wash" : "",
+          tag: "",
           isSelected: quoteState.services.includes(s.label),
           onClick: () => {
             toggleService(s.label);
