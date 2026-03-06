@@ -44,6 +44,7 @@ const quoteState = {
   name: "",
   phone: "",
   email: "",
+  city: "",
   notes: "",
   ackDeposit: false,
 
@@ -124,6 +125,14 @@ const upkeepFrequencies = [
   { label: "Weekly", hint: "Best for staying spotless" },
   { label: "Biweekly", hint: "Most popular" },
   { label: "Monthly", hint: "Maintenance refresh" }
+];
+
+const serviceCities = [
+  "Keizer",
+  "Salem",
+  "Portland",
+  "Tigard",
+  "Lake Oswego"
 ];
 
 // -------------------------
@@ -432,6 +441,7 @@ function canContinue() {
       quoteState.name.trim().length >= 2 &&
       quoteState.phone.trim().length >= 7 &&
       quoteState.email.trim().includes("@") &&
+      quoteState.city.trim().length > 0 &&
       quoteState.ackDeposit === true
     );
   }
@@ -654,6 +664,7 @@ function openQuoteModal() {
     name: "",
     phone: "",
     email: "",
+    city: "",
     notes: "",
     ackDeposit: false,
     honeypot: ""
@@ -816,7 +827,6 @@ function renderStep() {
     // ✅ Interior OR Exterior: single select + auto-advance (NO tray)
     if (isInterior || isExterior) {
       filtered.forEach((s) => {
-        const needsWash = REQUIRES_WASH.has(s.label);
         cards.appendChild(
           imgCard({
             label: s.label,
@@ -884,7 +894,6 @@ function renderStep() {
     tray.append(trayTop, chips);
 
     filtered.forEach((s) => {
-      const needsWash = REQUIRES_WASH.has(s.label);
       cards.appendChild(
         imgCard({
           label: s.label,
@@ -1026,7 +1035,19 @@ function renderStep() {
       <input id="qEmail" autocomplete="email" inputmode="email" placeholder="you@email.com" value="${escapeHtml(quoteState.email)}" />
     `;
 
-    grid.append(f1, f2, f3);
+    const f4 = document.createElement("div");
+    f4.className = "qField";
+    f4.innerHTML = `
+      <label for="qCity">Closest city *</label>
+      <select id="qCity">
+        <option value="">Select closest city</option>
+        ${serviceCities
+          .map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`)
+          .join("")}
+      </select>
+    `;
+
+    grid.append(f1, f2, f3, f4);
 
     const notes = document.createElement("div");
     notes.className = "qField";
@@ -1049,7 +1070,7 @@ function renderStep() {
         </label>
       </div>
       <div class="qStatus" data-q-status>
-        ${canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement."}
+        ${canContinue() ? "" : "Required: name, phone, email, closest city, and deposit acknowledgement."}
       </div>
       <div style="display:none;">
         <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
@@ -1061,6 +1082,7 @@ function renderStep() {
     const nameEl = quoteBody.querySelector("#qName");
     const phoneEl = quoteBody.querySelector("#qPhone");
     const emailEl = quoteBody.querySelector("#qEmail");
+    const cityEl = quoteBody.querySelector("#qCity");
     const notesEl = quoteBody.querySelector("#qNotes");
     const ackEl = quoteBody.querySelector("#qAck");
     const hpEl = quoteBody.querySelector("#qCompany");
@@ -1068,12 +1090,13 @@ function renderStep() {
 
     const updateStatus = () => {
       if (!statusEl) return;
-      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, and deposit acknowledgement.";
+      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, closest city, and deposit acknowledgement.";
     };
 
     nameEl?.addEventListener("input", (e) => { quoteState.name = e.target.value || ""; updateNav(); updateStatus(); });
     phoneEl?.addEventListener("input", (e) => { quoteState.phone = e.target.value || ""; updateNav(); updateStatus(); });
     emailEl?.addEventListener("input", (e) => { quoteState.email = e.target.value || ""; updateNav(); updateStatus(); });
+    cityEl?.addEventListener("change", (e) => { quoteState.city = e.target.value || ""; updateNav(); updateStatus(); });
     notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
     ackEl?.addEventListener("change", (e) => { quoteState.ackDeposit = !!e.target.checked; updateNav(); updateStatus(); });
     hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
@@ -1512,6 +1535,7 @@ function buildPayload() {
     name: quoteState.name,
     phone: quoteState.phone,
     email: quoteState.email,
+    city: quoteState.city,
     notes: quoteState.notes,
 
     ackDeposit: quoteState.ackDeposit
