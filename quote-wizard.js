@@ -1,14 +1,29 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v8.1)
+// QUOTE WIZARD (Flow v9.0 - Square Ready)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
-// -> Contact -> Estimate -> Calendar -> Done
+// -> Contact -> Estimate -> Calendar -> Payment -> Done
 //
-// Apps Script URL
+// Front-end is prepared for Square Web Payments SDK.
+// Live deposit charging still requires:
+// 1) window.SQUARE_APP_ID
+// 2) window.SQUARE_LOCATION_ID
+// 3) a secure backend endpoint that creates the payment with Square
+//
+// Suggested globals you can set before this file loads:
+// window.SCRIPT_URL = "...apps script...";
+// window.SQUARE_APP_ID = "sandbox-sq0idb-..." or production app id;
+// window.SQUARE_LOCATION_ID = "L....";
+// window.SQUARE_DEPOSIT_ENDPOINT = "/api/create-square-deposit";
+// window.ALLOW_DEPOSIT_BYPASS = true; // dev fallback while Square isn't connected
 */
+
 const DEFAULT_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
+
+const DEFAULT_DEPOSIT_AMOUNT = 25;
+const DEFAULT_DEPOSIT_ENDPOINT = "/api/create-square-deposit";
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -19,12 +34,13 @@ const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 const quoteNav = document.querySelector(".quoteNav");
 
 let lastActiveElQuote = null;
+let squareSdkPromise = null;
+let squarePaymentsInstance = null;
+let squareCardInstance = null;
 
 const quoteState = {
   vehicleType: "",
   serviceCategory: "",
-
-  // ✅ multi-select services (ONLY for Interior + Exterior; Interior/Exterior behave single-select)
   services: [],
 
   interiorCondition: "",
@@ -35,18 +51,26 @@ const quoteState = {
   estimateLow: "",
   estimateHigh: "",
 
-  // calendar
   slotId: "",
   slotLabel: "",
-  slotDate: "", // YYYY-MM-DD
-  slotTime: "", // HH:MM
+  slotDate: "",
+  slotTime: "",
 
   name: "",
   phone: "",
   email: "",
   city: "",
   notes: "",
+
+  // moved from contact to payment
   ackDeposit: false,
+  depositAmount: DEFAULT_DEPOSIT_AMOUNT,
+
+  paymentStatus: "", // "", "ready", "processing", "paid", "bypass"
+  paymentMessage: "",
+  squareSourceId: "",
+  squarePaymentId: "",
+  squareIdempotencyKey: "",
 
   honeypot: ""
 };
@@ -61,6 +85,7 @@ const steps = [
   "contact",
   "estimate",
   "appointment",
+  "payment",
   "done"
 ];
 
@@ -76,23 +101,18 @@ const vehicleTypes = [
   { label: "Truck", hint: "Pickup truck", img: "./silver-pickup-truck-side-view-svdvcb49lssczxnt.png", contain: true, zoom: 1.26 }
 ];
 
-// service category images
 const SERVICECAT_INTERIOR_IMG = "./2017-05-22-07-32-26.jpg";
 const SERVICECAT_EXTERIOR_IMG = "./c36084da09340612d8431de0221ea985.jpg";
 
 const serviceCategories = [
   { label: "Interior", hint: "Inside-only detailing", img: SERVICECAT_INTERIOR_IMG },
   { label: "Exterior", hint: "Outside-only detailing", img: SERVICECAT_EXTERIOR_IMG },
-
-  // ✅ side-by-side split (left/right) with a vertical divider
   { label: "Interior + Exterior", hint: "Full detail inside + out", img: [SERVICECAT_INTERIOR_IMG, SERVICECAT_EXTERIOR_IMG], split: "h" }
 ];
 
-// Upkeep plan images
 const INTERIOR_UPKEEP_IMG = "./img_6480.webp";
 const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp";
 
-// ✅ dependency: these require Exterior Wash
 const REQUIRES_WASH = new Set(["Ceramic Coating", "Paint Correction"]);
 const REQUIRED_WASH_LABEL = "Exterior Wash";
 
@@ -116,7 +136,6 @@ const interiorConditions = [
 
 const exteriorConditions = [
   { label: "Light", hint: "Light grime • quick reset", img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp" },
-  // ✅ zoom in more on Normal only
   { label: "Normal", hint: "Daily driver • full wash", img: "./IMG_2910.jpg", zoom: 1.28 },
   { label: "Heavy", hint: "Build-up • extra prep", img: "./dirty-car.jpg" }
 ];
@@ -136,10 +155,8 @@ const serviceCities = [
 ];
 
 // -------------------------
-// ESTIMATES (UPDATED PRICING)
+// ESTIMATES
 // -------------------------
-
-// Vehicle size add-ons
 const VEHICLE_ADDON = {
   Small: 0,
   Medium: 20,
@@ -147,11 +164,9 @@ const VEHICLE_ADDON = {
   Truck: 30
 };
 
-// Base prices by condition (Normal == "Medium condition" from your prompt)
 const INTERIOR_BASE_BY_COND = { Light: 150, Normal: 190, Heavy: 240 };
 const EXTERIOR_BASE_BY_COND = { Light: 80, Normal: 95, Heavy: 115 };
 
-// Ranges (keeps existing range-based estimate behavior without changing flow)
 const INTERIOR_SPREAD = 70;
 const EXTERIOR_SPREAD = 45;
 
@@ -185,19 +200,13 @@ const estimateTable = {
   Exterior: buildConditionTable(EXTERIOR_BASE_BY_COND, EXTERIOR_SPREAD)
 };
 
-// Overrides / Upkeep / Ceramic / Paint (UPDATED)
 const serviceOverrides = {
-  // Ceramic + Paint (requires wash)
   "Paint Correction": { Small: [450, 450], Medium: [500, 500], Large: [550, 550], Truck: [520, 520] },
   "Ceramic Coating": { Small: [700, 700], Medium: [750, 750], Large: [800, 800], Truck: [770, 770] },
 
-  // Upkeep plans
   "Interior Upkeep Plan": { Small: [85, 85], Medium: [95, 95], Large: [110, 110], Truck: [100, 100] },
   "Exterior Upkeep Plan": { Small: [55, 55], Medium: [65, 65], Large: [75, 75], Truck: [70, 70] },
 
-  // Keep this plan in place (still used by your flow)
-  // (No new pricing was provided for this plan specifically, so leaving it as-is would violate "update all pricing values".
-  // To align with your pricing model, this uses Interior base + Exterior base - $20 at "Normal" baseline, per vehicle addon, as a flat plan.)
   "Interior + Exterior Upkeep Plan": {
     Small: [INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small - 20, INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Small - 20],
     Medium: [INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium - 20, INTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium + EXTERIOR_BASE_BY_COND.Normal + VEHICLE_ADDON.Medium - 20],
@@ -224,8 +233,34 @@ function setProgress() {
   dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
 }
 
-// ✅ No bottom price pill
 function renderNavPrice() { return; }
+
+function moneyToCents(n) {
+  return Math.round(Number(n || 0) * 100);
+}
+
+function makeIdempotencyKey() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `qw_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function getSquareConfig() {
+  return {
+    appId: String(window.SQUARE_APP_ID || "").trim(),
+    locationId: String(window.SQUARE_LOCATION_ID || "").trim(),
+    endpoint: String(window.SQUARE_DEPOSIT_ENDPOINT || DEFAULT_DEPOSIT_ENDPOINT).trim(),
+    allowBypass: window.ALLOW_DEPOSIT_BYPASS !== false
+  };
+}
+
+function isSquareConfigured() {
+  const cfg = getSquareConfig();
+  return !!(cfg.appId && cfg.locationId);
+}
+
+function canBypassPayment() {
+  return !!getSquareConfig().allowBypass;
+}
 
 // -------------------------
 // Upkeep / requirement rules
@@ -234,44 +269,38 @@ const UPKEEP_SET = new Set(["Interior Upkeep Plan", "Exterior Upkeep Plan", "Int
 function isUpkeepService(label) { return UPKEEP_SET.has(label); }
 function isUpkeepPlanSelected() { return quoteState.services.some(isUpkeepService); }
 
-// If any upkeep plan selected, it becomes exclusive
 function enforceUpkeepExclusivity() {
   const upkeep = quoteState.services.find(isUpkeepService);
   if (upkeep) quoteState.services = [upkeep];
 }
 
-// ✅ ensure ceramic/paint always have Exterior Wash included
 function enforceWashDependencies() {
   const hasReq = quoteState.services.some((s) => REQUIRES_WASH.has(s));
   if (hasReq && !quoteState.services.includes(REQUIRED_WASH_LABEL)) {
     quoteState.services = [REQUIRED_WASH_LABEL, ...quoteState.services.filter((s) => s !== REQUIRED_WASH_LABEL)];
   }
 
-  // If user removes wash while a requiring service remains, drop the requiring services
   if (!quoteState.services.includes(REQUIRED_WASH_LABEL)) {
-    const still = quoteState.services.filter((s) => !REQUIRES_WASH.has(s));
-    quoteState.services = still;
+    quoteState.services = quoteState.services.filter((s) => !REQUIRES_WASH.has(s));
   }
 }
 
 function anyServiceRequiresInteriorCondition() {
   const s = quoteState.services || [];
   if (!s.length) return false;
-  if (s.includes("Interior Upkeep Plan")) return true;
-  if (s.includes("Interior + Exterior Upkeep Plan")) return true;
-  if (s.includes("Interior Detail")) return true;
-  return false;
+  return s.includes("Interior Upkeep Plan") || s.includes("Interior + Exterior Upkeep Plan") || s.includes("Interior Detail");
 }
 
 function anyServiceRequiresExteriorCondition() {
   const s = quoteState.services || [];
   if (!s.length) return false;
-  if (s.includes("Exterior Upkeep Plan")) return true;
-  if (s.includes("Interior + Exterior Upkeep Plan")) return true;
-  if (s.includes("Exterior Wash")) return true;
-  if (s.includes("Ceramic Coating")) return true;
-  if (s.includes("Paint Correction")) return true;
-  return false;
+  return (
+    s.includes("Exterior Upkeep Plan") ||
+    s.includes("Interior + Exterior Upkeep Plan") ||
+    s.includes("Exterior Wash") ||
+    s.includes("Ceramic Coating") ||
+    s.includes("Paint Correction")
+  );
 }
 
 function stepIsActive(stepName) {
@@ -299,10 +328,12 @@ function conditionFactor(cond) {
   if (cond === "Heavy") return 1.14;
   return 1.0;
 }
+
 function clampInt(n) {
   const x = Math.round(Number(n));
   return Number.isFinite(x) ? x : null;
 }
+
 function tightenAndHeavier(range) {
   if (!range) return null;
   const low = Number(range[0]);
@@ -316,9 +347,6 @@ function tightenAndHeavier(range) {
   return [newLow, newHigh];
 }
 
-/**
- * Compute range for a service with optional condition overrides
- */
 function computeRangeForService(serviceLabel, opts = {}) {
   const type = quoteState.vehicleType;
   if (!type) return null;
@@ -326,7 +354,6 @@ function computeRangeForService(serviceLabel, opts = {}) {
   const ic = opts.interiorCondition ?? quoteState.interiorCondition;
   const ec = opts.exteriorCondition ?? quoteState.exteriorCondition;
 
-  // Upkeep plans
   if (isUpkeepService(serviceLabel) && serviceOverrides[serviceLabel]) {
     const base = serviceOverrides[serviceLabel][type];
     if (!base) return null;
@@ -338,29 +365,22 @@ function computeRangeForService(serviceLabel, opts = {}) {
     let f = 1.0;
     if (serviceLabel === "Interior Upkeep Plan") f = conditionFactor(ic);
     if (serviceLabel === "Exterior Upkeep Plan") f = conditionFactor(ec);
-    if (serviceLabel === "Interior + Exterior Upkeep Plan") {
-      const fi = conditionFactor(ic);
-      const fe = conditionFactor(ec);
-      f = (fi + fe) / 2;
-    }
+    if (serviceLabel === "Interior + Exterior Upkeep Plan") f = (conditionFactor(ic) + conditionFactor(ec)) / 2;
 
     return [base[0] * f, base[1] * f].map(clampInt);
   }
 
-  // Overrides (Ceramic / Paint)
   if ((serviceLabel === "Ceramic Coating" || serviceLabel === "Paint Correction") && serviceOverrides[serviceLabel]) {
     const r = serviceOverrides[serviceLabel][type];
     return r ? [clampInt(r[0]), clampInt(r[1])] : null;
   }
 
-  // Interior Detail
   if (serviceLabel === "Interior Detail") {
     if (!ic) return null;
     const r = estimateTable.Interior?.[type]?.[ic];
     return r ? [clampInt(r[0]), clampInt(r[1])] : null;
   }
 
-  // Exterior Wash
   if (serviceLabel === "Exterior Wash") {
     if (!ec) return null;
     const r = estimateTable.Exterior?.[type]?.[ec];
@@ -383,7 +403,8 @@ function computeEstimateWithOverrides(overrides = {}) {
   const icPreview = ic || "Light";
   const ecPreview = ec || "Light";
 
-  let low = 0, high = 0;
+  let low = 0;
+  let high = 0;
 
   for (const s of svcs) {
     let useIc = ic;
@@ -398,12 +419,11 @@ function computeEstimateWithOverrides(overrides = {}) {
 
     const r = computeRangeForService(s, { interiorCondition: useIc, exteriorCondition: useEc });
     if (!r) return null;
+
     low += Number(r[0] || 0);
     high += Number(r[1] || 0);
   }
 
-  // ✅ Interior + Exterior Combo discount (-$20) ONLY when selecting Interior Detail + Exterior Wash together
-  // (does not apply to upkeep plans or ceramic/paint flows)
   const hasInterior = svcs.includes("Interior Detail");
   const hasExterior = svcs.includes("Exterior Wash");
   const hasUpkeep = svcs.some(isUpkeepService);
@@ -428,12 +448,10 @@ function canContinue() {
 
   if (step === "vehicleType") return !!quoteState.vehicleType;
   if (step === "serviceCategory") return !!quoteState.serviceCategory;
-
   if (step === "service") return Array.isArray(quoteState.services) && quoteState.services.length > 0;
 
   if (step === "conditionInterior") return !anyServiceRequiresInteriorCondition() ? true : !!quoteState.interiorCondition;
   if (step === "conditionExterior") return !anyServiceRequiresExteriorCondition() ? true : !!quoteState.exteriorCondition;
-
   if (step === "upkeepFrequency") return !isUpkeepPlanSelected() ? true : !!quoteState.upkeepFrequency;
 
   if (step === "contact") {
@@ -441,12 +459,18 @@ function canContinue() {
       quoteState.name.trim().length >= 2 &&
       quoteState.phone.trim().length >= 7 &&
       quoteState.email.trim().includes("@") &&
-      quoteState.city.trim().length > 0 &&
-      quoteState.ackDeposit === true
+      quoteState.city.trim().length > 0
     );
   }
 
   if (step === "appointment") return !!quoteState.slotId;
+
+  if (step === "payment") {
+    const paid = quoteState.paymentStatus === "paid";
+    const bypass = !isSquareConfigured() && canBypassPayment();
+    const manualBypass = quoteState.paymentStatus === "bypass";
+    return quoteState.ackDeposit === true && (paid || bypass || manualBypass);
+  }
 
   return true;
 }
@@ -470,18 +494,18 @@ function updateNav() {
   if (step === "service") {
     const n = Array.isArray(quoteState.services) ? quoteState.services.length : 0;
     quoteNextBtn.textContent = n > 0 ? `Continue (${n} selected)` : "Continue";
+  } else if (step === "appointment") {
+    quoteNextBtn.textContent = "Continue";
+  } else if (step === "payment") {
+    quoteNextBtn.textContent = "Complete Booking";
   } else {
-    quoteNextBtn.textContent = step === "appointment" ? "Finish" : "Continue";
+    quoteNextBtn.textContent = "Continue";
   }
 
   quoteNextBtn.disabled = !canContinue();
-
   renderNavPrice();
 }
 
-// -------------------------
-// ✅ AUTO-ADVANCE helper
-// -------------------------
 function pickAndAdvance(pickFn) {
   pickFn();
   renderStep();
@@ -489,10 +513,22 @@ function pickAndAdvance(pickFn) {
 }
 
 // -------------------------
-// Service selection rules
+// Service selection
 // -------------------------
+function resetDownstreamBookingState() {
+  quoteState.slotId = "";
+  quoteState.slotLabel = "";
+  quoteState.slotDate = "";
+  quoteState.slotTime = "";
 
-// ✅ multi-select toggle (ONLY Interior + Exterior)
+  quoteState.ackDeposit = false;
+  quoteState.paymentStatus = "";
+  quoteState.paymentMessage = "";
+  quoteState.squareSourceId = "";
+  quoteState.squarePaymentId = "";
+  quoteState.squareIdempotencyKey = "";
+}
+
 function toggleService(label) {
   const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
   const isSelected = current.includes(label);
@@ -507,43 +543,29 @@ function toggleService(label) {
   }
 
   enforceUpkeepExclusivity();
-
-  // ✅ dependency enforcement (Ceramic/Paint need Exterior Wash)
   enforceWashDependencies();
 
   if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  quoteState.slotId = "";
-  quoteState.slotLabel = "";
-  quoteState.slotDate = "";
-  quoteState.slotTime = "";
-
+  resetDownstreamBookingState();
   updateNav();
 }
 
 function removeService(label) {
   quoteState.services = (quoteState.services || []).filter((s) => s !== label);
-
-  // ✅ keep dependencies clean if someone removes wash
   enforceWashDependencies();
 
   if (!anyServiceRequiresInteriorCondition()) quoteState.interiorCondition = "";
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  quoteState.slotId = "";
-  quoteState.slotLabel = "";
-  quoteState.slotDate = "";
-  quoteState.slotTime = "";
-
+  resetDownstreamBookingState();
   updateNav();
 }
 
-// ✅ single-select (Interior + Exterior) + auto-advance
 function pickSingleServiceAndAdvance(label) {
-  // If ceramic/paint chosen, auto-include Exterior Wash behind the scenes
   if (REQUIRES_WASH.has(label)) {
     quoteState.services = [REQUIRED_WASH_LABEL, label];
   } else {
@@ -557,10 +579,7 @@ function pickSingleServiceAndAdvance(label) {
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  quoteState.slotId = "";
-  quoteState.slotLabel = "";
-  quoteState.slotDate = "";
-  quoteState.slotTime = "";
+  resetDownstreamBookingState();
 
   renderStep();
   setTimeout(() => nextStep(true), 80);
@@ -667,6 +686,12 @@ function openQuoteModal() {
     city: "",
     notes: "",
     ackDeposit: false,
+    depositAmount: DEFAULT_DEPOSIT_AMOUNT,
+    paymentStatus: "",
+    paymentMessage: "",
+    squareSourceId: "",
+    squarePaymentId: "",
+    squareIdempotencyKey: "",
     honeypot: ""
   });
 
@@ -707,6 +732,170 @@ if (quoteModal) {
 }
 
 // -------------------------
+// Square helpers
+// -------------------------
+async function loadSquareSdk() {
+  if (window.Square) return window.Square;
+  if (squareSdkPromise) return squareSdkPromise;
+
+  squareSdkPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-square-sdk="true"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve(window.Square));
+      existing.addEventListener("error", () => reject(new Error("Square SDK failed to load.")));
+      return;
+    }
+
+    const s = document.createElement("script");
+    s.src = "https://web.squarecdn.com/v1/square.js";
+    s.async = true;
+    s.defer = true;
+    s.dataset.squareSdk = "true";
+    s.onload = () => resolve(window.Square);
+    s.onerror = () => reject(new Error("Square SDK failed to load."));
+    document.head.appendChild(s);
+  });
+
+  return squareSdkPromise;
+}
+
+async function initSquareCard(cardMountEl, statusEl) {
+  const cfg = getSquareConfig();
+  if (!cardMountEl) return false;
+
+  if (!cfg.appId || !cfg.locationId) {
+    if (statusEl) {
+      statusEl.textContent = canBypassPayment()
+        ? "Square is not connected yet. You can still finish this request for now."
+        : "Square is not connected yet. Add app ID and location ID to enable deposit payment.";
+    }
+    return false;
+  }
+
+  try {
+    if (statusEl) statusEl.textContent = "Loading secure payment form...";
+
+    const Square = await loadSquareSdk();
+    if (!Square || typeof Square.payments !== "function") {
+      throw new Error("Square SDK unavailable.");
+    }
+
+    cardMountEl.innerHTML = "";
+
+    squarePaymentsInstance = Square.payments(cfg.appId, cfg.locationId);
+    squareCardInstance = await squarePaymentsInstance.card();
+    await squareCardInstance.attach(cardMountEl);
+
+    quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
+    if (statusEl) statusEl.textContent = "Enter card details for the $25 deposit.";
+    updateNav();
+    return true;
+  } catch (err) {
+    squareCardInstance = null;
+    squarePaymentsInstance = null;
+    quoteState.paymentStatus = "";
+    if (statusEl) statusEl.textContent = err?.message || "Could not load Square payment form.";
+    updateNav();
+    return false;
+  }
+}
+
+async function tokenizeSquareCard() {
+  if (!squareCardInstance) throw new Error("Card form is not ready.");
+  const result = await squareCardInstance.tokenize();
+  if (result.status !== "OK" || !result.token) {
+    throw new Error("Card details were not accepted. Please check the form and try again.");
+  }
+  return result.token;
+}
+
+async function createSquareDeposit(sourceId) {
+  const cfg = getSquareConfig();
+  const payload = {
+    amount: quoteState.depositAmount,
+    amountCents: moneyToCents(quoteState.depositAmount),
+    currency: "USD",
+    sourceId,
+    idempotencyKey: quoteState.squareIdempotencyKey || makeIdempotencyKey(),
+    booking: buildPayload(),
+    note: `Booking deposit for ${quoteState.name || "customer"}`
+  };
+
+  quoteState.squareIdempotencyKey = payload.idempotencyKey;
+
+  const res = await fetch(cfg.endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    cache: "no-store"
+  });
+
+  const text = await res.text();
+  let data = null;
+  try { data = JSON.parse(text); }
+  catch { data = { ok: false, message: "Deposit endpoint returned non-JSON." }; }
+
+  return data;
+}
+
+async function handleDepositPayment(payBtn, statusEl, paidWrapEl) {
+  if (!payBtn || !statusEl) return;
+
+  if (!isSquareConfigured()) {
+    if (canBypassPayment()) {
+      quoteState.paymentStatus = "bypass";
+      quoteState.paymentMessage = "Square is not connected yet. Deposit step is in bypass mode.";
+      statusEl.textContent = quoteState.paymentMessage;
+      updateNav();
+      return;
+    }
+    statusEl.textContent = "Square is not connected yet.";
+    return;
+  }
+
+  try {
+    payBtn.disabled = true;
+    payBtn.textContent = "Processing...";
+    quoteState.paymentStatus = "processing";
+    quoteState.paymentMessage = "";
+    updateNav();
+
+    const token = await tokenizeSquareCard();
+    quoteState.squareSourceId = token;
+
+    const result = await createSquareDeposit(token);
+
+    if (!result || result.ok !== true) {
+      throw new Error(result?.message || "Deposit payment failed.");
+    }
+
+    quoteState.paymentStatus = "paid";
+    quoteState.squarePaymentId = String(result.paymentId || result.id || "");
+    quoteState.paymentMessage = "Deposit paid successfully.";
+    statusEl.textContent = quoteState.paymentMessage;
+
+    if (paidWrapEl) {
+      paidWrapEl.innerHTML = `
+        <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
+        <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
+        ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+      `;
+    }
+
+    updateNav();
+    renderStep();
+  } catch (err) {
+    quoteState.paymentStatus = "";
+    quoteState.paymentMessage = err?.message || "Deposit payment failed.";
+    statusEl.textContent = quoteState.paymentMessage;
+    updateNav();
+  } finally {
+    payBtn.disabled = false;
+    payBtn.textContent = `Pay $${quoteState.depositAmount} Deposit`;
+  }
+}
+
+// -------------------------
 // Render
 // -------------------------
 function renderStep() {
@@ -722,7 +911,6 @@ function renderStep() {
   const sub = document.createElement("div");
   sub.className = "qStepSub";
 
-  // 1) Vehicle (✅ auto-advance)
   if (step === "vehicleType") {
     title.textContent = "Vehicle type";
     sub.textContent = "Pick the closest match. Tap to continue.";
@@ -748,7 +936,6 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 2) Category (✅ auto-advance)
   if (step === "serviceCategory") {
     title.textContent = "Service category";
     sub.textContent = "Choose what you want detailed. Tap to continue.";
@@ -768,16 +955,11 @@ function renderStep() {
           onClick: () =>
             pickAndAdvance(() => {
               quoteState.serviceCategory = c.label;
-
-              // reset downstream
               quoteState.services = [];
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
               quoteState.upkeepFrequency = "";
-              quoteState.slotId = "";
-              quoteState.slotLabel = "";
-              quoteState.slotDate = "";
-              quoteState.slotTime = "";
+              resetDownstreamBookingState();
             })
         })
       );
@@ -786,45 +968,28 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 3) Services
   if (step === "service") {
     const isInterior = quoteState.serviceCategory === "Interior";
     const isExterior = quoteState.serviceCategory === "Exterior";
     const isBoth = quoteState.serviceCategory === "Interior + Exterior";
 
     title.textContent = "Select service(s)";
-
-    // ✅ only show a simple line for single-select categories
     sub.textContent = isBoth ? "" : "Tap one service to continue.";
 
     const cards = document.createElement("div");
     cards.className = "qCards qCards--scroll qCards--big";
 
     const filtered = servicesAll.filter((s) => {
-      if (isInterior) {
-        return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
-      }
+      if (isInterior) return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
       if (isExterior) {
-        return (
-          s.label === "Exterior Wash" ||
-          s.label === "Exterior Upkeep Plan" ||
-          s.label === "Ceramic Coating" ||
-          s.label === "Paint Correction"
-        );
+        return s.label === "Exterior Wash" || s.label === "Exterior Upkeep Plan" || s.label === "Ceramic Coating" || s.label === "Paint Correction";
       }
       if (isBoth) {
-        return (
-          s.label === "Interior Detail" ||
-          s.label === "Exterior Wash" ||
-          s.label === "Ceramic Coating" ||
-          s.label === "Paint Correction" ||
-          s.label === "Interior + Exterior Upkeep Plan"
-        );
+        return s.label === "Interior Detail" || s.label === "Exterior Wash" || s.label === "Ceramic Coating" || s.label === "Paint Correction" || s.label === "Interior + Exterior Upkeep Plan";
       }
       return false;
     });
 
-    // ✅ Interior OR Exterior: single select + auto-advance (NO tray)
     if (isInterior || isExterior) {
       filtered.forEach((s) => {
         cards.appendChild(
@@ -834,8 +999,6 @@ function renderStep() {
             img: s.img,
             split: s.split || "h",
             variant: "qCard--square qCard--servicePick",
-            badge: "",
-            tag: "",
             isSelected: quoteState.services.includes(s.label),
             onClick: () => pickSingleServiceAndAdvance(s.label)
           })
@@ -847,7 +1010,6 @@ function renderStep() {
       return;
     }
 
-    // ✅ Interior + Exterior: multi-select tray + multi-select behavior
     const tray = document.createElement("div");
     tray.className = "qServiceTray";
 
@@ -901,8 +1063,6 @@ function renderStep() {
           img: s.img,
           split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
-          badge: "",
-          tag: "",
           isSelected: quoteState.services.includes(s.label),
           onClick: () => {
             toggleService(s.label);
@@ -915,7 +1075,6 @@ function renderStep() {
     quoteBody.append(title, sub, tray, cards);
   }
 
-  // 4) Interior condition
   if (step === "conditionInterior") {
     title.textContent = "Interior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -947,7 +1106,6 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 5) Exterior condition
   if (step === "conditionExterior") {
     title.textContent = "Exterior condition";
     sub.textContent = "Choose the closest match. Tap to continue.";
@@ -980,7 +1138,6 @@ function renderStep() {
     quoteBody.append(title, sub, cards);
   }
 
-  // 6) Upkeep frequency
   if (step === "upkeepFrequency") {
     title.textContent = "Upkeep frequency";
     sub.textContent = "How often would you like us to come out? Tap one to continue.";
@@ -1006,10 +1163,9 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
   }
 
-  // 7) Contact
   if (step === "contact") {
     title.textContent = "Your contact info";
-    sub.textContent = "Required. We’ll confirm by text/call.";
+    sub.textContent = "Required. We’ll confirm by text or call.";
 
     const grid = document.createElement("div");
     grid.className = "qGrid2";
@@ -1041,9 +1197,7 @@ function renderStep() {
       <label for="qCity">Closest city *</label>
       <select id="qCity">
         <option value="">Select closest city</option>
-        ${serviceCities
-          .map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`)
-          .join("")}
+        ${serviceCities.map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`).join("")}
       </select>
     `;
 
@@ -1057,40 +1211,25 @@ function renderStep() {
       <textarea id="qNotes" placeholder="Pet hair, stains, address notes, etc.">${escapeHtml(quoteState.notes)}</textarea>
     `;
 
-    const ack = document.createElement("div");
-    ack.style.marginTop = "10px";
-    ack.innerHTML = `
-      <div class="qCheck">
-        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
-        <label for="qAck">
-          <strong>$25 Booking Deposit Required *</strong><br/>
-          A $25 deposit is required to reserve your appointment.
-          This deposit is applied to your total (example: if the job is $170, you’ll pay $25 now and the remaining $145 at service).<br/><br/>
-          You can reschedule with at least <strong>2 days notice</strong>. If rescheduled with less than 2 days notice or canceled last minute, the deposit is kept.
-        </label>
-      </div>
-      <div class="qStatus" data-q-status>
-        ${canContinue() ? "" : "Required: name, phone, email, closest city, and deposit acknowledgement."}
-      </div>
-      <div style="display:none;">
-        <input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />
-      </div>
-    `;
+    const status = document.createElement("div");
+    status.className = "qStatus";
+    status.textContent = canContinue() ? "" : "Required: name, phone, email, and closest city.";
 
-    quoteBody.append(title, sub, grid, notes, ack);
+    const hp = document.createElement("div");
+    hp.style.display = "none";
+    hp.innerHTML = `<input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />`;
+
+    quoteBody.append(title, sub, grid, notes, status, hp);
 
     const nameEl = quoteBody.querySelector("#qName");
     const phoneEl = quoteBody.querySelector("#qPhone");
     const emailEl = quoteBody.querySelector("#qEmail");
     const cityEl = quoteBody.querySelector("#qCity");
     const notesEl = quoteBody.querySelector("#qNotes");
-    const ackEl = quoteBody.querySelector("#qAck");
     const hpEl = quoteBody.querySelector("#qCompany");
-    const statusEl = quoteBody.querySelector("[data-q-status]");
 
     const updateStatus = () => {
-      if (!statusEl) return;
-      statusEl.textContent = canContinue() ? "" : "Required: name, phone, email, closest city, and deposit acknowledgement.";
+      status.textContent = canContinue() ? "" : "Required: name, phone, email, and closest city.";
     };
 
     nameEl?.addEventListener("input", (e) => { quoteState.name = e.target.value || ""; updateNav(); updateStatus(); });
@@ -1098,13 +1237,11 @@ function renderStep() {
     emailEl?.addEventListener("input", (e) => { quoteState.email = e.target.value || ""; updateNav(); updateStatus(); });
     cityEl?.addEventListener("change", (e) => { quoteState.city = e.target.value || ""; updateNav(); updateStatus(); });
     notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
-    ackEl?.addEventListener("change", (e) => { quoteState.ackDeposit = !!e.target.checked; updateNav(); updateStatus(); });
     hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
 
     setTimeout(() => nameEl?.focus(), 50);
   }
 
-  // 8) Estimate
   if (step === "estimate") {
     title.textContent = "Estimated price";
     sub.textContent = "Estimate based on your selections.";
@@ -1131,7 +1268,6 @@ function renderStep() {
     quoteBody.append(title, sub, box);
   }
 
-  // 9) Appointment
   if (step === "appointment") {
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
@@ -1179,6 +1315,8 @@ function renderStep() {
         quoteState.slotTime = "";
         quoteState.slotId = "";
         quoteState.slotLabel = "";
+        quoteState.paymentStatus = "";
+        quoteState.squarePaymentId = "";
         renderStep();
       }
     });
@@ -1189,7 +1327,135 @@ function renderStep() {
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
   }
 
-  // 10) Done
+  if (step === "payment") {
+    title.textContent = "Pay your booking deposit";
+    sub.textContent = "A $25 deposit reserves your appointment and is applied to the total.";
+
+    const wrap = document.createElement("div");
+    wrap.className = "qEstimateBox qEstimateBox--simple";
+
+    const estLine = quoteState.estimateLow && quoteState.estimateHigh
+      ? `$${quoteState.estimateLow}–$${quoteState.estimateHigh}`
+      : "We’ll confirm after assessment";
+
+    wrap.innerHTML = `
+      <div class="qEstimateBig">$${escapeHtml(String(quoteState.depositAmount))}</div>
+      <div class="qEstimateFine" style="margin-top:8px;">
+        Deposit due now • applied toward service total
+      </div>
+      <div class="qEstimatePills" style="margin-top:14px;">
+        <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
+        <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
+      </div>
+    `;
+
+    const ack = document.createElement("div");
+    ack.style.marginTop = "12px";
+    ack.innerHTML = `
+      <div class="qCheck">
+        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
+        <label for="qAck">
+          <strong>$25 Booking Deposit Required *</strong><br/>
+          This deposit is applied to your total. Example: if the job is $170, you pay $25 now and the remaining $145 at service.<br/><br/>
+          You can reschedule with at least <strong>2 days notice</strong>. If rescheduled with less than 2 days notice or canceled last minute, the deposit is kept.
+        </label>
+      </div>
+    `;
+
+    const squareBox = document.createElement("div");
+    squareBox.className = "qCalWrap";
+    squareBox.style.marginTop = "12px";
+
+    const cfg = getSquareConfig();
+    const squareReady = isSquareConfigured();
+
+    squareBox.innerHTML = `
+      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
+      <div class="qStatus" data-q-pay-status>
+        ${
+          quoteState.paymentStatus === "paid"
+            ? "Deposit paid successfully."
+            : squareReady
+              ? "Loading secure payment form..."
+              : (cfg.allowBypass
+                  ? "Square is not connected yet. This page is in bypass mode for now."
+                  : "Square is not connected yet.")
+        }
+      </div>
+      <div id="qSquareCard" style="margin-top:12px; min-height:${quoteState.paymentStatus === "paid" ? "0" : "90px"};"></div>
+      <div data-q-paid-wrap style="margin-top:10px;">
+        ${
+          quoteState.paymentStatus === "paid"
+            ? `
+              <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
+              <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
+              ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+            `
+            : ""
+        }
+      </div>
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+        ${quoteState.paymentStatus === "paid" ? "" : `<button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button>`}
+        ${
+          !squareReady && cfg.allowBypass
+            ? `<button type="button" class="btn quoteBack" id="qBypassDepositBtn">Continue Without Live Payment</button>`
+            : ""
+        }
+      </div>
+    `;
+
+    const foot = document.createElement("div");
+    foot.className = "qStatus";
+    foot.style.marginTop = "10px";
+    foot.textContent = canContinue()
+      ? ""
+      : squareReady
+        ? "Required: deposit acknowledgment and successful payment."
+        : (cfg.allowBypass
+            ? "Required: deposit acknowledgment."
+            : "Required: deposit acknowledgment. Square must also be connected.");
+
+    quoteBody.append(title, sub, wrap, ack, squareBox, foot);
+
+    const ackEl = quoteBody.querySelector("#qAck");
+    const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
+    const squareCardEl = quoteBody.querySelector("#qSquareCard");
+    const payBtn = quoteBody.querySelector("#qPayDepositBtn");
+    const paidWrapEl = quoteBody.querySelector("[data-q-paid-wrap]");
+    const bypassBtn = quoteBody.querySelector("#qBypassDepositBtn");
+
+    const updateFooter = () => {
+      foot.textContent = canContinue()
+        ? ""
+        : squareReady
+          ? "Required: deposit acknowledgment and successful payment."
+          : (cfg.allowBypass
+              ? "Required: deposit acknowledgment."
+              : "Required: deposit acknowledgment. Square must also be connected.");
+      updateNav();
+    };
+
+    ackEl?.addEventListener("change", (e) => {
+      quoteState.ackDeposit = !!e.target.checked;
+      updateFooter();
+    });
+
+    bypassBtn?.addEventListener("click", () => {
+      quoteState.paymentStatus = "bypass";
+      quoteState.paymentMessage = "Live Square payment is not connected yet. Continuing in bypass mode.";
+      if (payStatusEl) payStatusEl.textContent = quoteState.paymentMessage;
+      updateFooter();
+    });
+
+    payBtn?.addEventListener("click", () => handleDepositPayment(payBtn, payStatusEl, paidWrapEl));
+
+    if (quoteState.paymentStatus !== "paid") {
+      initSquareCard(squareCardEl, payStatusEl).then(() => updateFooter());
+    } else {
+      updateFooter();
+    }
+  }
+
   if (step === "done") {
     title.textContent = "You're booked";
     sub.textContent = "We received your request and will confirm shortly.";
@@ -1206,6 +1472,12 @@ function renderStep() {
           ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
           : "—"
       }</div>
+      <div class="qDoneLine"><strong>Deposit:</strong> ${
+        quoteState.paymentStatus === "paid"
+          ? `$${escapeHtml(String(quoteState.depositAmount))} paid`
+          : (quoteState.paymentStatus === "bypass" ? "Payment setup pending" : "—")
+      }</div>
+      ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
       <div class="qDoneFine">If you need anything immediately, call us.</div>
     `;
 
@@ -1259,11 +1531,13 @@ function buildCalendarIndex(slots) {
   for (const [k, arr] of map.entries()) arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
   return map;
 }
+
 function findNextAvailableDate(fromDateISO) {
   const dates = Array.from(calendarCache.byDate.keys()).sort();
   for (const d of dates) if (!fromDateISO || d >= fromDateISO) return d;
   return "";
 }
+
 function parseSlotToDateTime(slot) {
   const id = String(slot.id || "").trim();
   const label = String(slot.label || "").trim();
@@ -1366,6 +1640,8 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotTime = "";
     quoteState.slotId = "";
     quoteState.slotLabel = "";
+    quoteState.paymentStatus = "";
+    quoteState.squarePaymentId = "";
     drawMonth(cursor);
   });
 
@@ -1382,6 +1658,8 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotTime = "";
     quoteState.slotId = "";
     quoteState.slotLabel = "";
+    quoteState.paymentStatus = "";
+    quoteState.squarePaymentId = "";
     drawMonth(cursor);
   });
 
@@ -1431,6 +1709,8 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
         quoteState.slotTime = "";
         quoteState.slotId = "";
         quoteState.slotLabel = "";
+        quoteState.paymentStatus = "";
+        quoteState.squarePaymentId = "";
         renderCalendar(calEl, timesEl, nextAvailBtn);
       });
 
@@ -1486,6 +1766,8 @@ function renderTimes(timesEl, nextAvailBtn) {
       quoteState.slotDate = s.date;
       quoteState.slotTime = s.time;
       quoteState.slotLabel = s.label || `${s.date} ${s.time}`;
+      quoteState.paymentStatus = "";
+      quoteState.squarePaymentId = "";
 
       grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
       b.classList.add("isSel");
@@ -1538,7 +1820,10 @@ function buildPayload() {
     city: quoteState.city,
     notes: quoteState.notes,
 
-    ackDeposit: quoteState.ackDeposit
+    ackDeposit: quoteState.ackDeposit,
+    depositAmount: quoteState.depositAmount,
+    paymentStatus: quoteState.paymentStatus,
+    squarePaymentId: quoteState.squarePaymentId
   };
 }
 
@@ -1577,34 +1862,37 @@ async function reserveAndSend() {
 // -------------------------
 // Nav actions
 // -------------------------
+function finalizeBooking() {
+  quoteNextBtn.disabled = true;
+  const old = quoteNextBtn.textContent;
+  quoteNextBtn.textContent = "Sending...";
+
+  const est = computeEstimate();
+  quoteState.estimateLow = est ? est[0] : "";
+  quoteState.estimateHigh = est ? est[1] : "";
+
+  reserveAndSend().then((result) => {
+    if (result && result.ok === false) {
+      alert(result.message || "That time was just booked. Pick another slot.");
+      quoteNextBtn.textContent = old;
+      quoteNextBtn.disabled = false;
+      return;
+    }
+
+    stepIndex = steps.indexOf("done");
+    renderStep();
+    quoteNextBtn.textContent = old;
+    quoteNextBtn.disabled = false;
+  });
+}
+
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
 
-  if (step === "appointment") {
-    quoteNextBtn.disabled = true;
-    const old = quoteNextBtn.textContent;
-    quoteNextBtn.textContent = "Sending...";
-
-    const est = computeEstimate();
-    quoteState.estimateLow = est ? est[0] : "";
-    quoteState.estimateHigh = est ? est[1] : "";
-
-    reserveAndSend().then((result) => {
-      if (result && result.ok === false) {
-        alert(result.message || "That time was just booked. Pick another slot.");
-        quoteNextBtn.textContent = old;
-        quoteNextBtn.disabled = false;
-        return;
-      }
-
-      stepIndex = steps.indexOf("done");
-      renderStep();
-      quoteNextBtn.textContent = old;
-      quoteNextBtn.disabled = false;
-    });
-
+  if (step === "payment") {
+    finalizeBooking();
     return;
   }
 
