@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v10.2 - Apple Pay Added + Payment Step Cleanup + Square Reliability)
+// QUOTE WIZARD (Flow v10.3 - Apple Pay Fix + Deposit or Pay In Full)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -56,11 +56,14 @@ const quoteState = {
   city: "",
   notes: "",
 
+  paymentMode: "deposit", // "deposit" | "full"
   ackDeposit: false,
+  ackPriceVariance: false,
   depositAmount: DEPOSIT_AMOUNT,
   paymentStatus: "", // "", "ready", "processing", "paid"
   paymentMessage: "",
   squarePaymentId: "",
+  paidAmount: "",
 
   honeypot: ""
 };
@@ -236,6 +239,41 @@ function makeIdempotencyKey() {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function formatMoney(n) {
+  return `$${Number(n || 0).toFixed(0)}`;
+}
+
+function getEstimateRange() {
+  const est = computeEstimate();
+  if (!est) return null;
+  return { low: Number(est[0] || 0), high: Number(est[1] || 0) };
+}
+
+function getFullPayAmount() {
+  const est = getEstimateRange();
+  if (!est) return DEPOSIT_AMOUNT;
+  return Math.round((est.low + est.high) / 2);
+}
+
+function getCurrentChargeAmount() {
+  return quoteState.paymentMode === "full" ? getFullPayAmount() : Number(quoteState.depositAmount || DEPOSIT_AMOUNT);
+}
+
+function getPaymentLabel() {
+  return quoteState.paymentMode === "full"
+    ? "Keizer Mobile Detailing Full Payment"
+    : "Keizer Mobile Detailing Deposit";
+}
+
+function resetPaymentState() {
+  quoteState.ackDeposit = false;
+  quoteState.ackPriceVariance = false;
+  quoteState.paymentStatus = "";
+  quoteState.paymentMessage = "";
+  quoteState.squarePaymentId = "";
+  quoteState.paidAmount = "";
 }
 
 // -------------------------
@@ -440,7 +478,9 @@ function canContinue() {
   if (step === "appointment") return !!quoteState.slotId;
 
   if (step === "payment") {
-    return quoteState.ackDeposit === true && quoteState.paymentStatus === "paid";
+    const baseAck = quoteState.ackDeposit === true;
+    const fullAck = quoteState.paymentMode === "full" ? quoteState.ackPriceVariance === true : true;
+    return baseAck && fullAck && quoteState.paymentStatus === "paid";
   }
 
   return true;
@@ -486,10 +526,8 @@ function resetBookingTail() {
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
   quoteState.slotTime = "";
-  quoteState.ackDeposit = false;
-  quoteState.paymentStatus = "";
-  quoteState.paymentMessage = "";
-  quoteState.squarePaymentId = "";
+  quoteState.paymentMode = "deposit";
+  resetPaymentState();
 }
 
 // -------------------------
@@ -650,11 +688,14 @@ function openQuoteModal() {
     email: "",
     city: "",
     notes: "",
+    paymentMode: "deposit",
     ackDeposit: false,
+    ackPriceVariance: false,
     depositAmount: DEPOSIT_AMOUNT,
     paymentStatus: "",
     paymentMessage: "",
     squarePaymentId: "",
+    paidAmount: "",
     honeypot: ""
   });
 
@@ -722,13 +763,13 @@ async function warmSquare() {
   }
 }
 
-function getDepositMoneyConfig() {
+function getCurrentMoneyConfig() {
   return {
     countryCode: "US",
     currencyCode: "USD",
     total: {
-      amount: String(Number(quoteState.depositAmount || DEPOSIT_AMOUNT).toFixed(2)),
-      label: "Keizer Mobile Detailing Deposit"
+      amount: String(Number(getCurrentChargeAmount()).toFixed(2)),
+      label: getPaymentLabel()
     }
   };
 }
@@ -761,7 +802,7 @@ async function initSquareCard(cardEl, statusEl) {
     await squareCard.attach(cardEl);
 
     quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
-    if (statusEl) statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
+    if (statusEl) statusEl.textContent = "Use Apple Pay or enter card details.";
     return true;
   } catch (err) {
     if (statusEl) statusEl.textContent = err?.message || "Could not load card form.";
@@ -790,7 +831,9 @@ async function initSquareApplePay(applePayEl, statusEl) {
     const buttonEl = applePayEl.querySelector("#qApplePayButton");
     if (!buttonEl) return false;
 
-    const paymentRequest = squarePayments.paymentRequest(getDepositMoneyConfig());
+    squareApplePay = null;
+
+    const paymentRequest = squarePayments.paymentRequest(getCurrentMoneyConfig());
     squareApplePay = await squarePayments.applePay(paymentRequest);
 
     let canUseApplePay = true;
@@ -806,7 +849,7 @@ async function initSquareApplePay(applePayEl, statusEl) {
     buttonEl.style.display = "inline-flex";
 
     if (statusEl && quoteState.paymentStatus !== "paid") {
-      statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
+      statusEl.textContent = "Use Apple Pay or enter card details.";
     }
 
     return true;
@@ -818,33 +861,21 @@ async function initSquareApplePay(applePayEl, statusEl) {
   }
 }
 
-    await squareApplePay.attach("#qApplePayButton");
+async function createSquareCharge(sourceId) {
+  const amount = getCurrentChargeAmount();
 
-    if (statusEl && quoteState.paymentStatus !== "paid") {
-      statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
-    }
-
-    return true;
-  } catch (err) {
-    console.error("Apple Pay init error:", err);
-    applePayEl.style.display = "none";
-    squareApplePay = null;
-    return false;
-  }
-}
-
-async function createSquareDeposit(sourceId) {
   const payload = {
     sourceId,
     idempotencyKey: makeIdempotencyKey(),
-    amountCents: moneyToCents(quoteState.depositAmount),
+    amountCents: moneyToCents(amount),
     booking: {
       name: quoteState.name,
       email: quoteState.email,
       phone: quoteState.phone,
       slotId: quoteState.slotId,
       slotLabel: quoteState.slotLabel,
-      city: quoteState.city
+      city: quoteState.city,
+      paymentMode: quoteState.paymentMode
     }
   };
 
@@ -863,7 +894,7 @@ async function createSquareDeposit(sourceId) {
   return data;
 }
 
-async function handlePayDeposit(payBtn, statusEl) {
+async function handlePayNowCard(payBtn, statusEl) {
   if (!squareCard) {
     statusEl.textContent = "Card form is not ready yet.";
     return;
@@ -883,31 +914,36 @@ async function handlePayDeposit(payBtn, statusEl) {
       throw new Error("Card details were not accepted. Please check the form and try again.");
     }
 
-    const result = await createSquareDeposit(tokenResult.token);
+    const result = await createSquareCharge(tokenResult.token);
     if (!result || result.ok !== true) {
-      throw new Error(result?.message || "Deposit payment failed.");
+      throw new Error(result?.message || "Payment failed.");
     }
 
     quoteState.paymentStatus = "paid";
-    quoteState.paymentMessage = "Deposit paid successfully.";
+    quoteState.paymentMessage = quoteState.paymentMode === "full"
+      ? "Full payment paid successfully."
+      : "Deposit paid successfully.";
     quoteState.squarePaymentId = String(result.paymentId || result.id || "");
+    quoteState.paidAmount = String(getCurrentChargeAmount());
 
     if (statusEl) statusEl.textContent = quoteState.paymentMessage;
     renderStep();
   } catch (err) {
     quoteState.paymentStatus = "";
-    quoteState.paymentMessage = err?.message || "Deposit payment failed.";
+    quoteState.paymentMessage = err?.message || "Payment failed.";
     if (statusEl) statusEl.textContent = quoteState.paymentMessage;
     updateNav();
   } finally {
     if (payBtn) {
       payBtn.disabled = false;
-      payBtn.textContent = `Pay $${quoteState.depositAmount} Deposit`;
+      payBtn.textContent = quoteState.paymentMode === "full"
+        ? `Pay ${formatMoney(getCurrentChargeAmount())} in Full`
+        : `Pay ${formatMoney(getCurrentChargeAmount())} Deposit`;
     }
   }
 }
 
-async function handleApplePayDeposit(statusEl) {
+async function handleApplePayCharge(statusEl) {
   if (!squareApplePay) {
     if (statusEl) statusEl.textContent = "Apple Pay is not available on this device/browser.";
     return;
@@ -925,14 +961,17 @@ async function handleApplePayDeposit(statusEl) {
       throw new Error("Apple Pay was not completed.");
     }
 
-    const result = await createSquareDeposit(tokenResult.token);
+    const result = await createSquareCharge(tokenResult.token);
     if (!result || result.ok !== true) {
       throw new Error(result?.message || "Apple Pay payment failed.");
     }
 
     quoteState.paymentStatus = "paid";
-    quoteState.paymentMessage = "Deposit paid successfully with Apple Pay.";
+    quoteState.paymentMessage = quoteState.paymentMode === "full"
+      ? "Full payment paid successfully with Apple Pay."
+      : "Deposit paid successfully with Apple Pay.";
     quoteState.squarePaymentId = String(result.paymentId || result.id || "");
+    quoteState.paidAmount = String(getCurrentChargeAmount());
 
     if (statusEl) statusEl.textContent = quoteState.paymentMessage;
     renderStep();
@@ -1366,8 +1405,7 @@ function renderStep() {
         quoteState.slotTime = "";
         quoteState.slotId = "";
         quoteState.slotLabel = "";
-        quoteState.paymentStatus = "";
-        quoteState.squarePaymentId = "";
+        resetPaymentState();
         renderStep();
       }
     });
@@ -1381,21 +1419,54 @@ function renderStep() {
   }
 
   if (step === "payment") {
-    title.textContent = "Pay booking deposit";
-    sub.textContent = "A $25 deposit reserves your appointment and is applied to your total.";
+    title.textContent = "Pay to reserve your appointment";
+    sub.textContent = "Choose a deposit or pay in full today.";
 
     const estLine = quoteState.estimateLow && quoteState.estimateHigh
       ? `$${quoteState.estimateLow}–$${quoteState.estimateHigh}`
       : "We’ll confirm after assessment";
 
+    const fullPayAmount = getFullPayAmount();
+    const currentChargeAmount = getCurrentChargeAmount();
+    const payBtnLabel = quoteState.paymentMode === "full"
+      ? `Pay ${formatMoney(currentChargeAmount)} in Full`
+      : `Pay ${formatMoney(currentChargeAmount)} Deposit`;
+
     const summary = document.createElement("div");
     summary.className = "qEstimateBox qEstimateBox--simple";
     summary.innerHTML = `
-      <div class="qEstimateBig">$${escapeHtml(String(quoteState.depositAmount))}</div>
-      <div class="qEstimateFine" style="margin-top:8px;">Deposit for your appointment</div>
+      <div class="qEstimateBig">${formatMoney(currentChargeAmount)}</div>
+      <div class="qEstimateFine" style="margin-top:8px;">
+        ${quoteState.paymentMode === "full" ? "Selected payment amount" : "Deposit to reserve your appointment"}
+      </div>
       <div class="qEstimatePills" style="margin-top:14px;">
         <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
         <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
+        <span class="qPill"><strong>Pay in full midpoint:</strong> ${formatMoney(fullPayAmount)}</span>
+      </div>
+    `;
+
+    const paymentChoice = document.createElement("div");
+    paymentChoice.className = "qCalWrap";
+    paymentChoice.style.marginTop = "12px";
+    paymentChoice.innerHTML = `
+      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Choose payment option</div>
+      <div style="display:grid; gap:10px;">
+        <label class="qCheck" style="align-items:flex-start;">
+          <input id="qPayModeDeposit" type="radio" name="qPayMode" value="deposit" ${quoteState.paymentMode === "deposit" ? "checked" : ""} />
+          <span>
+            <strong>Pay deposit now</strong><br/>
+            Pay ${formatMoney(DEPOSIT_AMOUNT)} now to reserve your appointment. It is applied to your total.
+          </span>
+        </label>
+
+        <label class="qCheck" style="align-items:flex-start;">
+          <input id="qPayModeFull" type="radio" name="qPayMode" value="full" ${quoteState.paymentMode === "full" ? "checked" : ""} />
+          <span>
+            <strong>Pay in full now</strong><br/>
+            Pay the midpoint of your estimate now: <strong>${formatMoney(fullPayAmount)}</strong>.
+          </span>
+        </label>
       </div>
     `;
 
@@ -1405,10 +1476,28 @@ function renderStep() {
       <div class="qCheck">
         <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
         <label for="qAck">
-          <strong>I understand the $25 deposit is applied to my total.</strong><br/>
-          You can reschedule with at least <strong>2 days notice</strong>. Late cancellations or no-shows forfeit the deposit.
+          ${
+            quoteState.paymentMode === "full"
+              ? `<strong>I understand this payment is being made today to reserve and cover the current quoted work.</strong><br/>
+                 You can reschedule with at least <strong>2 days notice</strong>. Late cancellations or no-shows may forfeit the amount paid.`
+              : `<strong>I understand the ${formatMoney(DEPOSIT_AMOUNT)} deposit is applied to my total.</strong><br/>
+                 You can reschedule with at least <strong>2 days notice</strong>. Late cancellations or no-shows forfeit the deposit.`
+          }
         </label>
       </div>
+      ${
+        quoteState.paymentMode === "full"
+          ? `
+            <div class="qCheck" style="margin-top:10px;">
+              <input id="qAckPriceVariance" type="checkbox" ${quoteState.ackPriceVariance ? "checked" : ""} />
+              <label for="qAckPriceVariance">
+                <strong>I understand the final price can be higher or lower depending on the actual condition of the vehicle.</strong><br/>
+                The upfront full payment is based on the midpoint of the estimate, and any difference can be settled after inspection if needed.
+              </label>
+            </div>
+          `
+          : ""
+      }
     `;
 
     const squareBox = document.createElement("div");
@@ -1418,21 +1507,27 @@ function renderStep() {
     squareBox.innerHTML = `
       <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
       <div class="qStatus" data-q-pay-status>
-        ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Choose Apple Pay or enter card details."}
+        ${quoteState.paymentStatus === "paid" ? "Payment completed successfully." : "Use Apple Pay or enter card details."}
       </div>
       ${
         quoteState.paymentStatus === "paid"
           ? ""
           : `
             <div id="qApplePayWrap" style="margin:12px 0 14px;">
-  <div id="qApplePayButton"></div>
-</div>
+              <button
+                type="button"
+                id="qApplePayButton"
+                style="display:none; width:100%; min-height:48px; border:none; border-radius:12px; background:#000; color:#fff; font-size:16px; font-weight:600; cursor:pointer;"
+              >
+                Apple Pay
+              </button>
+            </div>
 
             <div class="qStatus" style="margin:8px 0 10px;">Or pay with card</div>
             <div id="qSquareCard"></div>
 
             <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button>
+              <button type="button" class="btn btn--quote" id="qPayNowBtn">${escapeHtml(payBtnLabel)}</button>
             </div>
           `
       }
@@ -1440,8 +1535,9 @@ function renderStep() {
         ${
           quoteState.paymentStatus === "paid"
             ? `
-              <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
-              <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
+              <div class="qDoneLine"><strong>Payment:</strong> Paid</div>
+              <div class="qDoneLine"><strong>Type:</strong> ${quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit"}</div>
+              <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(quoteState.paidAmount || currentChargeAmount)}</div>
               ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
             `
             : ""
@@ -1452,23 +1548,54 @@ function renderStep() {
     const foot = document.createElement("div");
     foot.className = "qStatus";
     foot.style.marginTop = "10px";
-    foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
+    foot.textContent = canContinue()
+      ? ""
+      : quoteState.paymentMode === "full"
+        ? "Required: payment selection, both checkboxes, and successful payment."
+        : "Required: payment selection, acknowledgment, and successful payment.";
 
-    quoteBody.append(title, sub, summary, ack, squareBox, foot);
+    quoteBody.append(title, sub, summary, paymentChoice, ack, squareBox, foot);
 
     const ackEl = quoteBody.querySelector("#qAck");
+    const ackPriceVarianceEl = quoteBody.querySelector("#qAckPriceVariance");
     const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
     const squareCardEl = quoteBody.querySelector("#qSquareCard");
     const applePayWrapEl = quoteBody.querySelector("#qApplePayWrap");
-    const payBtn = quoteBody.querySelector("#qPayDepositBtn");
+    const payBtn = quoteBody.querySelector("#qPayNowBtn");
+    const applePayButtonEl = quoteBody.querySelector("#qApplePayButton");
+    const payModeDepositEl = quoteBody.querySelector("#qPayModeDeposit");
+    const payModeFullEl = quoteBody.querySelector("#qPayModeFull");
 
     const updateFoot = () => {
-      foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
+      foot.textContent = canContinue()
+        ? ""
+        : quoteState.paymentMode === "full"
+          ? "Required: payment selection, both checkboxes, and successful payment."
+          : "Required: payment selection, acknowledgment, and successful payment.";
       updateNav();
     };
 
+    payModeDepositEl?.addEventListener("change", (e) => {
+      if (!e.target.checked) return;
+      quoteState.paymentMode = "deposit";
+      resetPaymentState();
+      renderStep();
+    });
+
+    payModeFullEl?.addEventListener("change", (e) => {
+      if (!e.target.checked) return;
+      quoteState.paymentMode = "full";
+      resetPaymentState();
+      renderStep();
+    });
+
     ackEl?.addEventListener("change", (e) => {
       quoteState.ackDeposit = !!e.target.checked;
+      updateFoot();
+    });
+
+    ackPriceVarianceEl?.addEventListener("change", (e) => {
+      quoteState.ackPriceVariance = !!e.target.checked;
       updateFoot();
     });
 
@@ -1487,10 +1614,8 @@ function renderStep() {
       updateFoot();
     }
 
-    payBtn?.addEventListener("click", () => handlePayDeposit(payBtn, payStatusEl));
-
-    const applePayButtonEl = quoteBody.querySelector("#qApplePayButton");
-    applePayButtonEl?.addEventListener("click", () => handleApplePayDeposit(payStatusEl));
+    payBtn?.addEventListener("click", () => handlePayNowCard(payBtn, payStatusEl));
+    applePayButtonEl?.addEventListener("click", () => handleApplePayCharge(payStatusEl));
   }
 
   if (step === "done") {
@@ -1509,9 +1634,14 @@ function renderStep() {
           ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
           : "—"
       }</div>
-      <div class="qDoneLine"><strong>Deposit:</strong> $${escapeHtml(String(quoteState.depositAmount))} paid</div>
+      <div class="qDoneLine"><strong>Payment Type:</strong> ${quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit"}</div>
+      <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(quoteState.paidAmount || getCurrentChargeAmount())}</div>
       ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-      <div class="qDoneFine">If you need anything immediately, call us.</div>
+      ${
+        quoteState.paymentMode === "full"
+          ? `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the estimate.</div>`
+          : `<div class="qDoneFine">Your deposit will be applied to the final total.</div>`
+      }
     `;
 
     const actions = document.createElement("div");
@@ -1671,9 +1801,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotTime = "";
     quoteState.slotId = "";
     quoteState.slotLabel = "";
-    quoteState.paymentStatus = "";
-    quoteState.squarePaymentId = "";
-    quoteState.ackDeposit = false;
+    resetPaymentState();
     drawMonth(cursor);
   });
 
@@ -1690,9 +1818,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotTime = "";
     quoteState.slotId = "";
     quoteState.slotLabel = "";
-    quoteState.paymentStatus = "";
-    quoteState.squarePaymentId = "";
-    quoteState.ackDeposit = false;
+    resetPaymentState();
     drawMonth(cursor);
   });
 
@@ -1742,9 +1868,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
         quoteState.slotTime = "";
         quoteState.slotId = "";
         quoteState.slotLabel = "";
-        quoteState.paymentStatus = "";
-        quoteState.squarePaymentId = "";
-        quoteState.ackDeposit = false;
+        resetPaymentState();
         renderCalendar(calEl, timesEl, nextAvailBtn);
       });
 
@@ -1800,9 +1924,7 @@ function renderTimes(timesEl, nextAvailBtn) {
       quoteState.slotDate = s.date;
       quoteState.slotTime = s.time;
       quoteState.slotLabel = s.label || `${s.date} ${s.time}`;
-      quoteState.paymentStatus = "";
-      quoteState.squarePaymentId = "";
-      quoteState.ackDeposit = false;
+      resetPaymentState();
 
       grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
       b.classList.add("isSel");
@@ -1855,9 +1977,13 @@ function buildPayload() {
     city: quoteState.city,
     notes: quoteState.notes,
 
+    paymentMode: quoteState.paymentMode,
     ackDeposit: quoteState.ackDeposit,
+    ackPriceVariance: quoteState.ackPriceVariance,
     depositAmount: quoteState.depositAmount,
-    depositPaid: quoteState.paymentStatus === "paid",
+    paymentAmountCharged: getCurrentChargeAmount(),
+    depositPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "deposit",
+    fullPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "full",
     paymentStatus: quoteState.paymentStatus,
     squarePaymentId: quoteState.squarePaymentId
   };
