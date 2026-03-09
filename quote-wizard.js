@@ -780,13 +780,19 @@ async function initSquareApplePay(applePayEl, statusEl) {
 
     if (!squarePayments) {
       if (!squarePaymentsInitPromise) {
-        squarePaymentsInitPromise = Promise.resolve(window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID));
+        squarePaymentsInitPromise = Promise.resolve(
+          window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID)
+        );
       }
       squarePayments = await squarePaymentsInitPromise;
     }
 
     squareApplePay = null;
-    applePayEl.innerHTML = "";
+
+    const buttonEl = applePayEl.querySelector("#qApplePayButton");
+    if (!buttonEl) return false;
+
+    buttonEl.innerHTML = "";
 
     const paymentRequest = squarePayments.paymentRequest(getDepositMoneyConfig());
     squareApplePay = await squarePayments.applePay(paymentRequest);
@@ -797,17 +803,20 @@ async function initSquareApplePay(applePayEl, statusEl) {
     }
 
     if (!canUseApplePay) {
-      applePayEl.innerHTML = "";
+      applePayEl.style.display = "none";
       return false;
     }
 
     await squareApplePay.attach("#qApplePayButton");
+
     if (statusEl && quoteState.paymentStatus !== "paid") {
       statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
     }
+
     return true;
-  } catch {
-    applePayEl.innerHTML = "";
+  } catch (err) {
+    console.error("Apple Pay init error:", err);
+    applePayEl.style.display = "none";
     squareApplePay = null;
     return false;
   }
