@@ -1222,90 +1222,109 @@ function renderStep() {
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
   }
 
-  if (step === "payment") {
-    title.textContent = "Pay your booking deposit";
-    sub.textContent = "A $25 deposit reserves your appointment and is applied to your total.";
-
-    const wrap = document.createElement("div");
-    wrap.className = "qEstimateBox qEstimateBox--simple";
+    if (step === "payment") {
+    title.textContent = "Pay booking deposit";
+    sub.textContent = "";
 
     const estLine = quoteState.estimateLow && quoteState.estimateHigh
       ? `$${quoteState.estimateLow}–$${quoteState.estimateHigh}`
       : "We’ll confirm after assessment";
 
+    const wrap = document.createElement("div");
+    wrap.className = "qPayCard";
+
     wrap.innerHTML = `
-      <div class="qEstimateBig">$${escapeHtml(String(quoteState.depositAmount))}</div>
-      <div class="qEstimateFine" style="margin-top:8px;">
-        Deposit due now • applied toward service total
+      <div class="qPayHead">
+        <h3 class="qPayHeadTitle">Pay Booking Deposit</h3>
+        <button type="button" class="qPayCloseGhost" data-q-pay-close aria-label="Close">×</button>
       </div>
-      <div class="qEstimatePills" style="margin-top:14px;">
-        <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
-        <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
+
+      <div class="qPayBody">
+        <div class="qPayAmount">
+          <div class="qPayAmountBig">$${escapeHtml(String(quoteState.depositAmount))}</div>
+          <div class="qPayAmountSub">Deposit for your appointment</div>
+        </div>
+
+        <div class="qPayMeta">
+          <span class="qPayPill">${escapeHtml(quoteState.slotLabel || "Appointment pending")}</span>
+          <span class="qPayPill">Estimate: ${escapeHtml(estLine)}</span>
+        </div>
+
+        <div class="qPayNotice">
+          <div class="qPayNoticeCheck" aria-hidden="true">✓</div>
+          <div class="qPayNoticeText">
+            <p class="qPayNoticeTitle">
+              A $${escapeHtml(String(quoteState.depositAmount))} deposit is required and will be applied to your service total.
+            </p>
+            <p class="qPayNoticeSub">
+              Reschedule with at least 2 days notice and your deposit stays with your booking. Late cancellations or no-shows forfeit the deposit.
+            </p>
+          </div>
+        </div>
+
+        <div class="qPaySectionTitle">Card details</div>
+
+        <div class="qPayCardWrap">
+          <div class="qPayStatus" data-q-pay-status>
+            ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Enter card details for the deposit."}
+          </div>
+
+          <div id="qSquareCard"></div>
+
+          <div data-q-paid-wrap style="margin-top:10px;">
+            ${
+              quoteState.paymentStatus === "paid"
+                ? `
+                  <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
+                  <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
+                  ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+                `
+                : ""
+            }
+          </div>
+
+          ${
+            quoteState.paymentStatus === "paid"
+              ? ""
+              : `
+                <div class="qPayBtnWrap">
+                  <button type="button" class="btn btn--quote" id="qPayDepositBtn">
+                    Pay $${escapeHtml(String(quoteState.depositAmount))}
+                  </button>
+                </div>
+              `
+          }
+        </div>
+
+        <div class="qPayFoot">
+          Your appointment is reserved after the deposit is successfully paid.
+        </div>
+
+        <div class="qPayRequired">
+          ${canContinue() ? "" : "Required: successful deposit payment."}
+        </div>
       </div>
     `;
 
-    const ack = document.createElement("div");
-    ack.style.marginTop = "12px";
-    ack.innerHTML = `
-      <div class="qCheck">
-        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
-        <label for="qAck">
-          <strong>$25 Booking Deposit Required *</strong><br/>
-          This deposit is applied to your total. Example: if the job is $170, you pay $25 now and the remaining $145 at service.<br/><br/>
-          You can reschedule with at least <strong>2 days notice</strong>. If rescheduled with less than 2 days notice or canceled last minute, the deposit is kept.
-        </label>
-      </div>
-    `;
+    quoteBody.append(wrap);
 
-    const squareBox = document.createElement("div");
-    squareBox.className = "qCalWrap";
-    squareBox.style.marginTop = "12px";
-
-    squareBox.innerHTML = `
-      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
-      <div class="qStatus" data-q-pay-status>
-        ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Loading secure payment form..."}
-      </div>
-      <div id="qSquareCard"></div>
-      <div data-q-paid-wrap style="margin-top:10px;">
-        ${
-          quoteState.paymentStatus === "paid"
-            ? `
-              <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
-              <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
-              ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-            `
-            : ""
-        }
-      </div>
-      ${
-        quoteState.paymentStatus === "paid"
-          ? ""
-          : `<div style="margin-top:12px;"><button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button></div>`
-      }
-    `;
-
-    const foot = document.createElement("div");
-    foot.className = "qStatus";
-    foot.style.marginTop = "10px";
-    foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
-
-    quoteBody.append(title, sub, wrap, ack, squareBox, foot);
-
-    const ackEl = quoteBody.querySelector("#qAck");
+    const closeBtn = quoteBody.querySelector("[data-q-pay-close]");
     const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
     const squareCardEl = quoteBody.querySelector("#qSquareCard");
     const payBtn = quoteBody.querySelector("#qPayDepositBtn");
+    const requiredEl = quoteBody.querySelector(".qPayRequired");
+
+    closeBtn?.addEventListener("click", closeQuoteModal);
+
+    // keep logic intact, but remove bulky checkbox UI
+    quoteState.ackDeposit = true;
 
     const updateFoot = () => {
-      foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
+      if (requiredEl) {
+        requiredEl.textContent = canContinue() ? "" : "Required: successful deposit payment.";
+      }
       updateNav();
     };
-
-    ackEl?.addEventListener("change", (e) => {
-      quoteState.ackDeposit = !!e.target.checked;
-      updateFoot();
-    });
 
     if (quoteState.paymentStatus !== "paid") {
       initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
