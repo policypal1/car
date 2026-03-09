@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v10.0 - Inline Square Payment)
+// QUOTE WIZARD (Flow v10.1 - Payment Step Cleanup + Square Reliability)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -8,7 +8,6 @@
 // Requirements:
 // 1) Add <script src="https://web.squarecdn.com/v1/square.js"></script> to your HTML <head>
 // 2) Add /api/create-square-payment.js on Vercel
-// 3) Add the small CSS block provided below
 */
 
 const DEFAULT_SCRIPT_URL =
@@ -29,7 +28,8 @@ const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 let lastActiveElQuote = null;
 let squarePayments = null;
 let squareCard = null;
-let squareInitPromise = null;
+let squarePaymentsInitPromise = null;
+let squareWarmStarted = false;
 
 const quoteState = {
   vehicleType: "",
@@ -231,6 +231,10 @@ function moneyToCents(n) {
 function makeIdempotencyKey() {
   if (window.crypto?.randomUUID) return window.crypto.randomUUID();
   return `qw_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // -------------------------
@@ -660,6 +664,8 @@ function openQuoteModal() {
   quoteModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
   quoteModal.querySelector("[data-quote-close]")?.focus();
+
+  warmSquare();
 }
 
 function closeQuoteModal() {
@@ -692,31 +698,64 @@ if (quoteModal) {
 // -------------------------
 // Square
 // -------------------------
-async function initSquareCard(cardEl, statusEl) {
-  if (!window.Square) {
-    if (statusEl) statusEl.textContent = "Square failed to load. Check the script in your page head.";
-    return false;
+async function waitForSquare(maxMs = 7000) {
+  const start = Date.now();
+  while (!window.Square && Date.now() - start < maxMs) {
+    await sleep(120);
   }
+  return !!window.Square;
+}
 
-  if (squareCard) return true;
-  if (squareInitPromise) return squareInitPromise;
+async function warmSquare() {
+  if (squareWarmStarted) return;
+  squareWarmStarted = true;
+  try {
+    const hasSquare = await waitForSquare(7000);
+    if (!hasSquare) return;
+    if (!squarePaymentsInitPromise) {
+      squarePaymentsInitPromise = Promise.resolve(window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID));
+    }
+    squarePayments = await squarePaymentsInitPromise;
+  } catch {
+    // no-op
+  }
+}
 
-  squareInitPromise = (async () => {
-    try {
-      squarePayments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
-      squareCard = await squarePayments.card();
-      await squareCard.attach(cardEl);
-      quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
-      if (statusEl) statusEl.textContent = "Enter card details for the $25 deposit.";
-      return true;
-    } catch (err) {
-      if (statusEl) statusEl.textContent = err?.message || "Could not load card form.";
-      squareCard = null;
+async function initSquareCard(cardEl, statusEl) {
+  if (!cardEl) return false;
+
+  try {
+    if (statusEl) statusEl.textContent = "Loading secure card form...";
+    await warmSquare();
+
+    if (!window.Square) {
+      if (statusEl) statusEl.textContent = "Square failed to load. Refresh and try again.";
       return false;
     }
-  })();
 
-  return squareInitPromise;
+    if (!squarePayments) {
+      if (!squarePaymentsInitPromise) {
+        squarePaymentsInitPromise = Promise.resolve(window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID));
+      }
+      squarePayments = await squarePaymentsInitPromise;
+    }
+
+    if (squareCard && typeof squareCard.destroy === "function") {
+      try { await squareCard.destroy(); } catch {}
+    }
+    squareCard = null;
+
+    squareCard = await squarePayments.card();
+    await squareCard.attach(cardEl);
+
+    quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
+    if (statusEl) statusEl.textContent = "Enter card details for the deposit.";
+    return true;
+  } catch (err) {
+    if (statusEl) statusEl.textContent = err?.message || "Could not load card form.";
+    squareCard = null;
+    return false;
+  }
 }
 
 async function createSquareDeposit(sourceId) {
@@ -729,7 +768,8 @@ async function createSquareDeposit(sourceId) {
       email: quoteState.email,
       phone: quoteState.phone,
       slotId: quoteState.slotId,
-      slotLabel: quoteState.slotLabel
+      slotLabel: quoteState.slotLabel,
+      city: quoteState.city
     }
   };
 
@@ -758,8 +798,10 @@ async function handlePayDeposit(payBtn, statusEl) {
     quoteState.paymentStatus = "processing";
     updateNav();
 
-    payBtn.disabled = true;
-    payBtn.textContent = "Processing...";
+    if (payBtn) {
+      payBtn.disabled = true;
+      payBtn.textContent = "Processing...";
+    }
 
     const tokenResult = await squareCard.tokenize();
     if (tokenResult.status !== "OK" || !tokenResult.token) {
@@ -775,16 +817,18 @@ async function handlePayDeposit(payBtn, statusEl) {
     quoteState.paymentMessage = "Deposit paid successfully.";
     quoteState.squarePaymentId = String(result.paymentId || result.id || "");
 
-    statusEl.textContent = quoteState.paymentMessage;
+    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
     renderStep();
   } catch (err) {
     quoteState.paymentStatus = "";
     quoteState.paymentMessage = err?.message || "Deposit payment failed.";
-    statusEl.textContent = quoteState.paymentMessage;
+    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
     updateNav();
   } finally {
-    payBtn.disabled = false;
-    payBtn.textContent = `Pay $${quoteState.depositAmount} Deposit`;
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.textContent = `Pay $${quoteState.depositAmount} Deposit`;
+    }
   }
 }
 
@@ -1220,111 +1264,90 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
 
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
+
+    warmSquare();
   }
 
-    if (step === "payment") {
+  if (step === "payment") {
     title.textContent = "Pay booking deposit";
-    sub.textContent = "";
+    sub.textContent = "A $25 deposit reserves your appointment and is applied to your total.";
 
     const estLine = quoteState.estimateLow && quoteState.estimateHigh
       ? `$${quoteState.estimateLow}–$${quoteState.estimateHigh}`
       : "We’ll confirm after assessment";
 
-    const wrap = document.createElement("div");
-    wrap.className = "qPayCard";
-
-    wrap.innerHTML = `
-      <div class="qPayHead">
-        <h3 class="qPayHeadTitle">Pay Booking Deposit</h3>
-        <button type="button" class="qPayCloseGhost" data-q-pay-close aria-label="Close">×</button>
-      </div>
-
-      <div class="qPayBody">
-        <div class="qPayAmount">
-          <div class="qPayAmountBig">$${escapeHtml(String(quoteState.depositAmount))}</div>
-          <div class="qPayAmountSub">Deposit for your appointment</div>
-        </div>
-
-        <div class="qPayMeta">
-          <span class="qPayPill">${escapeHtml(quoteState.slotLabel || "Appointment pending")}</span>
-          <span class="qPayPill">Estimate: ${escapeHtml(estLine)}</span>
-        </div>
-
-        <div class="qPayNotice">
-          <div class="qPayNoticeCheck" aria-hidden="true">✓</div>
-          <div class="qPayNoticeText">
-            <p class="qPayNoticeTitle">
-              A $${escapeHtml(String(quoteState.depositAmount))} deposit is required and will be applied to your service total.
-            </p>
-            <p class="qPayNoticeSub">
-              Reschedule with at least 2 days notice and your deposit stays with your booking. Late cancellations or no-shows forfeit the deposit.
-            </p>
-          </div>
-        </div>
-
-        <div class="qPaySectionTitle">Card details</div>
-
-        <div class="qPayCardWrap">
-          <div class="qPayStatus" data-q-pay-status>
-            ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Enter card details for the deposit."}
-          </div>
-
-          <div id="qSquareCard"></div>
-
-          <div data-q-paid-wrap style="margin-top:10px;">
-            ${
-              quoteState.paymentStatus === "paid"
-                ? `
-                  <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
-                  <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
-                  ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-                `
-                : ""
-            }
-          </div>
-
-          ${
-            quoteState.paymentStatus === "paid"
-              ? ""
-              : `
-                <div class="qPayBtnWrap">
-                  <button type="button" class="btn btn--quote" id="qPayDepositBtn">
-                    Pay $${escapeHtml(String(quoteState.depositAmount))}
-                  </button>
-                </div>
-              `
-          }
-        </div>
-
-        <div class="qPayFoot">
-          Your appointment is reserved after the deposit is successfully paid.
-        </div>
-
-        <div class="qPayRequired">
-          ${canContinue() ? "" : "Required: successful deposit payment."}
-        </div>
+    const summary = document.createElement("div");
+    summary.className = "qEstimateBox qEstimateBox--simple";
+    summary.innerHTML = `
+      <div class="qEstimateBig">$${escapeHtml(String(quoteState.depositAmount))}</div>
+      <div class="qEstimateFine" style="margin-top:8px;">Deposit for your appointment</div>
+      <div class="qEstimatePills" style="margin-top:14px;">
+        <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
+        <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
       </div>
     `;
 
-    quoteBody.append(wrap);
+    const ack = document.createElement("div");
+    ack.style.marginTop = "12px";
+    ack.innerHTML = `
+      <div class="qCheck">
+        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
+        <label for="qAck">
+          <strong>I understand the $25 deposit is applied to my total.</strong><br/>
+          You can reschedule with at least <strong>2 days notice</strong>. Late cancellations or no-shows forfeit the deposit.
+        </label>
+      </div>
+    `;
 
-    const closeBtn = quoteBody.querySelector("[data-q-pay-close]");
+    const squareBox = document.createElement("div");
+    squareBox.className = "qCalWrap";
+    squareBox.style.marginTop = "12px";
+
+    squareBox.innerHTML = `
+      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Card details</div>
+      <div class="qStatus" data-q-pay-status>
+        ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Loading secure payment form..."}
+      </div>
+      <div id="qSquareCard"></div>
+      <div data-q-paid-wrap style="margin-top:10px;">
+        ${
+          quoteState.paymentStatus === "paid"
+            ? `
+              <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
+              <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
+              ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+            `
+            : ""
+        }
+      </div>
+      ${
+        quoteState.paymentStatus === "paid"
+          ? ""
+          : `<div style="margin-top:12px;"><button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button></div>`
+      }
+    `;
+
+    const foot = document.createElement("div");
+    foot.className = "qStatus";
+    foot.style.marginTop = "10px";
+    foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
+
+    quoteBody.append(title, sub, summary, ack, squareBox, foot);
+
+    const ackEl = quoteBody.querySelector("#qAck");
     const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
     const squareCardEl = quoteBody.querySelector("#qSquareCard");
     const payBtn = quoteBody.querySelector("#qPayDepositBtn");
-    const requiredEl = quoteBody.querySelector(".qPayRequired");
-
-    closeBtn?.addEventListener("click", closeQuoteModal);
-
-    // keep logic intact, but remove bulky checkbox UI
-    quoteState.ackDeposit = true;
 
     const updateFoot = () => {
-      if (requiredEl) {
-        requiredEl.textContent = canContinue() ? "" : "Required: successful deposit payment.";
-      }
+      foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
       updateNav();
     };
+
+    ackEl?.addEventListener("change", (e) => {
+      quoteState.ackDeposit = !!e.target.checked;
+      updateFoot();
+    });
 
     if (quoteState.paymentStatus !== "paid") {
       initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
@@ -1516,6 +1539,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotLabel = "";
     quoteState.paymentStatus = "";
     quoteState.squarePaymentId = "";
+    quoteState.ackDeposit = false;
     drawMonth(cursor);
   });
 
@@ -1534,6 +1558,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotLabel = "";
     quoteState.paymentStatus = "";
     quoteState.squarePaymentId = "";
+    quoteState.ackDeposit = false;
     drawMonth(cursor);
   });
 
@@ -1574,7 +1599,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
 
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "qCalDay" + (hasSlots ? "" : " isDisabled") + (quoteState.slotDate === dateISO ? " isSel" : "");
+      btn.className = "qCalDay" + (hasSlots ? "" : "isDisabled") + (quoteState.slotDate === dateISO ? " isSel" : "");
       btn.textContent = String(d);
       btn.disabled = !hasSlots;
 
@@ -1585,6 +1610,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
         quoteState.slotLabel = "";
         quoteState.paymentStatus = "";
         quoteState.squarePaymentId = "";
+        quoteState.ackDeposit = false;
         renderCalendar(calEl, timesEl, nextAvailBtn);
       });
 
@@ -1642,6 +1668,7 @@ function renderTimes(timesEl, nextAvailBtn) {
       quoteState.slotLabel = s.label || `${s.date} ${s.time}`;
       quoteState.paymentStatus = "";
       quoteState.squarePaymentId = "";
+      quoteState.ackDeposit = false;
 
       grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
       b.classList.add("isSel");
@@ -1696,6 +1723,7 @@ function buildPayload() {
 
     ackDeposit: quoteState.ackDeposit,
     depositAmount: quoteState.depositAmount,
+    depositPaid: quoteState.paymentStatus === "paid",
     paymentStatus: quoteState.paymentStatus,
     squarePaymentId: quoteState.squarePaymentId
   };
