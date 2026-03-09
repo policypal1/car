@@ -1414,8 +1414,8 @@ function renderStep() {
           ? ""
           : `
             <div id="qApplePayWrap" style="margin:12px 0 14px;">
-              <div id="qApplePayButton"></div>
-            </div>
+  <div id="qApplePayButton"></div>
+</div>
 
             <div class="qStatus" style="margin:8px 0 10px;">Or pay with card</div>
             <div id="qSquareCard"></div>
