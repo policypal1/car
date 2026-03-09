@@ -787,12 +787,8 @@ async function initSquareApplePay(applePayEl, statusEl) {
       squarePayments = await squarePaymentsInitPromise;
     }
 
-    squareApplePay = null;
-
     const buttonEl = applePayEl.querySelector("#qApplePayButton");
     if (!buttonEl) return false;
-
-    buttonEl.innerHTML = "";
 
     const paymentRequest = squarePayments.paymentRequest(getDepositMoneyConfig());
     squareApplePay = await squarePayments.applePay(paymentRequest);
@@ -806,6 +802,21 @@ async function initSquareApplePay(applePayEl, statusEl) {
       applePayEl.style.display = "none";
       return false;
     }
+
+    buttonEl.style.display = "inline-flex";
+
+    if (statusEl && quoteState.paymentStatus !== "paid") {
+      statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
+    }
+
+    return true;
+  } catch (err) {
+    console.error("Apple Pay init error:", err);
+    applePayEl.style.display = "none";
+    squareApplePay = null;
+    return false;
+  }
+}
 
     await squareApplePay.attach("#qApplePayButton");
 
