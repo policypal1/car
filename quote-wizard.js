@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v10.1 - Payment Step Cleanup + Square Reliability)
+// QUOTE WIZARD (Flow v10.2 - Apple Pay Added + Payment Step Cleanup + Square Reliability)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -28,6 +28,7 @@ const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 let lastActiveElQuote = null;
 let squarePayments = null;
 let squareCard = null;
+let squareApplePay = null;
 let squarePaymentsInitPromise = null;
 let squareWarmStarted = false;
 
@@ -721,11 +722,22 @@ async function warmSquare() {
   }
 }
 
+function getDepositMoneyConfig() {
+  return {
+    countryCode: "US",
+    currencyCode: "USD",
+    total: {
+      amount: String(Number(quoteState.depositAmount || DEPOSIT_AMOUNT).toFixed(2)),
+      label: "Keizer Mobile Detailing Deposit"
+    }
+  };
+}
+
 async function initSquareCard(cardEl, statusEl) {
   if (!cardEl) return false;
 
   try {
-    if (statusEl) statusEl.textContent = "Loading secure card form...";
+    if (statusEl) statusEl.textContent = "Loading secure payment options...";
     await warmSquare();
 
     if (!window.Square) {
@@ -749,11 +761,54 @@ async function initSquareCard(cardEl, statusEl) {
     await squareCard.attach(cardEl);
 
     quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
-    if (statusEl) statusEl.textContent = "Enter card details for the deposit.";
+    if (statusEl) statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
     return true;
   } catch (err) {
     if (statusEl) statusEl.textContent = err?.message || "Could not load card form.";
     squareCard = null;
+    return false;
+  }
+}
+
+async function initSquareApplePay(applePayEl, statusEl) {
+  if (!applePayEl) return false;
+
+  try {
+    await warmSquare();
+
+    if (!window.Square) return false;
+
+    if (!squarePayments) {
+      if (!squarePaymentsInitPromise) {
+        squarePaymentsInitPromise = Promise.resolve(window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID));
+      }
+      squarePayments = await squarePaymentsInitPromise;
+    }
+
+    squareApplePay = null;
+    applePayEl.innerHTML = "";
+
+    const paymentRequest = squarePayments.paymentRequest(getDepositMoneyConfig());
+    squareApplePay = await squarePayments.applePay(paymentRequest);
+
+    let canUseApplePay = true;
+    if (typeof squareApplePay?.canMakePayment === "function") {
+      canUseApplePay = await squareApplePay.canMakePayment();
+    }
+
+    if (!canUseApplePay) {
+      applePayEl.innerHTML = "";
+      return false;
+    }
+
+    await squareApplePay.attach("#qApplePayButton");
+    if (statusEl && quoteState.paymentStatus !== "paid") {
+      statusEl.textContent = "Use Apple Pay or enter card details for the deposit.";
+    }
+    return true;
+  } catch {
+    applePayEl.innerHTML = "";
+    squareApplePay = null;
     return false;
   }
 }
@@ -829,6 +884,43 @@ async function handlePayDeposit(payBtn, statusEl) {
       payBtn.disabled = false;
       payBtn.textContent = `Pay $${quoteState.depositAmount} Deposit`;
     }
+  }
+}
+
+async function handleApplePayDeposit(statusEl) {
+  if (!squareApplePay) {
+    if (statusEl) statusEl.textContent = "Apple Pay is not available on this device/browser.";
+    return;
+  }
+
+  try {
+    quoteState.paymentStatus = "processing";
+    updateNav();
+
+    if (statusEl) statusEl.textContent = "Opening Apple Pay...";
+
+    const tokenResult = await squareApplePay.tokenize();
+
+    if (tokenResult.status !== "OK" || !tokenResult.token) {
+      throw new Error("Apple Pay was not completed.");
+    }
+
+    const result = await createSquareDeposit(tokenResult.token);
+    if (!result || result.ok !== true) {
+      throw new Error(result?.message || "Apple Pay payment failed.");
+    }
+
+    quoteState.paymentStatus = "paid";
+    quoteState.paymentMessage = "Deposit paid successfully with Apple Pay.";
+    quoteState.squarePaymentId = String(result.paymentId || result.id || "");
+
+    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
+    renderStep();
+  } catch (err) {
+    quoteState.paymentStatus = "";
+    quoteState.paymentMessage = err?.message || "Apple Pay payment failed.";
+    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
+    updateNav();
   }
 }
 
@@ -1304,11 +1396,26 @@ function renderStep() {
     squareBox.style.marginTop = "12px";
 
     squareBox.innerHTML = `
-      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Card details</div>
+      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
       <div class="qStatus" data-q-pay-status>
-        ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Loading secure payment form..."}
+        ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Choose Apple Pay or enter card details."}
       </div>
-      <div id="qSquareCard"></div>
+      ${
+        quoteState.paymentStatus === "paid"
+          ? ""
+          : `
+            <div id="qApplePayWrap" style="margin:12px 0 14px;">
+              <div id="qApplePayButton"></div>
+            </div>
+
+            <div class="qStatus" style="margin:8px 0 10px;">Or pay with card</div>
+            <div id="qSquareCard"></div>
+
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button>
+            </div>
+          `
+      }
       <div data-q-paid-wrap style="margin-top:10px;">
         ${
           quoteState.paymentStatus === "paid"
@@ -1320,11 +1427,6 @@ function renderStep() {
             : ""
         }
       </div>
-      ${
-        quoteState.paymentStatus === "paid"
-          ? ""
-          : `<div style="margin-top:12px;"><button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button></div>`
-      }
     `;
 
     const foot = document.createElement("div");
@@ -1337,6 +1439,7 @@ function renderStep() {
     const ackEl = quoteBody.querySelector("#qAck");
     const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
     const squareCardEl = quoteBody.querySelector("#qSquareCard");
+    const applePayWrapEl = quoteBody.querySelector("#qApplePayWrap");
     const payBtn = quoteBody.querySelector("#qPayDepositBtn");
 
     const updateFoot = () => {
@@ -1351,12 +1454,23 @@ function renderStep() {
 
     if (quoteState.paymentStatus !== "paid") {
       initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
+
+      initSquareApplePay(applePayWrapEl, payStatusEl).then((available) => {
+        if (!available && applePayWrapEl) {
+          applePayWrapEl.style.display = "none";
+        }
+        updateFoot();
+      });
     } else {
-      squareCardEl.innerHTML = "";
+      if (squareCardEl) squareCardEl.innerHTML = "";
+      if (applePayWrapEl) applePayWrapEl.innerHTML = "";
       updateFoot();
     }
 
     payBtn?.addEventListener("click", () => handlePayDeposit(payBtn, payStatusEl));
+
+    const applePayButtonEl = quoteBody.querySelector("#qApplePayButton");
+    applePayButtonEl?.addEventListener("click", () => handleApplePayDeposit(payStatusEl));
   }
 
   if (step === "done") {
