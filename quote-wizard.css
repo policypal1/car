@@ -687,3 +687,227 @@
 #qPayDepositBtn{
   min-width:180px;
 }
+
+/* =========================
+   Payment step cleanup
+   ========================= */
+
+.qPayCard{
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 18px 44px rgba(0,0,0,.10);
+  overflow:hidden;
+}
+
+.qPayHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 18px 16px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.qPayHeadTitle{
+  margin:0;
+  font-family:Oswald, Inter, sans-serif;
+  font-size:clamp(1.6rem, 4vw, 2.2rem);
+  line-height:1;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:#111;
+}
+
+.qPayCloseGhost{
+  width:54px;
+  height:54px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  color:rgba(0,0,0,.62);
+  font-size:2rem;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:none;
+}
+.qPayCloseGhost:hover{
+  background:rgba(0,0,0,.03);
+}
+
+.qPayBody{
+  padding:18px;
+}
+
+.qPayAmount{
+  text-align:center;
+}
+
+.qPayAmountBig{
+  margin:0;
+  font-size:clamp(3rem, 8vw, 4.2rem);
+  line-height:1;
+  font-weight:1000;
+  color:#111;
+}
+
+.qPayAmountSub{
+  margin:10px 0 0;
+  font-size:clamp(1.1rem, 3vw, 1.5rem);
+  line-height:1.25;
+  color:#222;
+  font-weight:500;
+}
+
+.qPayMeta{
+  margin-top:16px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+
+.qPayPill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  font-weight:900;
+  color:rgba(0,0,0,.78);
+  font-size:.98rem;
+}
+
+.qPayNotice{
+  margin-top:18px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(0,0,0,.03);
+}
+
+.qPayNoticeCheck{
+  flex:0 0 auto;
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:#4f97ff;
+  color:#fff;
+  font-size:1rem;
+  font-weight:1000;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:1px;
+}
+
+.qPayNoticeText{
+  min-width:0;
+}
+
+.qPayNoticeTitle{
+  margin:0;
+  font-size:1.05rem;
+  line-height:1.35;
+  color:#111;
+  font-weight:900;
+}
+
+.qPayNoticeSub{
+  margin:6px 0 0;
+  color:rgba(0,0,0,.66);
+  line-height:1.5;
+  font-weight:700;
+  font-size:.97rem;
+}
+
+.qPaySectionTitle{
+  margin:18px 0 10px;
+  font-size:1.1rem;
+  font-weight:1000;
+  color:#111;
+}
+
+.qPayCardWrap{
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:18px;
+  background:#fff;
+  padding:14px;
+}
+
+.qPayStatus{
+  margin:0 0 10px;
+  font-weight:800;
+  color:rgba(0,0,0,.62);
+}
+
+#qSquareCard{
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:16px;
+  padding:12px;
+  background:#fff;
+  box-shadow:none;
+  min-height:84px;
+  margin-top:0;
+}
+
+.qPayBtnWrap{
+  margin-top:14px;
+}
+
+#qPayDepositBtn{
+  width:100%;
+  min-width:0;
+  min-height:58px;
+  border-radius:999px;
+  font-size:1.1rem;
+  font-weight:1000;
+}
+
+.qPayFoot{
+  margin-top:14px;
+  text-align:center;
+  color:rgba(0,0,0,.55);
+  font-weight:700;
+  line-height:1.45;
+}
+
+.qPayRequired{
+  margin-top:10px;
+  color:rgba(0,0,0,.62);
+  font-weight:800;
+}
+
+@media (max-width: 767px){
+  .qPayHead{
+    padding:16px 16px 14px;
+  }
+
+  .qPayBody{
+    padding:16px;
+  }
+
+  .qPayCloseGhost{
+    width:48px;
+    height:48px;
+    font-size:1.8rem;
+  }
+
+  .qPayMeta{
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .qPayPill{
+    width:100%;
+    text-align:center;
+  }
+}
