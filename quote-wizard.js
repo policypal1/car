@@ -1599,7 +1599,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
 
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "qCalDay" + (hasSlots ? "" : "isDisabled") + (quoteState.slotDate === dateISO ? " isSel" : "");
+      btn.className = "qCalDay" + (hasSlots ? "" : " isDisabled") + (quoteState.slotDate === dateISO ? " isSel" : "");
       btn.textContent = String(d);
       btn.disabled = !hasSlots;
 
