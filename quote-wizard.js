@@ -1,29 +1,23 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v9.0 - Square Ready)
+// QUOTE WIZARD (Flow v10.0 - Inline Square Payment)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Conditions -> Upkeep Frequency (if upkeep)
-// -> Contact -> Estimate -> Calendar -> Payment -> Done
+// -> Contact -> Estimate -> Appointment -> Payment -> Done
 //
-// Front-end is prepared for Square Web Payments SDK.
-// Live deposit charging still requires:
-// 1) window.SQUARE_APP_ID
-// 2) window.SQUARE_LOCATION_ID
-// 3) a secure backend endpoint that creates the payment with Square
-//
-// Suggested globals you can set before this file loads:
-// window.SCRIPT_URL = "...apps script...";
-// window.SQUARE_APP_ID = "sandbox-sq0idb-..." or production app id;
-// window.SQUARE_LOCATION_ID = "L....";
-// window.SQUARE_DEPOSIT_ENDPOINT = "/api/create-square-deposit";
-// window.ALLOW_DEPOSIT_BYPASS = true; // dev fallback while Square isn't connected
+// Requirements:
+// 1) Add <script src="https://web.squarecdn.com/v1/square.js"></script> to your HTML <head>
+// 2) Add /api/create-square-payment.js on Vercel
+// 3) Add the small CSS block provided below
 */
 
 const DEFAULT_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
 
-const DEFAULT_DEPOSIT_AMOUNT = 25;
-const DEFAULT_DEPOSIT_ENDPOINT = "/api/create-square-deposit";
+const SQUARE_APP_ID = "sq0idp-9rqrzxMJ-huh115bZkPH5Q";
+const SQUARE_LOCATION_ID = "LV9XSE8KC6F93";
+const SQUARE_PAYMENT_ENDPOINT = "/api/create-square-payment";
+const DEPOSIT_AMOUNT = 25;
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -31,12 +25,11 @@ const quoteNextBtn = document.querySelector("[data-quote-next]");
 const quoteBackBtn = document.querySelector("[data-quote-back]");
 const quoteCloseBtns = document.querySelectorAll("[data-quote-close]");
 const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
-const quoteNav = document.querySelector(".quoteNav");
 
 let lastActiveElQuote = null;
-let squareSdkPromise = null;
-let squarePaymentsInstance = null;
-let squareCardInstance = null;
+let squarePayments = null;
+let squareCard = null;
+let squareInitPromise = null;
 
 const quoteState = {
   vehicleType: "",
@@ -62,15 +55,11 @@ const quoteState = {
   city: "",
   notes: "",
 
-  // moved from contact to payment
   ackDeposit: false,
-  depositAmount: DEFAULT_DEPOSIT_AMOUNT,
-
-  paymentStatus: "", // "", "ready", "processing", "paid", "bypass"
+  depositAmount: DEPOSIT_AMOUNT,
+  paymentStatus: "", // "", "ready", "processing", "paid"
   paymentMessage: "",
-  squareSourceId: "",
   squarePaymentId: "",
-  squareIdempotencyKey: "",
 
   honeypot: ""
 };
@@ -244,24 +233,6 @@ function makeIdempotencyKey() {
   return `qw_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
-function getSquareConfig() {
-  return {
-    appId: String(window.SQUARE_APP_ID || "").trim(),
-    locationId: String(window.SQUARE_LOCATION_ID || "").trim(),
-    endpoint: String(window.SQUARE_DEPOSIT_ENDPOINT || DEFAULT_DEPOSIT_ENDPOINT).trim(),
-    allowBypass: window.ALLOW_DEPOSIT_BYPASS !== false
-  };
-}
-
-function isSquareConfigured() {
-  const cfg = getSquareConfig();
-  return !!(cfg.appId && cfg.locationId);
-}
-
-function canBypassPayment() {
-  return !!getSquareConfig().allowBypass;
-}
-
 // -------------------------
 // Upkeep / requirement rules
 // -------------------------
@@ -328,12 +299,10 @@ function conditionFactor(cond) {
   if (cond === "Heavy") return 1.14;
   return 1.0;
 }
-
 function clampInt(n) {
   const x = Math.round(Number(n));
   return Number.isFinite(x) ? x : null;
 }
-
 function tightenAndHeavier(range) {
   if (!range) return null;
   const low = Number(range[0]);
@@ -365,7 +334,9 @@ function computeRangeForService(serviceLabel, opts = {}) {
     let f = 1.0;
     if (serviceLabel === "Interior Upkeep Plan") f = conditionFactor(ic);
     if (serviceLabel === "Exterior Upkeep Plan") f = conditionFactor(ec);
-    if (serviceLabel === "Interior + Exterior Upkeep Plan") f = (conditionFactor(ic) + conditionFactor(ec)) / 2;
+    if (serviceLabel === "Interior + Exterior Upkeep Plan") {
+      f = (conditionFactor(ic) + conditionFactor(ec)) / 2;
+    }
 
     return [base[0] * f, base[1] * f].map(clampInt);
   }
@@ -403,8 +374,7 @@ function computeEstimateWithOverrides(overrides = {}) {
   const icPreview = ic || "Light";
   const ecPreview = ec || "Light";
 
-  let low = 0;
-  let high = 0;
+  let low = 0, high = 0;
 
   for (const s of svcs) {
     let useIc = ic;
@@ -419,7 +389,6 @@ function computeEstimateWithOverrides(overrides = {}) {
 
     const r = computeRangeForService(s, { interiorCondition: useIc, exteriorCondition: useEc });
     if (!r) return null;
-
     low += Number(r[0] || 0);
     high += Number(r[1] || 0);
   }
@@ -466,10 +435,7 @@ function canContinue() {
   if (step === "appointment") return !!quoteState.slotId;
 
   if (step === "payment") {
-    const paid = quoteState.paymentStatus === "paid";
-    const bypass = !isSquareConfigured() && canBypassPayment();
-    const manualBypass = quoteState.paymentStatus === "bypass";
-    return quoteState.ackDeposit === true && (paid || bypass || manualBypass);
+    return quoteState.ackDeposit === true && quoteState.paymentStatus === "paid";
   }
 
   return true;
@@ -494,8 +460,6 @@ function updateNav() {
   if (step === "service") {
     const n = Array.isArray(quoteState.services) ? quoteState.services.length : 0;
     quoteNextBtn.textContent = n > 0 ? `Continue (${n} selected)` : "Continue";
-  } else if (step === "appointment") {
-    quoteNextBtn.textContent = "Continue";
   } else if (step === "payment") {
     quoteNextBtn.textContent = "Complete Booking";
   } else {
@@ -512,23 +476,20 @@ function pickAndAdvance(pickFn) {
   setTimeout(() => nextStep(true), 80);
 }
 
-// -------------------------
-// Service selection
-// -------------------------
-function resetDownstreamBookingState() {
+function resetBookingTail() {
   quoteState.slotId = "";
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
   quoteState.slotTime = "";
-
   quoteState.ackDeposit = false;
   quoteState.paymentStatus = "";
   quoteState.paymentMessage = "";
-  quoteState.squareSourceId = "";
   quoteState.squarePaymentId = "";
-  quoteState.squareIdempotencyKey = "";
 }
 
+// -------------------------
+// Service selection
+// -------------------------
 function toggleService(label) {
   const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
   const isSelected = current.includes(label);
@@ -549,7 +510,7 @@ function toggleService(label) {
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  resetDownstreamBookingState();
+  resetBookingTail();
   updateNav();
 }
 
@@ -561,7 +522,7 @@ function removeService(label) {
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  resetDownstreamBookingState();
+  resetBookingTail();
   updateNav();
 }
 
@@ -579,8 +540,7 @@ function pickSingleServiceAndAdvance(label) {
   if (!anyServiceRequiresExteriorCondition()) quoteState.exteriorCondition = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 
-  resetDownstreamBookingState();
-
+  resetBookingTail();
   renderStep();
   setTimeout(() => nextStep(true), 80);
 }
@@ -686,12 +646,10 @@ function openQuoteModal() {
     city: "",
     notes: "",
     ackDeposit: false,
-    depositAmount: DEFAULT_DEPOSIT_AMOUNT,
+    depositAmount: DEPOSIT_AMOUNT,
     paymentStatus: "",
     paymentMessage: "",
-    squareSourceId: "",
     squarePaymentId: "",
-    squareIdempotencyKey: "",
     honeypot: ""
   });
 
@@ -732,98 +690,50 @@ if (quoteModal) {
 }
 
 // -------------------------
-// Square helpers
+// Square
 // -------------------------
-async function loadSquareSdk() {
-  if (window.Square) return window.Square;
-  if (squareSdkPromise) return squareSdkPromise;
-
-  squareSdkPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector('script[data-square-sdk="true"]');
-    if (existing) {
-      existing.addEventListener("load", () => resolve(window.Square));
-      existing.addEventListener("error", () => reject(new Error("Square SDK failed to load.")));
-      return;
-    }
-
-    const s = document.createElement("script");
-    s.src = "https://web.squarecdn.com/v1/square.js";
-    s.async = true;
-    s.defer = true;
-    s.dataset.squareSdk = "true";
-    s.onload = () => resolve(window.Square);
-    s.onerror = () => reject(new Error("Square SDK failed to load."));
-    document.head.appendChild(s);
-  });
-
-  return squareSdkPromise;
-}
-
-async function initSquareCard(cardMountEl, statusEl) {
-  const cfg = getSquareConfig();
-  if (!cardMountEl) return false;
-
-  if (!cfg.appId || !cfg.locationId) {
-    if (statusEl) {
-      statusEl.textContent = canBypassPayment()
-        ? "Square is not connected yet. You can still finish this request for now."
-        : "Square is not connected yet. Add app ID and location ID to enable deposit payment.";
-    }
+async function initSquareCard(cardEl, statusEl) {
+  if (!window.Square) {
+    if (statusEl) statusEl.textContent = "Square failed to load. Check the script in your page head.";
     return false;
   }
 
-  try {
-    if (statusEl) statusEl.textContent = "Loading secure payment form...";
+  if (squareCard) return true;
+  if (squareInitPromise) return squareInitPromise;
 
-    const Square = await loadSquareSdk();
-    if (!Square || typeof Square.payments !== "function") {
-      throw new Error("Square SDK unavailable.");
+  squareInitPromise = (async () => {
+    try {
+      squarePayments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID);
+      squareCard = await squarePayments.card();
+      await squareCard.attach(cardEl);
+      quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
+      if (statusEl) statusEl.textContent = "Enter card details for the $25 deposit.";
+      return true;
+    } catch (err) {
+      if (statusEl) statusEl.textContent = err?.message || "Could not load card form.";
+      squareCard = null;
+      return false;
     }
+  })();
 
-    cardMountEl.innerHTML = "";
-
-    squarePaymentsInstance = Square.payments(cfg.appId, cfg.locationId);
-    squareCardInstance = await squarePaymentsInstance.card();
-    await squareCardInstance.attach(cardMountEl);
-
-    quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
-    if (statusEl) statusEl.textContent = "Enter card details for the $25 deposit.";
-    updateNav();
-    return true;
-  } catch (err) {
-    squareCardInstance = null;
-    squarePaymentsInstance = null;
-    quoteState.paymentStatus = "";
-    if (statusEl) statusEl.textContent = err?.message || "Could not load Square payment form.";
-    updateNav();
-    return false;
-  }
-}
-
-async function tokenizeSquareCard() {
-  if (!squareCardInstance) throw new Error("Card form is not ready.");
-  const result = await squareCardInstance.tokenize();
-  if (result.status !== "OK" || !result.token) {
-    throw new Error("Card details were not accepted. Please check the form and try again.");
-  }
-  return result.token;
+  return squareInitPromise;
 }
 
 async function createSquareDeposit(sourceId) {
-  const cfg = getSquareConfig();
   const payload = {
-    amount: quoteState.depositAmount,
-    amountCents: moneyToCents(quoteState.depositAmount),
-    currency: "USD",
     sourceId,
-    idempotencyKey: quoteState.squareIdempotencyKey || makeIdempotencyKey(),
-    booking: buildPayload(),
-    note: `Booking deposit for ${quoteState.name || "customer"}`
+    idempotencyKey: makeIdempotencyKey(),
+    amountCents: moneyToCents(quoteState.depositAmount),
+    booking: {
+      name: quoteState.name,
+      email: quoteState.email,
+      phone: quoteState.phone,
+      slotId: quoteState.slotId,
+      slotLabel: quoteState.slotLabel
+    }
   };
 
-  quoteState.squareIdempotencyKey = payload.idempotencyKey;
-
-  const res = await fetch(cfg.endpoint, {
+  const res = await fetch(SQUARE_PAYMENT_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -833,56 +743,39 @@ async function createSquareDeposit(sourceId) {
   const text = await res.text();
   let data = null;
   try { data = JSON.parse(text); }
-  catch { data = { ok: false, message: "Deposit endpoint returned non-JSON." }; }
+  catch { data = { ok: false, message: "Payment endpoint returned non-JSON." }; }
 
   return data;
 }
 
-async function handleDepositPayment(payBtn, statusEl, paidWrapEl) {
-  if (!payBtn || !statusEl) return;
-
-  if (!isSquareConfigured()) {
-    if (canBypassPayment()) {
-      quoteState.paymentStatus = "bypass";
-      quoteState.paymentMessage = "Square is not connected yet. Deposit step is in bypass mode.";
-      statusEl.textContent = quoteState.paymentMessage;
-      updateNav();
-      return;
-    }
-    statusEl.textContent = "Square is not connected yet.";
+async function handlePayDeposit(payBtn, statusEl) {
+  if (!squareCard) {
+    statusEl.textContent = "Card form is not ready yet.";
     return;
   }
 
   try {
-    payBtn.disabled = true;
-    payBtn.textContent = "Processing...";
     quoteState.paymentStatus = "processing";
-    quoteState.paymentMessage = "";
     updateNav();
 
-    const token = await tokenizeSquareCard();
-    quoteState.squareSourceId = token;
+    payBtn.disabled = true;
+    payBtn.textContent = "Processing...";
 
-    const result = await createSquareDeposit(token);
+    const tokenResult = await squareCard.tokenize();
+    if (tokenResult.status !== "OK" || !tokenResult.token) {
+      throw new Error("Card details were not accepted. Please check the form and try again.");
+    }
 
+    const result = await createSquareDeposit(tokenResult.token);
     if (!result || result.ok !== true) {
       throw new Error(result?.message || "Deposit payment failed.");
     }
 
     quoteState.paymentStatus = "paid";
-    quoteState.squarePaymentId = String(result.paymentId || result.id || "");
     quoteState.paymentMessage = "Deposit paid successfully.";
+    quoteState.squarePaymentId = String(result.paymentId || result.id || "");
+
     statusEl.textContent = quoteState.paymentMessage;
-
-    if (paidWrapEl) {
-      paidWrapEl.innerHTML = `
-        <div class="qDoneLine"><strong>Deposit:</strong> Paid</div>
-        <div class="qDoneLine"><strong>Amount:</strong> $${escapeHtml(String(quoteState.depositAmount))}</div>
-        ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-      `;
-    }
-
-    updateNav();
     renderStep();
   } catch (err) {
     quoteState.paymentStatus = "";
@@ -959,7 +852,7 @@ function renderStep() {
               quoteState.interiorCondition = "";
               quoteState.exteriorCondition = "";
               quoteState.upkeepFrequency = "";
-              resetDownstreamBookingState();
+              resetBookingTail();
             })
         })
       );
@@ -980,7 +873,9 @@ function renderStep() {
     cards.className = "qCards qCards--scroll qCards--big";
 
     const filtered = servicesAll.filter((s) => {
-      if (isInterior) return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
+      if (isInterior) {
+        return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
+      }
       if (isExterior) {
         return s.label === "Exterior Wash" || s.label === "Exterior Upkeep Plan" || s.label === "Ceramic Coating" || s.label === "Paint Correction";
       }
@@ -1329,7 +1224,7 @@ function renderStep() {
 
   if (step === "payment") {
     title.textContent = "Pay your booking deposit";
-    sub.textContent = "A $25 deposit reserves your appointment and is applied to the total.";
+    sub.textContent = "A $25 deposit reserves your appointment and is applied to your total.";
 
     const wrap = document.createElement("div");
     wrap.className = "qEstimateBox qEstimateBox--simple";
@@ -1366,23 +1261,12 @@ function renderStep() {
     squareBox.className = "qCalWrap";
     squareBox.style.marginTop = "12px";
 
-    const cfg = getSquareConfig();
-    const squareReady = isSquareConfigured();
-
     squareBox.innerHTML = `
       <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
       <div class="qStatus" data-q-pay-status>
-        ${
-          quoteState.paymentStatus === "paid"
-            ? "Deposit paid successfully."
-            : squareReady
-              ? "Loading secure payment form..."
-              : (cfg.allowBypass
-                  ? "Square is not connected yet. This page is in bypass mode for now."
-                  : "Square is not connected yet.")
-        }
+        ${quoteState.paymentStatus === "paid" ? "Deposit paid successfully." : "Loading secure payment form..."}
       </div>
-      <div id="qSquareCard" style="margin-top:12px; min-height:${quoteState.paymentStatus === "paid" ? "0" : "90px"};"></div>
+      <div id="qSquareCard"></div>
       <div data-q-paid-wrap style="margin-top:10px;">
         ${
           quoteState.paymentStatus === "paid"
@@ -1394,26 +1278,17 @@ function renderStep() {
             : ""
         }
       </div>
-      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-        ${quoteState.paymentStatus === "paid" ? "" : `<button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button>`}
-        ${
-          !squareReady && cfg.allowBypass
-            ? `<button type="button" class="btn quoteBack" id="qBypassDepositBtn">Continue Without Live Payment</button>`
-            : ""
-        }
-      </div>
+      ${
+        quoteState.paymentStatus === "paid"
+          ? ""
+          : `<div style="margin-top:12px;"><button type="button" class="btn btn--quote" id="qPayDepositBtn">Pay $${escapeHtml(String(quoteState.depositAmount))} Deposit</button></div>`
+      }
     `;
 
     const foot = document.createElement("div");
     foot.className = "qStatus";
     foot.style.marginTop = "10px";
-    foot.textContent = canContinue()
-      ? ""
-      : squareReady
-        ? "Required: deposit acknowledgment and successful payment."
-        : (cfg.allowBypass
-            ? "Required: deposit acknowledgment."
-            : "Required: deposit acknowledgment. Square must also be connected.");
+    foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
 
     quoteBody.append(title, sub, wrap, ack, squareBox, foot);
 
@@ -1421,39 +1296,25 @@ function renderStep() {
     const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
     const squareCardEl = quoteBody.querySelector("#qSquareCard");
     const payBtn = quoteBody.querySelector("#qPayDepositBtn");
-    const paidWrapEl = quoteBody.querySelector("[data-q-paid-wrap]");
-    const bypassBtn = quoteBody.querySelector("#qBypassDepositBtn");
 
-    const updateFooter = () => {
-      foot.textContent = canContinue()
-        ? ""
-        : squareReady
-          ? "Required: deposit acknowledgment and successful payment."
-          : (cfg.allowBypass
-              ? "Required: deposit acknowledgment."
-              : "Required: deposit acknowledgment. Square must also be connected.");
+    const updateFoot = () => {
+      foot.textContent = canContinue() ? "" : "Required: deposit acknowledgment and successful payment.";
       updateNav();
     };
 
     ackEl?.addEventListener("change", (e) => {
       quoteState.ackDeposit = !!e.target.checked;
-      updateFooter();
+      updateFoot();
     });
-
-    bypassBtn?.addEventListener("click", () => {
-      quoteState.paymentStatus = "bypass";
-      quoteState.paymentMessage = "Live Square payment is not connected yet. Continuing in bypass mode.";
-      if (payStatusEl) payStatusEl.textContent = quoteState.paymentMessage;
-      updateFooter();
-    });
-
-    payBtn?.addEventListener("click", () => handleDepositPayment(payBtn, payStatusEl, paidWrapEl));
 
     if (quoteState.paymentStatus !== "paid") {
-      initSquareCard(squareCardEl, payStatusEl).then(() => updateFooter());
+      initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
     } else {
-      updateFooter();
+      squareCardEl.innerHTML = "";
+      updateFoot();
     }
+
+    payBtn?.addEventListener("click", () => handlePayDeposit(payBtn, payStatusEl));
   }
 
   if (step === "done") {
@@ -1472,11 +1333,7 @@ function renderStep() {
           ? `$${escapeHtml(quoteState.estimateLow)}–$${escapeHtml(quoteState.estimateHigh)}`
           : "—"
       }</div>
-      <div class="qDoneLine"><strong>Deposit:</strong> ${
-        quoteState.paymentStatus === "paid"
-          ? `$${escapeHtml(String(quoteState.depositAmount))} paid`
-          : (quoteState.paymentStatus === "bypass" ? "Payment setup pending" : "—")
-      }</div>
+      <div class="qDoneLine"><strong>Deposit:</strong> $${escapeHtml(String(quoteState.depositAmount))} paid</div>
       ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
       <div class="qDoneFine">If you need anything immediately, call us.</div>
     `;
@@ -1531,13 +1388,11 @@ function buildCalendarIndex(slots) {
   for (const [k, arr] of map.entries()) arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
   return map;
 }
-
 function findNextAvailableDate(fromDateISO) {
   const dates = Array.from(calendarCache.byDate.keys()).sort();
   for (const d of dates) if (!fromDateISO || d >= fromDateISO) return d;
   return "";
 }
-
 function parseSlotToDateTime(slot) {
   const id = String(slot.id || "").trim();
   const label = String(slot.label || "").trim();
@@ -1576,13 +1431,13 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
     let data = null;
     try { data = JSON.parse(text); }
     catch {
-      statusEl.textContent = "Scheduling error: Apps Script did not return JSON. (Deploy Web App access: Anyone / Anyone with link)";
+      statusEl.textContent = "Scheduling error: Apps Script did not return JSON.";
       loadBarEl.classList.remove("isOn");
       return;
     }
 
     if (!data || data.ok !== true || !Array.isArray(data.slots)) {
-      statusEl.textContent = "Couldn’t load availability. (Bad response format)";
+      statusEl.textContent = "Couldn’t load availability.";
       loadBarEl.classList.remove("isOn");
       return;
     }
@@ -1859,9 +1714,6 @@ async function reserveAndSend() {
   }
 }
 
-// -------------------------
-// Nav actions
-// -------------------------
 function finalizeBooking() {
   quoteNextBtn.disabled = true;
   const old = quoteNextBtn.textContent;
@@ -1886,38 +1738,16 @@ function finalizeBooking() {
   });
 }
 
-
+// -------------------------
+// Nav actions
+// -------------------------
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
 
-  if (step === "appointment") {
-    const est = computeEstimate();
-    quoteState.estimateLow = est ? est[0] : "";
-    quoteState.estimateHigh = est ? est[1] : "";
-
-    sessionStorage.setItem("quoteWizardData", JSON.stringify({
-      vehicleType: quoteState.vehicleType,
-      serviceCategory: quoteState.serviceCategory,
-      services: quoteState.services,
-      interiorCondition: quoteState.interiorCondition,
-      exteriorCondition: quoteState.exteriorCondition,
-      upkeepFrequency: quoteState.upkeepFrequency,
-      estimateLow: quoteState.estimateLow,
-      estimateHigh: quoteState.estimateHigh,
-      slotId: quoteState.slotId,
-      slotLabel: quoteState.slotLabel,
-      slotDate: quoteState.slotDate,
-      slotTime: quoteState.slotTime,
-      name: quoteState.name,
-      phone: quoteState.phone,
-      email: quoteState.email,
-      city: quoteState.city,
-      notes: quoteState.notes
-    }));
-
-    window.location.href = "/deposit.html";
+  if (step === "payment") {
+    finalizeBooking();
     return;
   }
 
@@ -1925,3 +1755,17 @@ function nextStep(fromAutoAdvance = false) {
   renderStep();
   if (fromAutoAdvance) updateNav();
 }
+
+function prevStep() {
+  if (steps[stepIndex] === "done") {
+    closeQuoteModal();
+    return;
+  }
+  stepIndex = prevActiveStepIndex(stepIndex);
+  renderStep();
+}
+
+quoteNextBtn?.addEventListener("click", () => nextStep(false));
+quoteBackBtn?.addEventListener("click", prevStep);
+
+if (quoteModal?.classList.contains("isOpen")) renderStep();
