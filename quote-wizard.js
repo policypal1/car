@@ -2076,3 +2076,4 @@ quoteNextBtn?.addEventListener("click", () => nextStep(false));
 quoteBackBtn?.addEventListener("click", prevStep);
 
 if (quoteModal?.classList.contains("isOpen")) renderStep();
+
