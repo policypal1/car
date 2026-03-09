@@ -673,3 +673,17 @@
   .qHearGrid{ grid-template-columns:repeat(3, 1fr); }
   .qTimesGrid{ grid-template-columns:repeat(4, 1fr); }
 }
+
+#qSquareCard{
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:14px;
+  padding:12px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+  min-height:88px;
+  margin-top:12px;
+}
+
+#qPayDepositBtn{
+  min-width:180px;
+}
