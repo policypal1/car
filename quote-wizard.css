@@ -911,3 +911,49 @@
     text-align:center;
   }
 }
+
+/* Payment step cleanup */
+.qCheck input{
+  width:18px;
+  height:18px;
+  margin-top:3px;
+  accent-color: rgba(214,178,94,.95);
+  cursor:pointer;
+  flex:0 0 auto;
+}
+
+.qCheck label{
+  cursor:pointer;
+  line-height:1.55;
+  color:#111;
+}
+
+#qSquareCard{
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:14px;
+  padding:12px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+  min-height:88px;
+  margin-top:12px;
+}
+
+#qPayDepositBtn{
+  min-width:180px;
+}
+
+@media (max-width: 767px){
+  .qEstimateBig{
+    font-size:1.95rem;
+  }
+
+  .qEstimatePills{
+    gap:8px;
+  }
+
+  .qPill{
+    width:100%;
+    justify-content:center;
+    text-align:center;
+  }
+}
