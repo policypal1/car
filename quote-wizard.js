@@ -1886,13 +1886,38 @@ function finalizeBooking() {
   });
 }
 
+
 function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
 
-  if (step === "payment") {
-    finalizeBooking();
+  if (step === "appointment") {
+    const est = computeEstimate();
+    quoteState.estimateLow = est ? est[0] : "";
+    quoteState.estimateHigh = est ? est[1] : "";
+
+    sessionStorage.setItem("quoteWizardData", JSON.stringify({
+      vehicleType: quoteState.vehicleType,
+      serviceCategory: quoteState.serviceCategory,
+      services: quoteState.services,
+      interiorCondition: quoteState.interiorCondition,
+      exteriorCondition: quoteState.exteriorCondition,
+      upkeepFrequency: quoteState.upkeepFrequency,
+      estimateLow: quoteState.estimateLow,
+      estimateHigh: quoteState.estimateHigh,
+      slotId: quoteState.slotId,
+      slotLabel: quoteState.slotLabel,
+      slotDate: quoteState.slotDate,
+      slotTime: quoteState.slotTime,
+      name: quoteState.name,
+      phone: quoteState.phone,
+      email: quoteState.email,
+      city: quoteState.city,
+      notes: quoteState.notes
+    }));
+
+    window.location.href = "/deposit.html";
     return;
   }
 
@@ -1900,17 +1925,3 @@ function nextStep(fromAutoAdvance = false) {
   renderStep();
   if (fromAutoAdvance) updateNav();
 }
-
-function prevStep() {
-  if (steps[stepIndex] === "done") {
-    closeQuoteModal();
-    return;
-  }
-  stepIndex = prevActiveStepIndex(stepIndex);
-  renderStep();
-}
-
-quoteNextBtn?.addEventListener("click", () => nextStep(false));
-quoteBackBtn?.addEventListener("click", prevStep);
-
-if (quoteModal?.classList.contains("isOpen")) renderStep();
