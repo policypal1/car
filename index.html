@@ -603,5 +603,112 @@
 
     <script src="./script.js"></script>
     <script src="./quote-wizard.js"></script>
+
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const quoteButtons = document.querySelectorAll("[data-quote-open]");
+    const callButtons = document.querySelectorAll("[data-call-open]");
+    const contactButtons = document.querySelectorAll("[data-contact-open]");
+
+    quoteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "quote_button_click"
+          });
+        }
+      });
+    });
+
+    callButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "call_button_click"
+          });
+        }
+      });
+    });
+
+    contactButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "contact_button_click"
+          });
+        }
+      });
+    });
+  });
+</script>
+
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const quoteButtons = document.querySelectorAll("[data-quote-open]");
+    const callButtons = document.querySelectorAll("[data-call-open]");
+    const contactButtons = document.querySelectorAll("[data-contact-open]");
+    const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+    const contactForm = document.querySelector("[data-contact-form]");
+
+    quoteButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "quote_button_click"
+          });
+        }
+      });
+    });
+
+    callButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "call_button_click"
+          });
+        }
+      });
+    });
+
+    contactButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "contact_button_click"
+          });
+        }
+      });
+    });
+
+    phoneLinks.forEach((link) => {
+      link.addEventListener("click", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "contact", {
+            event_category: "engagement",
+            event_label: "phone_number_click"
+          });
+        }
+      });
+    });
+
+    if (contactForm) {
+      contactForm.addEventListener("submit", function () {
+        if (typeof gtag === "function") {
+          gtag("event", "generate_lead", {
+            event_category: "engagement",
+            event_label: "contact_form_submit"
+          });
+        }
+      });
+    }
+  });
+</script>
+    
   </body>
 </html>
