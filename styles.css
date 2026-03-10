@@ -731,7 +731,7 @@ body{
   height: 320px;
   object-fit: cover;
   object-position: 18% 12%;
-  transform: scale(1.10);
+  transform: scale(1.00);
   transform-origin: 18% 12%;
   display:block;
 }
