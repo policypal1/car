@@ -1,1 +1,4 @@
-https://keizermobiledetailing.com/robots.txt
+User-agent: *
+Allow: /
+
+Sitemap: https://keizermobiledetailing.com/sitemap.xml
