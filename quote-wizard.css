@@ -989,3 +989,42 @@
     text-align:center;
   }
 }
+
+@media (max-width: 767px){
+  .quoteNav{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "note note"
+      "back next";
+    gap:10px;
+    align-items:center;
+    justify-content:stretch;
+  }
+
+  .qNavBundleNote{
+    grid-area:note;
+    margin:0;
+    padding:10px 12px;
+    text-align:left;
+    font-size:.92rem;
+    line-height:1.35;
+    border:1px solid rgba(214,178,94,.45);
+    border-radius:14px;
+    background:rgba(214,178,94,.10);
+  }
+
+  .quoteBack{
+    grid-area:back;
+    width:100%;
+    min-width:0;
+    justify-content:center;
+  }
+
+  .quoteNext{
+    grid-area:next;
+    width:100%;
+    min-width:0;
+    justify-content:center;
+  }
+}
