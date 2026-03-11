@@ -543,6 +543,29 @@ function canContinue() {
   return true;
 }
 
+function syncNavBundleNote() {
+  const nav = quoteBackBtn?.parentElement;
+  if (!nav) return;
+
+  let note = nav.querySelector(".qNavBundleNote");
+  const shouldShow =
+    steps[stepIndex] === "service" &&
+    quoteState.serviceCategory === "Interior + Exterior";
+
+  if (!shouldShow) {
+    if (note) note.remove();
+    return;
+  }
+
+  if (!note) {
+    note = document.createElement("div");
+    note.className = "qNavBundleNote";
+    quoteBackBtn.insertAdjacentElement("afterend", note);
+  }
+
+  note.textContent = "Save $30 when you book Interior Detail + Exterior Wash together.";
+}
+
 function updateNav() {
   if (!quoteBackBtn || !quoteNextBtn) return;
 
@@ -550,6 +573,7 @@ function updateNav() {
   const step = steps[stepIndex];
 
   if (step === "done") {
+    syncNavBundleNote();
     quoteNextBtn.style.display = "none";
     quoteBackBtn.textContent = "Close";
     quoteBackBtn.style.visibility = "visible";
@@ -570,6 +594,7 @@ function updateNav() {
 
   quoteNextBtn.disabled = !canContinue();
   renderNavPrice();
+  syncNavBundleNote();
 }
 
 function pickAndAdvance(pickFn) {
@@ -1157,10 +1182,6 @@ function renderStep() {
       return;
     }
 
-    const bundleNote = document.createElement("div");
-    bundleNote.className = "qServiceNote";
-    bundleNote.textContent = "Book Interior Detail + Exterior Wash together and save $30.";
-
     const tray = document.createElement("div");
     tray.className = "qServiceTray";
 
@@ -1223,7 +1244,7 @@ function renderStep() {
       );
     });
 
-    quoteBody.append(title, sub, bundleNote, tray, cards);
+    quoteBody.append(title, sub, tray, cards);
   }
 
   if (step === "interiorPackage") {
