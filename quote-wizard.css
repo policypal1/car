@@ -57,8 +57,6 @@
   margin-top:14px;
   padding-top:12px;
   padding-bottom:4px;
-
-  /* changed: solid background (no gradient/blur) */
   background:#fff;
   border-top:1px solid rgba(0,0,0,.08);
 }
@@ -260,6 +258,25 @@
   color:#111;
 }
 
+.qCard--servicePick,
+.qCard--condition{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+
+.qCard--servicePick .qCardMedia,
+.qCard--condition .qCardMedia{
+  width:100%;
+}
+
+.qCard--servicePick .qCardLabel,
+.qCard--condition .qCardLabel{
+  min-height:2.8em;
+  display:flex;
+  align-items:flex-start;
+}
+
 /* ✅ allow newline (used on condition cards for "Starting at") */
 .qCardHint{
   margin:0 2px 0;
@@ -337,6 +354,17 @@
 .qChipEmpty{
   font-weight:850;
   color:rgba(0,0,0,.55);
+}
+
+.qServiceNote{
+  margin:0 0 12px;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(214,178,94,.35);
+  background:rgba(214,178,94,.10);
+  color:#111;
+  font-weight:850;
+  line-height:1.45;
 }
 
 /* Fields */
