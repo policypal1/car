@@ -173,41 +173,38 @@ const paintCorrectionPackages = [
     label: "1 Step Correction",
     serviceLabel: "1 Step Paint Correction",
     hint: "Gloss boost + defect reduction",
-    img: PAINT_CORRECTION_IMG,
+    img: "./3fb0b0de-22d0-4d66-90a6-ce3938a8ba41.png",
     badge: "1"
   },
   {
     label: "2 Step Correction",
     serviceLabel: "2 Step Paint Correction",
     hint: "Heavier correction finish",
-    img: PAINT_CORRECTION_IMG,
+    img: "./ChatGPT Image Mar 11, 2026, 06_31_54 AM.png",
     badge: "2"
   }
 ];
 
 const ceramicPackages = [
   {
-    label: "Ceramic + Clay Decontamination",
+    label: "Ceramic + Clay Decon",
     serviceLabel: "Ceramic Coating + Clay Decontamination",
     hint: "Starting at $500",
-    img: CERAMIC_IMG,
-    badge: "1",
+    img: "./ChatGPT Image Mar 11, 2026, 06_42_13 AM.png",
     startingAt: 500
   },
   {
     label: "Ceramic + 1 Step Correction",
     serviceLabel: "Ceramic Coating + 1 Step Correction",
     hint: "Starting at $800",
-    img: CERAMIC_IMG,
-    badge: "2",
+    img: "./ChatGPT Image Mar 11, 2026, 06_43_01 AM.png",
     startingAt: 800
   },
   {
     label: "Ceramic + 2 Step Correction",
     serviceLabel: "Ceramic Coating + 2 Step Correction",
     hint: "Starting at $1000",
-    img: CERAMIC_IMG,
-    badge: "3",
+    img: "./2a261b9f-6f4b-4abc-b7b9-052a42a96366.png",
     startingAt: 1000
   }
 ];
@@ -354,6 +351,10 @@ function getSelectedServiceChipData() {
 function hasInteriorExteriorBundle() {
   const s = quoteState.services || [];
   return s.includes("Interior Detail") && s.includes("Exterior Wash");
+}
+
+function allowsFullPayment() {
+  return !(quoteState.services || []).includes("Ceramic Coating");
 }
 
 function computeEstimateInfo() {
@@ -1141,7 +1142,7 @@ function renderStep() {
         cards.appendChild(
           imgCard({
             label: s.label,
-            hint: getServiceCardHint(s.label),
+            hint: "",
             img: s.img,
             split: s.split || "h",
             variant: "qCard--square qCard--servicePick",
@@ -1155,6 +1156,10 @@ function renderStep() {
       updateNav();
       return;
     }
+
+    const bundleNote = document.createElement("div");
+    bundleNote.className = "qServiceNote";
+    bundleNote.textContent = "Book Interior Detail + Exterior Wash together and save $30.";
 
     const tray = document.createElement("div");
     tray.className = "qServiceTray";
@@ -1205,7 +1210,7 @@ function renderStep() {
       cards.appendChild(
         imgCard({
           label: s.label,
-          hint: quoteState.services.includes(s.label) ? "Selected" : getServiceCardHint(s.label),
+          hint: "",
           img: s.img,
           split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
@@ -1218,7 +1223,7 @@ function renderStep() {
       );
     });
 
-    quoteBody.append(title, sub, tray, cards);
+    quoteBody.append(title, sub, bundleNote, tray, cards);
   }
 
   if (step === "interiorPackage") {
@@ -1314,7 +1319,6 @@ function renderStep() {
           label: pkg.label,
           hint: pkg.hint,
           img: pkg.img,
-          badge: pkg.badge || "",
           variant: "qCard--square qCard--condition",
           isSelected: quoteState.ceramicPackage === pkg.serviceLabel,
           onClick: () => pickAndAdvance(() => (quoteState.ceramicPackage = pkg.serviceLabel))
@@ -1527,8 +1531,19 @@ function renderStep() {
   }
 
   if (step === "payment") {
+    const fullPaymentAllowed = allowsFullPayment();
+
+    if (!fullPaymentAllowed && quoteState.paymentMode !== "deposit") {
+      quoteState.paymentMode = "deposit";
+    }
+    if (!fullPaymentAllowed) {
+      quoteState.ackPriceVariance = false;
+    }
+
     title.textContent = "Pay to reserve your appointment";
-    sub.textContent = "Choose a deposit or pay in full today.";
+    sub.textContent = fullPaymentAllowed
+      ? "Choose a deposit or pay in full today."
+      : "Ceramic coating bookings require a deposit today.";
 
     const estInfo = computeEstimateInfo();
     const estLine = formatEstimateDisplay(estInfo);
@@ -1548,35 +1563,49 @@ function renderStep() {
       <div class="qEstimatePills" style="margin-top:14px;">
         <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
         <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
-        <span class="qPill"><strong>Pay in full:</strong> ${formatMoney(fullPayAmount)}</span>
+        ${
+          fullPaymentAllowed
+            ? `<span class="qPill"><strong>Pay in full:</strong> ${formatMoney(fullPayAmount)}</span>`
+            : `<span class="qPill"><strong>Payment:</strong> Deposit only for ceramic</span>`
+        }
       </div>
     `;
 
     const paymentChoice = document.createElement("div");
     paymentChoice.className = "qCalWrap";
     paymentChoice.style.marginTop = "12px";
-    paymentChoice.innerHTML = `
-      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Choose payment option</div>
-      <div style="display:grid; gap:10px;">
-        <label class="qCheck" style="align-items:flex-start;">
-          <input id="qPayModeDeposit" type="radio" name="qPayMode" value="deposit" ${quoteState.paymentMode === "deposit" ? "checked" : ""} />
+    paymentChoice.innerHTML = fullPaymentAllowed
+      ? `
+        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Choose payment option</div>
+        <div style="display:grid; gap:10px;">
+          <label class="qCheck" style="align-items:flex-start;">
+            <input id="qPayModeDeposit" type="radio" name="qPayMode" value="deposit" ${quoteState.paymentMode === "deposit" ? "checked" : ""} />
+            <span>
+              <strong>Pay deposit now</strong><br/>
+              Pay ${formatMoney(DEPOSIT_AMOUNT)} now to reserve your appointment. It is applied to your total.
+            </span>
+          </label>
+
+          <label class="qCheck" style="align-items:flex-start;">
+            <input id="qPayModeFull" type="radio" name="qPayMode" value="full" ${quoteState.paymentMode === "full" ? "checked" : ""} />
+            <span>
+              <strong>Pay in full now</strong><br/>
+              ${estInfo?.hasStartingAt
+                ? `Pay the current starting price now: <strong>${formatMoney(fullPayAmount)}</strong>.`
+                : `Pay the current quoted amount now: <strong>${formatMoney(fullPayAmount)}</strong>.`}
+            </span>
+          </label>
+        </div>
+      `
+      : `
+        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment option</div>
+        <div class="qCheck">
           <span>
             <strong>Pay deposit now</strong><br/>
-            Pay ${formatMoney(DEPOSIT_AMOUNT)} now to reserve your appointment. It is applied to your total.
+            Pay ${formatMoney(DEPOSIT_AMOUNT)} now to reserve your ceramic coating appointment. Pay in full is not available until final assessment.
           </span>
-        </label>
-
-        <label class="qCheck" style="align-items:flex-start;">
-          <input id="qPayModeFull" type="radio" name="qPayMode" value="full" ${quoteState.paymentMode === "full" ? "checked" : ""} />
-          <span>
-            <strong>Pay in full now</strong><br/>
-            ${estInfo?.hasStartingAt
-              ? `Pay the current starting price now: <strong>${formatMoney(fullPayAmount)}</strong>.`
-              : `Pay the current quoted amount now: <strong>${formatMoney(fullPayAmount)}</strong>.`}
-          </span>
-        </label>
-      </div>
-    `;
+        </div>
+      `;
 
     const ack = document.createElement("div");
     ack.style.marginTop = "12px";
@@ -1660,7 +1689,7 @@ function renderStep() {
       ? ""
       : quoteState.paymentMode === "full"
         ? "Required: payment selection, both checkboxes, and successful payment."
-        : "Required: payment selection, acknowledgment, and successful payment.";
+        : "Required: acknowledgment and successful payment.";
 
     quoteBody.append(title, sub, summary, paymentChoice, ack, squareBox, foot);
 
@@ -1679,7 +1708,7 @@ function renderStep() {
         ? ""
         : quoteState.paymentMode === "full"
           ? "Required: payment selection, both checkboxes, and successful payment."
-          : "Required: payment selection, acknowledgment, and successful payment.";
+          : "Required: acknowledgment and successful payment.";
       updateNav();
     };
 
