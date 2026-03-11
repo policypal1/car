@@ -102,12 +102,10 @@
   padding-bottom:8px;
   -webkit-overflow-scrolling:touch;
   scroll-snap-type:x mandatory;
-  align-items:stretch;
 }
 .qCards--scroll .qCard{
   flex:0 0 82%;
   scroll-snap-align:start;
-  align-self:stretch;
 }
 @media (min-width:520px){
   .qCards--scroll .qCard{ flex:0 0 62%; }
@@ -128,8 +126,6 @@
   padding:12px;
   border-radius:18px;
   box-shadow:0 12px 30px rgba(0,0,0,.08);
-  display:flex;
-  flex-direction:column;
 }
 .qCards--big .qCardMedia{
   border-radius:16px;
@@ -268,19 +264,10 @@
 .qCard--square .qCardMedia{ aspect-ratio: 1 / 1; }
 .qCard--square .qCardMedia img{ object-fit:cover; }
 
-.qCardCopy{
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  flex:1 1 auto;
-}
-
 .qCardLabel{
-  margin:0;
+  margin:10px 2px 2px;
   font-weight:900;
   color:#111;
-  line-height:1.25;
 }
 
 .qCard--servicePick,
@@ -294,63 +281,39 @@
   width:100%;
 }
 
-.qCard--servicePick .qCardLabel{
-  display:block;
-  min-height:2.5em;
-}
-
-.qCard--servicePick .qCardHint{
-  min-height:2.8em;
-}
-
-.qCard--condition .qCardCopy{
-  gap:2px;
-}
-
+.qCard--servicePick .qCardLabel,
 .qCard--condition .qCardLabel{
-  min-height:0;
-}
-
-.qCard--condition .qCardHint{
+  display:block;
   min-height:0;
 }
 
 /* ✅ allow newline (used on condition cards for "Starting at") */
 .qCardHint{
-  margin:0;
+  margin:0 2px 0;
   color:rgba(0,0,0,.62);
   font-weight:700;
   font-size:.95rem;
-  line-height:1.4;
+  line-height:1.45;
   white-space:pre-line;
 }
 .qCardHint:empty{ display:none; }
 
 /* ✅ Services tray (chips) */
 .qServiceTray{
-  border-radius:20px;
-  border:2px solid rgba(214,178,94,.28);
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
   background:
-    radial-gradient(900px 260px at 12% 0%, rgba(214,178,94,.13), rgba(255,255,255,0) 58%),
-    linear-gradient(180deg, rgba(214,178,94,.04), rgba(0,0,0,.02));
+    radial-gradient(800px 260px at 12% 0%, rgba(214,178,94,.12), rgba(255,255,255,0) 55%),
+    rgba(0,0,0,.02);
   padding:12px;
   margin-bottom:12px;
-  box-shadow:0 10px 28px rgba(0,0,0,.06);
-}
-.qServiceTray.isActive{
-  border-color:rgba(214,178,94,.58);
-  box-shadow:0 16px 42px rgba(214,178,94,.14);
-  background:
-    radial-gradient(900px 260px at 12% 0%, rgba(214,178,94,.18), rgba(255,255,255,0) 58%),
-    linear-gradient(180deg, rgba(214,178,94,.08), rgba(0,0,0,.02));
 }
 .qServiceTrayTop{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
   gap:10px;
   margin-bottom:10px;
-  flex-wrap:wrap;
 }
 .qServiceTrayTitle{
   font-weight:1000;
@@ -362,14 +325,11 @@
   color:rgba(0,0,0,.60);
   font-size:.95rem;
   line-height:1.35;
-  min-height:1.35em;
 }
 .qChips{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
-  min-height:42px;
-  align-items:flex-start;
 }
 .qChip{
   display:inline-flex;
@@ -382,7 +342,6 @@
   box-shadow:0 10px 26px rgba(0,0,0,.06);
   font-weight:900;
   color:#111;
-  min-height:42px;
 }
 .qChip button{
   width:20px;
@@ -403,9 +362,6 @@
   border-color:rgba(214,178,94,.72);
 }
 .qChipEmpty{
-  display:flex;
-  align-items:center;
-  min-height:42px;
   font-weight:850;
   color:rgba(0,0,0,.55);
 }
@@ -985,38 +941,6 @@
   .qNavBundleNote{
     font-size:.9rem;
     padding:0 6px;
-  }
-
-  .qCardCopy{
-    margin-top:8px;
-  }
-
-  .qCard--servicePick .qCardLabel{
-    min-height:2.45em;
-  }
-
-  .qCard--servicePick .qCardHint{
-    min-height:2.65em;
-    font-size:.92rem;
-    line-height:1.35;
-  }
-
-  .qCard--condition .qCardCopy{
-    gap:2px;
-  }
-
-  .qCard--condition .qCardLabel{
-    line-height:1.18;
-  }
-
-  .qCard--condition .qCardHint{
-    font-size:.92rem;
-    line-height:1.3;
-  }
-
-  .qServiceTrayTop{
-    flex-direction:column;
-    align-items:flex-start;
   }
 }
 
