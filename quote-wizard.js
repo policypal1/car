@@ -649,14 +649,14 @@ function pickSingleServiceAndAdvance(label) {
 }
 
 function getServiceCardHint(serviceLabel) {
-  if (serviceLabel === "Interior Detail") return "Choose package next";
-  if (serviceLabel === "Exterior Wash") return "Choose package next";
-  if (serviceLabel === "Paint Correction") return "Choose 1 step or 2 step next";
-  if (serviceLabel === "Ceramic Coating") return "Choose coating package next";
-  if (serviceLabel === "Interior Upkeep Plan") return "Recurring interior upkeep pricing";
-  if (serviceLabel === "Exterior Upkeep Plan") return "Recurring exterior upkeep pricing";
-  if (serviceLabel === "Interior + Exterior Upkeep Plan") return "Recurring full upkeep pricing";
-  return "Tap to select";
+  if (serviceLabel === "Interior Detail") return "Deep clean for seats, mats, panels, and trim.";
+  if (serviceLabel === "Exterior Wash") return "Hand wash with wheels, tires, and exterior cleanup.";
+  if (serviceLabel === "Paint Correction") return "Polish away swirls and boost gloss.";
+  if (serviceLabel === "Ceramic Coating") return "Longer-lasting shine and paint protection.";
+  if (serviceLabel === "Interior Upkeep Plan") return "Recurring interior maintenance to keep it fresh.";
+  if (serviceLabel === "Exterior Upkeep Plan") return "Recurring exterior maintenance to keep it clean.";
+  if (serviceLabel === "Interior + Exterior Upkeep Plan") return "Recurring maintenance for the full vehicle.";
+  return "";
 }
 
 // -------------------------
@@ -708,8 +708,10 @@ function imgCard({
 
   btn.innerHTML = `
     ${mediaHtml}
-    <div class="qCardLabel">${escapeHtml(label)}</div>
-    <div class="qCardHint">${escapeHtml(hint)}</div>
+    <div class="qCardCopy">
+      <div class="qCardLabel">${escapeHtml(label)}</div>
+      <div class="qCardHint">${escapeHtml(hint)}</div>
+    </div>
   `;
   return btn;
 }
@@ -1167,7 +1169,7 @@ function renderStep() {
         cards.appendChild(
           imgCard({
             label: s.label,
-            hint: "",
+            hint: getServiceCardHint(s.label),
             img: s.img,
             split: s.split || "h",
             variant: "qCard--square qCard--servicePick",
@@ -1183,7 +1185,8 @@ function renderStep() {
     }
 
     const tray = document.createElement("div");
-    tray.className = "qServiceTray";
+    const n = (quoteState.services || []).length;
+    tray.className = "qServiceTray" + (n ? " isActive" : "");
 
     const trayTop = document.createElement("div");
     trayTop.className = "qServiceTrayTop";
@@ -1194,7 +1197,6 @@ function renderStep() {
 
     const trayHint = document.createElement("div");
     trayHint.className = "qServiceTrayHint";
-    const n = (quoteState.services || []).length;
     trayHint.textContent = n ? `${n} selected • tap × to remove` : "Select one or more services below";
 
     trayTop.append(trayTitle, trayHint);
@@ -1231,7 +1233,7 @@ function renderStep() {
       cards.appendChild(
         imgCard({
           label: s.label,
-          hint: "",
+          hint: getServiceCardHint(s.label),
           img: s.img,
           split: s.split || "h",
           variant: "qCard--square qCard--servicePick",
@@ -1363,8 +1365,7 @@ function renderStep() {
     grid.className = "qHearGrid";
 
     upkeepFrequencies.forEach((o) => {
-      const price = computeUpkeepPrice(upkeepService, o.label);
-      const hint = `${o.hint}${price ? ` • ${formatMoney(price)} per visit` : ""}`;
+      const hint = o.hint;
 
       grid.appendChild(
         optionCard({
