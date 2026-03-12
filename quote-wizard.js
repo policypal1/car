@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v11.0 - Tier Pricing + Paint/Ceramic Branching)
+// QUOTE WIZARD (Flow v11.1 - Tier Pricing + Paint/Ceramic Branching)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -128,43 +128,104 @@ const servicesAll = [
 const interiorPackages = [
   {
     label: "Standard",
+    displayLabel: "Standard Clean",
     serviceLabel: "Standard Interior Detail",
     hint: "Clean reset",
-    img: "./IMG_2915.jpg"
+    img: "./IMG_2915.jpg",
+    features: [
+      "Full interior vacuum (seats, carpets, floor mats)",
+      "Full interior wipe down (dash, doors, console, vents, and panels)",
+      "Steam clean",
+      "Windows cleaned inside & out"
+    ]
   },
   {
     label: "Deep Clean",
+    displayLabel: "Deep Clean",
     serviceLabel: "Deep Clean Interior Detail",
     hint: "More thorough interior clean",
-    img: "./IMG_2916.jpg"
+    img: "./IMG_2916.jpg",
+    features: [
+      "Full interior vacuum (seats, carpets, floor mats)",
+      "Full interior wipe down (dash, doors, console, vents, and panels)",
+      "Carpet shampoo",
+      "Steam clean",
+      "Light stain removal",
+      "Light pet hair removal",
+      "Windows cleaned inside & out"
+    ]
   },
   {
     label: "Premium Deep Clean",
+    displayLabel: "Premium Deep Clean",
     serviceLabel: "Premium Deep Clean Interior Detail",
     hint: "Heavier interior work",
-    img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png"
+    img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png",
+    features: [
+      "Full interior vacuum (seats, carpets, floor mats)",
+      "Full interior wipe down (dash, doors, console, vents, and panels)",
+      "Carpet & floor mats shampoo",
+      "Seat extraction",
+      "Steam clean",
+      "Steam extraction",
+      "Deep stain removal",
+      "Pet hair removal",
+      "Windows cleaned inside & out"
+    ]
   }
 ];
 
 const exteriorPackages = [
   {
     label: "Standard",
+    displayLabel: "Standard",
     serviceLabel: "Standard Exterior Detail",
     hint: "Basic exterior reset",
-    img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp"
+    img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp",
+    features: [
+      "Pre-wash foam",
+      "Contact wash",
+      "Wheels and tires cleaned",
+      "Tire dressing",
+      "Spray wax",
+      "Dry with microfiber towel"
+    ]
   },
   {
     label: "Premium",
+    displayLabel: "Premium",
     serviceLabel: "Premium Exterior Detail",
     hint: "More complete exterior detail",
     img: "./IMG_2910.jpg",
-    zoom: 1.28
+    zoom: 1.28,
+    features: [
+      "Pre-wash foam",
+      "Contact wash",
+      "Wheels and tires cleaned",
+      "Tire dressing",
+      "Bug removal",
+      "Light tar removal",
+      "Paint sealant"
+    ]
   },
   {
     label: "Clay Decontamination",
+    displayLabel: "Clay Decontamination",
     serviceLabel: "Clay Decontamination Exterior Detail",
     hint: "Deeper contamination removal",
-    img: "./dirty-car.jpg"
+    img: "./dirty-car.jpg",
+    features: [
+      "Pre-wash foam",
+      "Contact wash",
+      "Iron remover",
+      "Clay bar",
+      "Wheels and tires cleaned",
+      "Tire dressing",
+      "Bug removal",
+      "Light tar removal",
+      "Paint sealant",
+      "Wax"
+    ]
   }
 ];
 
@@ -736,6 +797,27 @@ function optionCard({ label, hint, isSelected = false, onClick }) {
   return btn;
 }
 
+function featureCard({ title, items = [], price = null, isSelected = false, onClick }) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "qCard qFeatureCard" + (isSelected ? " isSel" : "");
+  btn.addEventListener("click", onClick);
+
+  btn.innerHTML = `
+    <div class="qFeatureCardInner">
+      <div class="qFeatureCardTitle">${escapeHtml(title)}</div>
+      <ul class="qFeatureList">
+        ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+      <div class="qFeaturePrice">
+        ${Number.isFinite(price) ? `Starting at ${escapeHtml(formatMoney(price))}` : "Price unavailable"}
+      </div>
+    </div>
+  `;
+
+  return btn;
+}
+
 // -------------------------
 // Modal open/close
 // -------------------------
@@ -1258,14 +1340,12 @@ function renderStep() {
 
     interiorPackages.forEach((pkg) => {
       const price = priceForVehicle(INTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-      const hint = `${pkg.hint}\n${price ? formatMoney(price) : "Price unavailable"}`;
 
       cards.appendChild(
-        imgCard({
-          label: pkg.label,
-          hint,
-          img: pkg.img,
-          variant: "qCard--square qCard--condition",
+        featureCard({
+          title: pkg.displayLabel || pkg.label,
+          items: pkg.features || [],
+          price,
           isSelected: quoteState.interiorPackage === pkg.serviceLabel,
           onClick: () => pickAndAdvance(() => (quoteState.interiorPackage = pkg.serviceLabel))
         })
@@ -1284,15 +1364,12 @@ function renderStep() {
 
     exteriorPackages.forEach((pkg) => {
       const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-      const hint = `${pkg.hint}\n${price ? formatMoney(price) : "Price unavailable"}`;
 
       cards.appendChild(
-        imgCard({
-          label: pkg.label,
-          hint,
-          img: pkg.img,
-          imgZoom: pkg.zoom || null,
-          variant: "qCard--square qCard--condition",
+        featureCard({
+          title: pkg.displayLabel || pkg.label,
+          items: pkg.features || [],
+          price,
           isSelected: quoteState.exteriorPackage === pkg.serviceLabel,
           onClick: () => pickAndAdvance(() => (quoteState.exteriorPackage = pkg.serviceLabel))
         })
@@ -1311,7 +1388,7 @@ function renderStep() {
 
     paintCorrectionPackages.forEach((pkg) => {
       const price = priceForVehicle(PAINT_CORRECTION_PRICES, pkg.serviceLabel);
-      const hint = `${pkg.hint}\n${price ? formatMoney(price) : "Price unavailable"}`;
+      const hint = `${pkg.hint}\n${price ? `Starting at ${formatMoney(price)}` : "Price unavailable"}`;
 
       cards.appendChild(
         imgCard({
