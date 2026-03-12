@@ -710,7 +710,7 @@ function pickSingleServiceAndAdvance(label) {
 }
 
 function getServiceCardHint(serviceLabel) {
-  if (serviceLabel === "Interior Detail") return "Deep clean for seats, mats, panels, and trim.";
+  if (serviceLabel === "Interior Detail") return "Seats, mats, center console, panels, and trim.";
   if (serviceLabel === "Exterior Wash") return "Hand wash with wheels, tires, and exterior cleanup.";
   if (serviceLabel === "Paint Correction") return "Polish away swirls and boost gloss.";
   if (serviceLabel === "Ceramic Coating") return "Longer-lasting shine and paint protection.";
