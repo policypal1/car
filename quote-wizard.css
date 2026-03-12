@@ -107,8 +107,12 @@
   flex:0 0 82%;
   scroll-snap-align:start;
 }
+.qCards--scroll .qFeatureCard{
+  flex:0 0 90%;
+}
 @media (min-width:520px){
   .qCards--scroll .qCard{ flex:0 0 62%; }
+  .qCards--scroll .qFeatureCard{ flex:0 0 72%; }
 }
 @media (min-width:768px){
   .qCards--scroll{
@@ -297,6 +301,48 @@
   white-space:pre-line;
 }
 .qCardHint:empty{ display:none; }
+
+/* ✅ NEW detail cards for interior/exterior package steps */
+.qFeatureCard{
+  display:flex;
+  align-items:stretch;
+  min-height:100%;
+}
+.qFeatureCardInner{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  min-height:100%;
+}
+.qFeatureCardTitle{
+  margin:2px 0 14px;
+  text-align:center;
+  font-weight:1000;
+  color:#111;
+  font-size:1.15rem;
+  line-height:1.25;
+}
+.qFeatureList{
+  margin:0;
+  padding-left:20px;
+  display:grid;
+  gap:8px;
+  color:rgba(0,0,0,.72);
+  font-weight:800;
+  font-size:.96rem;
+  line-height:1.45;
+}
+.qFeatureList li::marker{
+  color:rgba(0,0,0,.45);
+}
+.qFeaturePrice{
+  margin-top:auto;
+  padding-top:14px;
+  text-align:center;
+  font-weight:1000;
+  color:#111;
+  font-size:1rem;
+}
 
 /* ✅ Services tray (chips) */
 .qServiceTray{
