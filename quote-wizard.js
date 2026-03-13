@@ -10,7 +10,7 @@
 //
 
 const DEFAULT_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbycvwt1QVEDx1NdP9i8OnJMwi-CiKCZNFhkDSqPLgXvXXwV2Tvf_0-DZf2wdhumxZS4LQ/exec";
+  "https://script.google.com/macros/s/AKfycbzKQz3YhERov3GufQTFlrJ5JfUmzKumyjqhJVk-6fuVIL5TqAP8wmybiJljwVJkQzYUig/exec";
 
 const SQUARE_APP_ID = "sq0idp-9rqrzxMJ-huh115bZkPH5Q";
 const SQUARE_LOCATION_ID = "LV9XSE8KC6F93";
