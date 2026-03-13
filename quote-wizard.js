@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v11.3 - Tier Pricing + Paint/Ceramic Branching)
+// QUOTE WIZARD (Flow v11.4 - Tier Pricing + Paint/Ceramic Branching)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -826,7 +826,7 @@ function updateNav() {
     quoteNextBtn.textContent = "Continue";
   }
 
-  quoteNextBtn.disabled = !canContinue() || quoteState.leadEmailSending;
+  quoteNextBtn.disabled = !canContinue();
   renderNavPrice();
   syncNavBundleNote();
 }
@@ -1330,7 +1330,22 @@ async function handleApplePayCharge(statusEl) {
 // -------------------------
 // Lead / Apps Script
 // -------------------------
-async function sendLeadCaptureIfNeeded() {
+async function postJson(url, payload, extraOptions = {}) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+    redirect: "follow",
+    keepalive: extraOptions.keepalive === true
+  });
+
+  const text = await res.text();
+  try { return JSON.parse(text); }
+  catch { return { ok: false, message: "Apps Script returned non-JSON." }; }
+}
+
+async function sendLeadCaptureIfNeeded({ background = false } = {}) {
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) {
     return { ok: true, skipped: true };
   }
@@ -1347,34 +1362,58 @@ async function sendLeadCaptureIfNeeded() {
   }
 
   quoteState.leadEmailSending = true;
-  updateNav();
 
   try {
     const payload = buildPayload();
     const leadUrl = buildScriptUrl("lead");
 
     const result = await Promise.race([
-      postJson(leadUrl, payload),
-      timeout(12000).then(() => ({ ok: false, message: "Lead notification timed out." }))
+      postJson(leadUrl, payload, { keepalive: true }),
+      timeout(background ? 8000 : 12000).then(() => ({
+        ok: false,
+        message: "Lead notification timed out."
+      }))
     ]);
 
-    if (result && result.ok === true) {
+    const didSend =
+      result?.emailSent === true ||
+      (result?.ok === true && !Object.prototype.hasOwnProperty.call(result || {}, "emailSent"));
+
+    if (didSend) {
       quoteState.leadEmailSent = true;
       quoteState.leadEmailSignature = signature;
 
       if (result.routeGroup) quoteState.routeGroup = String(result.routeGroup || "");
       if (result.routeGroupLabel) quoteState.routeGroupLabel = String(result.routeGroupLabel || "");
 
-      return result;
+      return { ok: true, ...result };
     }
 
-    return result || { ok: false, message: "Lead notification failed." };
+    quoteState.leadEmailSent = false;
+    quoteState.leadEmailSignature = "";
+
+    return {
+      ok: false,
+      message: result?.emailError || result?.message || "Lead email failed.",
+      ...result
+    };
   } catch {
+    quoteState.leadEmailSent = false;
+    quoteState.leadEmailSignature = "";
     return { ok: false, message: "Lead notification blocked (CORS)." };
   } finally {
     quoteState.leadEmailSending = false;
-    updateNav();
   }
+}
+
+function queueLeadCapture() {
+  void Promise.resolve()
+    .then(() => sendLeadCaptureIfNeeded({ background: true }))
+    .then((result) => {
+      if (result && result.ok === false) {
+        console.warn("Lead notification issue:", result.message || result);
+      }
+    });
 }
 
 // -------------------------
@@ -1923,6 +1962,10 @@ function renderStep() {
     quoteBody.append(title, sub, wrap);
 
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
+
+    if (!quoteState.leadEmailSent && !quoteState.leadEmailSending) {
+      queueLeadCapture();
+    }
 
     warmSquare();
   }
@@ -2586,20 +2629,6 @@ function buildPayload() {
   };
 }
 
-async function postJson(url, payload) {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload),
-    cache: "no-store",
-    redirect: "follow"
-  });
-
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch { return { ok: false, message: "Apps Script returned non-JSON." }; }
-}
-
 async function reserveAndSend() {
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
 
@@ -2654,23 +2683,12 @@ async function nextStep(fromAutoAdvance = false) {
   const step = steps[stepIndex];
 
   if (step === "contact") {
-    const oldText = quoteNextBtn?.textContent || "Continue";
+    stepIndex = nextActiveStepIndex(stepIndex);
+    renderStep();
+    if (fromAutoAdvance) updateNav();
 
-    if (quoteNextBtn) {
-      quoteNextBtn.disabled = true;
-      quoteNextBtn.textContent = "Saving...";
-    }
-
-    const leadResult = await sendLeadCaptureIfNeeded();
-
-    if (quoteNextBtn) {
-      quoteNextBtn.textContent = oldText;
-      quoteNextBtn.disabled = false;
-    }
-
-    if (leadResult && leadResult.ok === false) {
-      console.warn("Lead notification issue:", leadResult.message || leadResult);
-    }
+    queueLeadCapture();
+    return;
   }
 
   if (step === "payment") {
