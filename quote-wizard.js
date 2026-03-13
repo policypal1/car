@@ -2364,21 +2364,28 @@ function parseSlotToDateTime(slot) {
 
   const date =
     normalizeDateValue(slot?.date) ||
-    normalizeDateValue(id) ||
-    normalizeDateValue(label) ||
     normalizeDateValue(slot?.start) ||
     normalizeDateValue(slot?.startAt) ||
+    normalizeDateValue(id) ||
+    normalizeDateValue(label) ||
     "";
 
-  const timeInfo =
-    extractTimeInfo(slot?.time) ||
-    extractTimeInfo(slot?.startTime) ||
-    extractTimeInfo(slot?.displayTime) ||
+  // Prefer the human-readable label time first.
+  // This avoids bad midnight values like 00:00 overriding a correct label like 10:00 AM.
+  const preferredTimeInfo =
     extractTimeInfo(label) ||
-    extractTimeInfo(id) ||
+    extractTimeInfo(slot?.displayTime) ||
+    extractTimeInfo(slot?.startTime) ||
     extractTimeInfo(slot?.start) ||
     extractTimeInfo(slot?.startAt) ||
     null;
+
+  const fallbackTimeInfo =
+    extractTimeInfo(slot?.time) ||
+    extractTimeInfo(id) ||
+    null;
+
+  const timeInfo = preferredTimeInfo || fallbackTimeInfo;
 
   return {
     date,
