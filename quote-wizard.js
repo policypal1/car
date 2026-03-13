@@ -1364,7 +1364,10 @@ async function sendLeadCaptureIfNeeded({ background = false } = {}) {
   quoteState.leadEmailSending = true;
 
   try {
-    const payload = buildPayload();
+    const payload = {
+  ...buildPayload(),
+  action: "lead"
+};
     const leadUrl = buildScriptUrl("lead");
 
     const result = await Promise.race([
