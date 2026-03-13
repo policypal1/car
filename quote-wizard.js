@@ -1,5 +1,5 @@
 // -------------------------
-// QUOTE WIZARD (Flow v11.5 - Contact Lead Send Lock + Hidden Payment Bypass)
+// QUOTE WIZARD (Flow v11.6 - Silent Lead Send + Hidden Payment Bypass)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -337,8 +337,6 @@ const CERAMIC_COATING_STARTING_AT = {
   "Level 3 Ceramic Coating": 1000
 };
 
-// Using your old upkeep numbers as the monthly base.
-// Biweekly is 8% cheaper per visit, weekly is 15% cheaper per visit.
 const UPKEEP_BASE_PRICES = {
   "Interior Upkeep Plan": { Sedan: 85, SUV: 95, "Big SUV": 110, Truck: 100 },
   "Exterior Upkeep Plan": { Sedan: 55, SUV: 65, "Big SUV": 75, Truck: 70 },
@@ -399,10 +397,6 @@ function priceForVehicle(table, key) {
   const vehicle = quoteState.vehicleType;
   if (!vehicle || !table?.[key]) return null;
   return clampInt(table[key][vehicle]);
-}
-
-function getActiveUpkeepService() {
-  return (quoteState.services || []).find(isUpkeepService) || "";
 }
 
 function computeUpkeepPrice(serviceLabel, frequency = quoteState.upkeepFrequency) {
@@ -1204,7 +1198,7 @@ async function initSquareCard(cardEl, statusEl) {
     squareCard = await squarePayments.card();
     await squareCard.attach(cardEl);
 
-    quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "ready";
+    quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "";
     if (statusEl) statusEl.textContent = "Use Apple Pay or enter card details.";
     return true;
   } catch (err) {
@@ -1430,17 +1424,13 @@ async function sendLeadCaptureIfNeeded({ background = false } = {}) {
 
     const leadUrl = buildScriptUrl("lead");
 
-    console.log("Sending lead capture:", { leadUrl, payload });
-
     const result = await Promise.race([
       postJson(leadUrl, payload, { keepalive: true }),
-      timeout(background ? 8000 : 15000).then(() => ({
+      timeout(background ? 8000 : 12000).then(() => ({
         ok: false,
         message: "Lead notification timed out."
       }))
     ]);
-
-    console.log("Lead capture response:", result);
 
     const didSend =
       result?.emailSent === true ||
@@ -1465,7 +1455,6 @@ async function sendLeadCaptureIfNeeded({ background = false } = {}) {
       ...result
     };
   } catch (err) {
-    console.error("Lead capture fetch error:", err);
     quoteState.leadEmailSent = false;
     quoteState.leadEmailSignature = "";
     return { ok: false, message: err?.message || "Lead notification blocked." };
@@ -1478,10 +1467,12 @@ function queueLeadCapture() {
   void Promise.resolve()
     .then(() => sendLeadCaptureIfNeeded({ background: true }))
     .then((result) => {
-      console.log("Lead capture result:", result);
       if (result && result.ok === false) {
         console.warn("Lead notification issue:", result.message || result);
       }
+    })
+    .catch((err) => {
+      console.warn("Lead notification crashed:", err);
     });
 }
 
@@ -2770,28 +2761,11 @@ async function nextStep(fromAutoAdvance = false) {
   const step = steps[stepIndex];
 
   if (step === "contact") {
-    if (quoteNextBtn) {
-      quoteNextBtn.disabled = true;
-      quoteNextBtn.textContent = "Sending...";
-    }
-
-    const leadResult = await sendLeadCaptureIfNeeded({ background: false });
-    console.log("Lead capture final result:", leadResult);
-
-    if (quoteNextBtn) {
-      quoteNextBtn.disabled = false;
-      quoteNextBtn.textContent = "Continue";
-    }
-
-    if (!leadResult || leadResult.ok !== true) {
-      alert(leadResult?.message || "Lead email failed to send. Please check Apps Script and try again.");
-      updateNav();
-      return;
-    }
-
     stepIndex = nextActiveStepIndex(stepIndex);
     renderStep();
     if (fromAutoAdvance) updateNav();
+
+    queueLeadCapture();
     return;
   }
 
