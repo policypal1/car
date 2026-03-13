@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v11.1 - Tier Pricing + Paint/Ceramic Branching)
+// QUOTE WIZARD (Flow v11.2 - Tier Pricing + Paint/Ceramic Branching)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -17,6 +17,9 @@ const SQUARE_APP_ID = "sq0idp-9rqrzxMJ-huh115bZkPH5Q";
 const SQUARE_LOCATION_ID = "LV9XSE8KC6F93";
 const SQUARE_PAYMENT_ENDPOINT = "/api/create-square-payment";
 const DEPOSIT_AMOUNT = 25;
+
+const INTERIOR_DISPLAY_RANGE_ADD = 40;
+const EXTERIOR_DISPLAY_RANGE_ADD = 15;
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -249,21 +252,21 @@ const paintCorrectionPackages = [
 const ceramicPackages = [
   {
     label: "Level 1 Ceramic Coating",
-    serviceLabel: "Ceramic Coating + Clay Decontamination",
+    serviceLabel: "Level 1 Ceramic Coating",
     hint: "Starting at $500",
     img: "./ChatGPT Image Mar 12, 2026, 07_07_29 PM.png",
     startingAt: 500
   },
   {
     label: "Level 2 Ceramic Coating",
-    serviceLabel: "Ceramic Coating + Stage 1 Paint Correction",
+    serviceLabel: "Level 2 Ceramic Coating",
     hint: "Starting at $800",
     img: "./ChatGPT Image Mar 12, 2026, 07_09_50 PM.png",
     startingAt: 800
   },
   {
     label: "Level 3 Ceramic Coating",
-    serviceLabel: "Ceramic Coating + Stage 2 Paint Correction",
+    serviceLabel: "Level 3 Ceramic Coating",
     hint: "Starting at $1000",
     img: "./ChatGPT Image Mar 12, 2026, 07_14_23 PM.png",
     startingAt: 1000
@@ -305,9 +308,9 @@ const PAINT_CORRECTION_PRICES = {
 };
 
 const CERAMIC_COATING_STARTING_AT = {
-  "Ceramic Coating + Clay Decontamination": 500,
-  "Ceramic Coating + Stage 1 Paint Correction": 800,
-  "Ceramic Coating + Stage 2 Paint Correction": 1000
+  "Level 1 Ceramic Coating": 500,
+  "Level 2 Ceramic Coating": 800,
+  "Level 3 Ceramic Coating": 1000
 };
 
 // Using your old upkeep numbers as the monthly base.
@@ -418,6 +421,17 @@ function allowsFullPayment() {
   return !(quoteState.services || []).includes("Ceramic Coating");
 }
 
+function getDisplayRangeAddForService(serviceLabel) {
+  if (serviceLabel === "Interior Detail") return INTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Exterior Wash") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Paint Correction") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Ceramic Coating") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Interior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Exterior Upkeep Plan") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Interior + Exterior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD + EXTERIOR_DISPLAY_RANGE_ADD;
+  return 0;
+}
+
 function computeEstimateInfo() {
   const vehicle = quoteState.vehicleType;
   const services = quoteState.services || [];
@@ -426,12 +440,14 @@ function computeEstimateInfo() {
 
   let total = 0;
   let hasStartingAt = false;
+  let displayRangeAdd = 0;
 
   for (const service of services) {
     if (service === "Interior Detail") {
       const price = priceForVehicle(INTERIOR_DETAIL_PRICES, quoteState.interiorPackage);
       if (!Number.isFinite(price)) return null;
       total += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
       continue;
     }
 
@@ -439,6 +455,7 @@ function computeEstimateInfo() {
       const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, quoteState.exteriorPackage);
       if (!Number.isFinite(price)) return null;
       total += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
       continue;
     }
 
@@ -446,6 +463,7 @@ function computeEstimateInfo() {
       const price = priceForVehicle(PAINT_CORRECTION_PRICES, quoteState.paintCorrectionPackage);
       if (!Number.isFinite(price)) return null;
       total += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
       continue;
     }
 
@@ -453,6 +471,7 @@ function computeEstimateInfo() {
       const price = CERAMIC_COATING_STARTING_AT?.[quoteState.ceramicPackage];
       if (!Number.isFinite(price)) return null;
       total += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
       hasStartingAt = true;
       continue;
     }
@@ -461,6 +480,7 @@ function computeEstimateInfo() {
       const price = computeUpkeepPrice(service, quoteState.upkeepFrequency);
       if (!Number.isFinite(price)) return null;
       total += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
       continue;
     }
   }
@@ -472,11 +492,13 @@ function computeEstimateInfo() {
   }
 
   total = clampInt(total);
-  if (!Number.isFinite(total)) return null;
+  const high = clampInt(total + displayRangeAdd);
+
+  if (!Number.isFinite(total) || !Number.isFinite(high)) return null;
 
   return {
     low: total,
-    high: total,
+    high,
     total,
     hasStartingAt,
     savings
@@ -485,16 +507,15 @@ function computeEstimateInfo() {
 
 function formatEstimateDisplay(info = computeEstimateInfo()) {
   if (!info) return "We’ll confirm after assessment";
-  const base = Number(info.total || 0);
-  const services = quoteState.services || [];
-  const hasInteriorService = services.some((service) => {
-    if (service === "Interior Detail") return true;
-    if (service === "Interior Upkeep Plan") return true;
-    if (service === "Interior + Exterior Upkeep Plan") return true;
-    return false;
-  });
-  const rangeMax = base + (hasInteriorService ? 40 : 15);
-  return `${formatMoney(base)}-${formatMoney(rangeMax)}`;
+
+  const lowText = formatMoney(info.low);
+  const highText = formatMoney(info.high);
+
+  if (Number(info.high) > Number(info.low)) {
+    return info.hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
+  }
+
+  return info.hasStartingAt ? `Starting at ${lowText}` : lowText;
 }
 
 function getEstimateRange() {
@@ -506,7 +527,7 @@ function getEstimateRange() {
 function getFullPayAmount() {
   const est = getEstimateRange();
   if (!est) return DEPOSIT_AMOUNT;
-  return Math.round((est.low + est.high) / 2);
+  return Math.round(est.low);
 }
 
 function getCurrentChargeAmount() {
@@ -534,6 +555,80 @@ function resetPackageSelectionsIfNeeded() {
   if (!quoteState.services.includes("Paint Correction")) quoteState.paintCorrectionPackage = "";
   if (!quoteState.services.includes("Ceramic Coating")) quoteState.ceramicPackage = "";
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
+}
+
+function normalizeDateValue(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return "";
+
+  const isoMatch = value.match(/(\d{4}-\d{2}-\d{2})/);
+  if (isoMatch) return isoMatch[1];
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  return isoDate(parsed);
+}
+
+function extractTimeInfo(raw) {
+  const value = String(raw || "").trim();
+  if (!value) return null;
+
+  const match12 = value.match(/\b(1[0-2]|0?\d):([0-5]\d)\s*(A\.?M\.?|P\.?M\.?)\b/i);
+  if (match12) {
+    const rawHour = Number(match12[1]);
+    const minute = String(match12[2]).padStart(2, "0");
+    const meridiem = String(match12[3] || "").toUpperCase().replaceAll(".", "").startsWith("P") ? "PM" : "AM";
+
+    let hour24 = rawHour % 12;
+    if (meridiem === "PM") hour24 += 12;
+
+    return {
+      normalized: `${String(hour24).padStart(2, "0")}:${minute}`,
+      label: `${rawHour}:${minute} ${meridiem}`
+    };
+  }
+
+  const match24 = value.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+  if (match24) {
+    const hour = String(match24[1]).padStart(2, "0");
+    const minute = String(match24[2]).padStart(2, "0");
+
+    return {
+      normalized: `${hour}:${minute}`,
+      label: `${hour}:${minute}`
+    };
+  }
+
+  return null;
+}
+
+function normalizeTimeValue(raw) {
+  return extractTimeInfo(raw)?.normalized || "";
+}
+
+function formatTimeLabel(raw, normalized = normalizeTimeValue(raw)) {
+  const found = extractTimeInfo(raw);
+  if (found?.label) return found.label;
+  if (!normalized) return "";
+
+  const [h, m] = normalized.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h, m, 0, 0);
+
+  return d.toLocaleTimeString([], {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function slotIsStillValid(slot) {
+  if (!slot?.date || !slot?.time) return false;
+
+  const slotDateTime = new Date(`${slot.date}T${slot.time}:00`);
+  if (Number.isNaN(slotDateTime.getTime())) return true;
+
+  return slotDateTime.getTime() >= Date.now();
 }
 
 // -------------------------
@@ -1442,8 +1537,6 @@ function renderStep() {
     title.textContent = "Upkeep frequency";
     sub.textContent = "How often would you like us to come out? Pricing changes by frequency.";
 
-    const upkeepService = getActiveUpkeepService();
-
     const wrap = document.createElement("div");
     wrap.className = "qHearWrap";
 
@@ -1451,12 +1544,10 @@ function renderStep() {
     grid.className = "qHearGrid";
 
     upkeepFrequencies.forEach((o) => {
-      const hint = o.hint;
-
       grid.appendChild(
         optionCard({
           label: o.label,
-          hint,
+          hint: o.hint,
           isSelected: quoteState.upkeepFrequency === o.label,
           onClick: () => pickAndAdvance(() => (quoteState.upkeepFrequency = o.label))
         })
@@ -1571,7 +1662,7 @@ function renderStep() {
       </div>
       <div class="qEstimateFine">
         ${est?.hasStartingAt
-          ? "Ceramic pricing is shown as a starting price. Final price is confirmed after assessment."
+          ? "Ceramic pricing is shown as a starting range. Final price is confirmed after assessment."
           : "Final price confirmed after quick assessment."}
       </div>
     `;
@@ -1882,7 +1973,7 @@ function renderStep() {
       ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
       ${
         estInfo?.hasStartingAt
-          ? `<div class="qDoneFine">Ceramic pricing was shown as a starting price. Final total is confirmed after inspection.</div>`
+          ? `<div class="qDoneFine">Ceramic pricing was shown as a starting range. Final total is confirmed after inspection.</div>`
           : quoteState.paymentMode === "full"
             ? `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the quote.</div>`
             : `<div class="qDoneFine">Your deposit will be applied to the final total.</div>`
@@ -1945,71 +2036,33 @@ function findNextAvailableDate(fromDateISO) {
   return "";
 }
 function parseSlotToDateTime(slot) {
-  const id = String(slot.id || "").trim();
-  const label = String(slot.label || "").trim();
+  const id = String(slot?.id || "").trim();
+  const label = String(slot?.label || "").trim();
 
-  const m1 = id.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/);
-  if (m1) return { date: m1[1], time: m1[2], pretty: label || id };
+  const date =
+    normalizeDateValue(slot?.date) ||
+    normalizeDateValue(id) ||
+    normalizeDateValue(label) ||
+    normalizeDateValue(slot?.start) ||
+    normalizeDateValue(slot?.startAt) ||
+    "";
 
-  const m2 = id.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
-  if (m2) return { date: m2[1], time: m2[2], pretty: label || id };
+  const timeInfo =
+    extractTimeInfo(slot?.time) ||
+    extractTimeInfo(slot?.startTime) ||
+    extractTimeInfo(slot?.displayTime) ||
+    extractTimeInfo(label) ||
+    extractTimeInfo(id) ||
+    extractTimeInfo(slot?.start) ||
+    extractTimeInfo(slot?.startAt) ||
+    null;
 
-  const d = new Date(label);
-  if (!isNaN(d.getTime())) {
-    const date = isoDate(d);
-    const time = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
-    return { date, time, pretty: label || id };
-  }
-  return { date: "", time: "", pretty: label || id };
-}
-
-function parseTimeParts(timeStr) {
-  const value = String(timeStr || "").trim();
-  if (!value) return null;
-
-  const twelveHour = value.match(/^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$/);
-  if (twelveHour) {
-    let h = Number(twelveHour[1]);
-    const m = Number(twelveHour[2]);
-    const period = twelveHour[3].toUpperCase();
-    if (!Number.isFinite(h) || !Number.isFinite(m) || h < 1 || h > 12 || m < 0 || m > 59) return null;
-    if (period === "AM") h = h % 12;
-    if (period === "PM") h = (h % 12) + 12;
-    return { hour: h, minute: m };
-  }
-
-  const twentyFourHour = value.match(/^(\d{1,2}):(\d{2})$/);
-  if (twentyFourHour) {
-    const h = Number(twentyFourHour[1]);
-    const m = Number(twentyFourHour[2]);
-    if (!Number.isFinite(h) || !Number.isFinite(m) || h < 0 || h > 23 || m < 0 || m > 59) return null;
-    return { hour: h, minute: m };
-  }
-
-  return null;
-}
-
-function normalizeTime24(timeStr) {
-  const parts = parseTimeParts(timeStr);
-  if (!parts) return "";
-  return `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
-}
-
-function formatTimeDisplay(timeStr) {
-  const parts = parseTimeParts(timeStr);
-  if (!parts) return String(timeStr || "").trim();
-  const hour12 = ((parts.hour + 11) % 12) + 1;
-  const ampm = parts.hour >= 12 ? "PM" : "AM";
-  return `${hour12}:${String(parts.minute).padStart(2, "0")} ${ampm}`;
-}
-
-function createSlotDateTime(dateISO, timeValue) {
-  const normalizedTime = normalizeTime24(timeValue);
-  if (!dateISO || !normalizedTime) return null;
-  const full = `${dateISO}T${normalizedTime}:00`;
-  const dt = new Date(full);
-  if (isNaN(dt.getTime())) return null;
-  return dt;
+  return {
+    date,
+    time: timeInfo?.normalized || "",
+    timeLabel: timeInfo?.label || "",
+    pretty: label || id
+  };
 }
 
 async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, nextAvailBtn, tzEl) {
@@ -2048,27 +2101,33 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
     const normalized = data.slots
       .filter((s) => String(s.status || "open").toLowerCase() === "open" || !("status" in s))
       .map((s) => {
-        const parsed =
-          "date" in s && "time" in s && s.date && s.time
-            ? { date: String(s.date), time: String(s.time), pretty: String(s.label || "") }
-            : parseSlotToDateTime(s);
-        const normalizedTime = normalizeTime24(parsed.time);
+        const parsed = parseSlotToDateTime(s);
+
+        const date = parsed.date;
+        const time = parsed.time;
+        const timeLabel = parsed.timeLabel || formatTimeLabel(time, time);
+        const fallbackLabel = date && timeLabel ? `${date} ${timeLabel}` : String(s.label || parsed.pretty || s.id || "");
+
         return {
-          id: String(s.id || ""),
-          date: parsed.date,
-          time: normalizedTime,
-          displayTime: formatTimeDisplay(normalizedTime || parsed.time),
-          label: String(s.label || parsed.pretty || s.id || "")
+          id: String(s.id || "").trim(),
+          date,
+          time,
+          timeLabel,
+          label: String(s.label || "").trim() || fallbackLabel
         };
       })
       .filter((s) => s.id && s.date && s.time)
-      .filter((s) => {
-        const slotDateTime = createSlotDateTime(s.date, s.time);
-        return slotDateTime ? slotDateTime.getTime() >= Date.now() : false;
-      });
+      .filter(slotIsStillValid);
 
     calendarCache.slots = normalized;
     calendarCache.byDate = buildCalendarIndex(calendarCache.slots);
+
+    const selectedSlotStillExists = calendarCache.slots.some((slot) => slot.id === quoteState.slotId);
+    if (!selectedSlotStillExists) {
+      quoteState.slotId = "";
+      quoteState.slotLabel = "";
+      quoteState.slotTime = "";
+    }
 
     if (calendarCache.slots.length === 0) {
       statusEl.textContent = "No availability right now.";
@@ -2222,13 +2281,13 @@ function renderTimes(timesEl, nextAvailBtn) {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "qTimeBtn" + (quoteState.slotId === s.id ? " isSel" : "");
-    b.textContent = s.displayTime || formatTimeDisplay(s.time);
+    b.textContent = s.timeLabel || s.time;
 
     b.addEventListener("click", () => {
       quoteState.slotId = s.id;
       quoteState.slotDate = s.date;
       quoteState.slotTime = s.time;
-      quoteState.slotLabel = `${s.date} ${s.displayTime || formatTimeDisplay(s.time)}`;
+      quoteState.slotLabel = s.label || `${s.date} ${s.timeLabel || s.time}`;
       resetPaymentState();
 
       grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
