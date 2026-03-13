@@ -1,6 +1,6 @@
 /* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v11.2 - Tier Pricing + Paint/Ceramic Branching)
+// QUOTE WIZARD (Flow v11.3 - Tier Pricing + Paint/Ceramic Branching)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -20,6 +20,17 @@ const DEPOSIT_AMOUNT = 25;
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
+
+const ROUTE_GROUP_SOUTH = "south";
+const ROUTE_GROUP_NORTH = "north";
+
+const CITY_ROUTE_MAP = {
+  keizer: ROUTE_GROUP_SOUTH,
+  salem: ROUTE_GROUP_SOUTH,
+  portland: ROUTE_GROUP_NORTH,
+  tigard: ROUTE_GROUP_NORTH,
+  "lake oswego": ROUTE_GROUP_NORTH
+};
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -61,6 +72,13 @@ const quoteState = {
   email: "",
   city: "",
   notes: "",
+
+  routeGroup: "",
+  routeGroupLabel: "",
+
+  leadEmailSent: false,
+  leadEmailSignature: "",
+  leadEmailSending: false,
 
   paymentMode: "deposit", // "deposit" | "full"
   ackDeposit: false,
@@ -557,6 +575,57 @@ function resetPackageSelectionsIfNeeded() {
   if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 }
 
+function normalizeCityKey(city) {
+  return String(city || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+
+function getRouteGroupFromCity(city) {
+  return CITY_ROUTE_MAP[normalizeCityKey(city)] || "";
+}
+
+function getRouteGroupLabel(routeGroup) {
+  if (routeGroup === ROUTE_GROUP_SOUTH) return "Keizer / Salem";
+  if (routeGroup === ROUTE_GROUP_NORTH) return "Portland / Tigard / Lake Oswego";
+  return "";
+}
+
+function syncRouteGroupFromCity() {
+  quoteState.routeGroup = getRouteGroupFromCity(quoteState.city);
+  quoteState.routeGroupLabel = getRouteGroupLabel(quoteState.routeGroup);
+  return quoteState.routeGroup;
+}
+
+function buildLeadSignature() {
+  return [
+    quoteState.name,
+    quoteState.phone,
+    quoteState.email,
+    quoteState.city,
+    quoteState.vehicleType,
+    quoteState.serviceCategory,
+    getSelectedDisplayServices().join("|"),
+    quoteState.upkeepFrequency,
+    quoteState.notes
+  ]
+    .map((v) => String(v || "").trim().toLowerCase())
+    .join("||");
+}
+
+function buildScriptUrl(action, extraParams = {}) {
+  const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
+  const params = new URLSearchParams({
+    action,
+    t: String(Date.now())
+  });
+
+  Object.entries(extraParams).forEach(([key, value]) => {
+    const safe = String(value ?? "").trim();
+    if (safe) params.set(key, safe);
+  });
+
+  return `${script}?${params.toString()}`;
+}
+
 function normalizeDateValue(raw) {
   const value = String(raw || "").trim();
   if (!value) return "";
@@ -757,7 +826,7 @@ function updateNav() {
     quoteNextBtn.textContent = "Continue";
   }
 
-  quoteNextBtn.disabled = !canContinue();
+  quoteNextBtn.disabled = !canContinue() || quoteState.leadEmailSending;
   renderNavPrice();
   syncNavBundleNote();
 }
@@ -765,7 +834,7 @@ function updateNav() {
 function pickAndAdvance(pickFn) {
   pickFn();
   renderStep();
-  setTimeout(() => nextStep(true), 80);
+  setTimeout(() => { void nextStep(true); }, 80);
 }
 
 function resetBookingTail() {
@@ -810,7 +879,7 @@ function pickSingleServiceAndAdvance(label) {
   resetPackageSelectionsIfNeeded();
   resetBookingTail();
   renderStep();
-  setTimeout(() => nextStep(true), 80);
+  setTimeout(() => { void nextStep(true); }, 80);
 }
 
 function getServiceCardHint(serviceLabel) {
@@ -955,6 +1024,13 @@ function openQuoteModal() {
     email: "",
     city: "",
     notes: "",
+
+    routeGroup: "",
+    routeGroupLabel: "",
+
+    leadEmailSent: false,
+    leadEmailSignature: "",
+    leadEmailSending: false,
 
     paymentMode: "deposit",
     ackDeposit: false,
@@ -1247,6 +1323,56 @@ async function handleApplePayCharge(statusEl) {
     quoteState.paymentStatus = "";
     quoteState.paymentMessage = err?.message || "Apple Pay payment failed.";
     if (statusEl) statusEl.textContent = quoteState.paymentMessage;
+    updateNav();
+  }
+}
+
+// -------------------------
+// Lead / Apps Script
+// -------------------------
+async function sendLeadCaptureIfNeeded() {
+  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) {
+    return { ok: true, skipped: true };
+  }
+
+  syncRouteGroupFromCity();
+
+  const signature = buildLeadSignature();
+  if (quoteState.leadEmailSent && quoteState.leadEmailSignature === signature) {
+    return { ok: true, skipped: true };
+  }
+
+  if (quoteState.leadEmailSending) {
+    return { ok: false, message: "Lead notification already sending." };
+  }
+
+  quoteState.leadEmailSending = true;
+  updateNav();
+
+  try {
+    const payload = buildPayload();
+    const leadUrl = buildScriptUrl("lead");
+
+    const result = await Promise.race([
+      postJson(leadUrl, payload),
+      timeout(12000).then(() => ({ ok: false, message: "Lead notification timed out." }))
+    ]);
+
+    if (result && result.ok === true) {
+      quoteState.leadEmailSent = true;
+      quoteState.leadEmailSignature = signature;
+
+      if (result.routeGroup) quoteState.routeGroup = String(result.routeGroup || "");
+      if (result.routeGroupLabel) quoteState.routeGroupLabel = String(result.routeGroupLabel || "");
+
+      return result;
+    }
+
+    return result || { ok: false, message: "Lead notification failed." };
+  } catch {
+    return { ok: false, message: "Lead notification blocked (CORS)." };
+  } finally {
+    quoteState.leadEmailSending = false;
     updateNav();
   }
 }
@@ -1627,10 +1753,32 @@ function renderStep() {
       status.textContent = canContinue() ? "" : "Required: name, phone, email, and closest city.";
     };
 
-    nameEl?.addEventListener("input", (e) => { quoteState.name = e.target.value || ""; updateNav(); updateStatus(); });
-    phoneEl?.addEventListener("input", (e) => { quoteState.phone = e.target.value || ""; updateNav(); updateStatus(); });
-    emailEl?.addEventListener("input", (e) => { quoteState.email = e.target.value || ""; updateNav(); updateStatus(); });
-    cityEl?.addEventListener("change", (e) => { quoteState.city = e.target.value || ""; updateNav(); updateStatus(); });
+    nameEl?.addEventListener("input", (e) => {
+      quoteState.name = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+
+    phoneEl?.addEventListener("input", (e) => {
+      quoteState.phone = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+
+    emailEl?.addEventListener("input", (e) => {
+      quoteState.email = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+
+    cityEl?.addEventListener("change", (e) => {
+      quoteState.city = e.target.value || "";
+      syncRouteGroupFromCity();
+      resetBookingTail();
+      updateNav();
+      updateStatus();
+    });
+
     notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
     hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
 
@@ -1670,6 +1818,8 @@ function renderStep() {
   }
 
   if (step === "appointment") {
+    syncRouteGroupFromCity();
+
     title.textContent = "Select a Date and Time";
     sub.textContent = "Choose an available date, then pick a time.";
 
@@ -1679,17 +1829,50 @@ function renderStep() {
     const topRow = document.createElement("div");
     topRow.className = "qCalTopRow";
 
+    const topLeft = document.createElement("div");
+    topLeft.style.display = "flex";
+    topLeft.style.flexWrap = "wrap";
+    topLeft.style.alignItems = "center";
+    topLeft.style.gap = "10px";
+
     const tz = document.createElement("div");
     tz.className = "qCalTz";
     tz.textContent = calendarCache.tzLabel || "Local Time";
+
+    const cityWrap = document.createElement("div");
+    cityWrap.style.display = "flex";
+    cityWrap.style.alignItems = "center";
+    cityWrap.style.gap = "8px";
+
+    const cityLabel = document.createElement("label");
+    cityLabel.setAttribute("for", "qCalendarCity");
+    cityLabel.textContent = "Town";
+    cityLabel.style.fontWeight = "800";
+    cityLabel.style.color = "rgba(0,0,0,.60)";
+    cityLabel.style.fontSize = ".92rem";
+
+    const citySelect = document.createElement("select");
+    citySelect.id = "qCalendarCity";
+    citySelect.style.minHeight = "38px";
+    citySelect.style.padding = "8px 12px";
+    citySelect.style.borderRadius = "12px";
+    citySelect.style.border = "1px solid rgba(0,0,0,.12)";
+    citySelect.style.background = "#fff";
+    citySelect.style.fontWeight = "700";
+    citySelect.style.fontFamily = "inherit";
+    citySelect.innerHTML = serviceCities
+      .map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`)
+      .join("");
+
+    cityWrap.append(cityLabel, citySelect);
+    topLeft.append(tz, cityWrap);
 
     const reload = document.createElement("button");
     reload.type = "button";
     reload.className = "qReloadLink";
     reload.textContent = "Reload";
-    reload.addEventListener("click", () => loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz));
 
-    topRow.append(tz, reload);
+    topRow.append(topLeft, reload);
 
     const status = document.createElement("div");
     status.className = "qStatus";
@@ -1721,10 +1904,25 @@ function renderStep() {
       }
     });
 
+    reload.addEventListener("click", () => {
+      loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
+    });
+
+    citySelect.addEventListener("change", (e) => {
+      quoteState.city = e.target.value || "";
+      syncRouteGroupFromCity();
+      quoteState.slotDate = "";
+      quoteState.slotTime = "";
+      quoteState.slotId = "";
+      quoteState.slotLabel = "";
+      resetPaymentState();
+      loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
+    });
+
     wrap.append(topRow, status, loadBar, cal, timesBox, nextAvailBtn);
     quoteBody.append(title, sub, wrap);
 
-    loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz);
+    loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
 
     warmSquare();
   }
@@ -2007,7 +2205,13 @@ function renderStep() {
 // -------------------------
 // Availability (Apps Script)
 // -------------------------
-let calendarCache = { tzLabel: "Local Time", slots: [], byDate: new Map() };
+let calendarCache = {
+  tzLabel: "Local Time",
+  slots: [],
+  byDate: new Map(),
+  routeGroup: "",
+  routeGroupLabel: ""
+};
 
 function isoDate(d) {
   const y = d.getFullYear();
@@ -2065,8 +2269,12 @@ function parseSlotToDateTime(slot) {
   };
 }
 
-async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, nextAvailBtn, tzEl) {
+async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, nextAvailBtn, tzEl, citySelectEl) {
   if (!statusEl || !calEl || !timesEl || !loadBarEl) return;
+
+  syncRouteGroupFromCity();
+
+  if (citySelectEl && quoteState.city) citySelectEl.value = quoteState.city;
 
   statusEl.textContent = "Loading availability...";
   loadBarEl.classList.add("isOn");
@@ -2074,10 +2282,12 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
   timesEl.innerHTML = "";
   nextAvailBtn.style.display = "none";
 
-  const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
-
   try {
-    const url = `${script}?action=slots&t=${Date.now()}`;
+    const url = buildScriptUrl("slots", {
+      city: quoteState.city,
+      routeGroup: quoteState.routeGroup
+    });
+
     const res = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
     const text = await res.text();
 
@@ -2096,6 +2306,12 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
     }
 
     calendarCache.tzLabel = data.tzLabel || "Local Time";
+    calendarCache.routeGroup = String(data.routeGroup || quoteState.routeGroup || "");
+    calendarCache.routeGroupLabel = String(data.routeGroupLabel || quoteState.routeGroupLabel || "");
+
+    if (calendarCache.routeGroup) quoteState.routeGroup = calendarCache.routeGroup;
+    if (calendarCache.routeGroupLabel) quoteState.routeGroupLabel = calendarCache.routeGroupLabel;
+
     if (tzEl) tzEl.textContent = calendarCache.tzLabel;
 
     const normalized = data.slots
@@ -2133,6 +2349,7 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
       statusEl.textContent = "No availability right now.";
       nextAvailBtn.style.display = "inline-flex";
       loadBarEl.classList.remove("isOn");
+      updateNav();
       return;
     }
 
@@ -2315,6 +2532,8 @@ function timeout(ms) {
 
 function buildPayload() {
   const estInfo = computeEstimateInfo();
+  const routeGroup = syncRouteGroupFromCity();
+  const routeGroupLabel = quoteState.routeGroupLabel;
 
   return {
     timestamp: new Date().toISOString(),
@@ -2352,6 +2571,9 @@ function buildPayload() {
     city: quoteState.city,
     notes: quoteState.notes,
 
+    routeGroup,
+    routeGroupLabel,
+
     paymentMode: quoteState.paymentMode,
     ackDeposit: quoteState.ackDeposit,
     ackPriceVariance: quoteState.ackPriceVariance,
@@ -2381,12 +2603,14 @@ async function postJson(url, payload) {
 async function reserveAndSend() {
   if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
 
-  const script = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
   const payload = buildPayload();
-  const reserveUrl = `${script}?action=reserve`;
+  const reserveUrl = buildScriptUrl("reserve");
 
   try {
-    const result = await Promise.race([postJson(reserveUrl, payload), timeout(12000)]);
+    const result = await Promise.race([
+      postJson(reserveUrl, payload),
+      timeout(12000).then(() => ({ ok: false, message: "Submit timed out." }))
+    ]);
 
     if (result && result.ok === true) return { ok: true };
     if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked." };
@@ -2424,10 +2648,30 @@ function finalizeBooking() {
 // -------------------------
 // Nav actions
 // -------------------------
-function nextStep(fromAutoAdvance = false) {
+async function nextStep(fromAutoAdvance = false) {
   if (!canContinue()) return;
 
   const step = steps[stepIndex];
+
+  if (step === "contact") {
+    const oldText = quoteNextBtn?.textContent || "Continue";
+
+    if (quoteNextBtn) {
+      quoteNextBtn.disabled = true;
+      quoteNextBtn.textContent = "Saving...";
+    }
+
+    const leadResult = await sendLeadCaptureIfNeeded();
+
+    if (quoteNextBtn) {
+      quoteNextBtn.textContent = oldText;
+      quoteNextBtn.disabled = false;
+    }
+
+    if (leadResult && leadResult.ok === false) {
+      console.warn("Lead notification issue:", leadResult.message || leadResult);
+    }
+  }
 
   if (step === "payment") {
     finalizeBooking();
@@ -2448,7 +2692,7 @@ function prevStep() {
   renderStep();
 }
 
-quoteNextBtn?.addEventListener("click", () => nextStep(false));
+quoteNextBtn?.addEventListener("click", () => { void nextStep(false); });
 quoteBackBtn?.addEventListener("click", prevStep);
 
 if (quoteModal?.classList.contains("isOpen")) renderStep();
