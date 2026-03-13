@@ -1,6 +1,5 @@
-/* quote-wizard.js
 // -------------------------
-// QUOTE WIZARD (Flow v11.4 - Tier Pricing + Paint/Ceramic Branching)
+// QUOTE WIZARD (Flow v11.5 - Contact Lead Send Lock + Hidden Payment Bypass)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
 // -> Contact -> Estimate -> Appointment -> Payment -> Done
@@ -8,7 +7,7 @@
 // Requirements:
 // 1) Add <script src="https://web.squarecdn.com/v1/square.js"></script> to your HTML <head>
 // 2) Add /api/create-square-payment.js on Vercel
-*/
+//
 
 const DEFAULT_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwgVow2uDZh0MGsoRzUV0MvZHTFnbWtXOjeuh4iXKPKrs3w4Qocu1yETtdRmIXnyvd5ag/exec";
@@ -23,6 +22,10 @@ const EXTERIOR_DISPLAY_RANGE_ADD = 15;
 
 const ROUTE_GROUP_SOUTH = "south";
 const ROUTE_GROUP_NORTH = "north";
+
+const SECRET_BYPASS_DOT_INDEX = 2; // third bubble
+const SECRET_BYPASS_REQUIRED_TAPS = 3;
+const SECRET_BYPASS_WINDOW_MS = 2600;
 
 const CITY_ROUTE_MAP = {
   keizer: ROUTE_GROUP_SOUTH,
@@ -84,12 +87,15 @@ const quoteState = {
   ackDeposit: false,
   ackPriceVariance: false,
   depositAmount: DEPOSIT_AMOUNT,
-  paymentStatus: "", // "", "ready", "processing", "paid"
+  paymentStatus: "", // "", "ready", "processing", "paid", "bypassed"
   paymentMessage: "",
   squarePaymentId: "",
   paidAmount: "",
 
-  honeypot: ""
+  honeypot: "",
+
+  secretBypassTapCount: 0,
+  secretBypassLastTapAt: 0
 };
 
 const steps = [
@@ -439,6 +445,10 @@ function allowsFullPayment() {
   return !(quoteState.services || []).includes("Ceramic Coating");
 }
 
+function paymentIsComplete() {
+  return quoteState.paymentStatus === "paid" || quoteState.paymentStatus === "bypassed";
+}
+
 function getDisplayRangeAddForService(serviceLabel) {
   if (serviceLabel === "Interior Detail") return INTERIOR_DISPLAY_RANGE_ADD;
   if (serviceLabel === "Exterior Wash") return EXTERIOR_DISPLAY_RANGE_ADD;
@@ -565,6 +575,8 @@ function resetPaymentState() {
   quoteState.paymentMessage = "";
   quoteState.squarePaymentId = "";
   quoteState.paidAmount = "";
+  quoteState.secretBypassTapCount = 0;
+  quoteState.secretBypassLastTapAt = 0;
 }
 
 function resetPackageSelectionsIfNeeded() {
@@ -769,9 +781,11 @@ function canContinue() {
   if (step === "appointment") return !!quoteState.slotId;
 
   if (step === "payment") {
-    const baseAck = quoteState.ackDeposit === true;
-    const fullAck = quoteState.paymentMode === "full" ? quoteState.ackPriceVariance === true : true;
-    return baseAck && fullAck && quoteState.paymentStatus === "paid";
+    const baseAck = quoteState.ackDeposit === true || quoteState.paymentStatus === "bypassed";
+    const fullAck = quoteState.paymentMode === "full"
+      ? (quoteState.ackPriceVariance === true || quoteState.paymentStatus === "bypassed")
+      : true;
+    return baseAck && fullAck && paymentIsComplete();
   }
 
   return true;
@@ -844,6 +858,45 @@ function resetBookingTail() {
   quoteState.slotTime = "";
   quoteState.paymentMode = "deposit";
   resetPaymentState();
+}
+
+function activatePaymentBypass() {
+  if (steps[stepIndex] !== "payment") return;
+
+  quoteState.ackDeposit = true;
+  quoteState.ackPriceVariance = true;
+  quoteState.paymentStatus = "bypassed";
+  quoteState.paymentMessage = "Booking bypass used. No payment collected.";
+  quoteState.squarePaymentId = "BYPASS_NO_CHARGE";
+  quoteState.paidAmount = "0";
+  quoteState.secretBypassTapCount = 0;
+  quoteState.secretBypassLastTapAt = 0;
+
+  renderStep();
+  finalizeBooking();
+}
+
+function handleSecretDotTap(dotIndex) {
+  if (dotIndex !== SECRET_BYPASS_DOT_INDEX) return;
+
+  if (steps[stepIndex] !== "payment") {
+    quoteState.secretBypassTapCount = 0;
+    quoteState.secretBypassLastTapAt = 0;
+    return;
+  }
+
+  const now = Date.now();
+
+  if (!quoteState.secretBypassLastTapAt || now - quoteState.secretBypassLastTapAt > SECRET_BYPASS_WINDOW_MS) {
+    quoteState.secretBypassTapCount = 0;
+  }
+
+  quoteState.secretBypassLastTapAt = now;
+  quoteState.secretBypassTapCount += 1;
+
+  if (quoteState.secretBypassTapCount >= SECRET_BYPASS_REQUIRED_TAPS) {
+    activatePaymentBypass();
+  }
 }
 
 // -------------------------
@@ -1040,7 +1093,10 @@ function openQuoteModal() {
     paymentMessage: "",
     squarePaymentId: "",
     paidAmount: "",
-    honeypot: ""
+    honeypot: "",
+
+    secretBypassTapCount: 0,
+    secretBypassLastTapAt: 0
   });
 
   stepIndex = 0;
@@ -1067,6 +1123,9 @@ window.closeQuoteModal = closeQuoteModal;
 
 document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
+quoteDots().forEach((dot, index) => {
+  dot.addEventListener("click", () => handleSecretDotTap(index));
+});
 
 if (quoteModal) {
   quoteModal.addEventListener(
@@ -1365,18 +1424,23 @@ async function sendLeadCaptureIfNeeded({ background = false } = {}) {
 
   try {
     const payload = {
-  ...buildPayload(),
-  action: "lead"
-};
+      ...buildPayload(),
+      action: "lead"
+    };
+
     const leadUrl = buildScriptUrl("lead");
+
+    console.log("Sending lead capture:", { leadUrl, payload });
 
     const result = await Promise.race([
       postJson(leadUrl, payload, { keepalive: true }),
-      timeout(background ? 8000 : 12000).then(() => ({
+      timeout(background ? 8000 : 15000).then(() => ({
         ok: false,
         message: "Lead notification timed out."
       }))
     ]);
+
+    console.log("Lead capture response:", result);
 
     const didSend =
       result?.emailSent === true ||
@@ -1400,10 +1464,11 @@ async function sendLeadCaptureIfNeeded({ background = false } = {}) {
       message: result?.emailError || result?.message || "Lead email failed.",
       ...result
     };
-  } catch {
+  } catch (err) {
+    console.error("Lead capture fetch error:", err);
     quoteState.leadEmailSent = false;
     quoteState.leadEmailSignature = "";
-    return { ok: false, message: "Lead notification blocked (CORS)." };
+    return { ok: false, message: err?.message || "Lead notification blocked." };
   } finally {
     quoteState.leadEmailSending = false;
   }
@@ -1413,6 +1478,7 @@ function queueLeadCapture() {
   void Promise.resolve()
     .then(() => sendLeadCaptureIfNeeded({ background: true }))
     .then((result) => {
+      console.log("Lead capture result:", result);
       if (result && result.ok === false) {
         console.warn("Lead notification issue:", result.message || result);
       }
@@ -1966,15 +2032,13 @@ function renderStep() {
 
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
 
-    if (!quoteState.leadEmailSent && !quoteState.leadEmailSending) {
-      queueLeadCapture();
-    }
-
     warmSquare();
   }
 
   if (step === "payment") {
     const fullPaymentAllowed = allowsFullPayment();
+    const paymentComplete = paymentIsComplete();
+    const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
 
     if (!fullPaymentAllowed && quoteState.paymentMode !== "deposit") {
       quoteState.paymentMode = "deposit";
@@ -1992,6 +2056,7 @@ function renderStep() {
     const estLine = formatEstimateDisplay(estInfo);
     const fullPayAmount = getFullPayAmount();
     const currentChargeAmount = getCurrentChargeAmount();
+    const displayedChargeAmount = paymentIsBypassed ? 0 : currentChargeAmount;
     const payBtnLabel = quoteState.paymentMode === "full"
       ? `Pay ${formatMoney(currentChargeAmount)} in Full`
       : `Pay ${formatMoney(currentChargeAmount)} Deposit`;
@@ -1999,17 +2064,25 @@ function renderStep() {
     const summary = document.createElement("div");
     summary.className = "qEstimateBox qEstimateBox--simple";
     summary.innerHTML = `
-      <div class="qEstimateBig">${formatMoney(currentChargeAmount)}</div>
+      <div class="qEstimateBig">${formatMoney(displayedChargeAmount)}</div>
       <div class="qEstimateFine" style="margin-top:8px;">
-        ${quoteState.paymentMode === "full" ? "Selected payment amount" : "Deposit to reserve your appointment"}
+        ${
+          paymentIsBypassed
+            ? "Bypass active — no payment will be collected."
+            : quoteState.paymentMode === "full"
+              ? "Selected payment amount"
+              : "Deposit to reserve your appointment"
+        }
       </div>
       <div class="qEstimatePills" style="margin-top:14px;">
         <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
         <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
         ${
-          fullPaymentAllowed
-            ? `<span class="qPill"><strong>Pay in full:</strong> ${formatMoney(fullPayAmount)}</span>`
-            : `<span class="qPill"><strong>Payment:</strong> Deposit only for ceramic</span>`
+          paymentIsBypassed
+            ? `<span class="qPill"><strong>Status:</strong> Hidden bypass active</span>`
+            : fullPaymentAllowed
+              ? `<span class="qPill"><strong>Pay in full:</strong> ${formatMoney(fullPayAmount)}</span>`
+              : `<span class="qPill"><strong>Payment:</strong> Deposit only for ceramic</span>`
         }
       </div>
     `;
@@ -2087,10 +2160,16 @@ function renderStep() {
     squareBox.innerHTML = `
       <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
       <div class="qStatus" data-q-pay-status>
-        ${quoteState.paymentStatus === "paid" ? "Payment completed successfully." : "Use Apple Pay or enter card details."}
+        ${
+          paymentIsBypassed
+            ? "Booking bypass activated. No payment will be collected."
+            : paymentComplete
+              ? "Payment completed successfully."
+              : "Use Apple Pay or enter card details."
+        }
       </div>
       ${
-        quoteState.paymentStatus === "paid"
+        paymentComplete
           ? ""
           : `
             <div id="qApplePayWrap" style="margin:12px 0 14px;">
@@ -2113,11 +2192,11 @@ function renderStep() {
       }
       <div data-q-paid-wrap style="margin-top:10px;">
         ${
-          quoteState.paymentStatus === "paid"
+          paymentComplete
             ? `
-              <div class="qDoneLine"><strong>Payment:</strong> Paid</div>
-              <div class="qDoneLine"><strong>Type:</strong> ${quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit"}</div>
-              <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(quoteState.paidAmount || currentChargeAmount)}</div>
+              <div class="qDoneLine"><strong>Payment:</strong> ${paymentIsBypassed ? "Bypassed" : "Paid"}</div>
+              <div class="qDoneLine"><strong>Type:</strong> ${paymentIsBypassed ? "No Charge / Hidden Bypass" : (quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit")}</div>
+              <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(paymentIsBypassed ? 0 : (quoteState.paidAmount || currentChargeAmount))}</div>
               ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
             `
             : ""
@@ -2179,7 +2258,7 @@ function renderStep() {
       updateFoot();
     });
 
-    if (quoteState.paymentStatus !== "paid") {
+    if (!paymentComplete) {
       initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
 
       initSquareApplePay(applePayWrapEl, payStatusEl).then((available) => {
@@ -2203,6 +2282,7 @@ function renderStep() {
     sub.textContent = "We received your request and will confirm shortly.";
 
     const estInfo = computeEstimateInfo();
+    const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
 
     const box = document.createElement("div");
     box.className = "qDoneBox";
@@ -2212,15 +2292,17 @@ function renderStep() {
       ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
       <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
       <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay(estInfo))}</div>
-      <div class="qDoneLine"><strong>Payment Type:</strong> ${quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit"}</div>
-      <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(quoteState.paidAmount || getCurrentChargeAmount())}</div>
+      <div class="qDoneLine"><strong>Payment Type:</strong> ${paymentIsBypassed ? "Hidden Bypass / No Charge" : (quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit")}</div>
+      <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(paymentIsBypassed ? 0 : (quoteState.paidAmount || getCurrentChargeAmount()))}</div>
       ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
       ${
-        estInfo?.hasStartingAt
-          ? `<div class="qDoneFine">Ceramic pricing was shown as a starting range. Final total is confirmed after inspection.</div>`
-          : quoteState.paymentMode === "full"
-            ? `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the quote.</div>`
-            : `<div class="qDoneFine">Your deposit will be applied to the final total.</div>`
+        paymentIsBypassed
+          ? `<div class="qDoneFine">Booking saved with hidden bypass. No payment was collected.</div>`
+          : estInfo?.hasStartingAt
+            ? `<div class="qDoneFine">Ceramic pricing was shown as a starting range. Final total is confirmed after inspection.</div>`
+            : quoteState.paymentMode === "full"
+              ? `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the quote.</div>`
+              : `<div class="qDoneFine">Your deposit will be applied to the final total.</div>`
       }
     `;
 
@@ -2580,6 +2662,7 @@ function buildPayload() {
   const estInfo = computeEstimateInfo();
   const routeGroup = syncRouteGroupFromCity();
   const routeGroupLabel = quoteState.routeGroupLabel;
+  const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
 
   return {
     timestamp: new Date().toISOString(),
@@ -2620,11 +2703,12 @@ function buildPayload() {
     routeGroup,
     routeGroupLabel,
 
-    paymentMode: quoteState.paymentMode,
+    paymentMode: paymentIsBypassed ? "bypass" : quoteState.paymentMode,
+    paymentBypass: paymentIsBypassed,
     ackDeposit: quoteState.ackDeposit,
     ackPriceVariance: quoteState.ackPriceVariance,
     depositAmount: quoteState.depositAmount,
-    paymentAmountCharged: getCurrentChargeAmount(),
+    paymentAmountCharged: paymentIsBypassed ? 0 : getCurrentChargeAmount(),
     depositPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "deposit",
     fullPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "full",
     paymentStatus: quoteState.paymentStatus,
@@ -2686,11 +2770,28 @@ async function nextStep(fromAutoAdvance = false) {
   const step = steps[stepIndex];
 
   if (step === "contact") {
+    if (quoteNextBtn) {
+      quoteNextBtn.disabled = true;
+      quoteNextBtn.textContent = "Sending...";
+    }
+
+    const leadResult = await sendLeadCaptureIfNeeded({ background: false });
+    console.log("Lead capture final result:", leadResult);
+
+    if (quoteNextBtn) {
+      quoteNextBtn.disabled = false;
+      quoteNextBtn.textContent = "Continue";
+    }
+
+    if (!leadResult || leadResult.ok !== true) {
+      alert(leadResult?.message || "Lead email failed to send. Please check Apps Script and try again.");
+      updateNav();
+      return;
+    }
+
     stepIndex = nextActiveStepIndex(stepIndex);
     renderStep();
     if (fromAutoAdvance) updateNav();
-
-    queueLeadCapture();
     return;
   }
 
