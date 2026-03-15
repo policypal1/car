@@ -1,8 +1,8 @@
 // -------------------------
-// QUOTE WIZARD (Flow v11.6 - Silent Lead Send + Hidden Payment Bypass)
+// QUOTE WIZARD (Flow v11.7 - Dynamic Progress + Address Step)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
-// -> Contact -> Estimate -> Appointment -> Payment -> Done
+// -> Contact -> Estimate -> Appointment -> Address -> Payment -> Done
 //
 // Requirements:
 // 1) Add <script src="https://web.squarecdn.com/v1/square.js"></script> to your HTML <head>
@@ -40,6 +40,7 @@ const quoteBody = document.querySelector("[data-quote-body]");
 const quoteNextBtn = document.querySelector("[data-quote-next]");
 const quoteBackBtn = document.querySelector("[data-quote-back]");
 const quoteCloseBtns = document.querySelectorAll("[data-quote-close]");
+const quoteProgressEl = document.querySelector(".quoteProgress");
 const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 
 let lastActiveElQuote = null;
@@ -69,6 +70,8 @@ const quoteState = {
   slotLabel: "",
   slotDate: "",
   slotTime: "",
+
+  address: "",
 
   name: "",
   phone: "",
@@ -110,6 +113,7 @@ const steps = [
   "contact",
   "estimate",
   "appointment",
+  "address",
   "payment",
   "done"
 ];
@@ -363,10 +367,50 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+function getVisibleSteps() {
+  return steps.filter((stepName) => stepIsActive(stepName));
+}
+
+function ensureProgressDots() {
+  const visibleSteps = getVisibleSteps();
+
+  if (!quoteProgressEl) {
+    return {
+      dots: quoteDots(),
+      visibleSteps
+    };
+  }
+
+  const desiredCount = Math.max(visibleSteps.length, 1);
+  const currentDots = Array.from(quoteProgressEl.querySelectorAll(".qpDot"));
+
+  if (currentDots.length !== desiredCount) {
+    quoteProgressEl.innerHTML = "";
+
+    for (let i = 0; i < desiredCount; i++) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "qpDot";
+      dot.setAttribute("aria-label", `Progress step ${i + 1} of ${desiredCount}`);
+      dot.addEventListener("click", () => handleSecretDotTap(i));
+      quoteProgressEl.appendChild(dot);
+    }
+  }
+
+  return {
+    dots: quoteDots(),
+    visibleSteps
+  };
+}
+
 function setProgress() {
-  const dots = quoteDots();
+  const { dots, visibleSteps } = ensureProgressDots();
   if (!dots.length) return;
-  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(stepIndex, dots.length - 1)));
+
+  const currentStep = steps[stepIndex];
+  const activeIndex = Math.max(0, visibleSteps.indexOf(currentStep));
+
+  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(activeIndex, dots.length - 1)));
 }
 
 function renderNavPrice() { return; }
@@ -773,6 +817,7 @@ function canContinue() {
   }
 
   if (step === "appointment") return !!quoteState.slotId;
+  if (step === "address") return quoteState.address.trim().length >= 5;
 
   if (step === "payment") {
     const baseAck = quoteState.ackDeposit === true || quoteState.paymentStatus === "bypassed";
@@ -811,19 +856,24 @@ function syncNavBundleNote() {
 function updateNav() {
   if (!quoteBackBtn || !quoteNextBtn) return;
 
-  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
+  const nav = quoteBackBtn.parentElement;
   const step = steps[stepIndex];
+
+  if (nav) {
+    nav.style.display = step === "done" ? "none" : "";
+  }
 
   if (step === "done") {
     syncNavBundleNote();
     quoteNextBtn.style.display = "none";
-    quoteBackBtn.textContent = "Close";
-    quoteBackBtn.style.visibility = "visible";
+    quoteBackBtn.style.display = "none";
     return;
   }
 
+  quoteBackBtn.style.display = "";
   quoteNextBtn.style.display = "inline-flex";
   quoteBackBtn.textContent = "Back";
+  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
 
   if (step === "service") {
     const n = Array.isArray(quoteState.services) ? quoteState.services.length : 0;
@@ -850,6 +900,7 @@ function resetBookingTail() {
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
   quoteState.slotTime = "";
+  quoteState.address = "";
   quoteState.paymentMode = "deposit";
   resetPaymentState();
 }
@@ -1066,6 +1117,8 @@ function openQuoteModal() {
     slotDate: "",
     slotTime: "",
 
+    address: "",
+
     name: "",
     phone: "",
     email: "",
@@ -1117,9 +1170,6 @@ window.closeQuoteModal = closeQuoteModal;
 
 document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
 quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
-quoteDots().forEach((dot, index) => {
-  dot.addEventListener("click", () => handleSecretDotTap(index));
-});
 
 if (quoteModal) {
   quoteModal.addEventListener(
@@ -1998,6 +2048,7 @@ function renderStep() {
         quoteState.slotTime = "";
         quoteState.slotId = "";
         quoteState.slotLabel = "";
+        quoteState.address = "";
         resetPaymentState();
         renderStep();
       }
@@ -2014,6 +2065,7 @@ function renderStep() {
       quoteState.slotTime = "";
       quoteState.slotId = "";
       quoteState.slotLabel = "";
+      quoteState.address = "";
       resetPaymentState();
       loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
     });
@@ -2024,6 +2076,50 @@ function renderStep() {
     loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
 
     warmSquare();
+  }
+
+  if (step === "address") {
+    title.textContent = "Service address";
+    sub.textContent = "Enter the address where we’ll service the vehicle.";
+
+    const wrap = document.createElement("div");
+    wrap.className = "qCalWrap";
+
+    const field = document.createElement("div");
+    field.className = "qField";
+    field.innerHTML = `
+      <label for="qAddress">Address *</label>
+      <input
+        id="qAddress"
+        autocomplete="street-address"
+        placeholder="123 Main St, Salem, OR 97301"
+        value="${escapeHtml(quoteState.address)}"
+      />
+    `;
+
+    const note = document.createElement("div");
+    note.className = "qStatus";
+    note.textContent = "We use this to confirm where the appointment is taking place.";
+
+    const status = document.createElement("div");
+    status.className = "qStatus";
+    status.textContent = canContinue() ? "" : "Required: service address.";
+
+    wrap.append(field, note, status);
+    quoteBody.append(title, sub, wrap);
+
+    const addressEl = quoteBody.querySelector("#qAddress");
+    const updateStatus = () => {
+      status.textContent = canContinue() ? "" : "Required: service address.";
+    };
+
+    addressEl?.addEventListener("input", (e) => {
+      quoteState.address = e.target.value || "";
+      updateNav();
+      updateStatus();
+    });
+
+    setTimeout(() => addressEl?.focus(), 50);
   }
 
   if (step === "payment") {
@@ -2123,9 +2219,9 @@ function renderStep() {
           ${
             quoteState.paymentMode === "full"
               ? `<strong>I understand this payment is being made today to reserve and cover the current quoted work.</strong><br/>
-                 You can reschedule with at least <strong>2 days notice</strong>. Late cancellations or no-shows may forfeit the amount paid.`
+                 You can reschedule with at least <strong>48 hours notice</strong>. Late cancellations or no-shows may forfeit the amount paid.`
               : `<strong>I understand the ${formatMoney(DEPOSIT_AMOUNT)} deposit is applied to my total.</strong><br/>
-                 You can reschedule with at least <strong>2 days notice</strong>. Late cancellations or no-shows forfeit the deposit.`
+                 You can reschedule with at least <strong>48 hours notice</strong>. Late cancellations or no-shows forfeit the deposit.`
           }
         </label>
       </div>
@@ -2282,6 +2378,7 @@ function renderStep() {
       <div class="qDoneLine"><strong>Services:</strong> ${escapeHtml(getSelectedDisplayServices().join(", ") || "—")}</div>
       ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
       <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
+      <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "—")}</div>
       <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay(estInfo))}</div>
       <div class="qDoneLine"><strong>Payment Type:</strong> ${paymentIsBypassed ? "Hidden Bypass / No Charge" : (quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit")}</div>
       <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(paymentIsBypassed ? 0 : (quoteState.paidAmount || getCurrentChargeAmount()))}</div>
@@ -2508,6 +2605,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotTime = "";
     quoteState.slotId = "";
     quoteState.slotLabel = "";
+    quoteState.address = "";
     resetPaymentState();
     drawMonth(cursor);
   });
@@ -2525,6 +2623,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
     quoteState.slotTime = "";
     quoteState.slotId = "";
     quoteState.slotLabel = "";
+    quoteState.address = "";
     resetPaymentState();
     drawMonth(cursor);
   });
@@ -2575,6 +2674,7 @@ function renderCalendar(calEl, timesEl, nextAvailBtn) {
         quoteState.slotTime = "";
         quoteState.slotId = "";
         quoteState.slotLabel = "";
+        quoteState.address = "";
         resetPaymentState();
         renderCalendar(calEl, timesEl, nextAvailBtn);
       });
@@ -2631,6 +2731,7 @@ function renderTimes(timesEl, nextAvailBtn) {
       quoteState.slotDate = s.date;
       quoteState.slotTime = s.time;
       quoteState.slotLabel = s.label || `${s.date} ${s.timeLabel || s.time}`;
+      quoteState.address = "";
       resetPaymentState();
 
       grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
@@ -2691,6 +2792,8 @@ function buildPayload() {
     slotLabel: quoteState.slotLabel,
     slotDate: quoteState.slotDate,
     slotTime: quoteState.slotTime,
+
+    address: quoteState.address,
 
     name: quoteState.name,
     phone: quoteState.phone,
