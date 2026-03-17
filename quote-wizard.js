@@ -262,14 +262,14 @@ const exteriorPackages = [
 
 const paintCorrectionPackages = [
   {
-    label: "Stage 1 Paint Correction",
+    label: "1 Step Paint Correction",
     serviceLabel: "Stage 1 Paint Correction",
     hint: "Gloss boost + defect reduction",
     img: "./2db4c116-33b7-4492-8922-1a3b5b25ee1c.png",
     badge: "1"
   },
   {
-    label: "Stage 2 Paint Correction",
+    label: "2 Step Paint Correction",
     serviceLabel: "Stage 2 Paint Correction",
     hint: "Heavier correction finish",
     img: "./9d828f71-efdd-4de9-a62b-1de399617334.png",
@@ -279,21 +279,21 @@ const paintCorrectionPackages = [
 
 const ceramicPackages = [
   {
-    label: "Level 1 Ceramic Coating",
+    label: "Ceramic Coating with Dlay Decontamination ",
     serviceLabel: "Level 1 Ceramic Coating",
     hint: "Starting at $500",
     img: "./ChatGPT Image Mar 12, 2026, 07_07_29 PM.png",
     startingAt: 500
   },
   {
-    label: "Level 2 Ceramic Coating",
+    label: "Ceramic Coating with Single Stage Paint Correction",
     serviceLabel: "Level 2 Ceramic Coating",
     hint: "Starting at $800",
     img: "./ChatGPT Image Mar 12, 2026, 07_09_50 PM.png",
     startingAt: 800
   },
   {
-    label: "Level 3 Ceramic Coating",
+    label: "Ceramic Coating with 2 Stage Paint Correction",
     serviceLabel: "Level 3 Ceramic Coating",
     hint: "Starting at $1000",
     img: "./ChatGPT Image Mar 12, 2026, 07_14_23 PM.png",
