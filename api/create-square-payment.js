@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ ok: false, message: "Invalid amount" });
     }
 
-    const squareRes = await fetch("https://connect.squareup.com/v2/payments", {
+    const squareRes = await fetch("https://connect.squareupsandbox.com/v2/payments", {
       method: "POST",
       headers: {
         "Square-Version": "2025-10-16",
