@@ -6,8 +6,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const SQUARE_BASE_URL = "https://connect.squareupsandbox.com";
-  const HARDCODED_SANDBOX_LOCATION_ID = "L8107Q7FK3ST2";
+  const SQUARE_BASE_URL = "https://connect.squareup.com";
   const SQUARE_VERSION = "2025-10-16";
 
   try {
@@ -44,7 +43,7 @@ export default async function handler(req, res) {
     const payload = {
       source_id: sourceId,
       idempotency_key: idempotencyKey,
-      location_id: HARDCODED_SANDBOX_LOCATION_ID,
+      location_id: process.env.SQUARE_LOCATION_ID,
       amount_money: {
         amount: Number(amountCents),
         currency: "USD"
@@ -54,13 +53,6 @@ export default async function handler(req, res) {
       reference_id: booking?.slotId || booking?.slotLabel || undefined,
       buyer_email_address: booking?.email || undefined
     };
-
-    console.log("Square sandbox request", {
-      baseUrl: SQUARE_BASE_URL,
-      locationId: HARDCODED_SANDBOX_LOCATION_ID,
-      amountCents: Number(amountCents),
-      hasAccessToken: !!process.env.SQUARE_ACCESS_TOKEN
-    });
 
     const squareRes = await fetch(`${SQUARE_BASE_URL}/v2/payments`, {
       method: "POST",
@@ -81,7 +73,6 @@ export default async function handler(req, res) {
       return res.status(500).json({
         ok: false,
         message: "Square returned non-JSON",
-        debugLocationUsed: HARDCODED_SANDBOX_LOCATION_ID,
         raw: rawText
       });
     }
@@ -90,7 +81,6 @@ export default async function handler(req, res) {
       return res.status(squareRes.status).json({
         ok: false,
         message: data?.errors?.[0]?.detail || "Square payment failed",
-        debugLocationUsed: HARDCODED_SANDBOX_LOCATION_ID,
         square: data
       });
     }
@@ -99,7 +89,6 @@ export default async function handler(req, res) {
       ok: true,
       paymentId: data?.payment?.id || "",
       status: data?.payment?.status || "",
-      debugLocationUsed: HARDCODED_SANDBOX_LOCATION_ID,
       square: data
     });
   } catch (err) {
