@@ -591,7 +591,9 @@ function getEstimateRange() {
 }
 
 function getFullPayAmount() {
-  return 1;
+  const est = getEstimateRange();
+  if (!est) return DEPOSIT_AMOUNT;
+  return Math.round(est.low);
 }
 
 function getCurrentChargeAmount() {
