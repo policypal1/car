@@ -13,7 +13,7 @@ const DEFAULT_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbzOJxJA74mOnrJVT5ZfxBiZJ16VpQzhKYTGnmdxZDnm5tRm8rb4pV8wuxJrX9M7WPnQQA/exec";
 
 const SQUARE_APP_ID = "sandbox-sq0idb-lUzKktYWidQGDxadu5T31g";
-const SQUARE_LOCATION_ID = "LV9XSE8KC6F93";
+const SQUARE_LOCATION_ID = "L8107Q7FK3ST2";
 const SQUARE_PAYMENT_ENDPOINT = "/api/create-square-payment";
 const DEPOSIT_AMOUNT = 25;
 
