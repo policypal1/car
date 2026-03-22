@@ -28,7 +28,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         source_id: sourceId,
         idempotency_key: idempotencyKey,
-        location_id: "LV9XSE8KC6F93",
+        location_id: process.env.SQUARE_LOCATION_ID,
         amount_money: {
           amount: Number(amountCents),
           currency: "USD"
