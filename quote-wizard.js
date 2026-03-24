@@ -15,7 +15,6 @@ const DEFAULT_SCRIPT_URL =
 const SQUARE_APP_ID = "sq0idp-9rqrzxMJ-huh115bZkPH5Q";
 const SQUARE_LOCATION_ID = "LV9XSE8KC6F93";
 const SQUARE_PAYMENT_ENDPOINT = "/api/create-square-payment";
-const DEPOSIT_AMOUNT = 1;
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
@@ -86,10 +85,9 @@ const quoteState = {
   leadEmailSignature: "",
   leadEmailSending: false,
 
-  paymentMode: "deposit", // "deposit" | "full"
-  ackDeposit: false,
+  paymentMode: "", // "" | "full" | "after"
   ackPriceVariance: false,
-  depositAmount: DEPOSIT_AMOUNT,
+  depositAmount: 0,
   paymentStatus: "", // "", "ready", "processing", "paid", "bypassed"
   paymentMessage: "",
   squarePaymentId: "",
@@ -480,7 +478,7 @@ function hasInteriorExteriorBundle() {
 }
 
 function allowsFullPayment() {
-  return !(quoteState.services || []).includes("Ceramic Coating");
+  return true;
 }
 
 function paymentIsComplete() {
@@ -592,22 +590,19 @@ function getEstimateRange() {
 
 function getFullPayAmount() {
   const est = getEstimateRange();
-  if (!est) return DEPOSIT_AMOUNT;
+  if (!est) return 0;
   return Math.round(est.low);
 }
 
 function getCurrentChargeAmount() {
-  return quoteState.paymentMode === "full" ? getFullPayAmount() : Number(quoteState.depositAmount || DEPOSIT_AMOUNT);
+  return quoteState.paymentMode === "full" ? getFullPayAmount() : 0;
 }
 
 function getPaymentLabel() {
-  return quoteState.paymentMode === "full"
-    ? "Keizer Mobile Detailing Full Payment"
-    : "Keizer Mobile Detailing Deposit";
+  return "Keizer Mobile Detailing Full Payment";
 }
 
 function resetPaymentState() {
-  quoteState.ackDeposit = false;
   quoteState.ackPriceVariance = false;
   quoteState.paymentStatus = "";
   quoteState.paymentMessage = "";
@@ -820,11 +815,15 @@ function canContinue() {
   if (step === "address") return quoteState.address.trim().length >= 5;
 
   if (step === "payment") {
-    const baseAck = quoteState.ackDeposit === true || quoteState.paymentStatus === "bypassed";
-    const fullAck = quoteState.paymentMode === "full"
-      ? (quoteState.ackPriceVariance === true || quoteState.paymentStatus === "bypassed")
-      : true;
-    return baseAck && fullAck && paymentIsComplete();
+    const hasMode =
+      quoteState.paymentMode === "full" ||
+      quoteState.paymentMode === "after" ||
+      quoteState.paymentStatus === "bypassed";
+
+    const hasAck = quoteState.ackPriceVariance === true || quoteState.paymentStatus === "bypassed";
+    const fullPaid = quoteState.paymentMode === "full" ? paymentIsComplete() : true;
+
+    return hasMode && hasAck && fullPaid;
   }
 
   return true;
@@ -901,14 +900,17 @@ function resetBookingTail() {
   quoteState.slotDate = "";
   quoteState.slotTime = "";
   quoteState.address = "";
-  quoteState.paymentMode = "deposit";
+  quoteState.paymentMode = "";
   resetPaymentState();
 }
 
 function activatePaymentBypass() {
   if (steps[stepIndex] !== "payment") return;
 
-  quoteState.ackDeposit = true;
+  if (!quoteState.paymentMode) {
+    quoteState.paymentMode = "after";
+  }
+
   quoteState.ackPriceVariance = true;
   quoteState.paymentStatus = "bypassed";
   quoteState.paymentMessage = "Booking bypass used. No payment collected.";
@@ -1132,10 +1134,9 @@ function openQuoteModal() {
     leadEmailSignature: "",
     leadEmailSending: false,
 
-    paymentMode: "deposit",
-    ackDeposit: false,
+    paymentMode: "",
     ackPriceVariance: false,
-    depositAmount: DEPOSIT_AMOUNT,
+    depositAmount: 0,
     paymentStatus: "",
     paymentMessage: "",
     squarePaymentId: "",
@@ -1367,9 +1368,7 @@ async function handlePayNowCard(payBtn, statusEl) {
     }
 
     quoteState.paymentStatus = "paid";
-    quoteState.paymentMessage = quoteState.paymentMode === "full"
-      ? "Full payment paid successfully."
-      : "Deposit paid successfully.";
+    quoteState.paymentMessage = "Full payment paid successfully.";
     quoteState.squarePaymentId = String(result.paymentId || result.id || "");
     quoteState.paidAmount = String(getCurrentChargeAmount());
 
@@ -1383,9 +1382,7 @@ async function handlePayNowCard(payBtn, statusEl) {
   } finally {
     if (payBtn) {
       payBtn.disabled = false;
-      payBtn.textContent = quoteState.paymentMode === "full"
-        ? `Pay ${formatMoney(getCurrentChargeAmount())} in Full`
-        : `Pay ${formatMoney(getCurrentChargeAmount())} Deposit`;
+      payBtn.textContent = `Pay ${formatMoney(getCurrentChargeAmount())} in Full`;
     }
   }
 }
@@ -1414,9 +1411,7 @@ async function handleApplePayCharge(statusEl) {
     }
 
     quoteState.paymentStatus = "paid";
-    quoteState.paymentMessage = quoteState.paymentMode === "full"
-      ? "Full payment paid successfully with Apple Pay."
-      : "Deposit paid successfully with Apple Pay.";
+    quoteState.paymentMessage = "Full payment paid successfully with Apple Pay.";
     quoteState.squarePaymentId = String(result.paymentId || result.id || "");
     quoteState.paidAmount = String(getCurrentChargeAmount());
 
@@ -2123,173 +2118,158 @@ function renderStep() {
   }
 
   if (step === "payment") {
-    const fullPaymentAllowed = allowsFullPayment();
     const paymentComplete = paymentIsComplete();
     const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
-
-    if (!fullPaymentAllowed && quoteState.paymentMode !== "deposit") {
-      quoteState.paymentMode = "deposit";
-    }
-    if (!fullPaymentAllowed) {
-      quoteState.ackPriceVariance = false;
-    }
-
-    title.textContent = "Pay to reserve your appointment";
-    sub.textContent = fullPaymentAllowed
-      ? "Choose a deposit or pay in full today."
-      : "Ceramic coating bookings require a deposit today.";
-
     const estInfo = computeEstimateInfo();
     const estLine = formatEstimateDisplay(estInfo);
     const fullPayAmount = getFullPayAmount();
-    const currentChargeAmount = getCurrentChargeAmount();
-    const displayedChargeAmount = paymentIsBypassed ? 0 : currentChargeAmount;
-    const payBtnLabel = quoteState.paymentMode === "full"
-      ? `Pay ${formatMoney(currentChargeAmount)} in Full`
-      : `Pay ${formatMoney(currentChargeAmount)} Deposit`;
+    const chargeToday = paymentIsBypassed ? 0 : (quoteState.paymentMode === "full" ? fullPayAmount : 0);
+
+    title.textContent = "Choose payment option";
+    sub.textContent = "Select pay in full or pay after service.";
 
     const summary = document.createElement("div");
     summary.className = "qEstimateBox qEstimateBox--simple";
     summary.innerHTML = `
-      <div class="qEstimateBig">${formatMoney(displayedChargeAmount)}</div>
-      <div class="qEstimateFine" style="margin-top:8px;">
-        ${
-          paymentIsBypassed
-            ? "Bypass active — no payment will be collected."
-            : quoteState.paymentMode === "full"
-              ? "Selected payment amount"
-              : "Deposit to reserve your appointment"
-        }
-      </div>
+      <div class="qEstimateBig">${escapeHtml(estLine)}</div>
+      <div class="qEstimateFine" style="margin-top:8px;">Current estimated range</div>
       <div class="qEstimatePills" style="margin-top:14px;">
         <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
-        <span class="qPill"><strong>Estimate:</strong> ${escapeHtml(estLine)}</span>
+        <span class="qPill"><strong>Today’s charge:</strong> ${formatMoney(chargeToday)}</span>
         ${
-          paymentIsBypassed
-            ? `<span class="qPill"><strong>Status:</strong> Hidden bypass active</span>`
-            : fullPaymentAllowed
-              ? `<span class="qPill"><strong>Pay in full:</strong> ${formatMoney(fullPayAmount)}</span>`
-              : `<span class="qPill"><strong>Payment:</strong> Deposit only for ceramic</span>`
+          quoteState.paymentMode === "full"
+            ? `<span class="qPill"><strong>Selected:</strong> Pay in Full</span>`
+            : quoteState.paymentMode === "after"
+              ? `<span class="qPill"><strong>Selected:</strong> Pay After Service</span>`
+              : ""
         }
       </div>
     `;
 
     const paymentChoice = document.createElement("div");
-    paymentChoice.className = "qCalWrap";
+    paymentChoice.className = "qCards";
+    paymentChoice.style.display = "grid";
+    paymentChoice.style.gridTemplateColumns = "repeat(auto-fit, minmax(220px, 1fr))";
+    paymentChoice.style.gap = "12px";
     paymentChoice.style.marginTop = "12px";
-    paymentChoice.innerHTML = fullPaymentAllowed
-      ? `
-        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Choose payment option</div>
-        <div style="display:grid; gap:10px;">
-          <label class="qCheck" style="align-items:flex-start;">
-            <input id="qPayModeDeposit" type="radio" name="qPayMode" value="deposit" ${quoteState.paymentMode === "deposit" ? "checked" : ""} />
-            <span>
-              <strong>Pay deposit now</strong><br/>
-              Pay ${formatMoney(DEPOSIT_AMOUNT)} now to reserve your appointment. It is applied to your total.
-            </span>
-          </label>
 
-          <label class="qCheck" style="align-items:flex-start;">
-            <input id="qPayModeFull" type="radio" name="qPayMode" value="full" ${quoteState.paymentMode === "full" ? "checked" : ""} />
-            <span>
-              <strong>Pay in full now</strong><br/>
-              ${estInfo?.hasStartingAt
-                ? `Pay the current starting price now: <strong>${formatMoney(fullPayAmount)}</strong>.`
-                : `Pay the current quoted amount now: <strong>${formatMoney(fullPayAmount)}</strong>.`}
-            </span>
-          </label>
-        </div>
-      `
-      : `
-        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment option</div>
-        <div class="qCheck">
-          <span>
-            <strong>Pay deposit now</strong><br/>
-            Pay ${formatMoney(DEPOSIT_AMOUNT)} now to reserve your ceramic coating appointment. Pay in full is not available until final assessment.
-          </span>
-        </div>
-      `;
+    const fullBox = document.createElement("button");
+    fullBox.type = "button";
+    fullBox.className = "qCard qFeatureCard" + (quoteState.paymentMode === "full" ? " isSel" : "");
+    fullBox.innerHTML = `
+      <div class="qFeatureCardInner">
+        <div class="qFeatureCardTitle">Pay in Full</div>
+        <ul class="qFeatureList">
+          <li>Pay online today</li>
+          <li>Current quote charged now</li>
+          <li>Final total may still change after inspection</li>
+        </ul>
+        <div class="qFeaturePrice">Pay ${escapeHtml(formatMoney(fullPayAmount))} today</div>
+      </div>
+    `;
+
+    const afterBox = document.createElement("button");
+    afterBox.type = "button";
+    afterBox.className = "qCard qFeatureCard" + (quoteState.paymentMode === "after" ? " isSel" : "");
+    afterBox.innerHTML = `
+      <div class="qFeatureCardInner">
+        <div class="qFeatureCardTitle">Pay After Detail</div>
+        <ul class="qFeatureList">
+          <li>No payment due today</li>
+          <li>Reserve the appointment now</li>
+          <li>Final total is paid after service</li>
+        </ul>
+        <div class="qFeaturePrice">Pay ${escapeHtml(formatMoney(0))} today</div>
+      </div>
+    `;
+
+    paymentChoice.append(fullBox, afterBox);
 
     const ack = document.createElement("div");
     ack.style.marginTop = "12px";
     ack.innerHTML = `
       <div class="qCheck">
-        <input id="qAck" type="checkbox" ${quoteState.ackDeposit ? "checked" : ""} />
-        <label for="qAck">
-          ${
-            quoteState.paymentMode === "full"
-              ? `<strong>I understand this payment is being made today to reserve and cover the current quoted work.</strong><br/>
-                 You can reschedule with at least <strong>48 hours notice</strong>. Late cancellations or no-shows may forfeit the amount paid.`
-              : `<strong>I understand the ${formatMoney(DEPOSIT_AMOUNT)} deposit is applied to my total.</strong><br/>
-                 You can reschedule with at least <strong>48 hours notice</strong>. Late cancellations or no-shows forfeit the deposit.`
-          }
+        <input id="qAckPriceVariance" type="checkbox" ${quoteState.ackPriceVariance ? "checked" : ""} />
+        <label for="qAckPriceVariance">
+          <strong>I understand this may not be the final price.</strong><br/>
+          The final price can be higher or lower depending on the actual condition of the vehicle, and any difference will be settled after inspection if needed.
         </label>
       </div>
-      ${
-        quoteState.paymentMode === "full"
-          ? `
-            <div class="qCheck" style="margin-top:10px;">
-              <input id="qAckPriceVariance" type="checkbox" ${quoteState.ackPriceVariance ? "checked" : ""} />
-              <label for="qAckPriceVariance">
-                <strong>I understand the final price can be higher or lower depending on the actual condition of the vehicle.</strong><br/>
-                The upfront full payment is based on the current quote, and any difference can be settled after inspection if needed.
-              </label>
-            </div>
-          `
-          : ""
-      }
     `;
 
     const squareBox = document.createElement("div");
     squareBox.className = "qCalWrap";
     squareBox.style.marginTop = "12px";
 
-    squareBox.innerHTML = `
-      <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
-      <div class="qStatus" data-q-pay-status>
-        ${
-          paymentIsBypassed
-            ? "Booking bypass activated. No payment will be collected."
-            : paymentComplete
-              ? "Payment completed successfully."
-              : "Use Apple Pay or enter card details."
-        }
-      </div>
-      ${
-        paymentComplete
-          ? ""
-          : `
-            <div id="qApplePayWrap" style="margin:12px 0 14px;">
-              <button
-                type="button"
-                id="qApplePayButton"
-                style="display:none; width:100%; min-height:48px; border:none; border-radius:12px; background:#000; color:#fff; font-size:16px; font-weight:600; cursor:pointer;"
-              >
-                Apple Pay
-              </button>
-            </div>
+    if (paymentIsBypassed) {
+      squareBox.innerHTML = `
+        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
+        <div class="qStatus" data-q-pay-status>Booking bypass activated. No payment will be collected.</div>
+        <div data-q-paid-wrap style="margin-top:10px;">
+          <div class="qDoneLine"><strong>Payment:</strong> Bypassed</div>
+          <div class="qDoneLine"><strong>Type:</strong> No Charge / Hidden Bypass</div>
+          <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(0)}</div>
+          ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+        </div>
+      `;
+    } else if (quoteState.paymentMode === "full") {
+      const payBtnLabel = `Pay ${formatMoney(fullPayAmount)} in Full`;
 
-            <div class="qStatus" style="margin:8px 0 10px;">Or pay with card</div>
-            <div id="qSquareCard"></div>
-
-            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-              <button type="button" class="btn btn--quote" id="qPayNowBtn">${escapeHtml(payBtnLabel)}</button>
-            </div>
-          `
-      }
-      <div data-q-paid-wrap style="margin-top:10px;">
+      squareBox.innerHTML = `
+        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
+        <div class="qStatus" data-q-pay-status>
+          ${paymentComplete ? "Payment completed successfully." : "Use Apple Pay or enter card details."}
+        </div>
         ${
           paymentComplete
-            ? `
-              <div class="qDoneLine"><strong>Payment:</strong> ${paymentIsBypassed ? "Bypassed" : "Paid"}</div>
-              <div class="qDoneLine"><strong>Type:</strong> ${paymentIsBypassed ? "No Charge / Hidden Bypass" : (quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit")}</div>
-              <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(paymentIsBypassed ? 0 : (quoteState.paidAmount || currentChargeAmount))}</div>
-              ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+            ? ""
+            : `
+              <div id="qApplePayWrap" style="margin:12px 0 14px;">
+                <button
+                  type="button"
+                  id="qApplePayButton"
+                  style="display:none; width:100%; min-height:48px; border:none; border-radius:12px; background:#000; color:#fff; font-size:16px; font-weight:600; cursor:pointer;"
+                >
+                  Apple Pay
+                </button>
+              </div>
+
+              <div class="qStatus" style="margin:8px 0 10px;">Or pay with card</div>
+              <div id="qSquareCard"></div>
+
+              <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" class="btn btn--quote" id="qPayNowBtn">${escapeHtml(payBtnLabel)}</button>
+              </div>
             `
-            : ""
         }
-      </div>
-    `;
+        <div data-q-paid-wrap style="margin-top:10px;">
+          ${
+            paymentComplete
+              ? `
+                <div class="qDoneLine"><strong>Payment:</strong> Paid</div>
+                <div class="qDoneLine"><strong>Type:</strong> Paid in Full</div>
+                <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(quoteState.paidAmount || fullPayAmount)}</div>
+                ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
+              `
+              : ""
+          }
+        </div>
+      `;
+    } else if (quoteState.paymentMode === "after") {
+      squareBox.innerHTML = `
+        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
+        <div class="qStatus" data-q-pay-status>No payment is due today. You’ll pay after the detail is completed.</div>
+        <div data-q-paid-wrap style="margin-top:10px;">
+          <div class="qDoneLine"><strong>Payment:</strong> Pay After Service</div>
+          <div class="qDoneLine"><strong>Amount Due Today:</strong> ${formatMoney(0)}</div>
+        </div>
+      `;
+    } else {
+      squareBox.innerHTML = `
+        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
+        <div class="qStatus" data-q-pay-status>Select one of the two payment options above.</div>
+      `;
+    }
 
     const foot = document.createElement("div");
     foot.className = "qStatus";
@@ -2297,47 +2277,41 @@ function renderStep() {
     foot.textContent = canContinue()
       ? ""
       : quoteState.paymentMode === "full"
-        ? "Required: payment selection, both checkboxes, and successful payment."
-        : "Required: acknowledgment and successful payment.";
+        ? "Required: select pay in full, check the acknowledgment box, and complete payment."
+        : quoteState.paymentMode === "after"
+          ? "Required: select pay after service and check the acknowledgment box."
+          : "Required: choose a payment option and check the acknowledgment box.";
 
     quoteBody.append(title, sub, summary, paymentChoice, ack, squareBox, foot);
 
-    const ackEl = quoteBody.querySelector("#qAck");
     const ackPriceVarianceEl = quoteBody.querySelector("#qAckPriceVariance");
     const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
     const squareCardEl = quoteBody.querySelector("#qSquareCard");
     const applePayWrapEl = quoteBody.querySelector("#qApplePayWrap");
     const payBtn = quoteBody.querySelector("#qPayNowBtn");
     const applePayButtonEl = quoteBody.querySelector("#qApplePayButton");
-    const payModeDepositEl = quoteBody.querySelector("#qPayModeDeposit");
-    const payModeFullEl = quoteBody.querySelector("#qPayModeFull");
 
     const updateFoot = () => {
       foot.textContent = canContinue()
         ? ""
         : quoteState.paymentMode === "full"
-          ? "Required: payment selection, both checkboxes, and successful payment."
-          : "Required: acknowledgment and successful payment.";
+          ? "Required: select pay in full, check the acknowledgment box, and complete payment."
+          : quoteState.paymentMode === "after"
+            ? "Required: select pay after service and check the acknowledgment box."
+            : "Required: choose a payment option and check the acknowledgment box.";
       updateNav();
     };
 
-    payModeDepositEl?.addEventListener("change", (e) => {
-      if (!e.target.checked) return;
-      quoteState.paymentMode = "deposit";
-      resetPaymentState();
-      renderStep();
-    });
-
-    payModeFullEl?.addEventListener("change", (e) => {
-      if (!e.target.checked) return;
+    fullBox.addEventListener("click", () => {
       quoteState.paymentMode = "full";
       resetPaymentState();
       renderStep();
     });
 
-    ackEl?.addEventListener("change", (e) => {
-      quoteState.ackDeposit = !!e.target.checked;
-      updateFoot();
+    afterBox.addEventListener("click", () => {
+      quoteState.paymentMode = "after";
+      resetPaymentState();
+      renderStep();
     });
 
     ackPriceVarianceEl?.addEventListener("change", (e) => {
@@ -2345,7 +2319,7 @@ function renderStep() {
       updateFoot();
     });
 
-    if (!paymentComplete) {
+    if (!paymentComplete && quoteState.paymentMode === "full") {
       initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
 
       initSquareApplePay(applePayWrapEl, payStatusEl).then((available) => {
@@ -2380,17 +2354,27 @@ function renderStep() {
       <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
       <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "—")}</div>
       <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay(estInfo))}</div>
-      <div class="qDoneLine"><strong>Payment Type:</strong> ${paymentIsBypassed ? "Hidden Bypass / No Charge" : (quoteState.paymentMode === "full" ? "Paid in Full" : "Deposit")}</div>
-      <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(paymentIsBypassed ? 0 : (quoteState.paidAmount || getCurrentChargeAmount()))}</div>
+      <div class="qDoneLine"><strong>Payment Type:</strong> ${
+        paymentIsBypassed
+          ? "Hidden Bypass / No Charge"
+          : quoteState.paymentMode === "full"
+            ? "Paid in Full"
+            : "Pay After Service"
+      }</div>
+      <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(
+        paymentIsBypassed
+          ? 0
+          : quoteState.paymentMode === "full"
+            ? (quoteState.paidAmount || getCurrentChargeAmount())
+            : 0
+      )}</div>
       ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
       ${
         paymentIsBypassed
           ? `<div class="qDoneFine">Booking saved with hidden bypass. No payment was collected.</div>`
-          : estInfo?.hasStartingAt
-            ? `<div class="qDoneFine">Ceramic pricing was shown as a starting range. Final total is confirmed after inspection.</div>`
-            : quoteState.paymentMode === "full"
-              ? `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the quote.</div>`
-              : `<div class="qDoneFine">Your deposit will be applied to the final total.</div>`
+          : quoteState.paymentMode === "after"
+            ? `<div class="qDoneFine">No payment was collected today. Final total is due after the detail is completed and confirmed after inspection.</div>`
+            : `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the quote.</div>`
       }
     `;
 
@@ -2806,12 +2790,12 @@ function buildPayload() {
 
     paymentMode: paymentIsBypassed ? "bypass" : quoteState.paymentMode,
     paymentBypass: paymentIsBypassed,
-    ackDeposit: quoteState.ackDeposit,
     ackPriceVariance: quoteState.ackPriceVariance,
-    depositAmount: quoteState.depositAmount,
-    paymentAmountCharged: paymentIsBypassed ? 0 : getCurrentChargeAmount(),
-    depositPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "deposit",
+    depositAmount: 0,
+    paymentAmountCharged: paymentIsBypassed ? 0 : (quoteState.paymentMode === "full" ? getCurrentChargeAmount() : 0),
+    depositPaid: false,
     fullPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "full",
+    payAfterService: !paymentIsBypassed && quoteState.paymentMode === "after",
     paymentStatus: quoteState.paymentStatus,
     squarePaymentId: quoteState.squarePaymentId
   };
