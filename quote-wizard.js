@@ -18,6 +18,7 @@ const SQUARE_PAYMENT_ENDPOINT = "/api/create-square-payment";
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
+const HEADLIGHT_RESTORATION_PRICE = 80;
 
 const ROUTE_GROUP_SOUTH = "south";
 const ROUTE_GROUP_NORTH = "north";
@@ -141,10 +142,12 @@ const INTERIOR_UPKEEP_IMG = "./img_6480.webp";
 const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp";
 const CERAMIC_IMG = "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png";
 const PAINT_CORRECTION_IMG = "./bee.jpg";
+const HEADLIGHT_RESTORATION_IMG = "./CCC_Headlight_Mktplc_Before_After__95898.jpg";
 
 const servicesAll = [
   { label: "Interior Detail", category: "Interior", img: "./Shampooing_interior_detail-55a7e5ac-640w.webp" },
   { label: "Exterior Wash", category: "Exterior", img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg" },
+  { label: "Headlight Restoration", category: "Exterior", img: HEADLIGHT_RESTORATION_IMG },
 
   { label: "Interior Upkeep Plan", category: "Interior", img: INTERIOR_UPKEEP_IMG, upkeep: "interior" },
   { label: "Exterior Upkeep Plan", category: "Exterior", img: EXTERIOR_UPKEEP_IMG, upkeep: "exterior" },
@@ -488,6 +491,7 @@ function paymentIsComplete() {
 function getDisplayRangeAddForService(serviceLabel) {
   if (serviceLabel === "Interior Detail") return INTERIOR_DISPLAY_RANGE_ADD;
   if (serviceLabel === "Exterior Wash") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Headlight Restoration") return EXTERIOR_DISPLAY_RANGE_ADD;
   if (serviceLabel === "Paint Correction") return EXTERIOR_DISPLAY_RANGE_ADD;
   if (serviceLabel === "Ceramic Coating") return EXTERIOR_DISPLAY_RANGE_ADD;
   if (serviceLabel === "Interior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD;
@@ -519,6 +523,12 @@ function computeEstimateInfo() {
       const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, quoteState.exteriorPackage);
       if (!Number.isFinite(price)) return null;
       total += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      continue;
+    }
+
+    if (service === "Headlight Restoration") {
+      total += HEADLIGHT_RESTORATION_PRICE;
       displayRangeAdd += getDisplayRangeAddForService(service);
       continue;
     }
@@ -985,6 +995,7 @@ function pickSingleServiceAndAdvance(label) {
 function getServiceCardHint(serviceLabel) {
   if (serviceLabel === "Interior Detail") return "Seats, mats, center console, panels, and trim.";
   if (serviceLabel === "Exterior Wash") return "Hand wash with wheels, tires, and exterior cleanup.";
+  if (serviceLabel === "Headlight Restoration") return "Restore cloudy headlights for clearer visibility and a cleaner look. $80 flat rate.";
   if (serviceLabel === "Paint Correction") return "Polish away swirls and boost gloss.";
   if (serviceLabel === "Ceramic Coating") return "Longer-lasting shine and paint protection.";
   if (serviceLabel === "Interior Upkeep Plan") return "Recurring interior maintenance to keep it fresh.";
@@ -1612,10 +1623,10 @@ function renderStep() {
         return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
       }
       if (isExterior) {
-        return s.label === "Exterior Wash" || s.label === "Exterior Upkeep Plan" || s.label === "Paint Correction" || s.label === "Ceramic Coating";
+        return s.label === "Exterior Wash" || s.label === "Headlight Restoration" || s.label === "Exterior Upkeep Plan" || s.label === "Paint Correction" || s.label === "Ceramic Coating";
       }
       if (isBoth) {
-        return s.label === "Interior Detail" || s.label === "Exterior Wash" || s.label === "Paint Correction" || s.label === "Ceramic Coating" || s.label === "Interior + Exterior Upkeep Plan";
+        return s.label === "Interior Detail" || s.label === "Exterior Wash" || s.label === "Headlight Restoration" || s.label === "Paint Correction" || s.label === "Ceramic Coating" || s.label === "Interior + Exterior Upkeep Plan";
       }
       return false;
     });
