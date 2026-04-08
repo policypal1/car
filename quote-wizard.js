@@ -995,7 +995,7 @@ function pickSingleServiceAndAdvance(label) {
 function getServiceCardHint(serviceLabel) {
   if (serviceLabel === "Interior Detail") return "Seats, mats, center console, panels, and trim.";
   if (serviceLabel === "Exterior Wash") return "Hand wash with wheels, tires, and exterior cleanup.";
-  if (serviceLabel === "Headlight Restoration") return "Restore cloudy headlights for clearer visibility and a cleaner look. $80 flat rate.";
+  if (serviceLabel === "Headlight Restoration") return "Restore cloudy headlights for a sharp and new look.";
   if (serviceLabel === "Paint Correction") return "Polish away swirls and boost gloss.";
   if (serviceLabel === "Ceramic Coating") return "Longer-lasting shine and paint protection.";
   if (serviceLabel === "Interior Upkeep Plan") return "Recurring interior maintenance to keep it fresh.";
