@@ -167,7 +167,7 @@ const interiorPackages = [
     features: [
       "Full interior vacuum (seats, carpets, floor mats)",
       "Full interior wipe down (dash, doors, console, vents, and panels)",
-      "Steam clean",
+      "Floor mats cleaned",
       "Windows cleaned inside & out"
     ]
   },
