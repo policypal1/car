@@ -72,6 +72,11 @@
         max-width: 700px;
       }
 
+      .hero__content > * {
+        position: relative;
+        z-index: 2;
+      }
+
       .hero__eyebrow {
         display: inline-flex;
         align-items: center;
@@ -98,7 +103,7 @@
       }
 
       .hero__headline {
-        max-width: 10ch;
+        max-width: 10.8ch;
         margin: 0 0 1rem;
         color: #ffffff;
         font-size: clamp(3.4rem, 7vw, 6rem);
@@ -145,7 +150,10 @@
       .hero__actions {
         display: flex;
         flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
         gap: 0.85rem;
+        margin-top: 1.7rem;
       }
 
       .btn--heroSecondary {
@@ -168,6 +176,7 @@
 
       .heroReview {
         position: relative;
+        align-self: start;
         padding: 1.55rem;
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 28px;
@@ -362,8 +371,12 @@
           grid-template-columns: 1fr;
         }
 
+        .hero__content {
+          max-width: 100%;
+        }
+
         .hero__headline {
-          max-width: 12ch;
+          max-width: 13ch;
         }
 
         .heroReview {
@@ -372,9 +385,13 @@
       }
 
       @media (max-width: 640px) {
+        .hero {
+          min-height: 88svh;
+        }
+
         .hero__inner {
-          padding-top: 4.75rem;
-          padding-bottom: 4.25rem;
+          padding-top: 4.9rem;
+          padding-bottom: 5.9rem;
         }
 
         .hero__eyebrow {
@@ -383,34 +400,44 @@
         }
 
         .hero__headline {
-          max-width: 11ch;
-          font-size: clamp(2.75rem, 14vw, 3.85rem);
-          line-height: 0.96;
+          max-width: 13ch;
+          font-size: clamp(2.55rem, 11.8vw, 3.8rem);
+          line-height: 0.98;
         }
 
         .hero__sub {
-          margin-bottom: 1.1rem;
+          max-width: 100%;
+          margin-bottom: 1.65rem;
           font-size: 1rem;
         }
 
         .hero__actions {
           flex-direction: column;
-          gap: 0.75rem;
+          align-items: flex-start;
+          gap: 0.8rem;
+          margin-top: 1.7rem;
+          margin-bottom: 1.8rem;
         }
 
         .hero__actions .btn {
           width: 100%;
+          max-width: 20rem;
         }
 
         .heroReview {
-          margin-top: 0.25rem;
+          margin-top: 2.4rem;
           padding: 1.1rem;
           border-radius: 22px;
+          transform: translateY(1rem);
         }
 
         .heroReview__quote {
           font-size: 1rem;
           line-height: 1.7;
+        }
+
+        .heroReview__top {
+          margin-bottom: 0.9rem;
         }
       }
     </style>
