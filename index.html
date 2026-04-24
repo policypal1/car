@@ -371,17 +371,6 @@
         display: none;
       }
 
-      .mobileServiceReview__actions {
-        display: grid;
-        gap: 0.85rem;
-      }
-
-      .mobileServiceReview__actions .btn {
-        width: 100%;
-        max-width: none;
-        border-radius: 16px;
-      }
-
       .mobileServiceReview__head {
         display: flex;
         align-items: center;
@@ -394,7 +383,7 @@
         margin: 0;
         color: #111111;
         font-family: Oswald, Inter, sans-serif;
-        font-size: 1.75rem;
+        font-size: 1.72rem;
         letter-spacing: 0.02em;
         line-height: 1.05;
       }
@@ -408,29 +397,90 @@
       }
 
       .mobileServiceReview__card {
-        padding: 1rem;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 20px;
-        background: #ffffff;
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+        position: relative;
+        padding: 1rem 1rem 1.05rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(30, 32, 37, 0.98) 0%, rgba(16, 18, 22, 0.98) 100%);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16);
+        overflow: hidden;
+      }
+
+      .mobileServiceReview__card::before {
+        content: "";
+        position: absolute;
+        inset: -38% auto auto 62%;
+        width: 190px;
+        height: 190px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(214, 167, 63, 0.18) 0%, rgba(214, 167, 63, 0) 72%);
+        pointer-events: none;
+      }
+
+      .mobileServiceReview__top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.95rem;
+      }
+
+      .mobileServiceReview__pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.72rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f6e7bb;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
       }
 
       .mobileServiceReview__stars {
-        margin-bottom: 0.7rem;
-        color: #d6a73f;
+        color: #f6d98a;
         font-size: 0.95rem;
         letter-spacing: 0.08em;
       }
 
       .mobileServiceReview__quote {
-        margin: 0 0 0.85rem;
-        color: #1a1d23;
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.96);
         font-size: 1rem;
-        line-height: 1.65;
+        line-height: 1.68;
+      }
+
+      .mobileServiceReview__footer {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .mobileServiceReview__avatar {
+        display: grid;
+        place-items: center;
+        width: 2.9rem;
+        height: 2.9rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6e7bb 0%, #d6a73f 100%);
+        color: #111111;
+        font-weight: 900;
+      }
+
+      .mobileServiceReview__name {
+        color: #ffffff;
+        font-weight: 800;
       }
 
       .mobileServiceReview__meta {
-        color: rgba(17, 17, 17, 0.62);
+        color: rgba(255, 255, 255, 0.68);
         font-size: 0.92rem;
       }
 
@@ -465,7 +515,7 @@
 
         .hero__inner {
           padding-top: 4.9rem;
-          padding-bottom: 2.2rem;
+          padding-bottom: 2.45rem;
         }
 
         .hero__eyebrow {
@@ -491,7 +541,18 @@
         }
 
         .hero__actions {
-          display: none;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 0.85rem;
+          margin-top: 3rem;
+          margin-bottom: 0;
+        }
+
+        .hero__actions .btn {
+          width: 100%;
+          max-width: none;
+          border-radius: 16px;
         }
 
         .heroReview {
@@ -500,13 +561,9 @@
 
         .mobileServiceReview {
           display: block;
-          margin: -0.2rem -1rem 1.5rem;
-          padding: 0 1rem 1.4rem;
-          background: #ffffff;
-        }
-
-        .mobileServiceReview__actions {
-          margin-bottom: 1.8rem;
+          margin: 0 0 1.85rem;
+          padding: 0;
+          background: transparent;
         }
 
         .mobileServiceReview__head {
@@ -562,7 +619,7 @@
 
             <div class="hero__actions">
               <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
-              <button class="btn btn--heroSecondary btn--lg" type="button" data-contact-open>CONTACT US</button>
+              <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
             </div>
           </div>
 
@@ -590,22 +647,28 @@
     <section class="section section--light" id="services">
       <div class="container">
         <div class="mobileServiceReview" aria-label="Mobile review section">
-          <div class="mobileServiceReview__actions">
-            <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
-            <button class="btn btn--heroSecondary btn--lg" type="button" data-contact-open>CONTACT US</button>
-          </div>
-
           <div class="mobileServiceReview__head">
             <h3 class="mobileServiceReview__title">What customers are saying</h3>
             <a class="mobileServiceReview__link" href="#reviews">See all</a>
           </div>
 
           <article class="mobileServiceReview__card">
-            <div class="mobileServiceReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <div class="mobileServiceReview__top">
+              <span class="mobileServiceReview__pill">Featured Review</span>
+              <div class="mobileServiceReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+
             <p class="mobileServiceReview__quote">
               “Was great with scheduling, showed up on time, and the quality was better than expected. I’d recommend them to anyone looking for a good price and quality job.”
             </p>
-            <div class="mobileServiceReview__meta">Carhart Family — Local customer review</div>
+
+            <div class="mobileServiceReview__footer">
+              <div class="mobileServiceReview__avatar" aria-hidden="true">CF</div>
+              <div>
+                <div class="mobileServiceReview__name">Carhart Family</div>
+                <div class="mobileServiceReview__meta">Local customer review</div>
+              </div>
+            </div>
           </article>
         </div>
 
