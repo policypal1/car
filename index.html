@@ -366,6 +366,75 @@
         border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
 
+
+      .mobileServiceReview {
+        display: none;
+      }
+
+      .mobileServiceReview__actions {
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      .mobileServiceReview__actions .btn {
+        width: 100%;
+        max-width: none;
+        border-radius: 16px;
+      }
+
+      .mobileServiceReview__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .mobileServiceReview__title {
+        margin: 0;
+        color: #111111;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 1.75rem;
+        letter-spacing: 0.02em;
+        line-height: 1.05;
+      }
+
+      .mobileServiceReview__link {
+        color: #b68518;
+        font-size: 0.96rem;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .mobileServiceReview__card {
+        padding: 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+      }
+
+      .mobileServiceReview__stars {
+        margin-bottom: 0.7rem;
+        color: #d6a73f;
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+      }
+
+      .mobileServiceReview__quote {
+        margin: 0 0 0.85rem;
+        color: #1a1d23;
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      .mobileServiceReview__meta {
+        color: rgba(17, 17, 17, 0.62);
+        font-size: 0.92rem;
+      }
+
+
       @media (max-width: 980px) {
         .hero__layout {
           grid-template-columns: 1fr;
@@ -387,16 +456,16 @@
       @media (max-width: 640px) {
         .hero {
           min-height: auto;
-          overflow: visible;
+          overflow: hidden;
         }
 
         .hero::after {
-          background: linear-gradient(180deg, rgba(4, 7, 14, 0.74) 0%, rgba(4, 7, 14, 0.58) 62%, rgba(4, 7, 14, 0.12) 100%);
+          background: linear-gradient(180deg, rgba(4, 7, 14, 0.74) 0%, rgba(4, 7, 14, 0.58) 72%, rgba(4, 7, 14, 0.3) 100%);
         }
 
         .hero__inner {
           padding-top: 4.9rem;
-          padding-bottom: 3.25rem;
+          padding-bottom: 2.2rem;
         }
 
         .hero__eyebrow {
@@ -417,68 +486,31 @@
 
         .hero__sub {
           max-width: 100%;
-          margin-bottom: 2.45rem;
+          margin-bottom: 0;
           font-size: 1rem;
         }
 
         .hero__actions {
-          flex-direction: column;
-          align-items: stretch;
-          gap: 0.85rem;
-          margin-top: 2.95rem;
-          margin-bottom: 0;
-        }
-
-        .hero__actions .btn {
-          width: 100%;
-          max-width: none;
-          border-radius: 16px;
+          display: none;
         }
 
         .heroReview {
-          margin-top: 2.35rem;
-          margin-inline: -1rem;
-          padding: 1.2rem 1rem 1.35rem;
-          border-radius: 24px 24px 0 0;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          border-bottom: 0;
+          display: none;
+        }
+
+        .mobileServiceReview {
+          display: block;
+          margin: -0.2rem -1rem 1.5rem;
+          padding: 0 1rem 1.4rem;
           background: #ffffff;
-          color: #111111;
-          box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.06);
-          backdrop-filter: none;
-          transform: none;
         }
 
-        .heroReview__quote {
-          color: #16181d;
-          font-size: 1rem;
-          line-height: 1.7;
+        .mobileServiceReview__actions {
+          margin-bottom: 1.8rem;
         }
 
-        .heroReview__top {
+        .mobileServiceReview__head {
           margin-bottom: 0.9rem;
-        }
-
-        .heroReview::before {
-          inset: -30% auto auto 62%;
-          background: radial-gradient(circle, rgba(214, 167, 63, 0.14) 0%, rgba(214, 167, 63, 0) 72%);
-        }
-
-        .heroReview__pill {
-          background: rgba(214, 178, 94, 0.14);
-          color: #6c5317;
-        }
-
-        .heroReview__footer {
-          padding-top: 0.15rem;
-        }
-
-        .heroReview__name {
-          color: #111111;
-        }
-
-        .heroReview__meta {
-          color: rgba(17, 17, 17, 0.62);
         }
       }
     </style>
@@ -557,6 +589,26 @@
 
     <section class="section section--light" id="services">
       <div class="container">
+        <div class="mobileServiceReview" aria-label="Mobile review section">
+          <div class="mobileServiceReview__actions">
+            <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
+            <button class="btn btn--heroSecondary btn--lg" type="button" data-contact-open>CONTACT US</button>
+          </div>
+
+          <div class="mobileServiceReview__head">
+            <h3 class="mobileServiceReview__title">What customers are saying</h3>
+            <a class="mobileServiceReview__link" href="#reviews">See all</a>
+          </div>
+
+          <article class="mobileServiceReview__card">
+            <div class="mobileServiceReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="mobileServiceReview__quote">
+              “Was great with scheduling, showed up on time, and the quality was better than expected. I’d recommend them to anyone looking for a good price and quality job.”
+            </p>
+            <div class="mobileServiceReview__meta">Carhart Family — Local customer review</div>
+          </article>
+        </div>
+
         <div class="section__head">
           <h2 class="section__title">SERVICES</h2>
           <p class="section__sub">Tap a service to see what's included. Quotes are based on vehicle size and condition.</p>
