@@ -237,7 +237,7 @@
   box-shadow:0 8px 18px rgba(0,0,0,.14);
 }
 
-/* ✅ NEW: "Requires Exterior Wash" pill badge (ONLY used on Ceramic Coating + Paint Correction) */
+/* ✅ "Requires Exterior Wash" pill badge */
 .requires-badge{
   position:absolute;
   top:10px;
@@ -348,6 +348,40 @@
   font-weight:1000;
   color:#111;
   font-size:1rem;
+}
+
+/* ✅ Image-less package cards (Standard / Deep Clean / Premium) */
+.qFeatureCard--noImg{
+  padding:18px;
+  background:#fff;
+}
+.qFeatureCard--noImg .qFeatureCardTitle{
+  font-size:1.25rem;
+  margin-bottom:6px;
+}
+.qFeatureCard--noImg .qFeatureCardHint{
+  text-align:center;
+  color:rgba(0,0,0,.55);
+  font-weight:700;
+  font-size:.92rem;
+  line-height:1.4;
+  margin-bottom:14px;
+  padding:0 4px;
+}
+.qFeatureCard--noImg .qFeatureList{
+  font-size:.94rem;
+  gap:7px;
+}
+.qFeatureCard--noImg .qFeaturePrice{
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid rgba(0,0,0,.08);
+  font-size:1.05rem;
+  letter-spacing:.2px;
+}
+.qFeatureCard--noImg.isSel .qFeaturePrice{
+  border-top-color:rgba(214,178,94,.45);
+  color:rgba(0,0,0,.85);
 }
 
 /* ✅ Services tray (chips) */
@@ -550,7 +584,204 @@
   box-shadow:inset 0 0 0 4px rgba(255,255,255,1);
 }
 
-/* Estimate */
+/* =========================
+   ✅ NEW: Estimate page
+   ========================= */
+
+.qEstimateHero{
+  position:relative;
+  border-radius:24px;
+  padding:28px 22px 26px;
+  background:
+    radial-gradient(900px 320px at 20% 15%, rgba(214,178,94,.18), rgba(255,255,255,0) 55%),
+    linear-gradient(180deg, #fff 0%, #fbf7ec 100%);
+  border:1px solid rgba(214,178,94,.35);
+  box-shadow:0 24px 60px rgba(0,0,0,.08);
+  text-align:center;
+  overflow:hidden;
+}
+
+.qEstimateEyebrow{
+  font-size:.78rem;
+  font-weight:1000;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(0,0,0,.55);
+  margin-bottom:8px;
+}
+
+.qEstimateHeroTitle{
+  margin:0 0 8px;
+  font-family:Oswald, Inter, sans-serif;
+  font-size:clamp(1.5rem, 4.5vw, 2rem);
+  font-weight:900;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:#111;
+  line-height:1.1;
+}
+
+.qEstimateHeroSub{
+  margin:0 auto 22px;
+  max-width:520px;
+  color:rgba(0,0,0,.62);
+  font-weight:600;
+  line-height:1.55;
+  font-size:.96rem;
+}
+
+.qEstimateHeroPrice{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.qEstimateOld{
+  color:rgba(0,0,0,.42);
+  font-weight:900;
+  text-decoration:line-through;
+  font-size:1.05rem;
+}
+
+.qEstimateBig{
+  margin:0;
+  font-weight:1000;
+  font-size:clamp(2.4rem, 8vw, 3.4rem);
+  line-height:1;
+  color:#111;
+  letter-spacing:-.5px;
+}
+
+.qEstimatePills{
+  margin-top:14px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.qPill{
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  padding:7px 12px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(255,255,255,.85);
+  color:rgba(0,0,0,.72);
+  font-weight:800;
+  font-size:.88rem;
+}
+
+/* Coupon box */
+.qCouponBox{
+  margin-top:18px;
+  border-radius:20px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  padding:20px;
+  box-shadow:0 12px 30px rgba(0,0,0,.05);
+}
+
+.qCouponHeader{
+  margin-bottom:14px;
+}
+
+.qCouponTitle{
+  font-weight:1000;
+  color:#111;
+  font-size:1.05rem;
+  margin-bottom:2px;
+}
+
+.qCouponSub{
+  color:rgba(0,0,0,.55);
+  font-weight:600;
+  font-size:.9rem;
+  line-height:1.4;
+}
+
+.qCouponRow{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+}
+
+.qCouponInput{
+  flex:1 1 auto;
+  min-width:0;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.14);
+  outline:none;
+  font-weight:700;
+  font-family:inherit;
+  font-size:1rem;
+  background:#fff;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:#111;
+}
+.qCouponInput::placeholder{
+  color:rgba(0,0,0,.32);
+  font-weight:600;
+  letter-spacing:normal;
+  text-transform:none;
+}
+.qCouponInput:focus{
+  border-color:rgba(214,178,94,.70);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18);
+}
+
+.qCouponBtn{
+  flex:0 0 auto;
+  min-width:96px;
+  padding:0 22px;
+  border-radius:14px;
+  border:none;
+  background:#111;
+  color:#fff;
+  font-weight:1000;
+  font-size:.95rem;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition: background .15s ease, transform .15s ease;
+}
+.qCouponBtn:hover{
+  background:#000;
+  transform:translateY(-1px);
+}
+.qCouponBtn.isApplied{
+  background:rgba(214,178,94,.95);
+  color:#111;
+}
+
+.qCouponMsg{
+  margin-top:12px;
+  font-weight:800;
+  font-size:.92rem;
+  line-height:1.4;
+}
+.qCouponMsg.isOk{
+  color:rgba(80,140,60,1);
+}
+.qCouponMsg.isErr{
+  color:#b00020;
+}
+
+.qEstimateFinePrint{
+  margin:16px 0 0;
+  text-align:center;
+  color:rgba(0,0,0,.50);
+  font-weight:600;
+  font-size:.85rem;
+  line-height:1.5;
+  padding:0 8px;
+}
+
+/* Existing estimate box (still used on Confirm step) */
 .qEstimateBox{
   border-radius:20px;
   padding:16px;
@@ -566,31 +797,8 @@
   box-shadow: 0 16px 44px rgba(0,0,0,.08);
   background: linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.01));
 }
-.qEstimateBig{
-  margin-top:2px;
-  font-weight:1000;
+.qEstimateBox .qEstimateBig{
   font-size:2.15rem;
-  line-height:1.1;
-  color:#111;
-}
-.qEstimatePills{
-  margin-top:12px;
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  justify-content:center;
-}
-.qPill{
-  display:inline-flex;
-  gap:6px;
-  align-items:center;
-  padding:8px 10px;
-  border-radius:999px;
-  border:1px solid rgba(0,0,0,.10);
-  background:rgba(255,255,255,.78);
-  color:rgba(0,0,0,.78);
-  font-weight:800;
-  font-size:.92rem;
 }
 .qEstimateFine{
   margin-top:12px;
@@ -1039,6 +1247,27 @@
     width:100%;
     justify-content:center;
     text-align:center;
+  }
+
+  /* Estimate page mobile tweaks */
+  .qEstimateHero{
+    padding:22px 16px 22px;
+    border-radius:20px;
+  }
+  .qEstimateHeroPrice .qEstimateBig{
+    font-size:clamp(2.2rem, 11vw, 2.8rem);
+  }
+  .qCouponBox{
+    padding:16px;
+    border-radius:16px;
+  }
+  .qCouponRow{
+    flex-direction:column;
+    gap:8px;
+  }
+  .qCouponBtn{
+    width:100%;
+    min-height:50px;
   }
 }
 
