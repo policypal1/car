@@ -21,7 +21,6 @@
     <link rel="dns-prefetch" href="//www.googletagmanager.com" />
     <link rel="dns-prefetch" href="//vitals.vercel-insights.com" />
 
-    
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -40,44 +39,7 @@
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
 
-
     <style>
-      /* Performance patch: remove the huge logo image and avoid loading the oversized hero background as LCP. */
-      .brand__mark {
-        display: grid;
-        place-items: center;
-        width: 46px;
-        height: 46px;
-        flex: 0 0 46px;
-        border-radius: 14px;
-        border: 1px solid rgba(214, 167, 63, 0.42);
-        background:
-          radial-gradient(circle at 30% 20%, rgba(246, 217, 138, 0.32), transparent 34%),
-          linear-gradient(135deg, #171717 0%, #050505 100%);
-        color: #f6d98a;
-        font-family: Oswald, Inter, sans-serif;
-        font-size: 1.42rem;
-        font-weight: 900;
-        letter-spacing: 0.02em;
-        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
-      }
-
-      .hero__bg {
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(900px 520px at 18% 24%, rgba(214, 167, 63, 0.22), rgba(214, 167, 63, 0) 58%),
-          radial-gradient(720px 480px at 80% 20%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 56%),
-          linear-gradient(135deg, #050608 0%, #101114 48%, #050506 100%) !important;
-        transform: none !important;
-        will-change: auto !important;
-      }
-
-      .serviceCard[data-bg],
-      .compare[data-before] {
-        background-color: #111111;
-      }
-
       .hero {
         position: relative;
         overflow: hidden;
@@ -165,26 +127,6 @@
         text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
       }
 
-      .hero__trust {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.7rem;
-        margin: 0 0 1.5rem;
-        padding: 0;
-        list-style: none;
-      }
-
-      .hero__trust li {
-        padding: 0.68rem 0.95rem;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        border-radius: 999px;
-        background: rgba(16, 16, 16, 0.38);
-        color: rgba(255, 255, 255, 0.92);
-        font-size: 0.94rem;
-        font-weight: 600;
-        backdrop-filter: blur(10px);
-      }
-
       .hero__actions {
         display: flex;
         flex-wrap: wrap;
@@ -264,6 +206,22 @@
         letter-spacing: 0.1em;
       }
 
+      .heroReview__media {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .heroReview__media img {
+        display: block;
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+      }
+
       .heroReview__quote {
         margin: 0 0 1.15rem;
         color: rgba(255, 255, 255, 0.98);
@@ -341,34 +299,8 @@
         border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
 
-
       .mobileServiceReview {
         display: none;
-      }
-
-      .mobileServiceReview__head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 1rem;
-      }
-
-      .mobileServiceReview__title {
-        margin: 0;
-        color: #111111;
-        font-family: Oswald, Inter, sans-serif;
-        font-size: 1.72rem;
-        letter-spacing: 0.02em;
-        line-height: 1.05;
-      }
-
-      .mobileServiceReview__link {
-        color: #b68518;
-        font-size: 0.96rem;
-        font-weight: 800;
-        text-decoration: none;
-        white-space: nowrap;
       }
 
       .mobileServiceReview__card {
@@ -421,6 +353,22 @@
         letter-spacing: 0.08em;
       }
 
+      .mobileServiceReview__media {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 0.95rem;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .mobileServiceReview__media img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
       .mobileServiceReview__quote {
         position: relative;
         z-index: 1;
@@ -459,6 +407,19 @@
         font-size: 0.92rem;
       }
 
+      .rReviewMedia {
+        margin: 0.85rem 0 0;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .rReviewMedia img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
 
       @media (max-width: 980px) {
         .hero__layout {
@@ -540,10 +501,6 @@
           padding: 0;
           background: transparent;
         }
-
-        .mobileServiceReview__head {
-          margin-bottom: 0.9rem;
-        }
       }
     </style>
 
@@ -553,7 +510,16 @@
     <header class="header" id="top">
       <div class="container header__inner">
         <a class="brand" href="#top" aria-label="Home">
-          <div class="brand__mark" aria-hidden="true">K</div>
+          <img
+            class="brand__logo"
+            src="./Untitled design (2).png"
+            alt="Keizer Mobile Detailing logo"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width="74"
+            height="74"
+          />
           <div class="brand__text">
             <span class="brand__name">
               <span class="brand__nameLine">Keizer Mobile</span>
@@ -604,6 +570,10 @@
               <div class="heroReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
             </div>
 
+            <div class="heroReview__media">
+              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+            </div>
+
             <p class="heroReview__quote">
               “My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!”
             </p>
@@ -614,7 +584,8 @@
                 <div class="heroReview__name">Edgar Diaz</div>
                 <div class="heroReview__meta">Google review · G-Wagon detail</div>
               </div>
-            </div>          </aside>
+            </div>
+          </aside>
         </div>
       </div>
     </section>
@@ -626,6 +597,10 @@
             <div class="mobileServiceReview__top">
               <span class="mobileServiceReview__pill">Featured Review</span>
               <div class="mobileServiceReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+
+            <div class="mobileServiceReview__media">
+              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
             </div>
 
             <p class="mobileServiceReview__quote">
@@ -760,7 +735,8 @@
                   <div
                     class="compare compare--fill"
                     data-compare
-                    data-before="./IMG_2469.jpg" data-after="./IMG_2461.jpg"
+                    data-before="./IMG_2469.jpg"
+                    data-after="./IMG_2461.jpg"
                     aria-label="Before and after comparison"
                   >
                     <div class="compare__stage" aria-hidden="true"></div>
@@ -773,7 +749,8 @@
                   <div
                     class="compare compare--fill"
                     data-compare
-                    data-before="./IMG_2919 (1).jpg" data-after="./IMG_2912.jpg"
+                    data-before="./IMG_2919 (1).jpg"
+                    data-after="./IMG_2912.jpg"
                     aria-label="Before and after comparison"
                   >
                     <div class="compare__stage" aria-hidden="true"></div>
@@ -919,7 +896,7 @@
 
         <div class="areaGrid">
           <div class="areaMap">
-            <img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" />
+            <img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" decoding="async" />
           </div>
 
           <div class="areaCard">
@@ -968,7 +945,7 @@
           </div>
 
           <div class="aboutMedia">
-            <img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" />
+            <img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>
@@ -1024,6 +1001,9 @@
               <p class="rText rText--dark">
                 My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!
               </p>
+              <div class="rReviewMedia">
+                <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+              </div>
             </article>
           </div>
 
@@ -1163,6 +1143,7 @@
           </div>
         </div>
         <div class="quoteBody" data-quote-body></div>
+
         <div class="quoteNav">
           <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
           <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
@@ -1219,168 +1200,163 @@
     </script>
 
     <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const quoteButtons = document.querySelectorAll("[data-quote-open]");
-    const callButtons = document.querySelectorAll("[data-call-open]");
-    const contactButtons = document.querySelectorAll("[data-contact-open]");
-    const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
-    const contactForm = document.querySelector("[data-contact-form]");
+      document.addEventListener("DOMContentLoaded", function () {
+        const quoteButtons = document.querySelectorAll("[data-quote-open]");
+        const callButtons = document.querySelectorAll("[data-call-open]");
+        const contactButtons = document.querySelectorAll("[data-contact-open]");
+        const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+        const contactForm = document.querySelector("[data-contact-form]");
 
-    quoteButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        if (typeof gtag === "function") {
-          gtag("event", "generate_lead", {
-            event_category: "engagement",
-            event_label: "quote_button_click"
+        quoteButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "quote_button_click"
+              });
+            }
+          });
+        });
+
+        callButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "call_button_click"
+              });
+            }
+          });
+        });
+
+        contactButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "contact_button_click"
+              });
+            }
+          });
+        });
+
+        phoneLinks.forEach((link) => {
+          link.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "contact", {
+                event_category: "engagement",
+                event_label: "phone_number_click"
+              });
+            }
+          });
+        });
+
+        if (contactForm) {
+          contactForm.addEventListener("submit", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "contact_form_submit"
+              });
+            }
           });
         }
       });
-    });
+    </script>
 
-    callButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        if (typeof gtag === "function") {
-          gtag("event", "generate_lead", {
-            event_category: "engagement",
-            event_label: "call_button_click"
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const contactForm = document.querySelector("[data-contact-form]");
+        const contactStatus = document.querySelector("[data-contact-status]");
+        const quoteBody = document.querySelector("[data-quote-body]");
+
+        const spamKeywords = [
+          "seo",
+          "backlink",
+          "guest post",
+          "website traffic",
+          "crypto",
+          "forex",
+          "viagra",
+          "casino",
+          "loan",
+          "loan approval",
+          "telegram"
+        ];
+
+        if (contactForm) {
+          contactForm.addEventListener("submit", function (event) {
+            const honeyPot = contactForm.querySelector('input[name="website"]');
+            const messageField = contactForm.querySelector("#cMessage");
+            const emailField = contactForm.querySelector("#cEmail");
+            const combinedText = [
+              honeyPot ? honeyPot.value : "",
+              messageField ? messageField.value : "",
+              emailField ? emailField.value : ""
+            ].join(" ").toLowerCase();
+
+            const isSpam = spamKeywords.some((keyword) => combinedText.includes(keyword)) || (honeyPot && honeyPot.value.trim() !== "");
+
+            if (isSpam) {
+              event.preventDefault();
+              if (contactStatus) {
+                contactStatus.textContent = "Message blocked. Please remove promotional or spam-like wording and try again.";
+              }
+            }
           });
         }
-      });
-    });
 
-    contactButtons.forEach((button) => {
-      button.addEventListener("click", function () {
-        if (typeof gtag === "function") {
-          gtag("event", "generate_lead", {
-            event_category: "engagement",
-            event_label: "contact_button_click"
-          });
+        function enhanceBookedScreen() {
+          if (!quoteBody) return;
+
+          const bodyText = quoteBody.textContent.toLowerCase();
+          const looksLikeSuccess =
+            bodyText.includes("you're booked") ||
+            bodyText.includes("you’re booked") ||
+            bodyText.includes("booking confirmed") ||
+            bodyText.includes("thank you") ||
+            bodyText.includes("we'll reach out") ||
+            bodyText.includes("we’ll reach out");
+
+          quoteBody.classList.toggle("quoteBody--success", looksLikeSuccess);
+
+          if (!looksLikeSuccess) return;
+          if (quoteBody.querySelector(".quoteSuccessWrap")) return;
+
+          const originalMarkup = quoteBody.innerHTML.trim();
+          if (!originalMarkup) return;
+
+          quoteBody.innerHTML = `
+            <div class="quoteSuccessWrap">
+              <div class="quoteSuccessBadge">Request received</div>
+              <h4 class="quoteSuccessTitle">You’re booked in.</h4>
+              <p class="quoteSuccessText">
+                Your request came through. We’ll reach out shortly to confirm the details and lock everything in.
+              </p>
+              <div class="quoteSuccessInner">${originalMarkup}</div>
+            </div>
+          `;
         }
-      });
-    });
 
-    phoneLinks.forEach((link) => {
-      link.addEventListener("click", function () {
-        if (typeof gtag === "function") {
-          gtag("event", "contact", {
-            event_category: "engagement",
-            event_label: "phone_number_click"
-          });
-        }
-      });
-    });
-
-    if (contactForm) {
-      contactForm.addEventListener("submit", function () {
-        if (typeof gtag === "function") {
-          gtag("event", "generate_lead", {
-            event_category: "engagement",
-            event_label: "contact_form_submit"
-          });
-        }
-      });
-    }
-  });
-</script>
-
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const contactForm = document.querySelector("[data-contact-form]");
-    const contactStatus = document.querySelector("[data-contact-status]");
-    const quoteBody = document.querySelector("[data-quote-body]");
-
-    const spamKeywords = [
-      "seo",
-      "backlink",
-      "guest post",
-      "website traffic",
-      "crypto",
-      "forex",
-      "viagra",
-      "casino",
-      "loan",
-      "loan approval",
-      "telegram"
-    ];
-
-    if (contactForm) {
-      contactForm.addEventListener("submit", function (event) {
-        const honeyPot = contactForm.querySelector('input[name="website"]');
-        const messageField = contactForm.querySelector("#cMessage");
-        const emailField = contactForm.querySelector("#cEmail");
-        const combinedText = [
-          honeyPot ? honeyPot.value : "",
-          messageField ? messageField.value : "",
-          emailField ? emailField.value : ""
-        ].join(" ").toLowerCase();
-
-        const isSpam = spamKeywords.some((keyword) => combinedText.includes(keyword)) || (honeyPot && honeyPot.value.trim() !== "");
-
-        if (isSpam) {
-          event.preventDefault();
-          if (contactStatus) {
-            contactStatus.textContent = "Message blocked. Please remove promotional or spam-like wording and try again.";
-          }
-        }
-      });
-    }
-
-    function enhanceBookedScreen() {
-      if (!quoteBody) return;
-
-      const bodyText = quoteBody.textContent.toLowerCase();
-      const looksLikeSuccess =
-        bodyText.includes("you're booked") ||
-        bodyText.includes("you’re booked") ||
-        bodyText.includes("booking confirmed") ||
-        bodyText.includes("thank you") ||
-        bodyText.includes("we'll reach out") ||
-        bodyText.includes("we’ll reach out");
-
-      quoteBody.classList.toggle("quoteBody--success", looksLikeSuccess);
-
-      if (!looksLikeSuccess) return;
-
-      if (quoteBody.querySelector(".quoteSuccessWrap")) return;
-
-      const originalMarkup = quoteBody.innerHTML.trim();
-      if (!originalMarkup) return;
-
-      quoteBody.innerHTML = `
-        <div class="quoteSuccessWrap">
-          <div class="quoteSuccessBadge">Request received</div>
-          <h4 class="quoteSuccessTitle">You’re booked in.</h4>
-          <p class="quoteSuccessText">
-            Your request came through. We’ll reach out shortly to confirm the details and lock everything in.
-          </p>
-          <div class="quoteSuccessInner">${originalMarkup}</div>
-        </div>
-      `;
-    }
-
-    enhanceBookedScreen();
-
-    if (quoteBody) {
-      const quoteObserver = new MutationObserver(function () {
         enhanceBookedScreen();
+
+        if (quoteBody) {
+          const quoteObserver = new MutationObserver(function () {
+            enhanceBookedScreen();
+          });
+
+          quoteObserver.observe(quoteBody, {
+            childList: true,
+            subtree: true,
+            characterData: true
+          });
+        }
       });
+    </script>
 
-      quoteObserver.observe(quoteBody, {
-        childList: true,
-        subtree: true,
-        characterData: true
-      });
-    }
-
-  });
-</script>
-
-
-<script>
-  window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/speed-insights/script.js"></script>
-    
+    <script>
+      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
   </body>
 </html>
