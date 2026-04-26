@@ -1,20 +1,18 @@
 // -------------------------
-// QUOTE WIZARD (Flow v11.7 - Dynamic Progress + Address Step)
+// QUOTE WIZARD (Conversion Flow v12 - Appointment Request + Coupon)
 // -------------------------
 // Vehicle -> Category -> Service(s) -> Package/Option steps -> Upkeep Frequency (if upkeep)
-// -> Contact -> Estimate -> Appointment -> Address -> Payment -> Done
+// -> Contact -> Estimate -> Appointment -> Address -> Confirm Request -> Done
 //
-// Requirements:
-// 1) Add <script src="https://web.squarecdn.com/v1/square.js"></script> to your HTML <head>
-// 2) Add /api/create-square-payment.js on Vercel
+// Notes:
+// - This keeps the same modal/cards/classes so the quote flow should look very close to your current design.
+// - The normal customer path no longer requires online payment.
+// - Quote leads are still sent after contact info so the 30-minute abandoned coupon email can trigger from Apps Script.
+// - Final submit reserves the slot and sends the booking/request email through Apps Script.
 //
 
 const DEFAULT_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzOJxJA74mOnrJVT5ZfxBiZJ16VpQzhKYTGnmdxZDnm5tRm8rb4pV8wuxJrX9M7WPnQQA/exec";
-
-const SQUARE_APP_ID = "sq0idp-9rqrzxMJ-huh115bZkPH5Q";
-const SQUARE_LOCATION_ID = "LV9XSE8KC6F93";
-const SQUARE_PAYMENT_ENDPOINT = "/api/create-square-payment";
+  "https://script.google.com/macros/s/AKfycbwHjH4JaJ_9Vl6xegBIuLztbcGnfPwvxdV00ej7LPEX4Tu0Da5ZbBseHxcbQg8Q217v/exec";
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
@@ -23,16 +21,18 @@ const HEADLIGHT_RESTORATION_PRICE = 80;
 const ROUTE_GROUP_SOUTH = "south";
 const ROUTE_GROUP_NORTH = "north";
 
-const SECRET_BYPASS_DOT_INDEX = 2; // third bubble
-const SECRET_BYPASS_REQUIRED_TAPS = 3;
-const SECRET_BYPASS_WINDOW_MS = 2600;
-
 const CITY_ROUTE_MAP = {
   keizer: ROUTE_GROUP_SOUTH,
   salem: ROUTE_GROUP_SOUTH,
   portland: ROUTE_GROUP_NORTH,
   tigard: ROUTE_GROUP_NORTH,
   "lake oswego": ROUTE_GROUP_NORTH
+};
+
+const VALID_COUPONS = {
+  DETAIL10: 10,
+  CLEAN10: 10,
+  RESET10: 10
 };
 
 const quoteModal = document.querySelector("[data-quote-modal]");
@@ -44,11 +44,12 @@ const quoteProgressEl = document.querySelector(".quoteProgress");
 const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
 
 let lastActiveElQuote = null;
-let squarePayments = null;
-let squareCard = null;
-let squareApplePay = null;
-let squarePaymentsInitPromise = null;
-let squareWarmStarted = false;
+let appointmentSlots = [];
+let appointmentSlotsLoading = false;
+let appointmentSlotsLoadedKey = "";
+let appointmentSlotsError = "";
+let calendarMonthDate = null;
+let selectedCalendarDate = "";
 
 const quoteState = {
   vehicleType: "",
@@ -66,6 +67,10 @@ const quoteState = {
   estimateHigh: "",
   estimateIsStartingAt: false,
 
+  couponCode: "",
+  couponDiscount: 0,
+  couponMessage: "",
+
   slotId: "",
   slotLabel: "",
   slotDate: "",
@@ -82,22 +87,24 @@ const quoteState = {
   routeGroup: "",
   routeGroupLabel: "",
 
+  leadId: "",
   leadEmailSent: false,
   leadEmailSignature: "",
   leadEmailSending: false,
 
-  paymentMode: "", // "" | "full" | "after"
+  submittingBooking: false,
+  bookingError: "",
+
+  // Kept for Apps Script/backward compatibility.
+  paymentMode: "after",
   ackPriceVariance: false,
   depositAmount: 0,
-  paymentStatus: "", // "", "ready", "processing", "paid", "bypassed"
+  paymentStatus: "appointment_requested",
   paymentMessage: "",
   squarePaymentId: "",
-  paidAmount: "",
+  paidAmount: "0",
 
-  honeypot: "",
-
-  secretBypassTapCount: 0,
-  secretBypassLastTapAt: 0
+  honeypot: ""
 };
 
 const steps = [
@@ -113,7 +120,7 @@ const steps = [
   "estimate",
   "appointment",
   "address",
-  "payment",
+  "confirm",
   "done"
 ];
 
@@ -357,7 +364,7 @@ const UPKEEP_FREQUENCY_MULTIPLIER = {
 const INTERIOR_EXTERIOR_BUNDLE_DISCOUNT = 30;
 
 // -------------------------
-// HELPERS
+// BASIC HELPERS
 // -------------------------
 function escapeHtml(str) {
   return String(str || "")
@@ -368,67 +375,6 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-function getVisibleSteps() {
-  return steps.filter((stepName) => stepIsActive(stepName));
-}
-
-function ensureProgressDots() {
-  const visibleSteps = getVisibleSteps();
-
-  if (!quoteProgressEl) {
-    return {
-      dots: quoteDots(),
-      visibleSteps
-    };
-  }
-
-  const desiredCount = Math.max(visibleSteps.length, 1);
-  const currentDots = Array.from(quoteProgressEl.querySelectorAll(".qpDot"));
-
-  if (currentDots.length !== desiredCount) {
-    quoteProgressEl.innerHTML = "";
-
-    for (let i = 0; i < desiredCount; i++) {
-      const dot = document.createElement("button");
-      dot.type = "button";
-      dot.className = "qpDot";
-      dot.setAttribute("aria-label", `Progress step ${i + 1} of ${desiredCount}`);
-      dot.addEventListener("click", () => handleSecretDotTap(i));
-      quoteProgressEl.appendChild(dot);
-    }
-  }
-
-  return {
-    dots: quoteDots(),
-    visibleSteps
-  };
-}
-
-function setProgress() {
-  const { dots, visibleSteps } = ensureProgressDots();
-  if (!dots.length) return;
-
-  const currentStep = steps[stepIndex];
-  const activeIndex = Math.max(0, visibleSteps.indexOf(currentStep));
-
-  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(activeIndex, dots.length - 1)));
-}
-
-function renderNavPrice() { return; }
-
-function moneyToCents(n) {
-  return Math.round(Number(n || 0) * 100);
-}
-
-function makeIdempotencyKey() {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  return `qw_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 function formatMoney(n) {
   return `$${Number(n || 0).toFixed(0)}`;
 }
@@ -436,6 +382,23 @@ function formatMoney(n) {
 function clampInt(n) {
   const x = Math.round(Number(n));
   return Number.isFinite(x) ? x : null;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function makeLeadId() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `lead_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function normalizeCoupon(code) {
+  return String(code || "").trim().toUpperCase();
+}
+
+function getCouponDiscount(code = quoteState.couponCode) {
+  return VALID_COUPONS[normalizeCoupon(code)] || 0;
 }
 
 function priceForVehicle(table, key) {
@@ -453,181 +416,6 @@ function computeUpkeepPrice(serviceLabel, frequency = quoteState.upkeepFrequency
 
   if (!Number.isFinite(base) || !Number.isFinite(mult)) return null;
   return clampInt(base * mult);
-}
-
-function getSelectedDisplayServices() {
-  return (quoteState.services || []).map((service) => {
-    if (service === "Interior Detail") return quoteState.interiorPackage || service;
-    if (service === "Exterior Wash") return quoteState.exteriorPackage || service;
-    if (service === "Paint Correction") return quoteState.paintCorrectionPackage || service;
-    if (service === "Ceramic Coating") return quoteState.ceramicPackage || service;
-    return service;
-  });
-}
-
-function getSelectedServiceChipData() {
-  return (quoteState.services || []).map((service) => {
-    if (service === "Interior Detail") return { baseLabel: service, displayLabel: quoteState.interiorPackage || service };
-    if (service === "Exterior Wash") return { baseLabel: service, displayLabel: quoteState.exteriorPackage || service };
-    if (service === "Paint Correction") return { baseLabel: service, displayLabel: quoteState.paintCorrectionPackage || service };
-    if (service === "Ceramic Coating") return { baseLabel: service, displayLabel: quoteState.ceramicPackage || service };
-    return { baseLabel: service, displayLabel: service };
-  });
-}
-
-function hasInteriorExteriorBundle() {
-  const s = quoteState.services || [];
-  return s.includes("Interior Detail") && s.includes("Exterior Wash");
-}
-
-function allowsFullPayment() {
-  return true;
-}
-
-function paymentIsComplete() {
-  return quoteState.paymentStatus === "paid" || quoteState.paymentStatus === "bypassed";
-}
-
-function getDisplayRangeAddForService(serviceLabel) {
-  if (serviceLabel === "Interior Detail") return INTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Exterior Wash") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Headlight Restoration") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Paint Correction") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Ceramic Coating") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Interior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Exterior Upkeep Plan") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Interior + Exterior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD + EXTERIOR_DISPLAY_RANGE_ADD;
-  return 0;
-}
-
-function computeEstimateInfo() {
-  const vehicle = quoteState.vehicleType;
-  const services = quoteState.services || [];
-
-  if (!vehicle || !services.length) return null;
-
-  let total = 0;
-  let hasStartingAt = false;
-  let displayRangeAdd = 0;
-
-  for (const service of services) {
-    if (service === "Interior Detail") {
-      const price = priceForVehicle(INTERIOR_DETAIL_PRICES, quoteState.interiorPackage);
-      if (!Number.isFinite(price)) return null;
-      total += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Exterior Wash") {
-      const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, quoteState.exteriorPackage);
-      if (!Number.isFinite(price)) return null;
-      total += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Headlight Restoration") {
-      total += HEADLIGHT_RESTORATION_PRICE;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Paint Correction") {
-      const price = priceForVehicle(PAINT_CORRECTION_PRICES, quoteState.paintCorrectionPackage);
-      if (!Number.isFinite(price)) return null;
-      total += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Ceramic Coating") {
-      const price = CERAMIC_COATING_STARTING_AT?.[quoteState.ceramicPackage];
-      if (!Number.isFinite(price)) return null;
-      total += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      hasStartingAt = true;
-      continue;
-    }
-
-    if (isUpkeepService(service)) {
-      const price = computeUpkeepPrice(service, quoteState.upkeepFrequency);
-      if (!Number.isFinite(price)) return null;
-      total += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-  }
-
-  let savings = 0;
-  if (hasInteriorExteriorBundle()) {
-    total = Math.max(0, total - INTERIOR_EXTERIOR_BUNDLE_DISCOUNT);
-    savings = INTERIOR_EXTERIOR_BUNDLE_DISCOUNT;
-  }
-
-  total = clampInt(total);
-  const high = clampInt(total + displayRangeAdd);
-
-  if (!Number.isFinite(total) || !Number.isFinite(high)) return null;
-
-  return {
-    low: total,
-    high,
-    total,
-    hasStartingAt,
-    savings
-  };
-}
-
-function formatEstimateDisplay(info = computeEstimateInfo()) {
-  if (!info) return "We’ll confirm after assessment";
-
-  const lowText = formatMoney(info.low);
-  const highText = formatMoney(info.high);
-
-  if (Number(info.high) > Number(info.low)) {
-    return info.hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
-  }
-
-  return info.hasStartingAt ? `Starting at ${lowText}` : lowText;
-}
-
-function getEstimateRange() {
-  const est = computeEstimateInfo();
-  if (!est) return null;
-  return { low: Number(est.low || 0), high: Number(est.high || 0) };
-}
-
-function getFullPayAmount() {
-  const est = getEstimateRange();
-  if (!est) return 0;
-  return Math.round(est.low);
-}
-
-function getCurrentChargeAmount() {
-  return quoteState.paymentMode === "full" ? getFullPayAmount() : 0;
-}
-
-function getPaymentLabel() {
-  return "Keizer Mobile Detailing Full Payment";
-}
-
-function resetPaymentState() {
-  quoteState.ackPriceVariance = false;
-  quoteState.paymentStatus = "";
-  quoteState.paymentMessage = "";
-  quoteState.squarePaymentId = "";
-  quoteState.paidAmount = "";
-  quoteState.secretBypassTapCount = 0;
-  quoteState.secretBypassLastTapAt = 0;
-}
-
-function resetPackageSelectionsIfNeeded() {
-  if (!quoteState.services.includes("Interior Detail")) quoteState.interiorPackage = "";
-  if (!quoteState.services.includes("Exterior Wash")) quoteState.exteriorPackage = "";
-  if (!quoteState.services.includes("Paint Correction")) quoteState.paintCorrectionPackage = "";
-  if (!quoteState.services.includes("Ceramic Coating")) quoteState.ceramicPackage = "";
-  if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
 }
 
 function normalizeCityKey(city) {
@@ -648,22 +436,6 @@ function syncRouteGroupFromCity() {
   quoteState.routeGroup = getRouteGroupFromCity(quoteState.city);
   quoteState.routeGroupLabel = getRouteGroupLabel(quoteState.routeGroup);
   return quoteState.routeGroup;
-}
-
-function buildLeadSignature() {
-  return [
-    quoteState.name,
-    quoteState.phone,
-    quoteState.email,
-    quoteState.city,
-    quoteState.vehicleType,
-    quoteState.serviceCategory,
-    getSelectedDisplayServices().join("|"),
-    quoteState.upkeepFrequency,
-    quoteState.notes
-  ]
-    .map((v) => String(v || "").trim().toLowerCase())
-    .join("||");
 }
 
 function buildScriptUrl(action, extraParams = {}) {
@@ -746,17 +518,38 @@ function formatTimeLabel(raw, normalized = normalizeTimeValue(raw)) {
   });
 }
 
-function slotIsStillValid(slot) {
-  if (!slot?.date || !slot?.time) return false;
+function isoDate(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
-  const slotDateTime = new Date(`${slot.date}T${slot.time}:00`);
-  if (Number.isNaN(slotDateTime.getTime())) return true;
+function parseLocalDate(ymd) {
+  const [y, m, d] = String(ymd || "").split("-").map(Number);
+  if (!y || !m || !d) return null;
+  return new Date(y, m - 1, d);
+}
 
-  return slotDateTime.getTime() >= Date.now();
+function formatDateNice(ymd) {
+  const d = parseLocalDate(ymd);
+  if (!d) return ymd || "";
+  return d.toLocaleDateString([], {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  });
+}
+
+function monthLabel(date) {
+  return date.toLocaleDateString([], {
+    month: "long",
+    year: "numeric"
+  });
 }
 
 // -------------------------
-// Upkeep / step rules
+// SERVICE HELPERS
 // -------------------------
 const UPKEEP_SET = new Set(["Interior Upkeep Plan", "Exterior Upkeep Plan", "Interior + Exterior Upkeep Plan"]);
 function isUpkeepService(label) { return UPKEEP_SET.has(label); }
@@ -787,18 +580,263 @@ function stepIsActive(stepName) {
   return true;
 }
 
+function getVisibleSteps() {
+  return steps.filter((stepName) => stepIsActive(stepName));
+}
+
 function nextActiveStepIndex(fromIndex) {
-  for (let i = fromIndex + 1; i < steps.length; i++) if (stepIsActive(steps[i])) return i;
+  for (let i = fromIndex + 1; i < steps.length; i++) {
+    if (stepIsActive(steps[i])) return i;
+  }
   return steps.length - 1;
 }
+
 function prevActiveStepIndex(fromIndex) {
-  for (let i = fromIndex - 1; i >= 0; i--) if (stepIsActive(steps[i])) return i;
+  for (let i = fromIndex - 1; i >= 0; i--) {
+    if (stepIsActive(steps[i])) return i;
+  }
   return 0;
 }
 
+function resetPackageSelectionsIfNeeded() {
+  if (!quoteState.services.includes("Interior Detail")) quoteState.interiorPackage = "";
+  if (!quoteState.services.includes("Exterior Wash")) quoteState.exteriorPackage = "";
+  if (!quoteState.services.includes("Paint Correction")) quoteState.paintCorrectionPackage = "";
+  if (!quoteState.services.includes("Ceramic Coating")) quoteState.ceramicPackage = "";
+  if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
+}
+
+function getSelectedDisplayServices() {
+  return (quoteState.services || []).map((service) => {
+    if (service === "Interior Detail") return quoteState.interiorPackage || service;
+    if (service === "Exterior Wash") return quoteState.exteriorPackage || service;
+    if (service === "Paint Correction") return quoteState.paintCorrectionPackage || service;
+    if (service === "Ceramic Coating") return quoteState.ceramicPackage || service;
+    return service;
+  });
+}
+
+function getSelectedServiceChipData() {
+  return (quoteState.services || []).map((service) => {
+    if (service === "Interior Detail") return { baseLabel: service, displayLabel: quoteState.interiorPackage || service };
+    if (service === "Exterior Wash") return { baseLabel: service, displayLabel: quoteState.exteriorPackage || service };
+    if (service === "Paint Correction") return { baseLabel: service, displayLabel: quoteState.paintCorrectionPackage || service };
+    if (service === "Ceramic Coating") return { baseLabel: service, displayLabel: quoteState.ceramicPackage || service };
+    return { baseLabel: service, displayLabel: service };
+  });
+}
+
+function hasInteriorExteriorBundle() {
+  const s = quoteState.services || [];
+  return s.includes("Interior Detail") && s.includes("Exterior Wash");
+}
+
+function getDisplayRangeAddForService(serviceLabel) {
+  if (serviceLabel === "Interior Detail") return INTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Exterior Wash") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Headlight Restoration") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Paint Correction") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Ceramic Coating") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Interior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Exterior Upkeep Plan") return EXTERIOR_DISPLAY_RANGE_ADD;
+  if (serviceLabel === "Interior + Exterior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD + EXTERIOR_DISPLAY_RANGE_ADD;
+  return 0;
+}
+
+function getServicesForCategory() {
+  if (!quoteState.serviceCategory) return [];
+
+  if (quoteState.serviceCategory === "Interior") {
+    return servicesAll.filter((s) => s.category === "Interior");
+  }
+
+  if (quoteState.serviceCategory === "Exterior") {
+    return servicesAll.filter((s) => s.category === "Exterior");
+  }
+
+  if (quoteState.serviceCategory === "Interior + Exterior") {
+    return servicesAll.filter((s) => ["Interior", "Exterior", "Both"].includes(s.category));
+  }
+
+  return servicesAll;
+}
+
 // -------------------------
-// Continue rules
+// ESTIMATE
 // -------------------------
+function computeEstimateInfo() {
+  const vehicle = quoteState.vehicleType;
+  const services = quoteState.services || [];
+
+  if (!vehicle || !services.length) return null;
+
+  let subtotal = 0;
+  let hasStartingAt = false;
+  let displayRangeAdd = 0;
+
+  for (const service of services) {
+    if (service === "Interior Detail") {
+      const price = priceForVehicle(INTERIOR_DETAIL_PRICES, quoteState.interiorPackage);
+      if (!Number.isFinite(price)) return null;
+      subtotal += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      continue;
+    }
+
+    if (service === "Exterior Wash") {
+      const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, quoteState.exteriorPackage);
+      if (!Number.isFinite(price)) return null;
+      subtotal += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      continue;
+    }
+
+    if (service === "Headlight Restoration") {
+      subtotal += HEADLIGHT_RESTORATION_PRICE;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      continue;
+    }
+
+    if (service === "Paint Correction") {
+      const price = priceForVehicle(PAINT_CORRECTION_PRICES, quoteState.paintCorrectionPackage);
+      if (!Number.isFinite(price)) return null;
+      subtotal += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      continue;
+    }
+
+    if (service === "Ceramic Coating") {
+      const price = CERAMIC_COATING_STARTING_AT?.[quoteState.ceramicPackage];
+      if (!Number.isFinite(price)) return null;
+      subtotal += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      hasStartingAt = true;
+      continue;
+    }
+
+    if (isUpkeepService(service)) {
+      const price = computeUpkeepPrice(service, quoteState.upkeepFrequency);
+      if (!Number.isFinite(price)) return null;
+      subtotal += price;
+      displayRangeAdd += getDisplayRangeAddForService(service);
+      continue;
+    }
+  }
+
+  let bundleSavings = 0;
+  if (hasInteriorExteriorBundle()) {
+    bundleSavings = INTERIOR_EXTERIOR_BUNDLE_DISCOUNT;
+  }
+
+  const couponDiscount = getCouponDiscount();
+  const lowBeforeCoupon = Math.max(0, subtotal - bundleSavings);
+  const highBeforeCoupon = Math.max(0, lowBeforeCoupon + displayRangeAdd);
+  const low = clampInt(Math.max(0, lowBeforeCoupon - couponDiscount));
+  const high = clampInt(Math.max(0, highBeforeCoupon - couponDiscount));
+
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return null;
+
+  return {
+    subtotal: clampInt(subtotal),
+    lowBeforeCoupon: clampInt(lowBeforeCoupon),
+    highBeforeCoupon: clampInt(highBeforeCoupon),
+    low,
+    high,
+    total: low,
+    hasStartingAt,
+    savings: bundleSavings,
+    couponCode: normalizeCoupon(quoteState.couponCode),
+    couponDiscount
+  };
+}
+
+function formatEstimateDisplay(info = computeEstimateInfo()) {
+  if (!info) return "We’ll confirm after assessment";
+
+  const lowText = formatMoney(info.low);
+  const highText = formatMoney(info.high);
+
+  if (Number(info.high) > Number(info.low)) {
+    return info.hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
+  }
+
+  return info.hasStartingAt ? `Starting at ${lowText}` : lowText;
+}
+
+function syncEstimateState() {
+  const info = computeEstimateInfo();
+  if (!info) {
+    quoteState.estimateLow = "";
+    quoteState.estimateHigh = "";
+    quoteState.estimateIsStartingAt = false;
+    quoteState.couponDiscount = 0;
+    return null;
+  }
+
+  quoteState.estimateLow = String(info.low);
+  quoteState.estimateHigh = String(info.high);
+  quoteState.estimateIsStartingAt = !!info.hasStartingAt;
+  quoteState.couponDiscount = info.couponDiscount || 0;
+  return info;
+}
+
+// -------------------------
+// PROGRESS / NAV
+// -------------------------
+function ensureProgressDots() {
+  const visibleSteps = getVisibleSteps();
+
+  if (!quoteProgressEl) {
+    return { dots: quoteDots(), visibleSteps };
+  }
+
+  const desiredCount = Math.max(visibleSteps.length, 1);
+  const currentDots = Array.from(quoteProgressEl.querySelectorAll(".qpDot"));
+
+  if (currentDots.length !== desiredCount) {
+    quoteProgressEl.innerHTML = "";
+
+    for (let i = 0; i < desiredCount; i++) {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "qpDot";
+      dot.setAttribute("aria-label", `Progress step ${i + 1} of ${desiredCount}`);
+      quoteProgressEl.appendChild(dot);
+    }
+  }
+
+  return { dots: quoteDots(), visibleSteps };
+}
+
+function setProgress() {
+  const { dots, visibleSteps } = ensureProgressDots();
+  if (!dots.length) return;
+
+  const currentStep = steps[stepIndex];
+  const activeIndex = Math.max(0, visibleSteps.indexOf(currentStep));
+
+  dots.forEach((d, i) => d.classList.toggle("isOn", i === Math.min(activeIndex, dots.length - 1)));
+}
+
+function renderNavPrice() { return; }
+
+function getNextButtonText() {
+  const step = steps[stepIndex];
+
+  if (step === "vehicleType") return "Continue";
+  if (step === "serviceCategory") return "Continue";
+  if (step === "service") return "Choose Package";
+  if (step === "interiorPackage" || step === "exteriorPackage" || step === "paintCorrectionPackage" || step === "ceramicPackage") return "Continue";
+  if (step === "upkeepFrequency") return "Continue";
+  if (step === "contact") return quoteState.leadEmailSending ? "Sending..." : "See My Estimate";
+  if (step === "estimate") return "Pick My Appointment Time";
+  if (step === "appointment") return "Continue With This Time";
+  if (step === "address") return "Review My Request";
+  if (step === "confirm") return quoteState.submittingBooking ? "Sending..." : "Request My Appointment";
+  if (step === "done") return "Close";
+  return "Continue";
+}
+
 function canContinue() {
   const step = steps[stepIndex];
 
@@ -813,1692 +851,750 @@ function canContinue() {
   if (step === "upkeepFrequency") return !isUpkeepPlanSelected() ? true : !!quoteState.upkeepFrequency;
 
   if (step === "contact") {
-    return (
-      quoteState.name.trim().length >= 2 &&
-      quoteState.phone.trim().length >= 7 &&
-      quoteState.email.trim().includes("@") &&
-      quoteState.city.trim().length > 0
-    );
+    return !!quoteState.name && !!quoteState.phone && !!quoteState.email && !!quoteState.city && !!quoteState.routeGroup && !quoteState.leadEmailSending;
   }
 
+  if (step === "estimate") return !!computeEstimateInfo();
   if (step === "appointment") return !!quoteState.slotId;
-  if (step === "address") return quoteState.address.trim().length >= 5;
-
-  if (step === "payment") {
-    const hasMode =
-      quoteState.paymentMode === "full" ||
-      quoteState.paymentMode === "after" ||
-      quoteState.paymentStatus === "bypassed";
-
-    const hasAck = quoteState.ackPriceVariance === true || quoteState.paymentStatus === "bypassed";
-    const fullPaid = quoteState.paymentMode === "full" ? paymentIsComplete() : true;
-
-    return hasMode && hasAck && fullPaid;
-  }
+  if (step === "address") return !!quoteState.address;
+  if (step === "confirm") return !quoteState.submittingBooking;
+  if (step === "done") return true;
 
   return true;
-}
-
-function syncNavBundleNote() {
-  const nav = quoteBackBtn?.parentElement;
-  if (!nav) return;
-
-  let note = nav.querySelector(".qNavBundleNote");
-  const shouldShow =
-    steps[stepIndex] === "service" &&
-    quoteState.serviceCategory === "Interior + Exterior";
-
-  if (!shouldShow) {
-    if (note) note.remove();
-    return;
-  }
-
-  if (!note) {
-    note = document.createElement("div");
-    note.className = "qNavBundleNote";
-    quoteBackBtn.insertAdjacentElement("afterend", note);
-  }
-
-  note.textContent = "Save $30 when you book Interior Detail + Exterior Wash together.";
 }
 
 function updateNav() {
   if (!quoteBackBtn || !quoteNextBtn) return;
 
-  const nav = quoteBackBtn.parentElement;
   const step = steps[stepIndex];
 
-  if (nav) {
-    nav.style.display = step === "done" ? "none" : "";
-  }
+  quoteBackBtn.style.display = stepIndex <= 0 || step === "done" ? "none" : "inline-flex";
+  quoteNextBtn.style.display = "inline-flex";
+  quoteNextBtn.textContent = getNextButtonText();
+  quoteNextBtn.disabled = !canContinue();
 
   if (step === "done") {
-    syncNavBundleNote();
-    quoteNextBtn.style.display = "none";
     quoteBackBtn.style.display = "none";
+    quoteNextBtn.disabled = false;
+  }
+}
+
+// -------------------------
+// CARD HELPERS
+// -------------------------
+function renderMedia(item, extraClass = "") {
+  if (Array.isArray(item.img)) {
+    const vertical = item.split === "v" ? " qCardMediaSplit--v" : "";
+    return `
+      <div class="qCardMedia ${extraClass}">
+        <div class="qCardMediaSplit${vertical}">
+          ${item.img.map((src) => `<img src="${escapeHtml(src)}" alt="" loading="lazy">`).join("")}
+        </div>
+      </div>
+    `;
+  }
+
+  const zoomStyle = item.zoom ? `style="--imgZoom:${Number(item.zoom)};--carZoom:${Number(item.zoom)}"` : "";
+  const zoomClass = item.zoom ? " isZoom" : "";
+  const containClass = item.contain ? "isContain" : "";
+
+  return `
+    <div class="qCardMedia${zoomClass} ${extraClass}" ${zoomStyle}>
+      ${item.badge ? `<span class="qCardBadge">${escapeHtml(item.badge)}</span>` : ""}
+      ${(item.label === "Paint Correction" || item.label === "Ceramic Coating") ? `<span class="requires-badge">Requires Exterior Wash</span>` : ""}
+      <img class="${containClass}" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.label || "")}" loading="lazy">
+    </div>
+  `;
+}
+
+function optionCard(item, selected, onClick, opts = {}) {
+  const cardType = opts.cardType || "qCard--img";
+  const extraClasses = opts.extraClasses || "";
+  const hint = opts.hint ?? item.hint ?? "";
+
+  return `
+    <button class="qCard ${cardType} ${selected ? "isSel" : ""} ${extraClasses}" type="button" data-action="${escapeHtml(onClick)}" data-value="${escapeHtml(item.label)}">
+      ${renderMedia(item)}
+      <div class="qCardLabel">${escapeHtml(item.displayLabel || item.label)}</div>
+      <div class="qCardHint">${escapeHtml(hint)}</div>
+    </button>
+  `;
+}
+
+function featureCard(pkg, selected, action, priceText) {
+  return `
+    <button class="qCard qFeatureCard ${selected ? "isSel" : ""}" type="button" data-action="${escapeHtml(action)}" data-value="${escapeHtml(pkg.serviceLabel)}">
+      <div class="qFeatureCardInner">
+        ${renderMedia(pkg, "")}
+        <div class="qFeatureCardTitle">${escapeHtml(pkg.displayLabel || pkg.label)}</div>
+        <ul class="qFeatureList">
+          ${(pkg.features || []).map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
+        </ul>
+        <div class="qFeaturePrice">${escapeHtml(priceText || "")}</div>
+      </div>
+    </button>
+  `;
+}
+
+function selectedChipsHtml() {
+  const chips = getSelectedServiceChipData();
+
+  return `
+    <div class="qServiceTray">
+      <div class="qServiceTrayTop">
+        <div class="qServiceTrayTitle">Selected services</div>
+        <div class="qServiceTrayHint">You can go back to adjust anything.</div>
+      </div>
+      <div class="qChips">
+        ${chips.length ? chips.map((chip) => `
+          <span class="qChip">
+            ${escapeHtml(chip.displayLabel)}
+            <button type="button" aria-label="Remove ${escapeHtml(chip.baseLabel)}" data-action="remove-service" data-value="${escapeHtml(chip.baseLabel)}">×</button>
+          </span>
+        `).join("") : `<span class="qChipEmpty">No services selected yet.</span>`}
+      </div>
+    </div>
+  `;
+}
+
+// -------------------------
+// RENDER STEPS
+// -------------------------
+function render() {
+  if (!quoteBody) return;
+
+  syncEstimateState();
+  setProgress();
+
+  const step = steps[stepIndex];
+  quoteBody.classList.toggle("quoteBody--success", step === "done");
+
+  if (step === "vehicleType") renderVehicleTypeStep();
+  if (step === "serviceCategory") renderServiceCategoryStep();
+  if (step === "service") renderServiceStep();
+  if (step === "interiorPackage") renderInteriorPackageStep();
+  if (step === "exteriorPackage") renderExteriorPackageStep();
+  if (step === "paintCorrectionPackage") renderPaintCorrectionPackageStep();
+  if (step === "ceramicPackage") renderCeramicPackageStep();
+  if (step === "upkeepFrequency") renderUpkeepFrequencyStep();
+  if (step === "contact") renderContactStep();
+  if (step === "estimate") renderEstimateStep();
+  if (step === "appointment") renderAppointmentStep();
+  if (step === "address") renderAddressStep();
+  if (step === "confirm") renderConfirmStep();
+  if (step === "done") renderDoneStep();
+
+  bindStepEvents();
+  updateNav();
+  renderNavPrice();
+}
+
+function renderVehicleTypeStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">What type of vehicle do you need detailed?</h3>
+    <p class="qStepSub">This helps us estimate the right price for your detail.</p>
+    <div class="qCards qCards--vehicle2x2 qCards--big">
+      ${vehicleTypes.map((v) => optionCard(v, quoteState.vehicleType === v.label, "select-vehicle", { cardType: "qCard--vehicle" })).join("")}
+    </div>
+  `;
+}
+
+function renderServiceCategoryStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">What do you need cleaned?</h3>
+    <p class="qStepSub">Pick the main type of detail you want.</p>
+    <div class="qCards qCards--scroll qCards--big">
+      ${serviceCategories.map((c) => optionCard(c, quoteState.serviceCategory === c.label, "select-category", { cardType: "qCard--img qCard--square" })).join("")}
+    </div>
+  `;
+}
+
+function renderServiceStep() {
+  const services = getServicesForCategory();
+
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Choose your service</h3>
+    <p class="qStepSub">Select what you want included. You can choose more than one.</p>
+    ${selectedChipsHtml()}
+    <div class="qCards qCards--scroll qCards--big">
+      ${services.map((s) => optionCard(s, quoteState.services.includes(s.label), "toggle-service", { cardType: "qCard--servicePick qCard--img qCard--square" })).join("")}
+    </div>
+  `;
+}
+
+function renderInteriorPackageStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Choose your interior package</h3>
+    <p class="qStepSub">Pick the level that best matches the condition of the inside of the vehicle.</p>
+    ${selectedChipsHtml()}
+    <div class="qCards qCards--scroll qCards--big">
+      ${interiorPackages.map((pkg) => {
+        const price = priceForVehicle(INTERIOR_DETAIL_PRICES, pkg.serviceLabel);
+        const high = Number.isFinite(price) ? price + INTERIOR_DISPLAY_RANGE_ADD : null;
+        const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
+        return featureCard(pkg, quoteState.interiorPackage === pkg.serviceLabel, "select-interior-package", priceText);
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderExteriorPackageStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Choose your exterior package</h3>
+    <p class="qStepSub">Pick the outside detail level you want.</p>
+    ${selectedChipsHtml()}
+    <div class="qCards qCards--scroll qCards--big">
+      ${exteriorPackages.map((pkg) => {
+        const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, pkg.serviceLabel);
+        const high = Number.isFinite(price) ? price + EXTERIOR_DISPLAY_RANGE_ADD : null;
+        const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
+        return featureCard(pkg, quoteState.exteriorPackage === pkg.serviceLabel, "select-exterior-package", priceText);
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderPaintCorrectionPackageStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Choose your paint correction option</h3>
+    <p class="qStepSub">Paint correction helps reduce swirls and improve gloss.</p>
+    ${selectedChipsHtml()}
+    <div class="qCards qCards--scroll qCards--big">
+      ${paintCorrectionPackages.map((pkg) => {
+        const price = priceForVehicle(PAINT_CORRECTION_PRICES, pkg.serviceLabel);
+        const high = Number.isFinite(price) ? price + EXTERIOR_DISPLAY_RANGE_ADD : null;
+        const hint = Number.isFinite(price) ? `${pkg.hint}\n${formatMoney(price)} - ${formatMoney(high)}` : pkg.hint;
+        return optionCard(pkg, quoteState.paintCorrectionPackage === pkg.serviceLabel, "select-paint-package", { cardType: "qCard--condition qCard--img qCard--square", hint });
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderCeramicPackageStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Choose your ceramic coating option</h3>
+    <p class="qStepSub">Ceramic pricing starts here and may change after vehicle condition is reviewed.</p>
+    ${selectedChipsHtml()}
+    <div class="qCards qCards--scroll qCards--big">
+      ${ceramicPackages.map((pkg) => optionCard(pkg, quoteState.ceramicPackage === pkg.serviceLabel, "select-ceramic-package", { cardType: "qCard--condition qCard--img qCard--square" })).join("")}
+    </div>
+  `;
+}
+
+function renderUpkeepFrequencyStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">How often do you want upkeep?</h3>
+    <p class="qStepSub">Upkeep plans are for keeping the vehicle clean after the first detail.</p>
+    ${selectedChipsHtml()}
+    <div class="qHearWrap">
+      <div class="qHearGrid">
+        ${upkeepFrequencies.map((freq) => `
+          <button class="qHearBtn ${quoteState.upkeepFrequency === freq.label ? "isSel" : ""}" type="button" data-action="select-upkeep" data-value="${escapeHtml(freq.label)}">
+            <span class="qHearLeft">
+              <span class="qHearLabel">${escapeHtml(freq.label)}</span>
+              <span class="qHearHint">${escapeHtml(freq.hint)}</span>
+            </span>
+            <span class="qHearRight">
+              <span class="qHearPill">Select</span>
+              <span class="qHearCheck" aria-hidden="true"></span>
+            </span>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderContactStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Where should we send your quote?</h3>
+    <p class="qStepSub">We’ll only use this for your quote, appointment request, and follow-up.</p>
+    <div class="qGrid2">
+      <div class="qField">
+        <label for="qName">Name</label>
+        <input id="qName" autocomplete="name" value="${escapeHtml(quoteState.name)}" placeholder="Your name">
+      </div>
+      <div class="qField">
+        <label for="qPhone">Phone</label>
+        <input id="qPhone" autocomplete="tel" value="${escapeHtml(quoteState.phone)}" placeholder="Phone number">
+      </div>
+      <div class="qField">
+        <label for="qEmail">Email</label>
+        <input id="qEmail" type="email" autocomplete="email" value="${escapeHtml(quoteState.email)}" placeholder="Email address">
+      </div>
+    </div>
+
+    <div class="qGrid2" style="margin-top:10px;">
+      <div class="qField">
+        <label for="qCity">Closest city</label>
+        <select id="qCity">
+          <option value="">Choose city</option>
+          ${serviceCities.map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="qField" style="grid-column:span 2;">
+        <label for="qNotes">Notes, optional</label>
+        <input id="qNotes" value="${escapeHtml(quoteState.notes)}" placeholder="Heavy pet hair, stains, special requests, etc.">
+      </div>
+    </div>
+
+    <input id="qCompany" tabindex="-1" autocomplete="off" value="${escapeHtml(quoteState.honeypot)}" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+    ${quoteState.leadEmailSending ? `<div class="qStatus">Sending your quote details...</div>` : ""}
+  `;
+}
+
+function selectedSummaryPillsHtml(info = computeEstimateInfo()) {
+  const chips = [
+    quoteState.vehicleType,
+    ...getSelectedDisplayServices(),
+    quoteState.upkeepFrequency,
+    quoteState.routeGroupLabel
+  ].filter(Boolean);
+
+  return `
+    <div class="qEstimatePills">
+      ${chips.map((chip) => `<span class="qPill">${escapeHtml(chip)}</span>`).join("")}
+      ${info?.savings ? `<span class="qPill">Bundle savings: -${formatMoney(info.savings)}</span>` : ""}
+      ${info?.couponDiscount ? `<span class="qPill">Coupon: -${formatMoney(info.couponDiscount)}</span>` : ""}
+    </div>
+  `;
+}
+
+function renderEstimateStep() {
+  const info = syncEstimateState();
+  const estimateText = formatEstimateDisplay(info);
+  const selectedServices = getSelectedDisplayServices();
+  const oldEstimateText = info?.couponDiscount
+    ? (Number(info.highBeforeCoupon) > Number(info.lowBeforeCoupon)
+      ? `${formatMoney(info.lowBeforeCoupon)} - ${formatMoney(info.highBeforeCoupon)}`
+      : formatMoney(info.lowBeforeCoupon))
+    : "";
+
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Your estimate is ready</h3>
+    <p class="qStepSub">Here’s a strong estimate based on your vehicle and selected service. Final price may vary depending on vehicle condition, but we’ll confirm before starting.</p>
+
+    <div class="qEstimateBox">
+      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">Estimated price</div>
+      ${oldEstimateText ? `<div style="margin-top:8px;color:rgba(0,0,0,.45);font-weight:900;text-decoration:line-through;">${escapeHtml(oldEstimateText)}</div>` : ""}
+      <div class="qEstimateBig">${escapeHtml(estimateText)}</div>
+      ${selectedSummaryPillsHtml(info)}
+      <div class="qEstimateFine">This estimate is based on your selections. Heavier stains, excessive pet hair, or unusual vehicle condition may affect final pricing.</div>
+    </div>
+
+    <div class="qDoneBox" style="margin-top:12px;">
+      <div class="qDoneBig">What you selected</div>
+      <div class="qDoneLine"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType || "-")}</div>
+      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(selectedServices.join(", ") || "-")}</div>
+      ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
+      ${info?.savings ? `<div class="qDoneLine"><strong>Bundle savings:</strong> -${formatMoney(info.savings)}</div>` : ""}
+    </div>
+
+    <div class="qDoneBox" style="margin-top:12px;">
+      <div class="qDoneBig">Have a coupon code?</div>
+      <p class="qStepSub" style="margin-bottom:10px;">Enter it here before picking your appointment time.</p>
+      <div class="qGrid2">
+        <div class="qField" style="grid-column:span 2;">
+          <label for="qCoupon">Coupon code</label>
+          <input id="qCoupon" value="${escapeHtml(quoteState.couponCode)}" placeholder="Example: DETAIL10" autocomplete="off">
+        </div>
+        <button class="btn btn--quote" type="button" data-action="apply-coupon" style="align-self:end;min-height:45px;">Apply</button>
+      </div>
+      ${quoteState.couponMessage ? `<div class="qStatus">${escapeHtml(quoteState.couponMessage)}</div>` : ""}
+    </div>
+
+    <div class="qDoneBox" style="margin-top:12px;">
+      <div class="qDoneBig">Why book with us?</div>
+      <div class="qDoneLine">Mobile service. We come to you.</div>
+      <div class="qDoneLine">Interior, exterior, and full detail options.</div>
+      <div class="qDoneLine">Fast quote and easy appointment request.</div>
+    </div>
+  `;
+}
+
+function renderAppointmentStep() {
+  const selectedDateSlots = selectedCalendarDate
+    ? appointmentSlots.filter((slot) => slot.date === selectedCalendarDate)
+    : [];
+
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Pick your preferred appointment time</h3>
+    <p class="qStepSub">Choose the time that works best. We’ll confirm the appointment after reviewing your vehicle details.</p>
+
+    <div class="qCalWrap">
+      <div class="qCalTopRow">
+        <div class="qCalTz">Local time${quoteState.routeGroupLabel ? ` · ${escapeHtml(quoteState.routeGroupLabel)}` : ""}</div>
+        <button class="qReloadLink" type="button" data-action="reload-slots">Reload times</button>
+      </div>
+
+      <div class="qLoadBar ${appointmentSlotsLoading ? "isOn" : ""}"><span class="qLoadBarFill"></span></div>
+      ${appointmentSlotsError ? `<div class="qStatus">${escapeHtml(appointmentSlotsError)}</div>` : ""}
+
+      ${appointmentSlotsLoading ? `<div class="qStatus">Loading available times...</div>` : renderCalendarHtml(selectedDateSlots)}
+    </div>
+  `;
+
+  maybeLoadAppointmentSlots();
+}
+
+function renderCalendarHtml(selectedDateSlots) {
+  if (!appointmentSlots.length && !appointmentSlotsLoading) {
+    return `
+      <div class="qDoneBox">
+        <div class="qDoneBig">No times are open right now</div>
+        <div class="qDoneLine">You can still go back and submit a quote, or contact us directly for availability.</div>
+      </div>
+    `;
+  }
+
+  const slotDates = Array.from(new Set(appointmentSlots.map((s) => s.date).filter(Boolean))).sort();
+  if (!selectedCalendarDate && slotDates.length) selectedCalendarDate = slotDates[0];
+
+  if (!calendarMonthDate) {
+    const first = parseLocalDate(slotDates[0]) || new Date();
+    calendarMonthDate = new Date(first.getFullYear(), first.getMonth(), 1);
+  }
+
+  const availableDateSet = new Set(slotDates);
+  const year = calendarMonthDate.getFullYear();
+  const month = calendarMonthDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const blanks = Array.from({ length: startOffset });
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  return `
+    <div class="qCal">
+      <div class="qCalHead">
+        <button class="qCalNav" type="button" data-action="month-prev" aria-label="Previous month">‹</button>
+        <div class="qCalMonth">${escapeHtml(monthLabel(calendarMonthDate))}</div>
+        <button class="qCalNav" type="button" data-action="month-next" aria-label="Next month">›</button>
+      </div>
+      <div class="qCalWeek">
+        ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => `<div class="qCalW">${d}</div>`).join("")}
+      </div>
+      <div class="qCalGrid">
+        ${blanks.map(() => `<button class="qCalDay qCalDay--blank" type="button" disabled></button>`).join("")}
+        ${days.map((day) => {
+          const ymd = isoDate(new Date(year, month, day));
+          const available = availableDateSet.has(ymd);
+          const selected = selectedCalendarDate === ymd;
+          return `<button class="qCalDay ${selected ? "isSel" : ""} ${available ? "" : "isDisabled"}" type="button" data-action="select-date" data-value="${ymd}" ${available ? "" : "disabled"}>${day}</button>`;
+        }).join("")}
+      </div>
+
+      <div class="qTimes">
+        <div class="qTimesTitle">${selectedCalendarDate ? `Available times for ${escapeHtml(formatDateNice(selectedCalendarDate))}` : "Choose an available date"}</div>
+        ${selectedDateSlots.length ? `
+          <div class="qTimesGrid">
+            ${selectedDateSlots.map((slot) => `
+              <button class="qTimeBtn ${quoteState.slotId === slot.id ? "isSel" : ""}" type="button" data-action="select-slot" data-id="${escapeHtml(slot.id)}">
+                ${escapeHtml(slot.timeLabel || formatTimeLabel(slot.label || slot.time))}
+              </button>
+            `).join("")}
+          </div>
+        ` : `<div class="qTimesNone">Select a highlighted date to see available times.</div>`}
+      </div>
+    </div>
+  `;
+}
+
+function renderAddressStep() {
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Where should we come for the detail?</h3>
+    <p class="qStepSub">Mobile service means we come to you. Add the address where the vehicle will be available.</p>
+
+    <div class="qDoneBox">
+      <div class="qDoneBig">Service location</div>
+      <div class="qField">
+        <label for="qAddress">Street address</label>
+        <input id="qAddress" autocomplete="street-address" value="${escapeHtml(quoteState.address)}" placeholder="123 Main St, Keizer, OR">
+      </div>
+      <div class="qEstimateFine">Please choose a location with enough room for mobile detailing and access to the vehicle.</div>
+    </div>
+
+    <div class="qDoneBox" style="margin-top:12px;">
+      <div class="qDoneBig">Appointment selected</div>
+      <div class="qDoneLine"><strong>Time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
+      <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay())}</div>
+    </div>
+  `;
+}
+
+function renderConfirmStep() {
+  const selectedServices = getSelectedDisplayServices();
+  const info = syncEstimateState();
+
+  quoteBody.innerHTML = `
+    <h3 class="qStepTitle">Confirm your appointment request</h3>
+    <p class="qStepSub">Review everything below. Once you submit, we’ll send the request over and confirm shortly.</p>
+
+    <div class="qEstimateBox qEstimateBox--simple">
+      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">Estimated price</div>
+      <div class="qEstimateBig">${escapeHtml(formatEstimateDisplay(info))}</div>
+      ${selectedSummaryPillsHtml(info)}
+      <div class="qEstimateFine">No online payment is required right now. We’ll confirm the final details before the service starts.</div>
+    </div>
+
+    <div class="qDoneBox" style="margin-top:12px;">
+      <div class="qDoneBig">Customer</div>
+      <div class="qDoneLine"><strong>Name:</strong> ${escapeHtml(quoteState.name || "-")}</div>
+      <div class="qDoneLine"><strong>Phone:</strong> ${escapeHtml(quoteState.phone || "-")}</div>
+      <div class="qDoneLine"><strong>Email:</strong> ${escapeHtml(quoteState.email || "-")}</div>
+      <div class="qDoneLine"><strong>City:</strong> ${escapeHtml(quoteState.city || "-")}</div>
+    </div>
+
+    <div class="qDoneBox" style="margin-top:12px;">
+      <div class="qDoneBig">Appointment request</div>
+      <div class="qDoneLine"><strong>Preferred time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
+      <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
+      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(selectedServices.join(", ") || "-")}</div>
+      ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))} ${quoteState.couponDiscount ? `(-${formatMoney(quoteState.couponDiscount)})` : ""}</div>` : ""}
+      ${quoteState.notes ? `<div class="qDoneLine"><strong>Notes:</strong> ${escapeHtml(quoteState.notes)}</div>` : ""}
+    </div>
+
+    ${quoteState.bookingError ? `<div class="qStatus" style="color:#b00020;">${escapeHtml(quoteState.bookingError)}</div>` : ""}
+  `;
+}
+
+function renderDoneStep() {
+  quoteBody.innerHTML = `
+    <div class="quoteSuccessWrap">
+      <div class="quoteSuccessBadge">Request Received</div>
+      <h3 class="quoteSuccessTitle">You’re all set.</h3>
+      <p class="quoteSuccessText">Your appointment request was sent to ${escapeHtml("Keizer Mobile Detailing")}. We’ll confirm shortly by text or email.</p>
+
+      <div class="quoteSuccessInner">
+        <div class="qDoneBox">
+          <div class="qDoneBig">Appointment request summary</div>
+          <div class="qDoneLine"><strong>Name:</strong> ${escapeHtml(quoteState.name || "-")}</div>
+          <div class="qDoneLine"><strong>Preferred time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
+          <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
+          <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(getSelectedDisplayServices().join(", ") || "-")}</div>
+          <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay())}</div>
+          ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))}</div>` : ""}
+          <div class="qDoneFine">Final price can vary depending on vehicle condition. We’ll confirm before starting.</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// -------------------------
+// EVENTS
+// -------------------------
+function bindStepEvents() {
+  if (!quoteBody) return;
+
+  quoteBody.querySelectorAll("[data-action]").forEach((el) => {
+    el.addEventListener("click", handleStepAction);
+  });
+
+  const qName = quoteBody.querySelector("#qName");
+  const qPhone = quoteBody.querySelector("#qPhone");
+  const qEmail = quoteBody.querySelector("#qEmail");
+  const qCity = quoteBody.querySelector("#qCity");
+  const qNotes = quoteBody.querySelector("#qNotes");
+  const qCompany = quoteBody.querySelector("#qCompany");
+  const qAddress = quoteBody.querySelector("#qAddress");
+  const qCoupon = quoteBody.querySelector("#qCoupon");
+
+  if (qName) qName.addEventListener("input", (e) => { quoteState.name = e.target.value; updateNav(); });
+  if (qPhone) qPhone.addEventListener("input", (e) => { quoteState.phone = e.target.value; updateNav(); });
+  if (qEmail) qEmail.addEventListener("input", (e) => { quoteState.email = e.target.value; updateNav(); });
+  if (qCity) qCity.addEventListener("change", (e) => {
+    quoteState.city = e.target.value;
+    syncRouteGroupFromCity();
+    clearAppointmentSelection();
+    updateNav();
+  });
+  if (qNotes) qNotes.addEventListener("input", (e) => { quoteState.notes = e.target.value; });
+  if (qCompany) qCompany.addEventListener("input", (e) => { quoteState.honeypot = e.target.value; });
+  if (qAddress) qAddress.addEventListener("input", (e) => { quoteState.address = e.target.value; updateNav(); });
+  if (qCoupon) qCoupon.addEventListener("input", (e) => { quoteState.couponCode = e.target.value; quoteState.couponMessage = ""; updateNav(); });
+}
+
+function handleStepAction(e) {
+  const target = e.currentTarget;
+  const action = target.dataset.action;
+  const value = target.dataset.value || "";
+
+  if (action === "select-vehicle") {
+    quoteState.vehicleType = value;
+    clearEstimateDependentState();
+    render();
     return;
   }
 
-  quoteBackBtn.style.display = "";
-  quoteNextBtn.style.display = "inline-flex";
-  quoteBackBtn.textContent = "Back";
-  quoteBackBtn.style.visibility = stepIndex === 0 ? "hidden" : "visible";
-
-  if (step === "service") {
-    const n = Array.isArray(quoteState.services) ? quoteState.services.length : 0;
-    quoteNextBtn.textContent = n > 0 ? `Continue (${n} selected)` : "Continue";
-  } else if (step === "payment") {
-    quoteNextBtn.textContent = "Complete Booking";
-  } else {
-    quoteNextBtn.textContent = "Continue";
+  if (action === "select-category") {
+    quoteState.serviceCategory = value;
+    quoteState.services = [];
+    clearEstimateDependentState();
+    render();
+    return;
   }
 
-  quoteNextBtn.disabled = !canContinue();
-  renderNavPrice();
-  syncNavBundleNote();
+  if (action === "toggle-service") {
+    toggleService(value);
+    render();
+    return;
+  }
+
+  if (action === "remove-service") {
+    quoteState.services = quoteState.services.filter((s) => s !== value);
+    resetPackageSelectionsIfNeeded();
+    clearEstimateDependentState();
+    render();
+    return;
+  }
+
+  if (action === "select-interior-package") {
+    quoteState.interiorPackage = value;
+    clearEstimateDependentState();
+    render();
+    return;
+  }
+
+  if (action === "select-exterior-package") {
+    quoteState.exteriorPackage = value;
+    clearEstimateDependentState();
+    render();
+    return;
+  }
+
+  if (action === "select-paint-package") {
+    quoteState.paintCorrectionPackage = paintCorrectionPackages.find((p) => p.label === value)?.serviceLabel || value;
+    clearEstimateDependentState();
+    render();
+    return;
+  }
+
+  if (action === "select-ceramic-package") {
+    quoteState.ceramicPackage = ceramicPackages.find((p) => p.label === value)?.serviceLabel || value;
+    clearEstimateDependentState();
+    render();
+    return;
+  }
+
+  if (action === "select-upkeep") {
+    quoteState.upkeepFrequency = value;
+    clearEstimateDependentState();
+    render();
+    return;
+  }
+
+  if (action === "apply-coupon") {
+    applyCouponFromField();
+    render();
+    return;
+  }
+
+  if (action === "reload-slots") {
+    appointmentSlotsLoadedKey = "";
+    appointmentSlotsError = "";
+    maybeLoadAppointmentSlots(true);
+    render();
+    return;
+  }
+
+  if (action === "month-prev" || action === "month-next") {
+    if (!calendarMonthDate) calendarMonthDate = new Date();
+    const dir = action === "month-next" ? 1 : -1;
+    calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() + dir, 1);
+    render();
+    return;
+  }
+
+  if (action === "select-date") {
+    selectedCalendarDate = value;
+    render();
+    return;
+  }
+
+  if (action === "select-slot") {
+    selectSlot(target.dataset.id || "");
+    render();
+    return;
+  }
 }
 
-function pickAndAdvance(pickFn) {
-  pickFn();
-  renderStep();
-  setTimeout(() => { void nextStep(true); }, 80);
+function toggleService(label) {
+  if (!label) return;
+
+  const exists = quoteState.services.includes(label);
+  if (exists) {
+    quoteState.services = quoteState.services.filter((s) => s !== label);
+  } else {
+    quoteState.services = [...quoteState.services, label];
+  }
+
+  // If someone chooses paint correction or ceramic, exterior wash is required by the service card language.
+  if ((label === "Paint Correction" || label === "Ceramic Coating") && !quoteState.services.includes("Exterior Wash")) {
+    quoteState.services.unshift("Exterior Wash");
+  }
+
+  resetPackageSelectionsIfNeeded();
+  clearEstimateDependentState();
 }
 
-function resetBookingTail() {
+function clearEstimateDependentState() {
+  quoteState.estimateLow = "";
+  quoteState.estimateHigh = "";
+  quoteState.estimateIsStartingAt = false;
+  quoteState.leadEmailSent = false;
+  quoteState.leadEmailSignature = "";
+  quoteState.bookingError = "";
+  clearAppointmentSelection();
+}
+
+function clearAppointmentSelection() {
   quoteState.slotId = "";
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
   quoteState.slotTime = "";
-  quoteState.address = "";
-  quoteState.paymentMode = "";
-  resetPaymentState();
+  appointmentSlots = [];
+  appointmentSlotsLoadedKey = "";
+  appointmentSlotsError = "";
+  selectedCalendarDate = "";
+  calendarMonthDate = null;
 }
 
-function activatePaymentBypass() {
-  if (steps[stepIndex] !== "payment") return;
+function applyCouponFromField() {
+  const input = quoteBody?.querySelector("#qCoupon");
+  const code = normalizeCoupon(input?.value || quoteState.couponCode);
+  quoteState.couponCode = code;
+  const discount = getCouponDiscount(code);
+  quoteState.couponDiscount = discount;
 
-  if (!quoteState.paymentMode) {
-    quoteState.paymentMode = "after";
-  }
-
-  quoteState.ackPriceVariance = true;
-  quoteState.paymentStatus = "bypassed";
-  quoteState.paymentMessage = "Booking bypass used. No payment collected.";
-  quoteState.squarePaymentId = "BYPASS_NO_CHARGE";
-  quoteState.paidAmount = "0";
-  quoteState.secretBypassTapCount = 0;
-  quoteState.secretBypassLastTapAt = 0;
-
-  renderStep();
-  finalizeBooking();
-}
-
-function handleSecretDotTap(dotIndex) {
-  if (dotIndex !== SECRET_BYPASS_DOT_INDEX) return;
-
-  if (steps[stepIndex] !== "payment") {
-    quoteState.secretBypassTapCount = 0;
-    quoteState.secretBypassLastTapAt = 0;
+  if (!code) {
+    quoteState.couponMessage = "Enter a coupon code first.";
     return;
   }
 
-  const now = Date.now();
-
-  if (!quoteState.secretBypassLastTapAt || now - quoteState.secretBypassLastTapAt > SECRET_BYPASS_WINDOW_MS) {
-    quoteState.secretBypassTapCount = 0;
-  }
-
-  quoteState.secretBypassLastTapAt = now;
-  quoteState.secretBypassTapCount += 1;
-
-  if (quoteState.secretBypassTapCount >= SECRET_BYPASS_REQUIRED_TAPS) {
-    activatePaymentBypass();
-  }
-}
-
-// -------------------------
-// Service selection
-// -------------------------
-function toggleService(label) {
-  const current = Array.isArray(quoteState.services) ? [...quoteState.services] : [];
-  const isSelected = current.includes(label);
-
-  if (!isSelected && isUpkeepService(label)) {
-    quoteState.services = [label];
-  } else {
-    let next = current.filter((s) => !isUpkeepService(s));
-    if (isSelected) next = next.filter((s) => s !== label);
-    else next.push(label);
-    quoteState.services = next;
-  }
-
-  resetPackageSelectionsIfNeeded();
-  resetBookingTail();
-  updateNav();
-}
-
-function removeService(label) {
-  quoteState.services = (quoteState.services || []).filter((s) => s !== label);
-  resetPackageSelectionsIfNeeded();
-  resetBookingTail();
-  updateNav();
-}
-
-function pickSingleServiceAndAdvance(label) {
-  quoteState.services = [label];
-  resetPackageSelectionsIfNeeded();
-  resetBookingTail();
-  renderStep();
-  setTimeout(() => { void nextStep(true); }, 80);
-}
-
-function getServiceCardHint(serviceLabel) {
-  if (serviceLabel === "Interior Detail") return "Seats, mats, center console, panels, and trim.";
-  if (serviceLabel === "Exterior Wash") return "Hand wash with wheels, tires, and exterior cleanup.";
-  if (serviceLabel === "Headlight Restoration") return "Restore cloudy headlights for a sharp and new look.";
-  if (serviceLabel === "Paint Correction") return "Polish away swirls and boost gloss.";
-  if (serviceLabel === "Ceramic Coating") return "Longer-lasting shine and paint protection.";
-  if (serviceLabel === "Interior Upkeep Plan") return "Recurring interior maintenance to keep it fresh.";
-  if (serviceLabel === "Exterior Upkeep Plan") return "Recurring exterior maintenance to keep it clean.";
-  if (serviceLabel === "Interior + Exterior Upkeep Plan") return "Recurring maintenance for the full vehicle.";
-  return "";
-}
-
-// -------------------------
-// Cards
-// -------------------------
-function imgCard({
-  label,
-  hint,
-  img,
-  contain = false,
-  zoom = null,
-  imgZoom = null,
-  split = "h",
-  isSelected = false,
-  onClick,
-  variant = "",
-  badge = "",
-  tag = ""
-}) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = `qCard qCard--img ${variant}`.trim() + (isSelected ? " isSel" : "");
-  btn.addEventListener("click", onClick);
-
-  const zoomStyle = typeof zoom === "number" ? `style="--carZoom:${zoom}"` : "";
-  const mediaZoomStyle = typeof imgZoom === "number" ? `style="--imgZoom:${imgZoom}"` : "";
-
-  const badgeHtml = badge ? `<span class="qCardBadge" aria-hidden="true">${escapeHtml(badge)}</span>` : "";
-  const tagHtml = tag ? `<span class="requires-badge" aria-hidden="true">${escapeHtml(tag)}</span>` : "";
-
-  const mediaHtml = Array.isArray(img)
-    ? `
-      <div class="qCardMedia" ${zoomStyle}>
-        ${badgeHtml}
-        ${tagHtml}
-        <div class="qCardMediaSplit ${split === "v" ? "qCardMediaSplit--v" : ""}" aria-hidden="true">
-          <img src="${escapeHtml(img[0])}" alt="" loading="lazy" />
-          <img src="${escapeHtml(img[1])}" alt="" loading="lazy" />
-        </div>
-      </div>
-    `
-    : `
-      <div class="qCardMedia ${typeof imgZoom === "number" ? "isZoom" : ""}" ${mediaZoomStyle} ${zoomStyle}>
-        ${badgeHtml}
-        ${tagHtml}
-        <img class="${contain ? "isContain" : ""}" src="${escapeHtml(img)}" alt="${escapeHtml(label)}" loading="lazy" />
-      </div>
-    `;
-
-  btn.innerHTML = `
-    ${mediaHtml}
-    <div class="qCardCopy">
-      <div class="qCardLabel">${escapeHtml(label)}</div>
-      <div class="qCardHint">${escapeHtml(hint)}</div>
-    </div>
-  `;
-  return btn;
-}
-
-function optionCard({ label, hint, isSelected = false, onClick }) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "qHearBtn" + (isSelected ? " isSel" : "");
-  btn.setAttribute("aria-label", label);
-  btn.addEventListener("click", onClick);
-
-  btn.innerHTML = `
-    <span class="qHearLeft">
-      <span class="qHearLabel">${escapeHtml(label)}</span>
-      <span class="qHearHint">${escapeHtml(hint)}</span>
-    </span>
-    <span class="qHearRight" aria-hidden="true">
-      <span class="qHearPill">${isSelected ? "Selected" : "Select"}</span>
-      <span class="qHearCheck"></span>
-    </span>
-  `;
-  return btn;
-}
-
-function featureCard({ title, items = [], price = null, isSelected = false, onClick }) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "qCard qFeatureCard" + (isSelected ? " isSel" : "");
-  btn.addEventListener("click", onClick);
-
-  btn.innerHTML = `
-    <div class="qFeatureCardInner">
-      <div class="qFeatureCardTitle">${escapeHtml(title)}</div>
-      <ul class="qFeatureList">
-        ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-      </ul>
-      <div class="qFeaturePrice">
-        ${Number.isFinite(price) ? `Starting at ${escapeHtml(formatMoney(price))}` : "Price unavailable"}
-      </div>
-    </div>
-  `;
-
-  return btn;
-}
-
-// -------------------------
-// Modal open/close
-// -------------------------
-function openQuoteModal() {
-  if (!quoteModal || !quoteBody) return;
-  lastActiveElQuote = document.activeElement;
-
-  Object.assign(quoteState, {
-    vehicleType: "",
-    serviceCategory: "",
-    services: [],
-
-    interiorPackage: "",
-    exteriorPackage: "",
-    paintCorrectionPackage: "",
-    ceramicPackage: "",
-
-    upkeepFrequency: "",
-
-    estimateLow: "",
-    estimateHigh: "",
-    estimateIsStartingAt: false,
-
-    slotId: "",
-    slotLabel: "",
-    slotDate: "",
-    slotTime: "",
-
-    address: "",
-
-    name: "",
-    phone: "",
-    email: "",
-    city: "",
-    notes: "",
-
-    routeGroup: "",
-    routeGroupLabel: "",
-
-    leadEmailSent: false,
-    leadEmailSignature: "",
-    leadEmailSending: false,
-
-    paymentMode: "",
-    ackPriceVariance: false,
-    depositAmount: 0,
-    paymentStatus: "",
-    paymentMessage: "",
-    squarePaymentId: "",
-    paidAmount: "",
-    honeypot: "",
-
-    secretBypassTapCount: 0,
-    secretBypassLastTapAt: 0
-  });
-
-  stepIndex = 0;
-  renderStep();
-
-  quoteModal.classList.add("isOpen");
-  quoteModal.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-  quoteModal.querySelector("[data-quote-close]")?.focus();
-
-  warmSquare();
-}
-
-function closeQuoteModal() {
-  if (!quoteModal) return;
-  quoteModal.classList.remove("isOpen");
-  quoteModal.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
-  if (lastActiveElQuote && typeof lastActiveElQuote.focus === "function") lastActiveElQuote.focus();
-}
-
-window.openQuoteModal = openQuoteModal;
-window.closeQuoteModal = closeQuoteModal;
-
-document.querySelectorAll("[data-quote-open]").forEach((btn) => btn.addEventListener("click", openQuoteModal));
-quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuoteModal));
-
-if (quoteModal) {
-  quoteModal.addEventListener(
-    "click",
-    (e) => {
-      if (e.target === quoteModal) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    },
-    true
-  );
-}
-
-// -------------------------
-// Square
-// -------------------------
-async function waitForSquare(maxMs = 7000) {
-  const start = Date.now();
-  while (!window.Square && Date.now() - start < maxMs) {
-    await sleep(120);
-  }
-  return !!window.Square;
-}
-
-async function warmSquare() {
-  if (squareWarmStarted) return;
-  squareWarmStarted = true;
-  try {
-    const hasSquare = await waitForSquare(7000);
-    if (!hasSquare) return;
-    if (!squarePaymentsInitPromise) {
-      squarePaymentsInitPromise = Promise.resolve(window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID));
-    }
-    squarePayments = await squarePaymentsInitPromise;
-  } catch {
-    // no-op
-  }
-}
-
-function getCurrentMoneyConfig() {
-  return {
-    countryCode: "US",
-    currencyCode: "USD",
-    total: {
-      amount: String(Number(getCurrentChargeAmount()).toFixed(2)),
-      label: getPaymentLabel()
-    }
-  };
-}
-
-async function initSquareCard(cardEl, statusEl) {
-  if (!cardEl) return false;
-
-  try {
-    if (statusEl) statusEl.textContent = "Loading secure payment options...";
-    await warmSquare();
-
-    if (!window.Square) {
-      if (statusEl) statusEl.textContent = "Square failed to load. Refresh and try again.";
-      return false;
-    }
-
-    if (!squarePayments) {
-      if (!squarePaymentsInitPromise) {
-        squarePaymentsInitPromise = Promise.resolve(window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID));
-      }
-      squarePayments = await squarePaymentsInitPromise;
-    }
-
-    if (squareCard && typeof squareCard.destroy === "function") {
-      try { await squareCard.destroy(); } catch {}
-    }
-    squareCard = null;
-
-    squareCard = await squarePayments.card();
-    await squareCard.attach(cardEl);
-
-    quoteState.paymentStatus = quoteState.paymentStatus === "paid" ? "paid" : "";
-    if (statusEl) statusEl.textContent = "Use Apple Pay or enter card details.";
-    return true;
-  } catch (err) {
-    if (statusEl) statusEl.textContent = err?.message || "Could not load card form.";
-    squareCard = null;
-    return false;
-  }
-}
-
-async function initSquareApplePay(applePayEl, statusEl) {
-  if (!applePayEl) return false;
-
-  try {
-    await warmSquare();
-
-    if (!window.Square) return false;
-
-    if (!squarePayments) {
-      if (!squarePaymentsInitPromise) {
-        squarePaymentsInitPromise = Promise.resolve(
-          window.Square.payments(SQUARE_APP_ID, SQUARE_LOCATION_ID)
-        );
-      }
-      squarePayments = await squarePaymentsInitPromise;
-    }
-
-    const buttonEl = applePayEl.querySelector("#qApplePayButton");
-    if (!buttonEl) return false;
-
-    squareApplePay = null;
-
-    const paymentRequest = squarePayments.paymentRequest(getCurrentMoneyConfig());
-    squareApplePay = await squarePayments.applePay(paymentRequest);
-
-    let canUseApplePay = true;
-    if (typeof squareApplePay?.canMakePayment === "function") {
-      canUseApplePay = await squareApplePay.canMakePayment();
-    }
-
-    if (!canUseApplePay) {
-      applePayEl.style.display = "none";
-      return false;
-    }
-
-    buttonEl.style.display = "inline-flex";
-
-    if (statusEl && quoteState.paymentStatus !== "paid") {
-      statusEl.textContent = "Use Apple Pay or enter card details.";
-    }
-
-    return true;
-  } catch (err) {
-    console.error("Apple Pay init error:", err);
-    applePayEl.style.display = "none";
-    squareApplePay = null;
-    return false;
-  }
-}
-
-async function createSquareCharge(sourceId) {
-  const amount = getCurrentChargeAmount();
-
-  const payload = {
-    sourceId,
-    idempotencyKey: makeIdempotencyKey(),
-    amountCents: moneyToCents(amount),
-    booking: {
-      name: quoteState.name,
-      email: quoteState.email,
-      phone: quoteState.phone,
-      slotId: quoteState.slotId,
-      slotLabel: quoteState.slotLabel,
-      city: quoteState.city,
-      paymentMode: quoteState.paymentMode
-    }
-  };
-
-  const res = await fetch(SQUARE_PAYMENT_ENDPOINT, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-    cache: "no-store"
-  });
-
-  const text = await res.text();
-  let data = null;
-  try { data = JSON.parse(text); }
-  catch { data = { ok: false, message: "Payment endpoint returned non-JSON." }; }
-
-  return data;
-}
-
-async function handlePayNowCard(payBtn, statusEl) {
-  if (!squareCard) {
-    statusEl.textContent = "Card form is not ready yet.";
+  if (!discount) {
+    quoteState.couponMessage = "That coupon code is not valid.";
     return;
   }
 
-  try {
-    quoteState.paymentStatus = "processing";
-    updateNav();
-
-    if (payBtn) {
-      payBtn.disabled = true;
-      payBtn.textContent = "Processing...";
-    }
-
-    const tokenResult = await squareCard.tokenize();
-    if (tokenResult.status !== "OK" || !tokenResult.token) {
-      throw new Error("Card details were not accepted. Please check the form and try again.");
-    }
-
-    const result = await createSquareCharge(tokenResult.token);
-    if (!result || result.ok !== true) {
-      throw new Error(result?.message || "Payment failed.");
-    }
-
-    quoteState.paymentStatus = "paid";
-    quoteState.paymentMessage = "Full payment paid successfully.";
-    quoteState.squarePaymentId = String(result.paymentId || result.id || "");
-    quoteState.paidAmount = String(getCurrentChargeAmount());
-
-    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
-    renderStep();
-  } catch (err) {
-    quoteState.paymentStatus = "";
-    quoteState.paymentMessage = err?.message || "Payment failed.";
-    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
-    updateNav();
-  } finally {
-    if (payBtn) {
-      payBtn.disabled = false;
-      payBtn.textContent = `Pay ${formatMoney(getCurrentChargeAmount())} in Full`;
-    }
-  }
-}
-
-async function handleApplePayCharge(statusEl) {
-  if (!squareApplePay) {
-    if (statusEl) statusEl.textContent = "Apple Pay is not available on this device/browser.";
-    return;
-  }
-
-  try {
-    quoteState.paymentStatus = "processing";
-    updateNav();
-
-    if (statusEl) statusEl.textContent = "Opening Apple Pay...";
-
-    const tokenResult = await squareApplePay.tokenize();
-
-    if (tokenResult.status !== "OK" || !tokenResult.token) {
-      throw new Error("Apple Pay was not completed.");
-    }
-
-    const result = await createSquareCharge(tokenResult.token);
-    if (!result || result.ok !== true) {
-      throw new Error(result?.message || "Apple Pay payment failed.");
-    }
-
-    quoteState.paymentStatus = "paid";
-    quoteState.paymentMessage = "Full payment paid successfully with Apple Pay.";
-    quoteState.squarePaymentId = String(result.paymentId || result.id || "");
-    quoteState.paidAmount = String(getCurrentChargeAmount());
-
-    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
-    renderStep();
-  } catch (err) {
-    quoteState.paymentStatus = "";
-    quoteState.paymentMessage = err?.message || "Apple Pay payment failed.";
-    if (statusEl) statusEl.textContent = quoteState.paymentMessage;
-    updateNav();
-  }
+  quoteState.couponMessage = `${code} applied. You saved ${formatMoney(discount)}.`;
 }
 
 // -------------------------
-// Lead / Apps Script
+// APPOINTMENT SLOTS
 // -------------------------
-async function postJson(url, payload, extraOptions = {}) {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify(payload),
-    cache: "no-store",
-    redirect: "follow",
-    keepalive: extraOptions.keepalive === true
-  });
-
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch { return { ok: false, message: "Apps Script returned non-JSON." }; }
+function getSlotsLoadKey() {
+  return [quoteState.city, quoteState.routeGroup].join("|");
 }
 
-async function sendLeadCaptureIfNeeded({ background = false } = {}) {
-  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) {
-    return { ok: true, skipped: true };
-  }
-
-  syncRouteGroupFromCity();
-
-  const signature = buildLeadSignature();
-  if (quoteState.leadEmailSent && quoteState.leadEmailSignature === signature) {
-    return { ok: true, skipped: true };
-  }
-
-  if (quoteState.leadEmailSending) {
-    return { ok: false, message: "Lead notification already sending." };
-  }
-
-  quoteState.leadEmailSending = true;
-
-  try {
-    const payload = {
-      ...buildPayload(),
-      action: "lead"
-    };
-
-    const leadUrl = buildScriptUrl("lead");
-
-    const result = await Promise.race([
-      postJson(leadUrl, payload, { keepalive: true }),
-      timeout(background ? 8000 : 12000).then(() => ({
-        ok: false,
-        message: "Lead notification timed out."
-      }))
-    ]);
-
-    const didSend =
-      result?.emailSent === true ||
-      (result?.ok === true && !Object.prototype.hasOwnProperty.call(result || {}, "emailSent"));
-
-    if (didSend) {
-      quoteState.leadEmailSent = true;
-      quoteState.leadEmailSignature = signature;
-
-      if (result.routeGroup) quoteState.routeGroup = String(result.routeGroup || "");
-      if (result.routeGroupLabel) quoteState.routeGroupLabel = String(result.routeGroupLabel || "");
-
-      return { ok: true, ...result };
-    }
-
-    quoteState.leadEmailSent = false;
-    quoteState.leadEmailSignature = "";
-
-    return {
-      ok: false,
-      message: result?.emailError || result?.message || "Lead email failed.",
-      ...result
-    };
-  } catch (err) {
-    quoteState.leadEmailSent = false;
-    quoteState.leadEmailSignature = "";
-    return { ok: false, message: err?.message || "Lead notification blocked." };
-  } finally {
-    quoteState.leadEmailSending = false;
-  }
-}
-
-function queueLeadCapture() {
-  void Promise.resolve()
-    .then(() => sendLeadCaptureIfNeeded({ background: true }))
-    .then((result) => {
-      if (result && result.ok === false) {
-        console.warn("Lead notification issue:", result.message || result);
-      }
-    })
-    .catch((err) => {
-      console.warn("Lead notification crashed:", err);
-    });
-}
-
-// -------------------------
-// Render
-// -------------------------
-function renderStep() {
-  if (!quoteBody) return;
-
-  quoteBody.innerHTML = "";
-  setProgress();
-
-  const step = steps[stepIndex];
-
-  const title = document.createElement("div");
-  title.className = "qStepTitle";
-  const sub = document.createElement("div");
-  sub.className = "qStepSub";
-
-  if (step === "vehicleType") {
-    title.textContent = "Vehicle type";
-    sub.textContent = "Pick the closest match. Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--vehicle2x2";
-
-    vehicleTypes.forEach((v) => {
-      cards.appendChild(
-        imgCard({
-          label: v.label,
-          hint: v.hint,
-          img: v.img,
-          contain: !!v.contain,
-          zoom: v.zoom,
-          variant: "qCard--vehicle",
-          isSelected: quoteState.vehicleType === v.label,
-          onClick: () => pickAndAdvance(() => (quoteState.vehicleType = v.label))
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "serviceCategory") {
-    title.textContent = "Service category";
-    sub.textContent = "Choose what you want detailed. Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--scroll qCards--big";
-
-    serviceCategories.forEach((c) => {
-      cards.appendChild(
-        imgCard({
-          label: c.label,
-          hint: c.hint,
-          img: c.img,
-          split: c.split || "h",
-          variant: "qCard--square qCard--serviceCat",
-          isSelected: quoteState.serviceCategory === c.label,
-          onClick: () =>
-            pickAndAdvance(() => {
-              quoteState.serviceCategory = c.label;
-              quoteState.services = [];
-              quoteState.interiorPackage = "";
-              quoteState.exteriorPackage = "";
-              quoteState.paintCorrectionPackage = "";
-              quoteState.ceramicPackage = "";
-              quoteState.upkeepFrequency = "";
-              resetBookingTail();
-            })
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "service") {
-    const isInterior = quoteState.serviceCategory === "Interior";
-    const isExterior = quoteState.serviceCategory === "Exterior";
-    const isBoth = quoteState.serviceCategory === "Interior + Exterior";
-
-    title.textContent = "Select service(s)";
-    sub.textContent = isBoth ? "Select one or more services, then continue." : "Tap one service to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--scroll qCards--big";
-
-    const filtered = servicesAll.filter((s) => {
-      if (isInterior) {
-        return s.label === "Interior Detail" || s.label === "Interior Upkeep Plan";
-      }
-      if (isExterior) {
-        return s.label === "Exterior Wash" || s.label === "Headlight Restoration" || s.label === "Exterior Upkeep Plan" || s.label === "Paint Correction" || s.label === "Ceramic Coating";
-      }
-      if (isBoth) {
-        return s.label === "Interior Detail" || s.label === "Exterior Wash" || s.label === "Headlight Restoration" || s.label === "Paint Correction" || s.label === "Ceramic Coating" || s.label === "Interior + Exterior Upkeep Plan";
-      }
-      return false;
-    });
-
-    if (isInterior || isExterior) {
-      filtered.forEach((s) => {
-        cards.appendChild(
-          imgCard({
-            label: s.label,
-            hint: getServiceCardHint(s.label),
-            img: s.img,
-            split: s.split || "h",
-            variant: "qCard--square qCard--servicePick",
-            isSelected: quoteState.services.includes(s.label),
-            onClick: () => pickSingleServiceAndAdvance(s.label)
-          })
-        );
-      });
-
-      quoteBody.append(title, sub, cards);
-      updateNav();
-      return;
-    }
-
-    const tray = document.createElement("div");
-    const n = (quoteState.services || []).length;
-    tray.className = "qServiceTray" + (n ? " isActive" : "");
-
-    const trayTop = document.createElement("div");
-    trayTop.className = "qServiceTrayTop";
-
-    const trayTitle = document.createElement("div");
-    trayTitle.className = "qServiceTrayTitle";
-    trayTitle.textContent = "Pick all that apply";
-
-    const trayHint = document.createElement("div");
-    trayHint.className = "qServiceTrayHint";
-    trayHint.textContent = n ? `${n} selected • tap × to remove` : "Select one or more services below";
-
-    trayTop.append(trayTitle, trayHint);
-
-    const chips = document.createElement("div");
-    chips.className = "qChips";
-
-    if (!n) {
-      const empty = document.createElement("div");
-      empty.className = "qChipEmpty";
-      empty.textContent = "Tip: tap everything you want, then press Continue.";
-      chips.appendChild(empty);
-    } else {
-      getSelectedServiceChipData().forEach((item) => {
-        const chip = document.createElement("span");
-        chip.className = "qChip";
-        chip.innerHTML = `
-          <span>${escapeHtml(item.displayLabel)}</span>
-          <button type="button" aria-label="Remove ${escapeHtml(item.displayLabel)}">×</button>
-        `;
-        chip.querySelector("button")?.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          removeService(item.baseLabel);
-          renderStep();
-        });
-        chips.appendChild(chip);
-      });
-    }
-
-    tray.append(trayTop, chips);
-
-    filtered.forEach((s) => {
-      cards.appendChild(
-        imgCard({
-          label: s.label,
-          hint: getServiceCardHint(s.label),
-          img: s.img,
-          split: s.split || "h",
-          variant: "qCard--square qCard--servicePick",
-          isSelected: quoteState.services.includes(s.label),
-          onClick: () => {
-            toggleService(s.label);
-            renderStep();
-          }
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, tray, cards);
-  }
-
-  if (step === "interiorPackage") {
-    title.textContent = "Interior package";
-    sub.textContent = "Choose your interior package. Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--scroll qCards--big";
-
-    interiorPackages.forEach((pkg) => {
-      const price = priceForVehicle(INTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-
-      cards.appendChild(
-        featureCard({
-          title: pkg.displayLabel || pkg.label,
-          items: pkg.features || [],
-          price,
-          isSelected: quoteState.interiorPackage === pkg.serviceLabel,
-          onClick: () => pickAndAdvance(() => (quoteState.interiorPackage = pkg.serviceLabel))
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "exteriorPackage") {
-    title.textContent = "Exterior package";
-    sub.textContent = "Choose your exterior package. Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--scroll qCards--big";
-
-    exteriorPackages.forEach((pkg) => {
-      const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-
-      cards.appendChild(
-        featureCard({
-          title: pkg.displayLabel || pkg.label,
-          items: pkg.features || [],
-          price,
-          isSelected: quoteState.exteriorPackage === pkg.serviceLabel,
-          onClick: () => pickAndAdvance(() => (quoteState.exteriorPackage = pkg.serviceLabel))
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "paintCorrectionPackage") {
-    title.textContent = "Paint correction";
-    sub.textContent = "Choose the correction level. Tap to continue.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--scroll qCards--big";
-
-    paintCorrectionPackages.forEach((pkg) => {
-      const price = priceForVehicle(PAINT_CORRECTION_PRICES, pkg.serviceLabel);
-      const hint = `${pkg.hint}\n${price ? `Starting at ${formatMoney(price)}` : "Price unavailable"}`;
-
-      cards.appendChild(
-        imgCard({
-          label: pkg.label,
-          hint,
-          img: pkg.img,
-          badge: pkg.badge || "",
-          variant: "qCard--square qCard--condition",
-          isSelected: quoteState.paintCorrectionPackage === pkg.serviceLabel,
-          onClick: () => pickAndAdvance(() => (quoteState.paintCorrectionPackage = pkg.serviceLabel))
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "ceramicPackage") {
-    title.textContent = "Ceramic coating";
-    sub.textContent = "Choose the package you want. Final ceramic pricing is confirmed after assessment.";
-
-    const cards = document.createElement("div");
-    cards.className = "qCards qCards--scroll qCards--big";
-
-    ceramicPackages.forEach((pkg) => {
-      cards.appendChild(
-        imgCard({
-          label: pkg.label,
-          hint: pkg.hint,
-          img: pkg.img,
-          variant: "qCard--square qCard--condition",
-          isSelected: quoteState.ceramicPackage === pkg.serviceLabel,
-          onClick: () => pickAndAdvance(() => (quoteState.ceramicPackage = pkg.serviceLabel))
-        })
-      );
-    });
-
-    quoteBody.append(title, sub, cards);
-  }
-
-  if (step === "upkeepFrequency") {
-    title.textContent = "Upkeep frequency";
-    sub.textContent = "How often would you like us to come out? Pricing changes by frequency.";
-
-    const wrap = document.createElement("div");
-    wrap.className = "qHearWrap";
-
-    const grid = document.createElement("div");
-    grid.className = "qHearGrid";
-
-    upkeepFrequencies.forEach((o) => {
-      grid.appendChild(
-        optionCard({
-          label: o.label,
-          hint: o.hint,
-          isSelected: quoteState.upkeepFrequency === o.label,
-          onClick: () => pickAndAdvance(() => (quoteState.upkeepFrequency = o.label))
-        })
-      );
-    });
-
-    wrap.appendChild(grid);
-    quoteBody.append(title, sub, wrap);
-  }
-
-  if (step === "contact") {
-    title.textContent = "Your contact info";
-    sub.textContent = "Required. We’ll confirm by text or call.";
-
-    const grid = document.createElement("div");
-    grid.className = "qGrid2";
-
-    const f1 = document.createElement("div");
-    f1.className = "qField";
-    f1.innerHTML = `
-      <label for="qName">Name *</label>
-      <input id="qName" autocomplete="name" placeholder="Your name" value="${escapeHtml(quoteState.name)}" />
-    `;
-
-    const f2 = document.createElement("div");
-    f2.className = "qField";
-    f2.innerHTML = `
-      <label for="qPhone">Phone number *</label>
-      <input id="qPhone" autocomplete="tel" inputmode="tel" placeholder="(555) 555-5555" value="${escapeHtml(quoteState.phone)}" />
-    `;
-
-    const f3 = document.createElement("div");
-    f3.className = "qField";
-    f3.innerHTML = `
-      <label for="qEmail">Email *</label>
-      <input id="qEmail" autocomplete="email" inputmode="email" placeholder="you@email.com" value="${escapeHtml(quoteState.email)}" />
-    `;
-
-    const f4 = document.createElement("div");
-    f4.className = "qField";
-    f4.innerHTML = `
-      <label for="qCity">Closest city *</label>
-      <select id="qCity">
-        <option value="">Select closest city</option>
-        ${serviceCities.map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`).join("")}
-      </select>
-    `;
-
-    grid.append(f1, f2, f3, f4);
-
-    const notes = document.createElement("div");
-    notes.className = "qField";
-    notes.style.marginTop = "10px";
-    notes.innerHTML = `
-      <label for="qNotes">Anything else we should know?</label>
-      <textarea id="qNotes" placeholder="Pet hair, stains, address notes, etc.">${escapeHtml(quoteState.notes)}</textarea>
-    `;
-
-    const status = document.createElement("div");
-    status.className = "qStatus";
-    status.textContent = canContinue() ? "" : "Required: name, phone, email, and closest city.";
-
-    const hp = document.createElement("div");
-    hp.style.display = "none";
-    hp.innerHTML = `<input id="qCompany" placeholder="Company" value="${escapeHtml(quoteState.honeypot)}" />`;
-
-    quoteBody.append(title, sub, grid, notes, status, hp);
-
-    const nameEl = quoteBody.querySelector("#qName");
-    const phoneEl = quoteBody.querySelector("#qPhone");
-    const emailEl = quoteBody.querySelector("#qEmail");
-    const cityEl = quoteBody.querySelector("#qCity");
-    const notesEl = quoteBody.querySelector("#qNotes");
-    const hpEl = quoteBody.querySelector("#qCompany");
-
-    const updateStatus = () => {
-      status.textContent = canContinue() ? "" : "Required: name, phone, email, and closest city.";
-    };
-
-    nameEl?.addEventListener("input", (e) => {
-      quoteState.name = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-
-    phoneEl?.addEventListener("input", (e) => {
-      quoteState.phone = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-
-    emailEl?.addEventListener("input", (e) => {
-      quoteState.email = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-
-    cityEl?.addEventListener("change", (e) => {
-      quoteState.city = e.target.value || "";
-      syncRouteGroupFromCity();
-      resetBookingTail();
-      updateNav();
-      updateStatus();
-    });
-
-    notesEl?.addEventListener("input", (e) => { quoteState.notes = e.target.value || ""; });
-    hpEl?.addEventListener("input", (e) => { quoteState.honeypot = e.target.value || ""; });
-
-    setTimeout(() => nameEl?.focus(), 50);
-  }
-
-  if (step === "estimate") {
-    title.textContent = "Estimated price";
-    sub.textContent = "Price based on your selections.";
-
-    const est = computeEstimateInfo();
-    quoteState.estimateLow = est ? est.low : "";
-    quoteState.estimateHigh = est ? est.high : "";
-    quoteState.estimateIsStartingAt = !!est?.hasStartingAt;
-
-    const servicesText = getSelectedDisplayServices().join(", ");
-
-    const box = document.createElement("div");
-    box.className = "qEstimateBox qEstimateBox--simple";
-    box.innerHTML = `
-      <div class="qEstimateBig">
-        ${escapeHtml(formatEstimateDisplay(est))}
-      </div>
-      <div class="qEstimatePills">
-        <span class="qPill"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType)}</span>
-        <span class="qPill"><strong>Services:</strong> ${escapeHtml(servicesText || "—")}</span>
-        ${quoteState.upkeepFrequency ? `<span class="qPill"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</span>` : ""}
-        ${est?.savings ? `<span class="qPill"><strong>Bundle savings:</strong> -${escapeHtml(formatMoney(est.savings))}</span>` : ""}
-      </div>
-      <div class="qEstimateFine">
-        ${est?.hasStartingAt
-          ? "Ceramic pricing is shown as a starting range. Final price is confirmed after assessment."
-          : "Final price confirmed after quick assessment."}
-      </div>
-    `;
-    quoteBody.append(title, sub, box);
-  }
-
-  if (step === "appointment") {
-    syncRouteGroupFromCity();
-
-    title.textContent = "Select a Date and Time";
-    sub.textContent = "Choose an available date, then pick a time.";
-
-    const wrap = document.createElement("div");
-    wrap.className = "qCalWrap";
-
-    const topRow = document.createElement("div");
-    topRow.className = "qCalTopRow";
-
-    const topLeft = document.createElement("div");
-    topLeft.style.display = "flex";
-    topLeft.style.flexWrap = "wrap";
-    topLeft.style.alignItems = "center";
-    topLeft.style.gap = "10px";
-
-    const tz = document.createElement("div");
-    tz.className = "qCalTz";
-    tz.textContent = calendarCache.tzLabel || "Local Time";
-
-    const cityWrap = document.createElement("div");
-    cityWrap.style.display = "flex";
-    cityWrap.style.alignItems = "center";
-    cityWrap.style.gap = "8px";
-
-    const cityLabel = document.createElement("label");
-    cityLabel.setAttribute("for", "qCalendarCity");
-    cityLabel.textContent = "Town";
-    cityLabel.style.fontWeight = "800";
-    cityLabel.style.color = "rgba(0,0,0,.60)";
-    cityLabel.style.fontSize = ".92rem";
-
-    const citySelect = document.createElement("select");
-    citySelect.id = "qCalendarCity";
-    citySelect.style.minHeight = "38px";
-    citySelect.style.padding = "8px 12px";
-    citySelect.style.borderRadius = "12px";
-    citySelect.style.border = "1px solid rgba(0,0,0,.12)";
-    citySelect.style.background = "#fff";
-    citySelect.style.fontWeight = "700";
-    citySelect.style.fontFamily = "inherit";
-    citySelect.innerHTML = serviceCities
-      .map((city) => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`)
-      .join("");
-
-    cityWrap.append(cityLabel, citySelect);
-    topLeft.append(tz, cityWrap);
-
-    const reload = document.createElement("button");
-    reload.type = "button";
-    reload.className = "qReloadLink";
-    reload.textContent = "Reload";
-
-    topRow.append(topLeft, reload);
-
-    const status = document.createElement("div");
-    status.className = "qStatus";
-    status.textContent = "Loading availability...";
-
-    const loadBar = document.createElement("div");
-    loadBar.className = "qLoadBar";
-    loadBar.innerHTML = `<span class="qLoadBarFill" aria-hidden="true"></span>`;
-
-    const cal = document.createElement("div");
-    cal.className = "qCal";
-
-    const timesBox = document.createElement("div");
-    timesBox.className = "qTimes";
-
-    const nextAvailBtn = document.createElement("button");
-    nextAvailBtn.type = "button";
-    nextAvailBtn.className = "btn btn--quote qNextAvail";
-    nextAvailBtn.textContent = "Check Next Availability";
-    nextAvailBtn.addEventListener("click", () => {
-      const nextDate = findNextAvailableDate(quoteState.slotDate || "");
-      if (nextDate) {
-        quoteState.slotDate = nextDate;
-        quoteState.slotTime = "";
-        quoteState.slotId = "";
-        quoteState.slotLabel = "";
-        quoteState.address = "";
-        resetPaymentState();
-        renderStep();
-      }
-    });
-
-    reload.addEventListener("click", () => {
-      loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
-    });
-
-    citySelect.addEventListener("change", (e) => {
-      quoteState.city = e.target.value || "";
-      syncRouteGroupFromCity();
-      quoteState.slotDate = "";
-      quoteState.slotTime = "";
-      quoteState.slotId = "";
-      quoteState.slotLabel = "";
-      quoteState.address = "";
-      resetPaymentState();
-      loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
-    });
-
-    wrap.append(topRow, status, loadBar, cal, timesBox, nextAvailBtn);
-    quoteBody.append(title, sub, wrap);
-
-    loadAvailabilityAndRender(status, loadBar, cal, timesBox, nextAvailBtn, tz, citySelect);
-
-    warmSquare();
-  }
-
-  if (step === "address") {
-    title.textContent = "Service address";
-    sub.textContent = "Enter the address where we’ll service the vehicle.";
-
-    const wrap = document.createElement("div");
-    wrap.className = "qCalWrap";
-
-    const field = document.createElement("div");
-    field.className = "qField";
-    field.innerHTML = `
-      <label for="qAddress">Address *</label>
-      <input
-        id="qAddress"
-        autocomplete="street-address"
-        placeholder="123 Main St, Salem, OR 97301"
-        value="${escapeHtml(quoteState.address)}"
-      />
-    `;
-
-    const note = document.createElement("div");
-    note.className = "qStatus";
-    note.textContent = "We use this to confirm where the appointment is taking place.";
-
-    const status = document.createElement("div");
-    status.className = "qStatus";
-    status.textContent = canContinue() ? "" : "Required: service address.";
-
-    wrap.append(field, note, status);
-    quoteBody.append(title, sub, wrap);
-
-    const addressEl = quoteBody.querySelector("#qAddress");
-    const updateStatus = () => {
-      status.textContent = canContinue() ? "" : "Required: service address.";
-    };
-
-    addressEl?.addEventListener("input", (e) => {
-      quoteState.address = e.target.value || "";
-      updateNav();
-      updateStatus();
-    });
-
-    setTimeout(() => addressEl?.focus(), 50);
-  }
-
-  if (step === "payment") {
-    const paymentComplete = paymentIsComplete();
-    const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
-    const estInfo = computeEstimateInfo();
-    const estLine = formatEstimateDisplay(estInfo);
-    const fullPayAmount = getFullPayAmount();
-    const chargeToday = paymentIsBypassed ? 0 : (quoteState.paymentMode === "full" ? fullPayAmount : 0);
-
-    title.textContent = "Choose payment option";
-    sub.textContent = "Select pay in full or pay after service.";
-
-    const summary = document.createElement("div");
-    summary.className = "qEstimateBox qEstimateBox--simple";
-    summary.innerHTML = `
-      <div class="qEstimateBig">${escapeHtml(estLine)}</div>
-      <div class="qEstimateFine" style="margin-top:8px;">Current estimated range</div>
-      <div class="qEstimatePills" style="margin-top:14px;">
-        <span class="qPill"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</span>
-        <span class="qPill"><strong>Today’s charge:</strong> ${formatMoney(chargeToday)}</span>
-        ${
-          quoteState.paymentMode === "full"
-            ? `<span class="qPill"><strong>Selected:</strong> Pay in Full</span>`
-            : quoteState.paymentMode === "after"
-              ? `<span class="qPill"><strong>Selected:</strong> Pay After Service</span>`
-              : ""
-        }
-      </div>
-    `;
-
-    const paymentChoice = document.createElement("div");
-    paymentChoice.className = "qCards";
-    paymentChoice.style.display = "grid";
-    paymentChoice.style.gridTemplateColumns = "repeat(auto-fit, minmax(220px, 1fr))";
-    paymentChoice.style.gap = "12px";
-    paymentChoice.style.marginTop = "12px";
-
-    const fullBox = document.createElement("button");
-    fullBox.type = "button";
-    fullBox.className = "qCard qFeatureCard" + (quoteState.paymentMode === "full" ? " isSel" : "");
-    fullBox.innerHTML = `
-      <div class="qFeatureCardInner">
-        <div class="qFeatureCardTitle">Pay in Full</div>
-        <ul class="qFeatureList">
-          <li>Pay online today</li>
-          <li>Current quote charged now</li>
-          <li>Final total may still change after inspection</li>
-        </ul>
-        <div class="qFeaturePrice">Pay ${escapeHtml(formatMoney(fullPayAmount))} today</div>
-      </div>
-    `;
-
-    const afterBox = document.createElement("button");
-    afterBox.type = "button";
-    afterBox.className = "qCard qFeatureCard" + (quoteState.paymentMode === "after" ? " isSel" : "");
-    afterBox.innerHTML = `
-      <div class="qFeatureCardInner">
-        <div class="qFeatureCardTitle">Pay After Detail</div>
-        <ul class="qFeatureList">
-          <li>No payment due today</li>
-          <li>Reserve the appointment now</li>
-          <li>Final total is paid after service</li>
-        </ul>
-        <div class="qFeaturePrice">Pay ${escapeHtml(formatMoney(0))} today</div>
-      </div>
-    `;
-
-    paymentChoice.append(fullBox, afterBox);
-
-    const ack = document.createElement("div");
-    ack.style.marginTop = "12px";
-    ack.innerHTML = `
-      <div class="qCheck">
-        <input id="qAckPriceVariance" type="checkbox" ${quoteState.ackPriceVariance ? "checked" : ""} />
-        <label for="qAckPriceVariance">
-          <strong>I understand this may not be the final price.</strong><br/>
-          The final price can be higher or lower depending on the actual condition of the vehicle, and any difference will be settled after inspection if needed.
-        </label>
-      </div>
-    `;
-
-    const squareBox = document.createElement("div");
-    squareBox.className = "qCalWrap";
-    squareBox.style.marginTop = "12px";
-
-    if (paymentIsBypassed) {
-      squareBox.innerHTML = `
-        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
-        <div class="qStatus" data-q-pay-status>Booking bypass activated. No payment will be collected.</div>
-        <div data-q-paid-wrap style="margin-top:10px;">
-          <div class="qDoneLine"><strong>Payment:</strong> Bypassed</div>
-          <div class="qDoneLine"><strong>Type:</strong> No Charge / Hidden Bypass</div>
-          <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(0)}</div>
-          ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-        </div>
-      `;
-    } else if (quoteState.paymentMode === "full") {
-      const payBtnLabel = `Pay ${formatMoney(fullPayAmount)} in Full`;
-
-      squareBox.innerHTML = `
-        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
-        <div class="qStatus" data-q-pay-status>
-          ${paymentComplete ? "Payment completed successfully." : "Use Apple Pay or enter card details."}
-        </div>
-        ${
-          paymentComplete
-            ? ""
-            : `
-              <div id="qApplePayWrap" style="margin:12px 0 14px;">
-                <button
-                  type="button"
-                  id="qApplePayButton"
-                  style="display:none; width:100%; min-height:48px; border:none; border-radius:12px; background:#000; color:#fff; font-size:16px; font-weight:600; cursor:pointer;"
-                >
-                  Apple Pay
-                </button>
-              </div>
-
-              <div class="qStatus" style="margin:8px 0 10px;">Or pay with card</div>
-              <div id="qSquareCard"></div>
-
-              <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
-                <button type="button" class="btn btn--quote" id="qPayNowBtn">${escapeHtml(payBtnLabel)}</button>
-              </div>
-            `
-        }
-        <div data-q-paid-wrap style="margin-top:10px;">
-          ${
-            paymentComplete
-              ? `
-                <div class="qDoneLine"><strong>Payment:</strong> Paid</div>
-                <div class="qDoneLine"><strong>Type:</strong> Paid in Full</div>
-                <div class="qDoneLine"><strong>Amount:</strong> ${formatMoney(quoteState.paidAmount || fullPayAmount)}</div>
-                ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-              `
-              : ""
-          }
-        </div>
-      `;
-    } else if (quoteState.paymentMode === "after") {
-      squareBox.innerHTML = `
-        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
-        <div class="qStatus" data-q-pay-status>No payment is due today. You’ll pay after the detail is completed.</div>
-        <div data-q-paid-wrap style="margin-top:10px;">
-          <div class="qDoneLine"><strong>Payment:</strong> Pay After Service</div>
-          <div class="qDoneLine"><strong>Amount Due Today:</strong> ${formatMoney(0)}</div>
-        </div>
-      `;
-    } else {
-      squareBox.innerHTML = `
-        <div class="qStepTitle" style="font-size:1rem; margin-bottom:8px;">Payment method</div>
-        <div class="qStatus" data-q-pay-status>Select one of the two payment options above.</div>
-      `;
-    }
-
-    const foot = document.createElement("div");
-    foot.className = "qStatus";
-    foot.style.marginTop = "10px";
-    foot.textContent = canContinue()
-      ? ""
-      : quoteState.paymentMode === "full"
-        ? "Required: select pay in full, check the acknowledgment box, and complete payment."
-        : quoteState.paymentMode === "after"
-          ? "Required: select pay after service and check the acknowledgment box."
-          : "Required: choose a payment option and check the acknowledgment box.";
-
-    quoteBody.append(title, sub, summary, paymentChoice, ack, squareBox, foot);
-
-    const ackPriceVarianceEl = quoteBody.querySelector("#qAckPriceVariance");
-    const payStatusEl = quoteBody.querySelector("[data-q-pay-status]");
-    const squareCardEl = quoteBody.querySelector("#qSquareCard");
-    const applePayWrapEl = quoteBody.querySelector("#qApplePayWrap");
-    const payBtn = quoteBody.querySelector("#qPayNowBtn");
-    const applePayButtonEl = quoteBody.querySelector("#qApplePayButton");
-
-    const updateFoot = () => {
-      foot.textContent = canContinue()
-        ? ""
-        : quoteState.paymentMode === "full"
-          ? "Required: select pay in full, check the acknowledgment box, and complete payment."
-          : quoteState.paymentMode === "after"
-            ? "Required: select pay after service and check the acknowledgment box."
-            : "Required: choose a payment option and check the acknowledgment box.";
-      updateNav();
-    };
-
-    fullBox.addEventListener("click", () => {
-      quoteState.paymentMode = "full";
-      resetPaymentState();
-      renderStep();
-    });
-
-    afterBox.addEventListener("click", () => {
-      quoteState.paymentMode = "after";
-      resetPaymentState();
-      renderStep();
-    });
-
-    ackPriceVarianceEl?.addEventListener("change", (e) => {
-      quoteState.ackPriceVariance = !!e.target.checked;
-      updateFoot();
-    });
-
-    if (!paymentComplete && quoteState.paymentMode === "full") {
-      initSquareCard(squareCardEl, payStatusEl).then(() => updateFoot());
-
-      initSquareApplePay(applePayWrapEl, payStatusEl).then((available) => {
-        if (!available && applePayWrapEl) {
-          applePayWrapEl.style.display = "none";
-        }
-        updateFoot();
-      });
-    } else {
-      if (squareCardEl) squareCardEl.innerHTML = "";
-      if (applePayWrapEl) applePayWrapEl.innerHTML = "";
-      updateFoot();
-    }
-
-    payBtn?.addEventListener("click", () => handlePayNowCard(payBtn, payStatusEl));
-    applePayButtonEl?.addEventListener("click", () => handleApplePayCharge(payStatusEl));
-  }
-
-  if (step === "done") {
-    title.textContent = "You're booked";
-    sub.textContent = "We received your request and will confirm shortly.";
-
-    const estInfo = computeEstimateInfo();
-    const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
-
-    const box = document.createElement("div");
-    box.className = "qDoneBox";
-    box.innerHTML = `
-      <div class="qDoneBig">✅ Request submitted</div>
-      <div class="qDoneLine"><strong>Services:</strong> ${escapeHtml(getSelectedDisplayServices().join(", ") || "—")}</div>
-      ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
-      <div class="qDoneLine"><strong>Appointment:</strong> ${escapeHtml(quoteState.slotLabel || "—")}</div>
-      <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "—")}</div>
-      <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay(estInfo))}</div>
-      <div class="qDoneLine"><strong>Payment Type:</strong> ${
-        paymentIsBypassed
-          ? "Hidden Bypass / No Charge"
-          : quoteState.paymentMode === "full"
-            ? "Paid in Full"
-            : "Pay After Service"
-      }</div>
-      <div class="qDoneLine"><strong>Amount Paid:</strong> ${formatMoney(
-        paymentIsBypassed
-          ? 0
-          : quoteState.paymentMode === "full"
-            ? (quoteState.paidAmount || getCurrentChargeAmount())
-            : 0
-      )}</div>
-      ${quoteState.squarePaymentId ? `<div class="qDoneLine"><strong>Payment ID:</strong> ${escapeHtml(quoteState.squarePaymentId)}</div>` : ""}
-      ${
-        paymentIsBypassed
-          ? `<div class="qDoneFine">Booking saved with hidden bypass. No payment was collected.</div>`
-          : quoteState.paymentMode === "after"
-            ? `<div class="qDoneFine">No payment was collected today. Final total is due after the detail is completed and confirmed after inspection.</div>`
-            : `<div class="qDoneFine">Final price may still be adjusted after inspection if the vehicle condition differs from the quote.</div>`
-      }
-    `;
-
-    const actions = document.createElement("div");
-    actions.style.marginTop = "12px";
-    actions.style.display = "flex";
-    actions.style.gap = "10px";
-    actions.style.flexWrap = "wrap";
-
-    const callBtn = document.createElement("a");
-    callBtn.className = "btn btn--call";
-    callBtn.href = `tel:${window.BUSINESS_PHONE || ""}`;
-    callBtn.textContent = "CALL NOW";
-
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "btn btn--quote";
-    closeBtn.type = "button";
-    closeBtn.textContent = "CLOSE";
-    closeBtn.addEventListener("click", closeQuoteModal);
-
-    actions.append(callBtn, closeBtn);
-    quoteBody.append(title, sub, box, actions);
-  }
-
+async function maybeLoadAppointmentSlots(force = false) {
+  const key = getSlotsLoadKey();
+  if (!force && appointmentSlotsLoadedKey === key) return;
+  if (appointmentSlotsLoading) return;
+
+  appointmentSlotsLoading = true;
+  appointmentSlotsError = "";
   updateNav();
-}
-
-// -------------------------
-// Availability (Apps Script)
-// -------------------------
-let calendarCache = {
-  tzLabel: "Local Time",
-  slots: [],
-  byDate: new Map(),
-  routeGroup: "",
-  routeGroupLabel: ""
-};
-
-function isoDate(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const da = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${da}`;
-}
-function startOfMonth(date) { return new Date(date.getFullYear(), date.getMonth(), 1); }
-function daysInMonth(date) { return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate(); }
-function monthLabel(date) { return date.toLocaleString(undefined, { month: "long", year: "numeric" }); }
-
-function buildCalendarIndex(slots) {
-  const map = new Map();
-  slots.forEach((s) => {
-    const k = s.date;
-    if (!k) return;
-    if (!map.has(k)) map.set(k, []);
-    map.get(k).push(s);
-  });
-  for (const [k, arr] of map.entries()) arr.sort((a, b) => String(a.time).localeCompare(String(b.time)));
-  return map;
-}
-function findNextAvailableDate(fromDateISO) {
-  const dates = Array.from(calendarCache.byDate.keys()).sort();
-  for (const d of dates) if (!fromDateISO || d >= fromDateISO) return d;
-  return "";
-}
-function parseSlotToDateTime(slot) {
-  const id = String(slot?.id || "").trim();
-  const label = String(slot?.label || "").trim();
-
-  const date =
-    normalizeDateValue(slot?.date) ||
-    normalizeDateValue(slot?.start) ||
-    normalizeDateValue(slot?.startAt) ||
-    normalizeDateValue(id) ||
-    normalizeDateValue(label) ||
-    "";
-
-  // Prefer the human-readable label time first.
-  // This avoids bad midnight values like 00:00 overriding a correct label like 10:00 AM.
-  const preferredTimeInfo =
-    extractTimeInfo(label) ||
-    extractTimeInfo(slot?.displayTime) ||
-    extractTimeInfo(slot?.startTime) ||
-    extractTimeInfo(slot?.start) ||
-    extractTimeInfo(slot?.startAt) ||
-    null;
-
-  const fallbackTimeInfo =
-    extractTimeInfo(slot?.time) ||
-    extractTimeInfo(id) ||
-    null;
-
-  const timeInfo = preferredTimeInfo || fallbackTimeInfo;
-
-  return {
-    date,
-    time: timeInfo?.normalized || "",
-    timeLabel: timeInfo?.label || "",
-    pretty: label || id
-  };
-}
-
-async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, nextAvailBtn, tzEl, citySelectEl) {
-  if (!statusEl || !calEl || !timesEl || !loadBarEl) return;
-
-  syncRouteGroupFromCity();
-
-  if (citySelectEl && quoteState.city) citySelectEl.value = quoteState.city;
-
-  statusEl.textContent = "Loading availability...";
-  loadBarEl.classList.add("isOn");
-  calEl.innerHTML = "";
-  timesEl.innerHTML = "";
-  nextAvailBtn.style.display = "none";
 
   try {
     const url = buildScriptUrl("slots", {
@@ -2506,394 +1602,342 @@ async function loadAvailabilityAndRender(statusEl, loadBarEl, calEl, timesEl, ne
       routeGroup: quoteState.routeGroup
     });
 
-    const res = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
-    const text = await res.text();
+    const res = await fetch(url, { method: "GET" });
+    const data = await res.json();
 
-    let data = null;
-    try { data = JSON.parse(text); }
-    catch {
-      statusEl.textContent = "Scheduling error: Apps Script did not return JSON.";
-      loadBarEl.classList.remove("isOn");
-      return;
+    if (!data?.ok) {
+      throw new Error(data?.message || data?.error || "Could not load times.");
     }
 
-    if (!data || data.ok !== true || !Array.isArray(data.slots)) {
-      statusEl.textContent = "Couldn’t load availability.";
-      loadBarEl.classList.remove("isOn");
-      return;
+    appointmentSlots = (data.slots || [])
+      .filter((slot) => slot?.id)
+      .map((slot) => ({
+        id: String(slot.id || ""),
+        label: String(slot.label || slot.id || ""),
+        date: normalizeDateValue(slot.date || slot.id),
+        time: normalizeTimeValue(slot.time || slot.id),
+        timeLabel: formatTimeLabel(slot.label || slot.time || slot.id)
+      }))
+      .filter((slot) => slot.date && slot.time)
+      .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+
+    appointmentSlotsLoadedKey = key;
+
+    const dates = Array.from(new Set(appointmentSlots.map((slot) => slot.date))).sort();
+    if (!selectedCalendarDate && dates.length) selectedCalendarDate = dates[0];
+    if (!calendarMonthDate && dates.length) {
+      const first = parseLocalDate(dates[0]) || new Date();
+      calendarMonthDate = new Date(first.getFullYear(), first.getMonth(), 1);
     }
-
-    calendarCache.tzLabel = data.tzLabel || "Local Time";
-    calendarCache.routeGroup = String(data.routeGroup || quoteState.routeGroup || "");
-    calendarCache.routeGroupLabel = String(data.routeGroupLabel || quoteState.routeGroupLabel || "");
-
-    if (calendarCache.routeGroup) quoteState.routeGroup = calendarCache.routeGroup;
-    if (calendarCache.routeGroupLabel) quoteState.routeGroupLabel = calendarCache.routeGroupLabel;
-
-    if (tzEl) tzEl.textContent = calendarCache.tzLabel;
-
-    const normalized = data.slots
-      .filter((s) => String(s.status || "open").toLowerCase() === "open" || !("status" in s))
-      .map((s) => {
-        const parsed = parseSlotToDateTime(s);
-
-        const date = parsed.date;
-        const time = parsed.time;
-        const timeLabel = parsed.timeLabel || formatTimeLabel(time, time);
-        const fallbackLabel = date && timeLabel ? `${date} ${timeLabel}` : String(s.label || parsed.pretty || s.id || "");
-
-        return {
-          id: String(s.id || "").trim(),
-          date,
-          time,
-          timeLabel,
-          label: String(s.label || "").trim() || fallbackLabel
-        };
-      })
-      .filter((s) => s.id && s.date && s.time)
-      .filter(slotIsStillValid);
-
-    calendarCache.slots = normalized;
-    calendarCache.byDate = buildCalendarIndex(calendarCache.slots);
-
-    const selectedSlotStillExists = calendarCache.slots.some((slot) => slot.id === quoteState.slotId);
-    if (!selectedSlotStillExists) {
-      quoteState.slotId = "";
-      quoteState.slotLabel = "";
-      quoteState.slotTime = "";
-    }
-
-    if (calendarCache.slots.length === 0) {
-      statusEl.textContent = "No availability right now.";
-      nextAvailBtn.style.display = "inline-flex";
-      loadBarEl.classList.remove("isOn");
-      updateNav();
-      return;
-    }
-
-    if (!quoteState.slotDate) quoteState.slotDate = findNextAvailableDate("");
-    else if (!calendarCache.byDate.has(quoteState.slotDate)) quoteState.slotDate = findNextAvailableDate(quoteState.slotDate);
-
-    statusEl.textContent = "Select a date, then choose a time:";
-    renderCalendar(calEl, timesEl, nextAvailBtn);
-  } catch {
-    statusEl.textContent = "Couldn’t load availability. Check Apps Script deployment + sheet rows.";
+  } catch (err) {
+    appointmentSlotsError = err?.message || "Could not load appointment times.";
+    appointmentSlots = [];
   } finally {
-    loadBarEl.classList.remove("isOn");
-    updateNav();
+    appointmentSlotsLoading = false;
+    if (steps[stepIndex] === "appointment") render();
   }
 }
 
-function renderCalendar(calEl, timesEl, nextAvailBtn) {
-  const selected = quoteState.slotDate ? new Date(`${quoteState.slotDate}T12:00:00`) : new Date();
-  let cursor = startOfMonth(selected);
+function selectSlot(slotId) {
+  const slot = appointmentSlots.find((s) => s.id === slotId);
+  if (!slot) return;
 
-  const head = document.createElement("div");
-  head.className = "qCalHead";
-
-  const prev = document.createElement("button");
-  prev.type = "button";
-  prev.className = "qCalNav";
-  prev.textContent = "‹";
-  prev.addEventListener("click", () => {
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
-    quoteState.slotTime = "";
-    quoteState.slotId = "";
-    quoteState.slotLabel = "";
-    quoteState.address = "";
-    resetPaymentState();
-    drawMonth(cursor);
-  });
-
-  const label = document.createElement("div");
-  label.className = "qCalMonth";
-  label.textContent = monthLabel(cursor);
-
-  const next = document.createElement("button");
-  next.type = "button";
-  next.className = "qCalNav";
-  next.textContent = "›";
-  next.addEventListener("click", () => {
-    cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
-    quoteState.slotTime = "";
-    quoteState.slotId = "";
-    quoteState.slotLabel = "";
-    quoteState.address = "";
-    resetPaymentState();
-    drawMonth(cursor);
-  });
-
-  head.append(prev, label, next);
-
-  const week = document.createElement("div");
-  week.className = "qCalWeek";
-  ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((d) => {
-    const w = document.createElement("div");
-    w.className = "qCalW";
-    w.textContent = d;
-    week.appendChild(w);
-  });
-
-  const grid = document.createElement("div");
-  grid.className = "qCalGrid";
-
-  calEl.innerHTML = "";
-  calEl.append(head, week, grid);
-
-  const drawMonth = (mStart) => {
-    label.textContent = monthLabel(mStart);
-    grid.innerHTML = "";
-
-    const firstDow = mStart.getDay();
-    const total = daysInMonth(mStart);
-
-    for (let i = 0; i < firstDow; i++) {
-      const blank = document.createElement("div");
-      blank.className = "qCalDay qCalDay--blank";
-      grid.appendChild(blank);
-    }
-
-    for (let d = 1; d <= total; d++) {
-      const date = new Date(mStart.getFullYear(), mStart.getMonth(), d);
-      const dateISO = isoDate(date);
-      const hasSlots = calendarCache.byDate.has(dateISO);
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "qCalDay" + (hasSlots ? "" : " isDisabled") + (quoteState.slotDate === dateISO ? " isSel" : "");
-      btn.textContent = String(d);
-      btn.disabled = !hasSlots;
-
-      btn.addEventListener("click", () => {
-        quoteState.slotDate = dateISO;
-        quoteState.slotTime = "";
-        quoteState.slotId = "";
-        quoteState.slotLabel = "";
-        quoteState.address = "";
-        resetPaymentState();
-        renderCalendar(calEl, timesEl, nextAvailBtn);
-      });
-
-      grid.appendChild(btn);
-    }
-
-    renderTimes(timesEl, nextAvailBtn);
-  };
-
-  drawMonth(cursor);
-}
-
-function renderTimes(timesEl, nextAvailBtn) {
-  timesEl.innerHTML = "";
-
-  const selectedDate = quoteState.slotDate;
-  const list = calendarCache.byDate.get(selectedDate) || [];
-
-  const title = document.createElement("div");
-  title.className = "qTimesTitle";
-  title.textContent = selectedDate ? `Availability for ${selectedDate}` : "Availability";
-  timesEl.appendChild(title);
-
-  const selectedLine = document.createElement("div");
-  selectedLine.className = "qTimesNone";
-  selectedLine.setAttribute("data-q-selected-line", "true");
-  selectedLine.textContent = quoteState.slotLabel ? `Selected: ${quoteState.slotLabel}` : "Selected: —";
-  timesEl.appendChild(selectedLine);
-
-  if (!list.length) {
-    const none = document.createElement("div");
-    none.className = "qTimesNone";
-    none.textContent = "No availability";
-    timesEl.appendChild(none);
-
-    nextAvailBtn.style.display = "inline-flex";
-    return;
-  }
-
-  nextAvailBtn.style.display = "none";
-
-  const grid = document.createElement("div");
-  grid.className = "qTimesGrid";
-
-  list.forEach((s) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "qTimeBtn" + (quoteState.slotId === s.id ? " isSel" : "");
-    b.textContent = s.timeLabel || s.time;
-
-    b.addEventListener("click", () => {
-      quoteState.slotId = s.id;
-      quoteState.slotDate = s.date;
-      quoteState.slotTime = s.time;
-      quoteState.slotLabel = s.label || `${s.date} ${s.timeLabel || s.time}`;
-      quoteState.address = "";
-      resetPaymentState();
-
-      grid.querySelectorAll(".qTimeBtn.isSel").forEach((btn) => btn.classList.remove("isSel"));
-      b.classList.add("isSel");
-
-      const line = timesEl.querySelector('[data-q-selected-line="true"]');
-      if (line) line.textContent = `Selected: ${quoteState.slotLabel}`;
-
-      updateNav();
-    });
-
-    grid.appendChild(b);
-  });
-
-  timesEl.appendChild(grid);
-  updateNav();
+  quoteState.slotId = slot.id;
+  quoteState.slotLabel = slot.label || `${formatDateNice(slot.date)} at ${slot.timeLabel}`;
+  quoteState.slotDate = slot.date;
+  quoteState.slotTime = slot.time;
 }
 
 // -------------------------
-// Submit
+// PAYLOAD / SUBMIT
 // -------------------------
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function buildLeadSignature() {
+  return [
+    quoteState.name,
+    quoteState.phone,
+    quoteState.email,
+    quoteState.city,
+    quoteState.vehicleType,
+    quoteState.serviceCategory,
+    getSelectedDisplayServices().join("|"),
+    quoteState.upkeepFrequency,
+    quoteState.notes,
+    normalizeCoupon(quoteState.couponCode)
+  ]
+    .map((v) => String(v || "").trim().toLowerCase())
+    .join("||");
 }
 
-function buildPayload() {
-  const estInfo = computeEstimateInfo();
-  const routeGroup = syncRouteGroupFromCity();
-  const routeGroupLabel = quoteState.routeGroupLabel;
-  const paymentIsBypassed = quoteState.paymentStatus === "bypassed";
+function buildPayload(includeSlot = false) {
+  const info = syncEstimateState();
+  const baseServices = quoteState.services.slice();
+  const displayServices = getSelectedDisplayServices();
 
-  return {
-    timestamp: new Date().toISOString(),
-    source: "Website Quote Wizard",
-
-    vehicleType: quoteState.vehicleType,
-    serviceCategory: quoteState.serviceCategory,
-    services: getSelectedDisplayServices(),
-    baseServices: quoteState.services,
-
-    interiorPackage: quoteState.interiorPackage,
-    exteriorPackage: quoteState.exteriorPackage,
-    paintCorrectionPackage: quoteState.paintCorrectionPackage,
-    ceramicPackage: quoteState.ceramicPackage,
-
-    interiorCondition: quoteState.interiorPackage,
-    exteriorCondition: quoteState.exteriorPackage,
-
-    upkeepFrequency: quoteState.upkeepFrequency,
-
-    estimateLow: quoteState.estimateLow,
-    estimateHigh: quoteState.estimateHigh,
-    estimateDisplay: formatEstimateDisplay(estInfo),
-    estimateIsStartingAt: !!estInfo?.hasStartingAt,
-    bundleSavings: estInfo?.savings || 0,
-
-    slotId: quoteState.slotId,
-    slotLabel: quoteState.slotLabel,
-    slotDate: quoteState.slotDate,
-    slotTime: quoteState.slotTime,
-
-    address: quoteState.address,
-
+  const payload = {
+    leadId: quoteState.leadId || "",
     name: quoteState.name,
     phone: quoteState.phone,
     email: quoteState.email,
     city: quoteState.city,
+    routeGroup: quoteState.routeGroup,
+    routeGroupLabel: quoteState.routeGroupLabel,
+
+    vehicleType: quoteState.vehicleType,
+    serviceCategory: quoteState.serviceCategory,
+    services: displayServices,
+    baseServices,
+
+    interiorPackage: quoteState.interiorPackage,
+    interiorCondition: quoteState.interiorPackage,
+    exteriorPackage: quoteState.exteriorPackage,
+    exteriorCondition: quoteState.exteriorPackage,
+    paintCorrectionPackage: quoteState.paintCorrectionPackage,
+    ceramicPackage: quoteState.ceramicPackage,
+    upkeepFrequency: quoteState.upkeepFrequency,
+
+    estimateLow: info?.low ?? "",
+    estimateHigh: info?.high ?? "",
+    estimateDisplay: formatEstimateDisplay(info),
+    estimateIsStartingAt: !!info?.hasStartingAt,
+    bundleSavings: info?.savings || 0,
+
+    couponCode: normalizeCoupon(quoteState.couponCode),
+    couponDiscount: info?.couponDiscount || 0,
+
     notes: quoteState.notes,
+    address: quoteState.address,
 
-    routeGroup,
-    routeGroupLabel,
-
-    paymentMode: paymentIsBypassed ? "bypass" : quoteState.paymentMode,
-    paymentBypass: paymentIsBypassed,
-    ackPriceVariance: quoteState.ackPriceVariance,
-    depositAmount: 0,
-    paymentAmountCharged: paymentIsBypassed ? 0 : (quoteState.paymentMode === "full" ? getCurrentChargeAmount() : 0),
+    paymentMode: "after",
+    paymentBypass: false,
+    ackDeposit: false,
+    ackPriceVariance: false,
     depositPaid: false,
-    fullPaid: quoteState.paymentStatus === "paid" && quoteState.paymentMode === "full",
-    payAfterService: !paymentIsBypassed && quoteState.paymentMode === "after",
-    paymentStatus: quoteState.paymentStatus,
-    squarePaymentId: quoteState.squarePaymentId
+    fullPaid: false,
+    depositAmount: 0,
+    paymentAmountCharged: 0,
+    paymentStatus: "appointment_requested",
+    squarePaymentId: ""
   };
+
+  if (includeSlot) {
+    payload.slotId = quoteState.slotId;
+    payload.slotLabel = quoteState.slotLabel;
+    payload.slotDate = quoteState.slotDate;
+    payload.slotTime = quoteState.slotTime;
+  }
+
+  return payload;
 }
 
-async function reserveAndSend() {
-  if (quoteState.honeypot && quoteState.honeypot.trim().length > 0) return { ok: true };
+async function sendLeadNotificationIfNeeded() {
+  if (quoteState.honeypot) return { ok: true, skipped: true };
 
-  const payload = buildPayload();
-  const reserveUrl = buildScriptUrl("reserve");
+  if (!quoteState.leadId) quoteState.leadId = makeLeadId();
+
+  const signature = buildLeadSignature();
+  if (quoteState.leadEmailSent && quoteState.leadEmailSignature === signature) {
+    return { ok: true, skipped: true };
+  }
+
+  quoteState.leadEmailSending = true;
+  render();
 
   try {
-    const result = await Promise.race([
-      postJson(reserveUrl, payload),
-      timeout(12000).then(() => ({ ok: false, message: "Submit timed out." }))
-    ]);
+    const payload = buildPayload(false);
+    const res = await fetch(window.SCRIPT_URL || DEFAULT_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
 
-    if (result && result.ok === true) return { ok: true };
-    if (result && result.ok === false) return { ok: false, message: result.message || "That time was just booked." };
-    return { ok: false, message: "Submit failed." };
-  } catch {
-    return { ok: false, message: "Submission blocked (CORS)." };
+    const data = await res.json();
+    if (!data?.ok && !data?.emailSent) {
+      throw new Error(data?.message || data?.error || data?.emailError || "Lead email failed.");
+    }
+
+    quoteState.leadEmailSent = true;
+    quoteState.leadEmailSignature = signature;
+    if (data?.leadId) quoteState.leadId = data.leadId;
+
+    return data;
+  } catch (err) {
+    console.warn("Lead notification failed:", err);
+    // Do not block the user from seeing the estimate just because email failed.
+    return { ok: false, error: err?.message || String(err) };
+  } finally {
+    quoteState.leadEmailSending = false;
+    if (steps[stepIndex] === "contact") render();
   }
 }
 
-function finalizeBooking() {
-  quoteNextBtn.disabled = true;
-  const old = quoteNextBtn.textContent;
-  quoteNextBtn.textContent = "Sending...";
+async function submitAppointmentRequest() {
+  if (!canContinue()) return;
 
-  const est = computeEstimateInfo();
-  quoteState.estimateLow = est ? est.low : "";
-  quoteState.estimateHigh = est ? est.high : "";
-  quoteState.estimateIsStartingAt = !!est?.hasStartingAt;
+  quoteState.submittingBooking = true;
+  quoteState.bookingError = "";
+  render();
 
-  reserveAndSend().then((result) => {
-    if (result && result.ok === false) {
-      alert(result.message || "That time was just booked. Pick another slot.");
-      quoteNextBtn.textContent = old;
-      quoteNextBtn.disabled = false;
-      return;
+  try {
+    if (!quoteState.leadId) quoteState.leadId = makeLeadId();
+
+    const payload = buildPayload(true);
+    const res = await fetch(window.SCRIPT_URL || DEFAULT_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    if (!data?.ok) {
+      throw new Error(data?.message || data?.error || data?.emailError || "Could not submit appointment request.");
     }
 
+    quoteState.submittingBooking = false;
     stepIndex = steps.indexOf("done");
-    renderStep();
-    quoteNextBtn.textContent = old;
-    quoteNextBtn.disabled = false;
-  });
+    render();
+  } catch (err) {
+    quoteState.submittingBooking = false;
+    quoteState.bookingError = err?.message || "Could not submit appointment request. Please try again.";
+    render();
+  }
 }
 
 // -------------------------
-// Nav actions
+// NAVIGATION
 // -------------------------
-async function nextStep(fromAutoAdvance = false) {
-  if (!canContinue()) return;
-
+async function goNext() {
   const step = steps[stepIndex];
 
-  if (step === "contact") {
-    stepIndex = nextActiveStepIndex(stepIndex);
-    renderStep();
-    if (fromAutoAdvance) updateNav();
-
-    queueLeadCapture();
+  if (step === "done") {
+    closeQuote();
     return;
   }
 
-  if (step === "payment") {
-    finalizeBooking();
+  if (!canContinue()) {
+    updateNav();
+    return;
+  }
+
+  if (step === "contact") {
+    await sendLeadNotificationIfNeeded();
+  }
+
+  if (step === "confirm") {
+    await submitAppointmentRequest();
     return;
   }
 
   stepIndex = nextActiveStepIndex(stepIndex);
-  renderStep();
-  if (fromAutoAdvance) updateNav();
+  render();
 }
 
-function prevStep() {
-  if (steps[stepIndex] === "done") {
-    closeQuoteModal();
-    return;
-  }
+function goBack() {
+  if (stepIndex <= 0) return;
   stepIndex = prevActiveStepIndex(stepIndex);
-  renderStep();
+  render();
 }
 
-quoteNextBtn?.addEventListener("click", () => { void nextStep(false); });
-quoteBackBtn?.addEventListener("click", prevStep);
+function resetQuoteFlow() {
+  Object.assign(quoteState, {
+    vehicleType: "",
+    serviceCategory: "",
+    services: [],
+    interiorPackage: "",
+    exteriorPackage: "",
+    paintCorrectionPackage: "",
+    ceramicPackage: "",
+    upkeepFrequency: "",
+    estimateLow: "",
+    estimateHigh: "",
+    estimateIsStartingAt: false,
+    couponCode: "",
+    couponDiscount: 0,
+    couponMessage: "",
+    slotId: "",
+    slotLabel: "",
+    slotDate: "",
+    slotTime: "",
+    address: "",
+    name: "",
+    phone: "",
+    email: "",
+    city: "",
+    notes: "",
+    routeGroup: "",
+    routeGroupLabel: "",
+    leadId: "",
+    leadEmailSent: false,
+    leadEmailSignature: "",
+    leadEmailSending: false,
+    submittingBooking: false,
+    bookingError: "",
+    paymentMode: "after",
+    ackPriceVariance: false,
+    depositAmount: 0,
+    paymentStatus: "appointment_requested",
+    paymentMessage: "",
+    squarePaymentId: "",
+    paidAmount: "0",
+    honeypot: ""
+  });
 
-if (quoteModal?.classList.contains("isOpen")) renderStep();
+  appointmentSlots = [];
+  appointmentSlotsLoading = false;
+  appointmentSlotsLoadedKey = "";
+  appointmentSlotsError = "";
+  calendarMonthDate = null;
+  selectedCalendarDate = "";
+  stepIndex = 0;
+}
+
+function openQuote() {
+  if (!quoteModal) return;
+  lastActiveElQuote = document.activeElement;
+  quoteModal.removeAttribute("hidden");
+  quoteModal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  render();
+  setTimeout(() => quoteNextBtn?.focus(), 50);
+}
+
+function closeQuote() {
+  if (!quoteModal) return;
+  quoteModal.setAttribute("hidden", "");
+  quoteModal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+  lastActiveElQuote?.focus?.();
+}
+
+// -------------------------
+// INIT
+// -------------------------
+function initQuoteWizard() {
+  document.querySelectorAll("[data-quote-open]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      resetQuoteFlow();
+      openQuote();
+    });
+  });
+
+  quoteCloseBtns.forEach((btn) => btn.addEventListener("click", closeQuote));
+
+  quoteNextBtn?.addEventListener("click", () => {
+    goNext();
+  });
+
+  quoteBackBtn?.addEventListener("click", () => {
+    goBack();
+  });
+
+  quoteModal?.addEventListener("click", (e) => {
+    if (e.target === quoteModal) closeQuote();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && quoteModal && !quoteModal.hasAttribute("hidden")) {
+      closeQuote();
+    }
+  });
+}
+
+initQuoteWizard();
