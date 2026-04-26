@@ -5,7 +5,7 @@
 // -------------------------
 
 const DEFAULT_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwHjH4JaJ_9Vl6xegBIuLztbcGnfPwvxdV00ej7LPEX4Tu0Da5ZbBseHxcbQg8Q217v/exec";
+  "https://script.google.com/macros/s/AKfycbypGCCGap1xVweJoBzPQwiNkV9z_38Rp2qRmeJ5HujXmYN_rVSB1zVCffSn-6tubvP-2w/exec";
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
