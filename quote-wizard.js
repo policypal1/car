@@ -26,12 +26,9 @@ const VALID_COUPONS = {
   // Add custom coupon codes here. Format: CODE: discountAmount
   // Example: SPRING25: 25,
   DETAIL10: 10,
-  DEKUNSBALS: 999999999,
-  NIGGABUTTSEX: 69,
-  FUCKYOUMAX: 1,
-  ILOVESAM: 9999999,
-  DEKUNLIKESITHARD: 5
-  };
+  CLEAN10: 10,
+  RESET10: 10
+};
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
@@ -2369,11 +2366,7 @@ function openQuote() {
 
   document.body.style.overflow = "hidden";
 
-  quoteCloseBtns.forEach(btn => {
-    btn.removeAttribute("aria-hidden");
-    btn.removeAttribute("tabindex");
-    btn.style.display = "inline-flex";
-  });
+  styleQuoteCloseButtons();
 
   try {
     render();
@@ -2439,10 +2432,118 @@ window.forceCloseQuote = function () {
 };
 
 // -------------------------
+// UI PATCHES
+// -------------------------
+
+function injectQuoteWizardStylePatches() {
+  if (document.getElementById("quote-wizard-js-style-patches")) return;
+
+  const style = document.createElement("style");
+  style.id = "quote-wizard-js-style-patches";
+  style.textContent = `
+    [data-quote-modal]:not([hidden]) {
+      background: rgba(0,0,0,.52) !important;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    [data-quote-close] {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      padding: 0 !important;
+      border-radius: 14px !important;
+      border: 1px solid rgba(0,0,0,.14) !important;
+      background: #fff !important;
+      color: #111 !important;
+      box-shadow: 0 10px 26px rgba(0,0,0,.08) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      line-height: 1 !important;
+      font-size: 0 !important;
+      font-weight: 900 !important;
+      cursor: pointer !important;
+      appearance: none !important;
+      -webkit-appearance: none !important;
+    }
+
+    [data-quote-close]::before {
+      content: "×";
+      display: block;
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1;
+      transform: translateY(-1px);
+    }
+
+    [data-quote-close]:hover {
+      background: #f7f7f7 !important;
+      border-color: rgba(0,0,0,.22) !important;
+    }
+
+    [data-quote-close]:focus-visible {
+      outline: none !important;
+      box-shadow: 0 0 0 4px rgba(214,178,94,.22), 0 10px 26px rgba(0,0,0,.08) !important;
+      border-color: rgba(214,178,94,.72) !important;
+    }
+
+    .qInputField.hasError .qInputIcon {
+      top: 28px !important;
+      transform: translateY(-50%) !important;
+    }
+
+    .qInputField.hasError label {
+      top: 28px !important;
+      transform: translateY(-50%) !important;
+    }
+
+    .qInputField.hasError input:focus + label,
+    .qInputField.hasError input:not(:placeholder-shown) + label,
+    .qInputField.hasError.isFilled label,
+    .qInputField.hasError.qInputField--select label {
+      top: 10px !important;
+      transform: translateY(0) !important;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function styleQuoteCloseButtons() {
+  quoteCloseBtns.forEach(btn => {
+    btn.removeAttribute("aria-hidden");
+    btn.removeAttribute("tabindex");
+    btn.setAttribute("aria-label", "Close quote form");
+    btn.style.display = "inline-flex";
+  });
+}
+
+function preventBackdropClose() {
+  if (!quoteModal || quoteModal.dataset.backdropCloseLocked === "true") return;
+
+  quoteModal.dataset.backdropCloseLocked = "true";
+
+  ["click", "mousedown", "mouseup", "touchstart", "touchend"].forEach(eventName => {
+    quoteModal.addEventListener(eventName, e => {
+      if (e.target === quoteModal) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }, true);
+  });
+}
+
+// -------------------------
 // INIT
 // -------------------------
 
 function initQuoteWizard() {
+  injectQuoteWizardStylePatches();
+  preventBackdropClose();
+  styleQuoteCloseButtons();
+
   if (!quoteModal || !quoteBody) {
     console.warn("Quote wizard missing modal/body elements.");
     return;
