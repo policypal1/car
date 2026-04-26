@@ -1,7 +1,7 @@
 // -------------------------
-// QUOTE WIZARD
-// Conversion Flow v12.2
-// Vehicle -> Category -> Service -> Package -> Contact -> Estimate -> Appointment -> Address -> Confirm -> Done
+// KEIZER MOBILE DETAILING QUOTE WIZARD
+// Clean Conversion Flow v12.3
+// Vehicle -> Service Type -> Package(s) -> Contact -> Estimate -> Time -> Address -> Confirm -> Success
 // -------------------------
 
 const DEFAULT_SCRIPT_URL =
@@ -9,7 +9,7 @@ const DEFAULT_SCRIPT_URL =
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
-const HEADLIGHT_RESTORATION_PRICE = 80;
+const INTERIOR_EXTERIOR_BUNDLE_DISCOUNT = 30;
 
 const ROUTE_GROUP_SOUTH = "south";
 const ROUTE_GROUP_NORTH = "north";
@@ -53,10 +53,6 @@ const quoteState = {
 
   interiorPackage: "",
   exteriorPackage: "",
-  paintCorrectionPackage: "",
-  ceramicPackage: "",
-
-  upkeepFrequency: "",
 
   estimateLow: "",
   estimateHigh: "",
@@ -66,21 +62,20 @@ const quoteState = {
   couponDiscount: 0,
   couponMessage: "",
 
-  slotId: "",
-  slotLabel: "",
-  slotDate: "",
-  slotTime: "",
-
-  address: "",
-
   name: "",
   phone: "",
   email: "",
   city: "",
   notes: "",
+  address: "",
 
   routeGroup: "",
   routeGroupLabel: "",
+
+  slotId: "",
+  slotLabel: "",
+  slotDate: "",
+  slotTime: "",
 
   leadId: "",
   leadEmailSent: false,
@@ -90,23 +85,14 @@ const quoteState = {
   submittingBooking: false,
   bookingError: "",
 
-  paymentMode: "after",
-  paymentStatus: "appointment_requested",
-  paymentAmountCharged: 0,
-  squarePaymentId: "",
-
   honeypot: ""
 };
 
 const steps = [
   "vehicleType",
   "serviceCategory",
-  "service",
   "interiorPackage",
   "exteriorPackage",
-  "paintCorrectionPackage",
-  "ceramicPackage",
-  "upkeepFrequency",
   "contact",
   "estimate",
   "appointment",
@@ -114,10 +100,6 @@ const steps = [
   "confirm",
   "done"
 ];
-
-// -------------------------
-// OPTIONS / IMAGES
-// -------------------------
 
 const vehicleTypes = [
   {
@@ -150,90 +132,30 @@ const vehicleTypes = [
   }
 ];
 
-const SERVICECAT_INTERIOR_IMG = "./2017-05-22-07-32-26.jpg";
-const SERVICECAT_EXTERIOR_IMG = "./c36084da09340612d8431de0221ea985.jpg";
-
 const serviceCategories = [
   {
     label: "Interior",
     hint: "Inside-only detailing",
-    img: SERVICECAT_INTERIOR_IMG
+    img: "./2017-05-22-07-32-26.jpg"
   },
   {
     label: "Exterior",
     hint: "Outside-only detailing",
-    img: SERVICECAT_EXTERIOR_IMG
+    img: "./c36084da09340612d8431de0221ea985.jpg"
   },
   {
     label: "Interior + Exterior",
     hint: "Full detail inside + out",
-    img: [SERVICECAT_INTERIOR_IMG, SERVICECAT_EXTERIOR_IMG],
+    img: ["./2017-05-22-07-32-26.jpg", "./c36084da09340612d8431de0221ea985.jpg"],
     split: "h"
-  }
-];
-
-const INTERIOR_UPKEEP_IMG = "./img_6480.webp";
-const EXTERIOR_UPKEEP_IMG = "./Audi 2 Foamed_1704769098.webp";
-const CERAMIC_IMG = "./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png";
-const PAINT_CORRECTION_IMG = "./bee.jpg";
-const HEADLIGHT_RESTORATION_IMG = "./CCC_Headlight_Mktplc_Before_After__95898.jpg";
-
-const servicesAll = [
-  {
-    label: "Interior Detail",
-    category: "Interior",
-    img: "./Shampooing_interior_detail-55a7e5ac-640w.webp"
-  },
-  {
-    label: "Exterior Wash",
-    category: "Exterior",
-    img: "./63eaaf7a6f6b7f11ccae99f6_car-detailing-houston-1.jpg"
-  },
-  {
-    label: "Headlight Restoration",
-    category: "Exterior",
-    img: HEADLIGHT_RESTORATION_IMG
-  },
-  {
-    label: "Interior Upkeep Plan",
-    category: "Interior",
-    img: INTERIOR_UPKEEP_IMG,
-    upkeep: "interior"
-  },
-  {
-    label: "Exterior Upkeep Plan",
-    category: "Exterior",
-    img: EXTERIOR_UPKEEP_IMG,
-    upkeep: "exterior"
-  },
-  {
-    label: "Interior + Exterior Upkeep Plan",
-    category: "Both",
-    img: [INTERIOR_UPKEEP_IMG, EXTERIOR_UPKEEP_IMG],
-    split: "h",
-    upkeep: "both"
-  },
-  {
-    label: "Paint Correction",
-    category: "Exterior",
-    img: PAINT_CORRECTION_IMG,
-    substep: "paint"
-  },
-  {
-    label: "Ceramic Coating",
-    category: "Exterior",
-    img: CERAMIC_IMG,
-    substep: "ceramic"
   }
 ];
 
 const interiorPackages = [
   {
-    label: "Standard",
-    displayLabel: "Standard Clean",
+    label: "Standard Clean",
     serviceLabel: "Standard Interior Detail",
-    hint: "Best if the interior is already maintained.",
-    img: "./IMG_2915.jpg",
+    hint: "Best if the interior is already maintained and needs a simple reset.",
     features: [
       "Full interior vacuum",
       "Full interior wipe down",
@@ -243,10 +165,8 @@ const interiorPackages = [
   },
   {
     label: "Deep Clean",
-    displayLabel: "Deep Clean",
     serviceLabel: "Deep Clean Interior Detail",
-    hint: "Best for dirt buildup, light stains, and a deeper reset.",
-    img: "./IMG_2916.jpg",
+    hint: "Best for dirt buildup, light stains, and a more complete interior clean.",
     features: [
       "Full interior vacuum",
       "Full interior wipe down",
@@ -259,10 +179,8 @@ const interiorPackages = [
   },
   {
     label: "Premium Deep Clean",
-    displayLabel: "Premium Deep Clean",
     serviceLabel: "Premium Deep Clean Interior Detail",
     hint: "Best for heavier dirt, pet hair, stains, or neglected interiors.",
-    img: "./dirty-car-complete-with-moldy-carpets-v0-nb2pbgkkdalb1.png",
     features: [
       "Full interior vacuum",
       "Full interior wipe down",
@@ -280,10 +198,8 @@ const interiorPackages = [
 const exteriorPackages = [
   {
     label: "Standard",
-    displayLabel: "Standard",
     serviceLabel: "Standard Exterior Detail",
     hint: "Best for a basic exterior reset.",
-    img: "./looks-dirty-even-after-wash-v0-0v8lqgjivccf1.webp",
     features: [
       "Pre-wash foam",
       "Contact wash",
@@ -295,11 +211,8 @@ const exteriorPackages = [
   },
   {
     label: "Premium",
-    displayLabel: "Premium",
     serviceLabel: "Premium Exterior Detail",
     hint: "Best for a more complete exterior clean and protection.",
-    img: "./IMG_2910.jpg",
-    zoom: 1.28,
     features: [
       "Pre-wash foam",
       "Contact wash",
@@ -312,10 +225,8 @@ const exteriorPackages = [
   },
   {
     label: "Clay Decontamination",
-    displayLabel: "Clay Decontamination",
     serviceLabel: "Clay Decontamination Exterior Detail",
     hint: "Best for deeper contamination removal.",
-    img: "./dirty-car.jpg",
     features: [
       "Pre-wash foam",
       "Contact wash",
@@ -331,58 +242,7 @@ const exteriorPackages = [
   }
 ];
 
-const paintCorrectionPackages = [
-  {
-    label: "1 Step Paint Correction",
-    serviceLabel: "Stage 1 Paint Correction",
-    hint: "Gloss boost + defect reduction",
-    img: "./2db4c116-33b7-4492-8922-1a3b5b25ee1c.png",
-    badge: "1"
-  },
-  {
-    label: "2 Step Paint Correction",
-    serviceLabel: "Stage 2 Paint Correction",
-    hint: "Heavier correction finish",
-    img: "./9d828f71-efdd-4de9-a62b-1de399617334.png",
-    badge: "2"
-  }
-];
-
-const ceramicPackages = [
-  {
-    label: "Ceramic Coating with Dlay Decontamination ",
-    serviceLabel: "Level 1 Ceramic Coating",
-    hint: "Starting at $500",
-    img: "./ChatGPT Image Mar 12, 2026, 07_07_29 PM.png",
-    startingAt: 500
-  },
-  {
-    label: "Ceramic Coating with Single Stage Paint Correction",
-    serviceLabel: "Level 2 Ceramic Coating",
-    hint: "Starting at $800",
-    img: "./ChatGPT Image Mar 12, 2026, 07_09_50 PM.png",
-    startingAt: 800
-  },
-  {
-    label: "Ceramic Coating with 2 Stage Paint Correction",
-    serviceLabel: "Level 3 Ceramic Coating",
-    hint: "Starting at $1000",
-    img: "./ChatGPT Image Mar 12, 2026, 07_14_23 PM.png",
-    startingAt: 1000
-  }
-];
-
-const upkeepFrequencies = [
-  { label: "Weekly", hint: "Lowest per-visit price" },
-  { label: "Biweekly", hint: "Best mix of value + consistency" },
-  { label: "Monthly", hint: "Base upkeep rate" }
-];
-
 const serviceCities = ["Keizer", "Salem", "Portland", "Tigard", "Lake Oswego"];
-
-// -------------------------
-// PRICING
-// -------------------------
 
 const INTERIOR_DETAIL_PRICES = {
   "Standard Interior Detail": { Sedan: 80, SUV: 90, "Big SUV": 100, Truck: 80 },
@@ -395,31 +255,6 @@ const EXTERIOR_DETAIL_PRICES = {
   "Premium Exterior Detail": { Sedan: 100, SUV: 110, "Big SUV": 120, Truck: 115 },
   "Clay Decontamination Exterior Detail": { Sedan: 130, SUV: 150, "Big SUV": 165, Truck: 150 }
 };
-
-const PAINT_CORRECTION_PRICES = {
-  "Stage 1 Paint Correction": { Sedan: 275, SUV: 300, "Big SUV": 320, Truck: 295 },
-  "Stage 2 Paint Correction": { Sedan: 370, SUV: 395, "Big SUV": 410, Truck: 395 }
-};
-
-const CERAMIC_COATING_STARTING_AT = {
-  "Level 1 Ceramic Coating": 500,
-  "Level 2 Ceramic Coating": 800,
-  "Level 3 Ceramic Coating": 1000
-};
-
-const UPKEEP_BASE_PRICES = {
-  "Interior Upkeep Plan": { Sedan: 85, SUV: 95, "Big SUV": 110, Truck: 100 },
-  "Exterior Upkeep Plan": { Sedan: 55, SUV: 65, "Big SUV": 75, Truck: 70 },
-  "Interior + Exterior Upkeep Plan": { Sedan: 125, SUV: 145, "Big SUV": 170, Truck: 155 }
-};
-
-const UPKEEP_FREQUENCY_MULTIPLIER = {
-  Weekly: 0.85,
-  Biweekly: 0.92,
-  Monthly: 1
-};
-
-const INTERIOR_EXTERIOR_BUNDLE_DISCOUNT = 30;
 
 // -------------------------
 // HELPERS
@@ -454,12 +289,6 @@ function normalizeCoupon(code) {
 
 function getCouponDiscount(code = quoteState.couponCode) {
   return VALID_COUPONS[normalizeCoupon(code)] || 0;
-}
-
-function priceForVehicle(table, key) {
-  const vehicle = quoteState.vehicleType;
-  if (!vehicle || !table?.[key]) return null;
-  return clampInt(table[key][vehicle]);
 }
 
 function normalizeCityKey(city) {
@@ -580,6 +409,7 @@ function formatTimeLabel(raw, normalized = normalizeTimeValue(raw)) {
 function formatDateNice(ymd) {
   const d = parseLocalDate(ymd);
   if (!d) return ymd || "";
+
   return d.toLocaleDateString([], {
     weekday: "short",
     month: "short",
@@ -594,42 +424,27 @@ function monthLabel(date) {
   });
 }
 
-// -------------------------
-// STEP LOGIC
-// -------------------------
-
-const UPKEEP_SET = new Set(["Interior Upkeep Plan", "Exterior Upkeep Plan", "Interior + Exterior Upkeep Plan"]);
-
-function isUpkeepService(label) {
-  return UPKEEP_SET.has(label);
+function advanceSoon(delay = 140) {
+  window.setTimeout(() => {
+    if (canContinue()) goNext();
+  }, delay);
 }
 
-function isUpkeepPlanSelected() {
-  return quoteState.services.some(isUpkeepService);
-}
+// -------------------------
+// FLOW LOGIC
+// -------------------------
 
-function anyServiceRequiresInteriorPackage() {
+function needsInteriorPackage() {
   return quoteState.services.includes("Interior Detail");
 }
 
-function anyServiceRequiresExteriorPackage() {
+function needsExteriorPackage() {
   return quoteState.services.includes("Exterior Wash");
 }
 
-function anyServiceRequiresPaintCorrectionPackage() {
-  return quoteState.services.includes("Paint Correction");
-}
-
-function anyServiceRequiresCeramicPackage() {
-  return quoteState.services.includes("Ceramic Coating");
-}
-
 function stepIsActive(stepName) {
-  if (stepName === "interiorPackage") return anyServiceRequiresInteriorPackage();
-  if (stepName === "exteriorPackage") return anyServiceRequiresExteriorPackage();
-  if (stepName === "paintCorrectionPackage") return anyServiceRequiresPaintCorrectionPackage();
-  if (stepName === "ceramicPackage") return anyServiceRequiresCeramicPackage();
-  if (stepName === "upkeepFrequency") return isUpkeepPlanSelected();
+  if (stepName === "interiorPackage") return needsInteriorPackage();
+  if (stepName === "exteriorPackage") return needsExteriorPackage();
   return true;
 }
 
@@ -641,6 +456,7 @@ function nextActiveStepIndex(fromIndex) {
   for (let i = fromIndex + 1; i < steps.length; i++) {
     if (stepIsActive(steps[i])) return i;
   }
+
   return steps.length - 1;
 }
 
@@ -648,153 +464,83 @@ function prevActiveStepIndex(fromIndex) {
   for (let i = fromIndex - 1; i >= 0; i--) {
     if (stepIsActive(steps[i])) return i;
   }
+
   return 0;
 }
 
-function resetPackageSelectionsIfNeeded() {
-  if (!quoteState.services.includes("Interior Detail")) quoteState.interiorPackage = "";
-  if (!quoteState.services.includes("Exterior Wash")) quoteState.exteriorPackage = "";
-  if (!quoteState.services.includes("Paint Correction")) quoteState.paintCorrectionPackage = "";
-  if (!quoteState.services.includes("Ceramic Coating")) quoteState.ceramicPackage = "";
-  if (!isUpkeepPlanSelected()) quoteState.upkeepFrequency = "";
-}
+function setServiceByCategory(category) {
+  quoteState.serviceCategory = category;
 
-function getServicesForCategory() {
-  if (quoteState.serviceCategory === "Interior") {
-    return servicesAll.filter(s => s.category === "Interior");
+  if (category === "Interior") {
+    quoteState.services = ["Interior Detail"];
+    quoteState.exteriorPackage = "";
   }
 
-  if (quoteState.serviceCategory === "Exterior") {
-    return servicesAll.filter(s => s.category === "Exterior");
+  if (category === "Exterior") {
+    quoteState.services = ["Exterior Wash"];
+    quoteState.interiorPackage = "";
   }
 
-  if (quoteState.serviceCategory === "Interior + Exterior") {
-    return servicesAll.filter(s => ["Interior", "Exterior", "Both"].includes(s.category));
+  if (category === "Interior + Exterior") {
+    quoteState.services = ["Interior Detail", "Exterior Wash"];
   }
 
-  return servicesAll;
+  clearEstimateDependentState();
 }
 
 function getSelectedDisplayServices() {
   return quoteState.services.map(service => {
     if (service === "Interior Detail") return quoteState.interiorPackage || service;
     if (service === "Exterior Wash") return quoteState.exteriorPackage || service;
-    if (service === "Paint Correction") return quoteState.paintCorrectionPackage || service;
-    if (service === "Ceramic Coating") return quoteState.ceramicPackage || service;
     return service;
   });
-}
-
-function getSelectedServiceChipData() {
-  return quoteState.services.map(service => {
-    if (service === "Interior Detail") return { baseLabel: service, displayLabel: quoteState.interiorPackage || service };
-    if (service === "Exterior Wash") return { baseLabel: service, displayLabel: quoteState.exteriorPackage || service };
-    if (service === "Paint Correction") return { baseLabel: service, displayLabel: quoteState.paintCorrectionPackage || service };
-    if (service === "Ceramic Coating") return { baseLabel: service, displayLabel: quoteState.ceramicPackage || service };
-    return { baseLabel: service, displayLabel: service };
-  });
-}
-
-function hasInteriorExteriorBundle() {
-  return quoteState.services.includes("Interior Detail") && quoteState.services.includes("Exterior Wash");
-}
-
-function getDisplayRangeAddForService(serviceLabel) {
-  if (serviceLabel === "Interior Detail") return INTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Exterior Wash") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Headlight Restoration") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Paint Correction") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Ceramic Coating") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Interior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Exterior Upkeep Plan") return EXTERIOR_DISPLAY_RANGE_ADD;
-  if (serviceLabel === "Interior + Exterior Upkeep Plan") return INTERIOR_DISPLAY_RANGE_ADD + EXTERIOR_DISPLAY_RANGE_ADD;
-  return 0;
-}
-
-function computeUpkeepPrice(serviceLabel, frequency = quoteState.upkeepFrequency) {
-  const vehicle = quoteState.vehicleType;
-  if (!vehicle || !serviceLabel || !frequency) return null;
-
-  const base = UPKEEP_BASE_PRICES?.[serviceLabel]?.[vehicle];
-  const mult = UPKEEP_FREQUENCY_MULTIPLIER?.[frequency];
-
-  if (!Number.isFinite(base) || !Number.isFinite(mult)) return null;
-  return clampInt(base * mult);
 }
 
 // -------------------------
 // ESTIMATE
 // -------------------------
 
-function computeEstimateInfo() {
+function priceForVehicle(table, key) {
   const vehicle = quoteState.vehicleType;
-  const services = quoteState.services || [];
+  if (!vehicle || !table?.[key]) return null;
+  return clampInt(table[key][vehicle]);
+}
 
-  if (!vehicle || !services.length) return null;
+function computeEstimateInfo() {
+  if (!quoteState.vehicleType || !quoteState.services.length) return null;
 
   let subtotal = 0;
-  let hasStartingAt = false;
-  let displayRangeAdd = 0;
+  let rangeAdd = 0;
 
-  for (const service of services) {
-    if (service === "Interior Detail") {
-      const price = priceForVehicle(INTERIOR_DETAIL_PRICES, quoteState.interiorPackage);
-      if (!Number.isFinite(price)) return null;
-      subtotal += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
+  if (quoteState.services.includes("Interior Detail")) {
+    const interiorPrice = priceForVehicle(INTERIOR_DETAIL_PRICES, quoteState.interiorPackage);
+    if (!Number.isFinite(interiorPrice)) return null;
 
-    if (service === "Exterior Wash") {
-      const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, quoteState.exteriorPackage);
-      if (!Number.isFinite(price)) return null;
-      subtotal += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Headlight Restoration") {
-      subtotal += HEADLIGHT_RESTORATION_PRICE;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Paint Correction") {
-      const price = priceForVehicle(PAINT_CORRECTION_PRICES, quoteState.paintCorrectionPackage);
-      if (!Number.isFinite(price)) return null;
-      subtotal += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
-
-    if (service === "Ceramic Coating") {
-      const price = CERAMIC_COATING_STARTING_AT?.[quoteState.ceramicPackage];
-      if (!Number.isFinite(price)) return null;
-      subtotal += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      hasStartingAt = true;
-      continue;
-    }
-
-    if (isUpkeepService(service)) {
-      const price = computeUpkeepPrice(service, quoteState.upkeepFrequency);
-      if (!Number.isFinite(price)) return null;
-      subtotal += price;
-      displayRangeAdd += getDisplayRangeAddForService(service);
-      continue;
-    }
+    subtotal += interiorPrice;
+    rangeAdd += INTERIOR_DISPLAY_RANGE_ADD;
   }
 
-  const bundleSavings = hasInteriorExteriorBundle() ? INTERIOR_EXTERIOR_BUNDLE_DISCOUNT : 0;
+  if (quoteState.services.includes("Exterior Wash")) {
+    const exteriorPrice = priceForVehicle(EXTERIOR_DETAIL_PRICES, quoteState.exteriorPackage);
+    if (!Number.isFinite(exteriorPrice)) return null;
+
+    subtotal += exteriorPrice;
+    rangeAdd += EXTERIOR_DISPLAY_RANGE_ADD;
+  }
+
+  const bundleSavings =
+    quoteState.services.includes("Interior Detail") &&
+    quoteState.services.includes("Exterior Wash")
+      ? INTERIOR_EXTERIOR_BUNDLE_DISCOUNT
+      : 0;
+
   const couponDiscount = getCouponDiscount();
 
   const lowBeforeCoupon = Math.max(0, subtotal - bundleSavings);
-  const highBeforeCoupon = Math.max(0, lowBeforeCoupon + displayRangeAdd);
+  const highBeforeCoupon = Math.max(0, lowBeforeCoupon + rangeAdd);
 
   const low = clampInt(Math.max(0, lowBeforeCoupon - couponDiscount));
   const high = clampInt(Math.max(0, highBeforeCoupon - couponDiscount));
-
-  if (!Number.isFinite(low) || !Number.isFinite(high)) return null;
 
   return {
     subtotal: clampInt(subtotal),
@@ -802,10 +548,7 @@ function computeEstimateInfo() {
     highBeforeCoupon: clampInt(highBeforeCoupon),
     low,
     high,
-    total: low,
-    hasStartingAt,
     savings: bundleSavings,
-    couponCode: normalizeCoupon(quoteState.couponCode),
     couponDiscount
   };
 }
@@ -816,14 +559,12 @@ function syncEstimateState() {
   if (!info) {
     quoteState.estimateLow = "";
     quoteState.estimateHigh = "";
-    quoteState.estimateIsStartingAt = false;
     quoteState.couponDiscount = 0;
     return null;
   }
 
   quoteState.estimateLow = String(info.low);
   quoteState.estimateHigh = String(info.high);
-  quoteState.estimateIsStartingAt = !!info.hasStartingAt;
   quoteState.couponDiscount = info.couponDiscount || 0;
 
   return info;
@@ -832,14 +573,11 @@ function syncEstimateState() {
 function formatEstimateDisplay(info = computeEstimateInfo()) {
   if (!info) return "We’ll confirm after assessment";
 
-  const lowText = formatMoney(info.low);
-  const highText = formatMoney(info.high);
-
   if (Number(info.high) > Number(info.low)) {
-    return info.hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
+    return `${formatMoney(info.low)} - ${formatMoney(info.high)}`;
   }
 
-  return info.hasStartingAt ? `Starting at ${lowText}` : lowText;
+  return formatMoney(info.low);
 }
 
 // -------------------------
@@ -850,7 +588,10 @@ function ensureProgressDots() {
   const visibleSteps = getVisibleSteps();
 
   if (!quoteProgressEl) {
-    return { dots: quoteDots(), visibleSteps };
+    return {
+      dots: quoteDots(),
+      visibleSteps
+    };
   }
 
   const desiredCount = Math.max(visibleSteps.length, 1);
@@ -868,7 +609,10 @@ function ensureProgressDots() {
     }
   }
 
-  return { dots: quoteDots(), visibleSteps };
+  return {
+    dots: quoteDots(),
+    visibleSteps
+  };
 }
 
 function setProgress() {
@@ -888,21 +632,18 @@ function canContinue() {
 
   if (step === "vehicleType") return !!quoteState.vehicleType;
   if (step === "serviceCategory") return !!quoteState.serviceCategory;
-  if (step === "service") return quoteState.services.length > 0;
-
-  if (step === "interiorPackage") return !anyServiceRequiresInteriorPackage() || !!quoteState.interiorPackage;
-  if (step === "exteriorPackage") return !anyServiceRequiresExteriorPackage() || !!quoteState.exteriorPackage;
-  if (step === "paintCorrectionPackage") return !anyServiceRequiresPaintCorrectionPackage() || !!quoteState.paintCorrectionPackage;
-  if (step === "ceramicPackage") return !anyServiceRequiresCeramicPackage() || !!quoteState.ceramicPackage;
-  if (step === "upkeepFrequency") return !isUpkeepPlanSelected() || !!quoteState.upkeepFrequency;
+  if (step === "interiorPackage") return !needsInteriorPackage() || !!quoteState.interiorPackage;
+  if (step === "exteriorPackage") return !needsExteriorPackage() || !!quoteState.exteriorPackage;
 
   if (step === "contact") {
-    return !!quoteState.name &&
+    return (
+      !!quoteState.name &&
       !!quoteState.phone &&
       !!quoteState.email &&
       !!quoteState.city &&
       !!quoteState.routeGroup &&
-      !quoteState.leadEmailSending;
+      !quoteState.leadEmailSending
+    );
   }
 
   if (step === "estimate") return !!computeEstimateInfo();
@@ -917,10 +658,10 @@ function canContinue() {
 function getNextButtonText() {
   const step = steps[stepIndex];
 
-  if (step === "contact") return quoteState.leadEmailSending ? "Sending..." : "See My Estimate";
-  if (step === "estimate") return "Pick My Appointment Time";
-  if (step === "appointment") return "Continue With This Time";
-  if (step === "address") return "Review My Request";
+  if (step === "contact") return quoteState.leadEmailSending ? "Sending..." : "Get My Quote";
+  if (step === "estimate") return "Pick Appointment Time";
+  if (step === "appointment") return "Continue";
+  if (step === "address") return "Review Request";
   if (step === "confirm") return quoteState.submittingBooking ? "Sending..." : "Request My Appointment";
   if (step === "done") return "Close";
 
@@ -948,7 +689,7 @@ function renderNavPrice() {
 }
 
 // -------------------------
-// HTML HELPERS
+// HTML COMPONENTS
 // -------------------------
 
 function renderMedia(item) {
@@ -962,86 +703,46 @@ function renderMedia(item) {
     `;
   }
 
-  const zoomStyle = item.zoom ? `style="--imgZoom:${Number(item.zoom)};--carZoom:${Number(item.zoom)}"` : "";
+  const zoomStyle = item.zoom
+    ? `style="--imgZoom:${Number(item.zoom)};--carZoom:${Number(item.zoom)}"`
+    : "";
+
   const zoomClass = item.zoom ? " isZoom" : "";
   const containClass = item.contain ? "isContain" : "";
 
   return `
     <div class="qCardMedia${zoomClass}" ${zoomStyle}>
-      ${item.badge ? `<span class="qCardBadge">${escapeHtml(item.badge)}</span>` : ""}
-      ${(item.label === "Paint Correction" || item.label === "Ceramic Coating") ? `<span class="requires-badge">Requires Exterior Wash</span>` : ""}
       <img class="${containClass}" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.label || "")}" loading="lazy">
     </div>
   `;
 }
 
-function optionCard(item, selected, action, opts = {}) {
-  const cardType = opts.cardType || "qCard--img";
-  const hint = opts.hint ?? item.hint ?? "";
-
+function imageCard(item, selected, action, cardType = "qCard--img") {
   return `
     <button class="qCard ${cardType} ${selected ? "isSel" : ""}" type="button" data-action="${escapeHtml(action)}" data-value="${escapeHtml(item.label)}">
       ${renderMedia(item)}
-      <div class="qCardLabel">${escapeHtml(item.displayLabel || item.label)}</div>
-      <div class="qCardHint">${escapeHtml(hint)}</div>
+      <div class="qCardLabel">${escapeHtml(item.label)}</div>
+      <div class="qCardHint">${escapeHtml(item.hint || "")}</div>
     </button>
   `;
 }
 
-function featureCard(pkg, selected, action, priceText) {
+function packageTextCard(pkg, selected, action, priceText) {
   return `
-    <button class="qCard qFeatureCard ${selected ? "isSel" : ""}" type="button" data-action="${escapeHtml(action)}" data-value="${escapeHtml(pkg.serviceLabel)}">
-      <div class="qFeatureCardInner">
-        ${renderMedia(pkg)}
-        <div class="qFeatureCardTitle">${escapeHtml(pkg.displayLabel || pkg.label)}</div>
-        <ul class="qFeatureList">
-          ${(pkg.features || []).map(f => `<li>${escapeHtml(f)}</li>`).join("")}
-        </ul>
-        <div class="qFeaturePrice">${escapeHtml(priceText || "")}</div>
-      </div>
+    <button class="qHearBtn ${selected ? "isSel" : ""}" type="button" data-action="${escapeHtml(action)}" data-value="${escapeHtml(pkg.serviceLabel)}">
+      <span class="qHearLeft">
+        <span class="qHearLabel">${escapeHtml(pkg.label)}</span>
+        <span class="qHearHint">${escapeHtml(pkg.hint)}</span>
+        <span class="qHearHint" style="margin-top:6px;font-weight:900;color:#111;">${escapeHtml(priceText)}</span>
+        <span class="qHearHint" style="margin-top:6px;">
+          ${(pkg.features || []).map(f => `• ${escapeHtml(f)}`).join("<br>")}
+        </span>
+      </span>
+      <span class="qHearRight">
+        <span class="qHearPill">Select</span>
+        <span class="qHearCheck" aria-hidden="true"></span>
+      </span>
     </button>
-  `;
-}
-
-function selectedChipsHtml() {
-  const chips = getSelectedServiceChipData();
-
-  return `
-    <div class="qServiceTray">
-      <div class="qServiceTrayTop">
-        <div class="qServiceTrayTitle">Selected services</div>
-        <div class="qServiceTrayHint">You can go back to adjust anything.</div>
-      </div>
-      <div class="qChips">
-        ${
-          chips.length
-            ? chips.map(chip => `
-              <span class="qChip">
-                ${escapeHtml(chip.displayLabel)}
-                <button type="button" aria-label="Remove ${escapeHtml(chip.baseLabel)}" data-action="remove-service" data-value="${escapeHtml(chip.baseLabel)}">×</button>
-              </span>
-            `).join("")
-            : `<span class="qChipEmpty">No services selected yet.</span>`
-        }
-      </div>
-    </div>
-  `;
-}
-
-function selectedSummaryPillsHtml(info = computeEstimateInfo()) {
-  const chips = [
-    quoteState.vehicleType,
-    ...getSelectedDisplayServices(),
-    quoteState.upkeepFrequency,
-    quoteState.routeGroupLabel
-  ].filter(Boolean);
-
-  return `
-    <div class="qEstimatePills">
-      ${chips.map(chip => `<span class="qPill">${escapeHtml(chip)}</span>`).join("")}
-      ${info?.savings ? `<span class="qPill">Bundle savings: -${formatMoney(info.savings)}</span>` : ""}
-      ${info?.couponDiscount ? `<span class="qPill">Coupon: -${formatMoney(info.couponDiscount)}</span>` : ""}
-    </div>
   `;
 }
 
@@ -1061,12 +762,8 @@ function render() {
 
   if (step === "vehicleType") renderVehicleTypeStep();
   if (step === "serviceCategory") renderServiceCategoryStep();
-  if (step === "service") renderServiceStep();
   if (step === "interiorPackage") renderInteriorPackageStep();
   if (step === "exteriorPackage") renderExteriorPackageStep();
-  if (step === "paintCorrectionPackage") renderPaintCorrectionPackageStep();
-  if (step === "ceramicPackage") renderCeramicPackageStep();
-  if (step === "upkeepFrequency") renderUpkeepFrequencyStep();
   if (step === "contact") renderContactStep();
   if (step === "estimate") renderEstimateStep();
   if (step === "appointment") renderAppointmentStep();
@@ -1082,9 +779,10 @@ function render() {
 function renderVehicleTypeStep() {
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">What type of vehicle do you need detailed?</h3>
-    <p class="qStepSub">This helps us estimate the right price for your detail.</p>
+    <p class="qStepSub">Choose your vehicle type.</p>
+
     <div class="qCards qCards--vehicle2x2 qCards--big">
-      ${vehicleTypes.map(v => optionCard(v, quoteState.vehicleType === v.label, "select-vehicle", { cardType: "qCard--vehicle" })).join("")}
+      ${vehicleTypes.map(v => imageCard(v, quoteState.vehicleType === v.label, "select-vehicle", "qCard--vehicle")).join("")}
     </div>
   `;
 }
@@ -1092,22 +790,10 @@ function renderVehicleTypeStep() {
 function renderServiceCategoryStep() {
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">What do you need cleaned?</h3>
-    <p class="qStepSub">Pick the main type of detail you want.</p>
-    <div class="qCards qCards--scroll qCards--big">
-      ${serviceCategories.map(c => optionCard(c, quoteState.serviceCategory === c.label, "select-category", { cardType: "qCard--img qCard--square" })).join("")}
-    </div>
-  `;
-}
+    <p class="qStepSub">Choose the main service you want.</p>
 
-function renderServiceStep() {
-  const services = getServicesForCategory();
-
-  quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Choose your service</h3>
-    <p class="qStepSub">Select what you want included. You can choose more than one.</p>
-    ${selectedChipsHtml()}
     <div class="qCards qCards--scroll qCards--big">
-      ${services.map(s => optionCard(s, quoteState.services.includes(s.label), "toggle-service", { cardType: "qCard--servicePick qCard--img qCard--square" })).join("")}
+      ${serviceCategories.map(c => imageCard(c, quoteState.serviceCategory === c.label, "select-category", "qCard--img qCard--square")).join("")}
     </div>
   `;
 }
@@ -1115,15 +801,18 @@ function renderServiceStep() {
 function renderInteriorPackageStep() {
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Choose your interior package</h3>
-    <p class="qStepSub">Pick the level that best matches the condition of the inside of the vehicle.</p>
-    ${selectedChipsHtml()}
-    <div class="qCards qCards--scroll qCards--big">
-      ${interiorPackages.map(pkg => {
-        const price = priceForVehicle(INTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-        const high = Number.isFinite(price) ? price + INTERIOR_DISPLAY_RANGE_ADD : null;
-        const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
-        return featureCard(pkg, quoteState.interiorPackage === pkg.serviceLabel, "select-interior-package", priceText);
-      }).join("")}
+    <p class="qStepSub">Pick the interior detail level that fits your vehicle.</p>
+
+    <div class="qHearWrap">
+      <div class="qHearGrid">
+        ${interiorPackages.map(pkg => {
+          const price = priceForVehicle(INTERIOR_DETAIL_PRICES, pkg.serviceLabel);
+          const high = Number.isFinite(price) ? price + INTERIOR_DISPLAY_RANGE_ADD : null;
+          const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
+
+          return packageTextCard(pkg, quoteState.interiorPackage === pkg.serviceLabel, "select-interior-package", priceText);
+        }).join("")}
+      </div>
     </div>
   `;
 }
@@ -1131,65 +820,17 @@ function renderInteriorPackageStep() {
 function renderExteriorPackageStep() {
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Choose your exterior package</h3>
-    <p class="qStepSub">Pick the outside detail level you want.</p>
-    ${selectedChipsHtml()}
-    <div class="qCards qCards--scroll qCards--big">
-      ${exteriorPackages.map(pkg => {
-        const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-        const high = Number.isFinite(price) ? price + EXTERIOR_DISPLAY_RANGE_ADD : null;
-        const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
-        return featureCard(pkg, quoteState.exteriorPackage === pkg.serviceLabel, "select-exterior-package", priceText);
-      }).join("")}
-    </div>
-  `;
-}
+    <p class="qStepSub">Pick the exterior detail level that fits your vehicle.</p>
 
-function renderPaintCorrectionPackageStep() {
-  quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Choose your paint correction option</h3>
-    <p class="qStepSub">Paint correction helps reduce swirls and improve gloss.</p>
-    ${selectedChipsHtml()}
-    <div class="qCards qCards--scroll qCards--big">
-      ${paintCorrectionPackages.map(pkg => {
-        const price = priceForVehicle(PAINT_CORRECTION_PRICES, pkg.serviceLabel);
-        const high = Number.isFinite(price) ? price + EXTERIOR_DISPLAY_RANGE_ADD : null;
-        const hint = Number.isFinite(price) ? `${pkg.hint}\n${formatMoney(price)} - ${formatMoney(high)}` : pkg.hint;
-        return optionCard(pkg, quoteState.paintCorrectionPackage === pkg.serviceLabel, "select-paint-package", { cardType: "qCard--condition qCard--img qCard--square", hint });
-      }).join("")}
-    </div>
-  `;
-}
-
-function renderCeramicPackageStep() {
-  quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Choose your ceramic coating option</h3>
-    <p class="qStepSub">Ceramic pricing starts here and may change after vehicle condition is reviewed.</p>
-    ${selectedChipsHtml()}
-    <div class="qCards qCards--scroll qCards--big">
-      ${ceramicPackages.map(pkg => optionCard(pkg, quoteState.ceramicPackage === pkg.serviceLabel, "select-ceramic-package", { cardType: "qCard--condition qCard--img qCard--square" })).join("")}
-    </div>
-  `;
-}
-
-function renderUpkeepFrequencyStep() {
-  quoteBody.innerHTML = `
-    <h3 class="qStepTitle">How often do you want upkeep?</h3>
-    <p class="qStepSub">Upkeep plans are for keeping the vehicle clean after the first detail.</p>
-    ${selectedChipsHtml()}
     <div class="qHearWrap">
       <div class="qHearGrid">
-        ${upkeepFrequencies.map(freq => `
-          <button class="qHearBtn ${quoteState.upkeepFrequency === freq.label ? "isSel" : ""}" type="button" data-action="select-upkeep" data-value="${escapeHtml(freq.label)}">
-            <span class="qHearLeft">
-              <span class="qHearLabel">${escapeHtml(freq.label)}</span>
-              <span class="qHearHint">${escapeHtml(freq.hint)}</span>
-            </span>
-            <span class="qHearRight">
-              <span class="qHearPill">Select</span>
-              <span class="qHearCheck" aria-hidden="true"></span>
-            </span>
-          </button>
-        `).join("")}
+        ${exteriorPackages.map(pkg => {
+          const price = priceForVehicle(EXTERIOR_DETAIL_PRICES, pkg.serviceLabel);
+          const high = Number.isFinite(price) ? price + EXTERIOR_DISPLAY_RANGE_ADD : null;
+          const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
+
+          return packageTextCard(pkg, quoteState.exteriorPackage === pkg.serviceLabel, "select-exterior-package", priceText);
+        }).join("")}
       </div>
     </div>
   `;
@@ -1198,7 +839,7 @@ function renderUpkeepFrequencyStep() {
 function renderContactStep() {
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Where should we send your quote?</h3>
-    <p class="qStepSub">We’ll only use this for your quote, appointment request, and follow-up.</p>
+    <p class="qStepSub">Enter your contact info so we can send your quote and appointment confirmation.</p>
 
     <div class="qGrid2">
       <div class="qField">
@@ -1228,7 +869,7 @@ function renderContactStep() {
 
       <div class="qField" style="grid-column:span 2;">
         <label for="qNotes">Notes, optional</label>
-        <input id="qNotes" value="${escapeHtml(quoteState.notes)}" placeholder="Heavy pet hair, stains, special requests, etc.">
+        <input id="qNotes" value="${escapeHtml(quoteState.notes)}" placeholder="Pet hair, stains, special requests, etc.">
       </div>
     </div>
 
@@ -1241,7 +882,6 @@ function renderContactStep() {
 function renderEstimateStep() {
   const info = syncEstimateState();
   const estimateText = formatEstimateDisplay(info);
-  const selectedServices = getSelectedDisplayServices();
 
   const oldEstimateText = info?.couponDiscount
     ? Number(info.highBeforeCoupon) > Number(info.lowBeforeCoupon)
@@ -1251,45 +891,37 @@ function renderEstimateStep() {
 
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Your estimate is ready</h3>
-    <p class="qStepSub">Here’s a strong estimate based on your vehicle and selected service. Final price may vary depending on vehicle condition, but we’ll confirm before starting.</p>
+    <p class="qStepSub">Final price may vary depending on vehicle condition. We’ll confirm before starting.</p>
 
     <div class="qEstimateBox">
-      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">Estimated price</div>
+      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">
+        Estimated price
+      </div>
+
       ${oldEstimateText ? `<div style="margin-top:8px;color:rgba(0,0,0,.45);font-weight:900;text-decoration:line-through;">${escapeHtml(oldEstimateText)}</div>` : ""}
+
       <div class="qEstimateBig">${escapeHtml(estimateText)}</div>
-      ${selectedSummaryPillsHtml(info)}
-      <div class="qEstimateFine">This estimate is based on your selections. Heavier stains, excessive pet hair, or unusual vehicle condition may affect final pricing.</div>
+
+      <div class="qEstimateFine">
+        Based on your selected vehicle and package.
+      </div>
     </div>
 
     <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">What you selected</div>
-      <div class="qDoneLine"><strong>Vehicle:</strong> ${escapeHtml(quoteState.vehicleType || "-")}</div>
-      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(selectedServices.join(", ") || "-")}</div>
-      ${quoteState.upkeepFrequency ? `<div class="qDoneLine"><strong>Frequency:</strong> ${escapeHtml(quoteState.upkeepFrequency)}</div>` : ""}
-      ${info?.savings ? `<div class="qDoneLine"><strong>Bundle savings:</strong> -${formatMoney(info.savings)}</div>` : ""}
-    </div>
-
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Have a coupon code?</div>
-      <p class="qStepSub" style="margin-bottom:10px;">Enter it here before picking your appointment time.</p>
+      <div class="qDoneBig">Coupon code</div>
 
       <div class="qGrid2">
         <div class="qField" style="grid-column:span 2;">
-          <label for="qCoupon">Coupon code</label>
-          <input id="qCoupon" value="${escapeHtml(quoteState.couponCode)}" placeholder="Example: DETAIL10" autocomplete="off">
+          <label for="qCoupon">Enter coupon code</label>
+          <input id="qCoupon" value="${escapeHtml(quoteState.couponCode)}" placeholder="Enter coupon code" autocomplete="off">
         </div>
 
-        <button class="btn btn--quote" type="button" data-action="apply-coupon" style="align-self:end;min-height:45px;">Apply</button>
+        <button class="btn btn--quote" type="button" data-action="apply-coupon" style="align-self:end;min-height:45px;">
+          Apply
+        </button>
       </div>
 
       ${quoteState.couponMessage ? `<div class="qStatus">${escapeHtml(quoteState.couponMessage)}</div>` : ""}
-    </div>
-
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Why book with us?</div>
-      <div class="qDoneLine">Mobile service. We come to you.</div>
-      <div class="qDoneLine">Interior, exterior, and full detail options.</div>
-      <div class="qDoneLine">Fast quote and easy appointment request.</div>
     </div>
   `;
 }
@@ -1301,7 +933,7 @@ function renderAppointmentStep() {
 
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Pick your preferred appointment time</h3>
-    <p class="qStepSub">Choose the time that works best. We’ll confirm the appointment after reviewing your vehicle details.</p>
+    <p class="qStepSub">Choose the time that works best. We’ll confirm your appointment shortly.</p>
 
     <div class="qCalWrap">
       <div class="qCalTopRow">
@@ -1309,7 +941,9 @@ function renderAppointmentStep() {
         <button class="qReloadLink" type="button" data-action="reload-slots">Reload times</button>
       </div>
 
-      <div class="qLoadBar ${appointmentSlotsLoading ? "isOn" : ""}"><span class="qLoadBarFill"></span></div>
+      <div class="qLoadBar ${appointmentSlotsLoading ? "isOn" : ""}">
+        <span class="qLoadBarFill"></span>
+      </div>
 
       ${appointmentSlotsError ? `<div class="qStatus">${escapeHtml(appointmentSlotsError)}</div>` : ""}
       ${appointmentSlotsLoading ? `<div class="qStatus">Loading available times...</div>` : renderCalendarHtml(selectedDateSlots)}
@@ -1377,7 +1011,9 @@ function renderCalendarHtml(selectedDateSlots) {
       </div>
 
       <div class="qTimes">
-        <div class="qTimesTitle">${selectedCalendarDate ? `Available times for ${escapeHtml(formatDateNice(selectedCalendarDate))}` : "Choose an available date"}</div>
+        <div class="qTimesTitle">
+          ${selectedCalendarDate ? `Available times for ${escapeHtml(formatDateNice(selectedCalendarDate))}` : "Choose an available date"}
+        </div>
 
         ${
           selectedDateSlots.length
@@ -1399,58 +1035,50 @@ function renderCalendarHtml(selectedDateSlots) {
 
 function renderAddressStep() {
   quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Where should we come for the detail?</h3>
-    <p class="qStepSub">Mobile service means we come to you. Add the address where the vehicle will be available.</p>
+    <h3 class="qStepTitle">Service address</h3>
+    <p class="qStepSub">Enter the address where the vehicle will be detailed.</p>
 
     <div class="qDoneBox">
-      <div class="qDoneBig">Service location</div>
-
       <div class="qField">
         <label for="qAddress">Street address</label>
-        <input id="qAddress" autocomplete="street-address" value="${escapeHtml(quoteState.address)}" placeholder="123 Main St, Keizer, OR">
+        <input id="qAddress" autocomplete="street-address" value="${escapeHtml(quoteState.address)}" placeholder="Street address">
       </div>
 
-      <div class="qEstimateFine">Please choose a location with enough room for mobile detailing and access to the vehicle.</div>
-    </div>
-
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Appointment selected</div>
-      <div class="qDoneLine"><strong>Time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
-      <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay())}</div>
+      <div class="qEstimateFine">
+        Please choose a location with enough room for mobile detailing.
+      </div>
     </div>
   `;
 }
 
 function renderConfirmStep() {
-  const selectedServices = getSelectedDisplayServices();
   const info = syncEstimateState();
 
   quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Confirm your appointment request</h3>
-    <p class="qStepSub">Review everything below. Once you submit, we’ll send the request over and confirm shortly.</p>
+    <h3 class="qStepTitle">Confirm appointment request</h3>
+    <p class="qStepSub">Review your request before sending it in.</p>
 
     <div class="qEstimateBox qEstimateBox--simple">
-      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">Estimated price</div>
+      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">
+        Estimated price
+      </div>
+
       <div class="qEstimateBig">${escapeHtml(formatEstimateDisplay(info))}</div>
-      ${selectedSummaryPillsHtml(info)}
-      <div class="qEstimateFine">No online payment is required right now. We’ll confirm the final details before the service starts.</div>
+
+      <div class="qEstimateFine">
+        No online payment required right now.
+      </div>
     </div>
 
     <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Customer</div>
+      <div class="qDoneBig">Request summary</div>
       <div class="qDoneLine"><strong>Name:</strong> ${escapeHtml(quoteState.name || "-")}</div>
       <div class="qDoneLine"><strong>Phone:</strong> ${escapeHtml(quoteState.phone || "-")}</div>
       <div class="qDoneLine"><strong>Email:</strong> ${escapeHtml(quoteState.email || "-")}</div>
-      <div class="qDoneLine"><strong>City:</strong> ${escapeHtml(quoteState.city || "-")}</div>
-    </div>
-
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Appointment request</div>
-      <div class="qDoneLine"><strong>Preferred time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
+      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(getSelectedDisplayServices().join(", ") || "-")}</div>
+      <div class="qDoneLine"><strong>Time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
       <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
-      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(selectedServices.join(", ") || "-")}</div>
-      ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))} ${quoteState.couponDiscount ? `(-${formatMoney(quoteState.couponDiscount)})` : ""}</div>` : ""}
-      ${quoteState.notes ? `<div class="qDoneLine"><strong>Notes:</strong> ${escapeHtml(quoteState.notes)}</div>` : ""}
+      ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))}</div>` : ""}
     </div>
 
     ${quoteState.bookingError ? `<div class="qStatus" style="color:#b00020;">${escapeHtml(quoteState.bookingError)}</div>` : ""}
@@ -1462,18 +1090,15 @@ function renderDoneStep() {
     <div class="quoteSuccessWrap">
       <div class="quoteSuccessBadge">Request Received</div>
       <h3 class="quoteSuccessTitle">You’re all set.</h3>
-      <p class="quoteSuccessText">Your appointment request was sent to Keizer Mobile Detailing. We’ll confirm shortly by text or email.</p>
+      <p class="quoteSuccessText">Your appointment request was sent. We’ll confirm shortly by text or email.</p>
 
       <div class="quoteSuccessInner">
         <div class="qDoneBox">
-          <div class="qDoneBig">Appointment request summary</div>
-          <div class="qDoneLine"><strong>Name:</strong> ${escapeHtml(quoteState.name || "-")}</div>
-          <div class="qDoneLine"><strong>Preferred time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
-          <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
+          <div class="qDoneBig">Summary</div>
           <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(getSelectedDisplayServices().join(", ") || "-")}</div>
+          <div class="qDoneLine"><strong>Time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
+          <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
           <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay())}</div>
-          ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))}</div>` : ""}
-          <div class="qDoneFine">Final price can vary depending on vehicle condition. We’ll confirm before starting.</div>
         </div>
       </div>
     </div>
@@ -1500,9 +1125,20 @@ function bindStepEvents() {
   const qCoupon = quoteBody.querySelector("#qCoupon");
   const qAddress = quoteBody.querySelector("#qAddress");
 
-  if (qName) qName.addEventListener("input", e => { quoteState.name = e.target.value; updateNav(); });
-  if (qPhone) qPhone.addEventListener("input", e => { quoteState.phone = e.target.value; updateNav(); });
-  if (qEmail) qEmail.addEventListener("input", e => { quoteState.email = e.target.value; updateNav(); });
+  if (qName) qName.addEventListener("input", e => {
+    quoteState.name = e.target.value;
+    updateNav();
+  });
+
+  if (qPhone) qPhone.addEventListener("input", e => {
+    quoteState.phone = e.target.value;
+    updateNav();
+  });
+
+  if (qEmail) qEmail.addEventListener("input", e => {
+    quoteState.email = e.target.value;
+    updateNav();
+  });
 
   if (qCity) qCity.addEventListener("change", e => {
     quoteState.city = e.target.value;
@@ -1511,10 +1147,23 @@ function bindStepEvents() {
     updateNav();
   });
 
-  if (qNotes) qNotes.addEventListener("input", e => { quoteState.notes = e.target.value; });
-  if (qCompany) qCompany.addEventListener("input", e => { quoteState.honeypot = e.target.value; });
-  if (qCoupon) qCoupon.addEventListener("input", e => { quoteState.couponCode = e.target.value; quoteState.couponMessage = ""; });
-  if (qAddress) qAddress.addEventListener("input", e => { quoteState.address = e.target.value; updateNav(); });
+  if (qNotes) qNotes.addEventListener("input", e => {
+    quoteState.notes = e.target.value;
+  });
+
+  if (qCompany) qCompany.addEventListener("input", e => {
+    quoteState.honeypot = e.target.value;
+  });
+
+  if (qCoupon) qCoupon.addEventListener("input", e => {
+    quoteState.couponCode = e.target.value;
+    quoteState.couponMessage = "";
+  });
+
+  if (qAddress) qAddress.addEventListener("input", e => {
+    quoteState.address = e.target.value;
+    updateNav();
+  });
 }
 
 function handleStepAction(e) {
@@ -1526,28 +1175,14 @@ function handleStepAction(e) {
     quoteState.vehicleType = value;
     clearEstimateDependentState();
     render();
+    advanceSoon();
     return;
   }
 
   if (action === "select-category") {
-    quoteState.serviceCategory = value;
-    quoteState.services = [];
-    clearEstimateDependentState();
+    setServiceByCategory(value);
     render();
-    return;
-  }
-
-  if (action === "toggle-service") {
-    toggleService(value);
-    render();
-    return;
-  }
-
-  if (action === "remove-service") {
-    quoteState.services = quoteState.services.filter(s => s !== value);
-    resetPackageSelectionsIfNeeded();
-    clearEstimateDependentState();
-    render();
+    advanceSoon();
     return;
   }
 
@@ -1555,6 +1190,7 @@ function handleStepAction(e) {
     quoteState.interiorPackage = value;
     clearEstimateDependentState();
     render();
+    advanceSoon();
     return;
   }
 
@@ -1562,27 +1198,7 @@ function handleStepAction(e) {
     quoteState.exteriorPackage = value;
     clearEstimateDependentState();
     render();
-    return;
-  }
-
-  if (action === "select-paint-package") {
-    quoteState.paintCorrectionPackage = paintCorrectionPackages.find(p => p.label === value)?.serviceLabel || value;
-    clearEstimateDependentState();
-    render();
-    return;
-  }
-
-  if (action === "select-ceramic-package") {
-    quoteState.ceramicPackage = ceramicPackages.find(p => p.label === value)?.serviceLabel || value;
-    clearEstimateDependentState();
-    render();
-    return;
-  }
-
-  if (action === "select-upkeep") {
-    quoteState.upkeepFrequency = value;
-    clearEstimateDependentState();
-    render();
+    advanceSoon();
     return;
   }
 
@@ -1602,8 +1218,14 @@ function handleStepAction(e) {
 
   if (action === "month-prev" || action === "month-next") {
     if (!calendarMonthDate) calendarMonthDate = new Date();
-    const dir = action === "month-next" ? 1 : -1;
-    calendarMonthDate = new Date(calendarMonthDate.getFullYear(), calendarMonthDate.getMonth() + dir, 1);
+
+    const direction = action === "month-next" ? 1 : -1;
+    calendarMonthDate = new Date(
+      calendarMonthDate.getFullYear(),
+      calendarMonthDate.getMonth() + direction,
+      1
+    );
+
     render();
     return;
   }
@@ -1619,23 +1241,6 @@ function handleStepAction(e) {
     render();
     return;
   }
-}
-
-function toggleService(label) {
-  if (!label) return;
-
-  if (quoteState.services.includes(label)) {
-    quoteState.services = quoteState.services.filter(s => s !== label);
-  } else {
-    quoteState.services = [...quoteState.services, label];
-  }
-
-  if ((label === "Paint Correction" || label === "Ceramic Coating") && !quoteState.services.includes("Exterior Wash")) {
-    quoteState.services.unshift("Exterior Wash");
-  }
-
-  resetPackageSelectionsIfNeeded();
-  clearEstimateDependentState();
 }
 
 function applyCouponFromField() {
@@ -1655,13 +1260,12 @@ function applyCouponFromField() {
     return;
   }
 
-  quoteState.couponMessage = `${code} applied. You saved ${formatMoney(quoteState.couponDiscount)}.`;
+  quoteState.couponMessage = `${code} applied.`;
 }
 
 function clearEstimateDependentState() {
   quoteState.estimateLow = "";
   quoteState.estimateHigh = "";
-  quoteState.estimateIsStartingAt = false;
   quoteState.leadEmailSent = false;
   quoteState.leadEmailSignature = "";
   quoteState.bookingError = "";
@@ -1673,6 +1277,7 @@ function clearAppointmentSelection() {
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
   quoteState.slotTime = "";
+
   appointmentSlots = [];
   appointmentSlotsLoading = false;
   appointmentSlotsLoadedKey = "";
@@ -1739,7 +1344,10 @@ async function maybeLoadAppointmentSlots(force = false) {
     appointmentSlots = [];
   } finally {
     appointmentSlotsLoading = false;
-    if (steps[stepIndex] === "appointment") render();
+
+    if (steps[stepIndex] === "appointment") {
+      render();
+    }
   }
 }
 
@@ -1754,7 +1362,7 @@ function selectSlot(slotId) {
 }
 
 // -------------------------
-// PAYLOAD + SUBMIT
+// PAYLOAD + EMAILS
 // -------------------------
 
 function buildLeadSignature() {
@@ -1766,7 +1374,6 @@ function buildLeadSignature() {
     quoteState.vehicleType,
     quoteState.serviceCategory,
     getSelectedDisplayServices().join("|"),
-    quoteState.upkeepFrequency,
     quoteState.notes,
     normalizeCoupon(quoteState.couponCode)
   ]
@@ -1797,14 +1404,10 @@ function buildPayload(includeSlot = false) {
     interiorCondition: quoteState.interiorPackage,
     exteriorPackage: quoteState.exteriorPackage,
     exteriorCondition: quoteState.exteriorPackage,
-    paintCorrectionPackage: quoteState.paintCorrectionPackage,
-    ceramicPackage: quoteState.ceramicPackage,
-    upkeepFrequency: quoteState.upkeepFrequency,
 
     estimateLow: info?.low ?? "",
     estimateHigh: info?.high ?? "",
     estimateDisplay: formatEstimateDisplay(info),
-    estimateIsStartingAt: !!info?.hasStartingAt,
     bundleSavings: info?.savings || 0,
 
     couponCode: normalizeCoupon(quoteState.couponCode),
@@ -1847,14 +1450,16 @@ async function sendLeadNotificationIfNeeded() {
   }
 
   quoteState.leadEmailSending = true;
-  render();
+  updateNav();
 
   try {
     const payload = buildPayload(false);
 
     const res = await fetch(window.SCRIPT_URL || DEFAULT_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
       body: JSON.stringify(payload)
     });
 
@@ -1867,15 +1472,20 @@ async function sendLeadNotificationIfNeeded() {
     quoteState.leadEmailSent = true;
     quoteState.leadEmailSignature = signature;
 
-    if (data?.leadId) quoteState.leadId = data.leadId;
+    if (data?.leadId) {
+      quoteState.leadId = data.leadId;
+    }
 
     return data;
   } catch (err) {
     console.warn("Lead notification failed:", err);
-    return { ok: false, error: err?.message || String(err) };
+    return {
+      ok: false,
+      error: err?.message || String(err)
+    };
   } finally {
     quoteState.leadEmailSending = false;
-    if (steps[stepIndex] === "contact") render();
+    updateNav();
   }
 }
 
@@ -1893,7 +1503,9 @@ async function submitAppointmentRequest() {
 
     const res = await fetch(window.SCRIPT_URL || DEFAULT_SCRIPT_URL, {
       method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
       body: JSON.stringify(payload)
     });
 
@@ -1945,6 +1557,7 @@ async function goNext() {
 
 function goBack() {
   if (stepIndex <= 0) return;
+
   stepIndex = prevActiveStepIndex(stepIndex);
   render();
 }
@@ -1957,10 +1570,6 @@ function resetQuoteFlow() {
 
     interiorPackage: "",
     exteriorPackage: "",
-    paintCorrectionPackage: "",
-    ceramicPackage: "",
-
-    upkeepFrequency: "",
 
     estimateLow: "",
     estimateHigh: "",
@@ -1970,21 +1579,20 @@ function resetQuoteFlow() {
     couponDiscount: 0,
     couponMessage: "",
 
-    slotId: "",
-    slotLabel: "",
-    slotDate: "",
-    slotTime: "",
-
-    address: "",
-
     name: "",
     phone: "",
     email: "",
     city: "",
     notes: "",
+    address: "",
 
     routeGroup: "",
     routeGroupLabel: "",
+
+    slotId: "",
+    slotLabel: "",
+    slotDate: "",
+    slotTime: "",
 
     leadId: "",
     leadEmailSent: false,
@@ -1993,11 +1601,6 @@ function resetQuoteFlow() {
 
     submittingBooking: false,
     bookingError: "",
-
-    paymentMode: "after",
-    paymentStatus: "appointment_requested",
-    paymentAmountCharged: 0,
-    squarePaymentId: "",
 
     honeypot: ""
   });
@@ -2008,6 +1611,7 @@ function resetQuoteFlow() {
   appointmentSlotsError = "";
   selectedCalendarDate = "";
   calendarMonthDate = null;
+
   stepIndex = 0;
 }
 
@@ -2125,7 +1729,9 @@ function initQuoteWizard() {
   });
 
   quoteModal?.addEventListener("click", e => {
-    if (e.target === quoteModal) closeQuote();
+    if (e.target === quoteModal) {
+      closeQuote();
+    }
   });
 
   document.addEventListener("keydown", e => {
