@@ -17,7 +17,9 @@
     <title>Keizer Mobile Detailing</title>
     <meta name="description" content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking." />
 
-    <script src="https://web.squarecdn.com/v1/square.js"></script>
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//vitals.vercel-insights.com" />
 
     
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,6 +42,42 @@
 
 
     <style>
+      /* Performance patch: remove the huge logo image and avoid loading the oversized hero background as LCP. */
+      .brand__mark {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        border-radius: 14px;
+        border: 1px solid rgba(214, 167, 63, 0.42);
+        background:
+          radial-gradient(circle at 30% 20%, rgba(246, 217, 138, 0.32), transparent 34%),
+          linear-gradient(135deg, #171717 0%, #050505 100%);
+        color: #f6d98a;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 1.42rem;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.2);
+      }
+
+      .hero__bg {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(900px 520px at 18% 24%, rgba(214, 167, 63, 0.22), rgba(214, 167, 63, 0) 58%),
+          radial-gradient(720px 480px at 80% 20%, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0) 56%),
+          linear-gradient(135deg, #050608 0%, #101114 48%, #050506 100%) !important;
+        transform: none !important;
+        will-change: auto !important;
+      }
+
+      .serviceCard[data-bg],
+      .compare[data-before] {
+        background-color: #111111;
+      }
+
       .hero {
         position: relative;
         overflow: hidden;
@@ -258,69 +296,6 @@
       .heroReview__meta {
         color: rgba(255, 255, 255, 0.78);
         font-size: 0.92rem;
-      }
-
-      .quotePaymentPlan {
-        margin-top: 1.15rem;
-        padding: 1rem;
-        border: 1px solid rgba(214, 167, 63, 0.28);
-        border-radius: 18px;
-        background: linear-gradient(180deg, rgba(214, 167, 63, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
-      }
-
-      .quotePaymentPlan[hidden] {
-        display: none !important;
-      }
-
-      .quotePaymentPlan__eyebrow {
-        display: inline-block;
-        margin-bottom: 0.55rem;
-        color: #d6a73f;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      .quotePaymentPlan h4 {
-        margin: 0 0 0.45rem;
-        font-size: 1.06rem;
-      }
-
-      .quotePaymentPlan p {
-        margin: 0 0 0.9rem;
-        color: rgba(255, 255, 255, 0.78);
-        line-height: 1.6;
-      }
-
-      .quotePaymentPlan__option {
-        display: flex;
-        gap: 0.75rem;
-        align-items: flex-start;
-        padding: 0.9rem 1rem;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.05);
-        cursor: pointer;
-      }
-
-      .quotePaymentPlan__option input {
-        width: 1rem;
-        height: 1rem;
-        margin-top: 0.2rem;
-        accent-color: #d6a73f;
-      }
-
-      .quotePaymentPlan__optionTitle {
-        display: block;
-        margin-bottom: 0.18rem;
-        font-weight: 700;
-      }
-
-      .quotePaymentPlan__optionText {
-        display: block;
-        color: rgba(255, 255, 255, 0.72);
-        font-size: 0.92rem;
-        line-height: 1.5;
       }
 
       .quoteBody--success {
@@ -578,7 +553,7 @@
     <header class="header" id="top">
       <div class="container header__inner">
         <a class="brand" href="#top" aria-label="Home">
-          <img class="brand__logo" src="./Untitled design (2).png" alt="Keizer Mobile Detailing logo" loading="eager" />
+          <div class="brand__mark" aria-hidden="true">K</div>
           <div class="brand__text">
             <span class="brand__name">
               <span class="brand__nameLine">Keizer Mobile</span>
@@ -630,14 +605,14 @@
             </div>
 
             <p class="heroReview__quote">
-              “Was great with scheduling, showed up on time, and the quality was better than expected. I’d recommend them to anyone looking for a good price and quality job.”
+              “My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!”
             </p>
 
             <div class="heroReview__footer">
-              <div class="heroReview__avatar" aria-hidden="true">CF</div>
+              <div class="heroReview__avatar" aria-hidden="true">ED</div>
               <div>
-                <div class="heroReview__name">Carhart Family</div>
-                <div class="heroReview__meta">Local customer review</div>
+                <div class="heroReview__name">Edgar Diaz</div>
+                <div class="heroReview__meta">Google review · G-Wagon detail</div>
               </div>
             </div>          </aside>
         </div>
@@ -654,14 +629,14 @@
             </div>
 
             <p class="mobileServiceReview__quote">
-              “Was great with scheduling, showed up on time, and the quality was better than expected. I’d recommend them to anyone looking for a good price and quality job.”
+              “My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!”
             </p>
 
             <div class="mobileServiceReview__footer">
-              <div class="mobileServiceReview__avatar" aria-hidden="true">CF</div>
+              <div class="mobileServiceReview__avatar" aria-hidden="true">ED</div>
               <div>
-                <div class="mobileServiceReview__name">Carhart Family</div>
-                <div class="mobileServiceReview__meta">Local customer review</div>
+                <div class="mobileServiceReview__name">Edgar Diaz</div>
+                <div class="mobileServiceReview__meta">Google review · G-Wagon detail</div>
               </div>
             </div>
           </article>
@@ -673,7 +648,7 @@
         </div>
 
         <div class="serviceWrap">
-          <article class="serviceCard" style="background-image:url('./2017-05-22-07-32-26.jpg')">
+          <article class="serviceCard" data-bg="./2017-05-22-07-32-26.jpg">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
@@ -691,7 +666,7 @@
             </div>
           </article>
 
-          <article class="serviceCard" style="background-image:url('./c36084da09340612d8431de0221ea985.jpg')">
+          <article class="serviceCard" data-bg="./c36084da09340612d8431de0221ea985.jpg">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
@@ -709,7 +684,7 @@
             </div>
           </article>
 
-          <article class="serviceCard" style="background-image:url('./img_6480.webp')">
+          <article class="serviceCard" data-bg="./img_6480.webp">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
@@ -727,7 +702,7 @@
             </div>
           </article>
 
-          <article class="serviceCard" style="background-image:url('./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png')">
+          <article class="serviceCard" data-bg="./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
@@ -745,7 +720,7 @@
             </div>
           </article>
 
-          <article class="serviceCard" style="background-image:url('./bee.jpg')">
+          <article class="serviceCard" data-bg="./bee.jpg">
             <div class="serviceCard__overlay"></div>
             <div class="serviceCard__shine" aria-hidden="true"></div>
             <div class="serviceCard__content">
@@ -785,7 +760,7 @@
                   <div
                     class="compare compare--fill"
                     data-compare
-                    style="--before:url('./IMG_2469.jpg'); --after:url('./IMG_2461.jpg');"
+                    data-before="./IMG_2469.jpg" data-after="./IMG_2461.jpg"
                     aria-label="Before and after comparison"
                   >
                     <div class="compare__stage" aria-hidden="true"></div>
@@ -798,7 +773,7 @@
                   <div
                     class="compare compare--fill"
                     data-compare
-                    style="--before:url('./IMG_2919 (1).jpg'); --after:url('./IMG_2912.jpg');"
+                    data-before="./IMG_2919 (1).jpg" data-after="./IMG_2912.jpg"
                     aria-label="Before and after comparison"
                   >
                     <div class="compare__stage" aria-hidden="true"></div>
@@ -829,7 +804,7 @@
 
           <div class="reels" data-reels aria-label="Short video clips of detailing work">
             <article class="reel" data-reel>
-              <video class="reel__video" muted playsinline loop preload="metadata" aria-label="Detailing video clip 1">
+              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 1">
                 <source
                   src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
                   type="video/mp4"
@@ -849,7 +824,7 @@
             </article>
 
             <article class="reel" data-reel>
-              <video class="reel__video" muted playsinline loop preload="metadata" aria-label="Detailing video clip 2">
+              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 2">
                 <source
                   src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4"
                   type="video/mp4"
@@ -869,7 +844,7 @@
             </article>
 
             <article class="reel" data-reel>
-              <video class="reel__video" muted playsinline loop preload="metadata" aria-label="Detailing video clip 3">
+              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 3">
                 <source
                   src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4"
                   type="video/mp4"
@@ -1036,6 +1011,20 @@
                 to an older car. Would recommend them to anyone looking for a good price and quality job!
               </p>
             </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">ED</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">Edgar Diaz</div>
+                  <div class="rLoc rLoc--dark">5 reviews · Google review</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              </div>
+              <p class="rText rText--dark">
+                My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!
+              </p>
+            </article>
           </div>
 
           <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">&#8250;</button>
@@ -1174,23 +1163,6 @@
           </div>
         </div>
         <div class="quoteBody" data-quote-body></div>
-
-        <div class="quotePaymentPlan" data-quote-payment-plan hidden>
-          <span class="quotePaymentPlan__eyebrow">Optional</span>
-          <h4>Need to split the cost up?</h4>
-          <p>Add a payment plan request at the end of the quote flow and we can confirm the details when we reach out.</p>
-
-          <input type="hidden" name="paymentPlanInterested" value="No" data-payment-plan-hidden />
-
-          <label class="quotePaymentPlan__option">
-            <input type="checkbox" value="Yes" data-payment-plan-checkbox />
-            <span>
-              <span class="quotePaymentPlan__optionTitle">I’m interested in a payment plan option</span>
-              <span class="quotePaymentPlan__optionText">This gives people a softer yes instead of losing them on price.</span>
-            </span>
-          </label>
-        </div>
-
         <div class="quoteNav">
           <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
           <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
@@ -1204,6 +1176,47 @@
 
     <script src="./script.js"></script>
     <script src="./quote-wizard.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const lazyBackgrounds = Array.from(document.querySelectorAll("[data-bg]"));
+        const lazyCompares = Array.from(document.querySelectorAll(".compare[data-before][data-after]"));
+
+        function loadBackground(el) {
+          const bg = el.getAttribute("data-bg");
+          if (!bg) return;
+          el.style.backgroundImage = `url('${bg}')`;
+          el.removeAttribute("data-bg");
+        }
+
+        function loadCompare(el) {
+          const before = el.getAttribute("data-before");
+          const after = el.getAttribute("data-after");
+          if (before) el.style.setProperty("--before", `url('${before}')`);
+          if (after) el.style.setProperty("--after", `url('${after}')`);
+          el.removeAttribute("data-before");
+          el.removeAttribute("data-after");
+        }
+
+        if ("IntersectionObserver" in window) {
+          const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+              if (!entry.isIntersecting) return;
+              const el = entry.target;
+              if (el.hasAttribute("data-bg")) loadBackground(el);
+              if (el.matches(".compare")) loadCompare(el);
+              obs.unobserve(el);
+            });
+          }, { rootMargin: "180px 0px" });
+
+          lazyBackgrounds.forEach(el => observer.observe(el));
+          lazyCompares.forEach(el => observer.observe(el));
+        } else {
+          lazyBackgrounds.forEach(loadBackground);
+          lazyCompares.forEach(loadCompare);
+        }
+      });
+    </script>
 
     <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -1276,12 +1289,6 @@
     const contactForm = document.querySelector("[data-contact-form]");
     const contactStatus = document.querySelector("[data-contact-status]");
     const quoteBody = document.querySelector("[data-quote-body]");
-    const quoteNext = document.querySelector("[data-quote-next]");
-    const quoteModal = document.querySelector("[data-quote-modal]");
-    const progressDots = Array.from(document.querySelectorAll(".qpDot"));
-    const paymentPlanWrap = document.querySelector("[data-quote-payment-plan]");
-    const paymentPlanCheckbox = document.querySelector("[data-payment-plan-checkbox]");
-    const paymentPlanHidden = document.querySelector("[data-payment-plan-hidden]");
 
     const spamKeywords = [
       "seo",
@@ -1319,35 +1326,6 @@
       });
     }
 
-    function syncPaymentPlanValue() {
-      if (paymentPlanHidden && paymentPlanCheckbox) {
-        paymentPlanHidden.value = paymentPlanCheckbox.checked ? "Yes" : "No";
-      }
-    }
-
-    function getActiveStepIndex() {
-      return progressDots.findIndex((dot) => dot.classList.contains("isOn"));
-    }
-
-    function updatePaymentPlanVisibility() {
-      if (!paymentPlanWrap) return;
-
-      const stepIndex = getActiveStepIndex();
-      const bodyText = (quoteBody ? quoteBody.textContent : "").toLowerCase();
-      const nextText = (quoteNext ? quoteNext.textContent : "").toLowerCase();
-
-      const shouldShow =
-        stepIndex >= 7 ||
-        bodyText.includes("book") ||
-        bodyText.includes("payment") ||
-        bodyText.includes("schedule") ||
-        nextText.includes("book") ||
-        nextText.includes("finish") ||
-        nextText.includes("submit");
-
-      paymentPlanWrap.hidden = !shouldShow || !quoteModal || quoteModal.getAttribute("aria-hidden") === "true";
-    }
-
     function enhanceBookedScreen() {
       if (!quoteBody) return;
 
@@ -1381,17 +1359,10 @@
       `;
     }
 
-    syncPaymentPlanValue();
-    updatePaymentPlanVisibility();
     enhanceBookedScreen();
-
-    if (paymentPlanCheckbox) {
-      paymentPlanCheckbox.addEventListener("change", syncPaymentPlanValue);
-    }
 
     if (quoteBody) {
       const quoteObserver = new MutationObserver(function () {
-        updatePaymentPlanVisibility();
         enhanceBookedScreen();
       });
 
@@ -1402,39 +1373,6 @@
       });
     }
 
-    if (quoteModal) {
-      const modalObserver = new MutationObserver(function () {
-        updatePaymentPlanVisibility();
-      });
-
-      modalObserver.observe(quoteModal, {
-        attributes: true,
-        attributeFilter: ["aria-hidden"]
-      });
-    }
-
-    progressDots.forEach((dot) => {
-      const dotObserver = new MutationObserver(function () {
-        updatePaymentPlanVisibility();
-      });
-
-      dotObserver.observe(dot, {
-        attributes: true,
-        attributeFilter: ["class"]
-      });
-    });
-
-    if (quoteNext) {
-      const nextObserver = new MutationObserver(function () {
-        updatePaymentPlanVisibility();
-      });
-
-      nextObserver.observe(quoteNext, {
-        childList: true,
-        subtree: true,
-        characterData: true
-      });
-    }
   });
 </script>
 
