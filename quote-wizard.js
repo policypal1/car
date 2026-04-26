@@ -26,9 +26,12 @@ const VALID_COUPONS = {
   // Add custom coupon codes here. Format: CODE: discountAmount
   // Example: SPRING25: 25,
   DETAIL10: 10,
-  DEKUNSBALSS: 999999999,
-  NIGGABUTTSEX: 69
-};
+  DEKUNSBALS: 999999999,
+  NIGGABUTTSEX: 69,
+  FUCKYOUMAX: 1,
+  ILOVESAME: 9999999,
+  DEKUNLIKESITHARD: 5
+  };
 
 const quoteModal = document.querySelector("[data-quote-modal]");
 const quoteBody = document.querySelector("[data-quote-body]");
