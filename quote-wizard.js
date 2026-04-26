@@ -1356,18 +1356,15 @@ function renderAppointmentStep() {
     : [];
 
   quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Pick your preferred appointment time</h3>
-    <p class="qStepSub">Choose the time that works best. We’ll confirm the appointment after reviewing your vehicle details.</p>
+    <h3 class="qStepTitle">Pick your appointment time</h3>
 
     <div class="qCalWrap">
       <div class="qCalTopRow">
         <div class="qCalTz">Local time${quoteState.routeGroupLabel ? ` · ${escapeHtml(quoteState.routeGroupLabel)}` : ""}</div>
-        <button class="qReloadLink" type="button" data-action="reload-slots">Reload times</button>
       </div>
 
       <div class="qLoadBar ${appointmentSlotsLoading ? "isOn" : ""}"><span class="qLoadBarFill"></span></div>
 
-      ${appointmentSlotsError ? `<div class="qStatus">${escapeHtml(appointmentSlotsError)}</div>` : ""}
       ${appointmentSlotsLoading ? `<div class="qStatus">Loading available times...</div>` : renderCalendarHtml(selectedDateSlots)}
     </div>
   `;
@@ -1817,6 +1814,8 @@ function getSlotsLoadKey() {
 async function maybeLoadAppointmentSlots(force = false) {
   const key = getSlotsLoadKey();
 
+  // Don't retry the same key automatically — only on explicit user action (force=true).
+  // This prevents the infinite "Try again" flashing loop when the request errors out.
   if (!force && appointmentSlotsLoadedKey === key) return;
   if (appointmentSlotsLoading) return;
 
@@ -1825,12 +1824,29 @@ async function maybeLoadAppointmentSlots(force = false) {
   updateNav();
 
   try {
-    const url = buildScriptUrl("slots", {
+    // POST with text/plain matches the same pattern used by sendLeadNotificationIfNeeded()
+    // and submitAppointmentRequest() — both of which are confirmed working. Apps Script
+    // treats text/plain as a "simple" request, dodging the CORS preflight that breaks
+    // arbitrary GETs against script.google.com.
+    const scriptUrl = window.SCRIPT_URL || DEFAULT_SCRIPT_URL;
+    const payload = {
+      action: "slots",
       city: quoteState.city,
-      routeGroup: quoteState.routeGroup
+      routeGroup: quoteState.routeGroup,
+      t: Date.now()
+    };
+
+    const res = await fetch(scriptUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
+      redirect: "follow"
     });
 
-    const res = await fetch(url, { method: "GET" });
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status}`);
+    }
+
     const data = await res.json();
 
     if (!data?.ok) {
@@ -1838,8 +1854,6 @@ async function maybeLoadAppointmentSlots(force = false) {
     }
 
     // Build slots with GUARANTEED-UNIQUE keys so clicking one time doesn't highlight all of them.
-    // Some Apps Script payloads return the same slot.id across different times; we synthesize a
-    // composite uid from date+time+source-id+index to disambiguate.
     appointmentSlots = (data.slots || [])
       .filter(slot => slot?.id)
       .map((slot, index) => {
@@ -1871,6 +1885,9 @@ async function maybeLoadAppointmentSlots(force = false) {
   } catch (err) {
     appointmentSlotsError = err?.message || "Could not load appointment times.";
     appointmentSlots = [];
+    // CRITICAL: mark this key as "tried" so we don't auto-retry on every render.
+    // User must click "Try again" (which calls force=true) to retry.
+    appointmentSlotsLoadedKey = key;
   } finally {
     appointmentSlotsLoading = false;
     if (steps[stepIndex] === "appointment") render();
