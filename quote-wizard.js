@@ -5,7 +5,7 @@
 // -------------------------
 
 const DEFAULT_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbypGCCGap1xVweJoBzPQwiNkV9z_38Rp2qRmeJ5HujXmYN_rVSB1zVCffSn-6tubvP-2w/exec";
+  "https://script.google.com/macros/s/AKfycbwHjH4JaJ_9Vl6xegBIuLztbcGnfPwvxdV00ej7LPEX4Tu0Da5ZbBseHxcbQg8Q217v/exec";
 
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
@@ -67,6 +67,7 @@ const quoteState = {
   couponMessage: "",
 
   slotId: "",
+  slotSourceId: "",
   slotLabel: "",
   slotDate: "",
   slotTime: "",
@@ -89,6 +90,10 @@ const quoteState = {
 
   submittingBooking: false,
   bookingError: "",
+
+  // Contact form validation
+  contactErrors: {},
+  showContactErrors: false,
 
   paymentMode: "after",
   paymentStatus: "appointment_requested",
@@ -473,6 +478,34 @@ function getRouteGroupLabel(routeGroup) {
 function syncRouteGroupFromCity() {
   quoteState.routeGroup = getRouteGroupFromCity(quoteState.city);
   quoteState.routeGroupLabel = getRouteGroupLabel(quoteState.routeGroup);
+}
+
+// Validate the contact step and return a map of fieldName -> error message.
+function validateContactStep() {
+  const errors = {};
+  const name = String(quoteState.name || "").trim();
+  const phone = String(quoteState.phone || "").trim();
+  const email = String(quoteState.email || "").trim();
+  const city = String(quoteState.city || "").trim();
+
+  if (!name) errors.name = "Please enter your name";
+
+  if (!phone) {
+    errors.phone = "Please enter a phone number";
+  } else {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 10) errors.phone = "Please enter a valid phone number";
+  }
+
+  if (!email) {
+    errors.email = "Please enter your email";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = "Please enter a valid email";
+  }
+
+  if (!city) errors.city = "Please choose your closest city";
+
+  return errors;
 }
 
 function buildScriptUrl(action, extraParams = {}) {
@@ -891,12 +924,8 @@ function canContinue() {
   if (step === "upkeepFrequency") return !isUpkeepPlanSelected() || !!quoteState.upkeepFrequency;
 
   if (step === "contact") {
-    return !!quoteState.name &&
-      !!quoteState.phone &&
-      !!quoteState.email &&
-      !!quoteState.city &&
-      !!quoteState.routeGroup &&
-      !quoteState.leadEmailSending;
+    // Always allow click — validation runs in goNext() and shows inline errors if missing.
+    return !quoteState.leadEmailSending;
   }
 
   if (step === "estimate") return !!computeEstimateInfo();
@@ -1198,39 +1227,60 @@ function renderUpkeepFrequencyStep() {
 }
 
 function renderContactStep() {
+  const errors = quoteState.showContactErrors ? (quoteState.contactErrors || {}) : {};
+
+  const fieldClass = name => `qInputField ${errors[name] ? "hasError" : ""} ${quoteState[name] ? "isFilled" : ""}`;
+
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Where should we send your quote?</h3>
     <p class="qStepSub">We’ll only use this for your quote, appointment request, and follow-up.</p>
 
-    <div class="qGrid2">
-      <div class="qField">
-        <label for="qName">Name</label>
-        <input id="qName" autocomplete="name" value="${escapeHtml(quoteState.name)}" placeholder="Your name">
+    <div class="qContactGrid">
+      <div class="${fieldClass("name")}">
+        <span class="qInputIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <input id="qName" autocomplete="name" value="${escapeHtml(quoteState.name)}" placeholder=" " required>
+        <label for="qName">Full name <span class="qReq">*</span></label>
+        ${errors.name ? `<div class="qFieldError">${escapeHtml(errors.name)}</div>` : ""}
       </div>
 
-      <div class="qField">
-        <label for="qPhone">Phone</label>
-        <input id="qPhone" autocomplete="tel" value="${escapeHtml(quoteState.phone)}" placeholder="Phone number">
+      <div class="${fieldClass("phone")}">
+        <span class="qInputIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </span>
+        <input id="qPhone" autocomplete="tel" inputmode="tel" value="${escapeHtml(quoteState.phone)}" placeholder=" " required>
+        <label for="qPhone">Phone number <span class="qReq">*</span></label>
+        ${errors.phone ? `<div class="qFieldError">${escapeHtml(errors.phone)}</div>` : ""}
       </div>
 
-      <div class="qField">
-        <label for="qEmail">Email</label>
-        <input id="qEmail" type="email" autocomplete="email" value="${escapeHtml(quoteState.email)}" placeholder="Email address">
+      <div class="${fieldClass("email")}">
+        <span class="qInputIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </span>
+        <input id="qEmail" type="email" autocomplete="email" inputmode="email" value="${escapeHtml(quoteState.email)}" placeholder=" " required>
+        <label for="qEmail">Email address <span class="qReq">*</span></label>
+        ${errors.email ? `<div class="qFieldError">${escapeHtml(errors.email)}</div>` : ""}
       </div>
-    </div>
 
-    <div class="qGrid2" style="margin-top:10px;">
-      <div class="qField">
-        <label for="qCity">Closest city</label>
-        <select id="qCity">
-          <option value="">Choose city</option>
+      <div class="${fieldClass("city")} qInputField--select">
+        <span class="qInputIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </span>
+        <select id="qCity" required>
+          <option value="" ${!quoteState.city ? "selected" : ""}>Choose your closest city</option>
           ${serviceCities.map(city => `<option value="${escapeHtml(city)}" ${quoteState.city === city ? "selected" : ""}>${escapeHtml(city)}</option>`).join("")}
         </select>
+        <label for="qCity">Closest city <span class="qReq">*</span></label>
+        ${errors.city ? `<div class="qFieldError">${escapeHtml(errors.city)}</div>` : ""}
       </div>
 
-      <div class="qField" style="grid-column:span 2;">
-        <label for="qNotes">Notes, optional</label>
-        <input id="qNotes" value="${escapeHtml(quoteState.notes)}" placeholder="Heavy pet hair, stains, special requests, etc.">
+      <div class="qInputField qInputField--full ${quoteState.notes ? "isFilled" : ""}">
+        <span class="qInputIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        </span>
+        <input id="qNotes" value="${escapeHtml(quoteState.notes)}" placeholder=" ">
+        <label for="qNotes">Notes <span class="qOpt">(optional)</span></label>
       </div>
     </div>
 
@@ -1240,9 +1290,7 @@ function renderContactStep() {
   `;
 }
 
-// ✅ ESTIMATE STEP — fully redesigned.
-// Removed: "What you selected" box, "Why book with us" box, optional payment plan section.
-// Kept: hero estimate card, coupon entry, fine print.
+// ✅ ESTIMATE STEP — premium, no pill bubbles, white Apply button.
 function renderEstimateStep() {
   const info = syncEstimateState();
   const estimateText = formatEstimateDisplay(info);
@@ -1257,15 +1305,21 @@ function renderEstimateStep() {
 
   quoteBody.innerHTML = `
     <div class="qEstimateHero">
-      <div class="qEstimateEyebrow">Your estimate</div>
+      <div class="qEstimateEyebrow">Your Estimate</div>
       <h3 class="qEstimateHeroTitle">Your estimate is ready</h3>
       <p class="qEstimateHeroSub">Based on your vehicle and selected service. Final price may vary depending on vehicle condition — we'll always confirm before starting.</p>
 
       <div class="qEstimateHeroPrice">
         ${oldEstimateText ? `<div class="qEstimateOld">${escapeHtml(oldEstimateText)}</div>` : ""}
         <div class="qEstimateBig">${escapeHtml(estimateText)}</div>
-        ${selectedSummaryPillsHtml(info)}
       </div>
+
+      ${info?.savings || info?.couponDiscount ? `
+        <div class="qEstimateSavings">
+          ${info?.savings ? `<span class="qSaveLine">Bundle savings <strong>−${formatMoney(info.savings)}</strong></span>` : ""}
+          ${info?.couponDiscount ? `<span class="qSaveLine">Coupon <strong>−${formatMoney(info.couponDiscount)}</strong></span>` : ""}
+        </div>
+      ` : ""}
     </div>
 
     <div class="qCouponBox">
@@ -1324,9 +1378,12 @@ function renderAppointmentStep() {
 function renderCalendarHtml(selectedDateSlots) {
   if (!appointmentSlots.length && !appointmentSlotsLoading) {
     return `
-      <div class="qDoneBox">
-        <div class="qDoneBig">No times are open right now</div>
-        <div class="qDoneLine">Reload available times or contact us directly for scheduling.</div>
+      <div class="qNoTimes">
+        <div class="qNoTimesIcon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="qNoTimesTitle">No open times right now</div>
+        <button class="qNoTimesBtn" type="button" data-action="reload-slots">Try again</button>
       </div>
     `;
   }
@@ -1402,23 +1459,19 @@ function renderCalendarHtml(selectedDateSlots) {
 function renderAddressStep() {
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Where should we come for the detail?</h3>
-    <p class="qStepSub">Mobile service means we come to you. Add the address where the vehicle will be available.</p>
+    <p class="qStepSub">We're mobile — we come to you. Add the address where the vehicle will be available.</p>
 
-    <div class="qDoneBox">
-      <div class="qDoneBig">Service location</div>
-
-      <div class="qField">
-        <label for="qAddress">Street address</label>
-        <input id="qAddress" autocomplete="street-address" value="${escapeHtml(quoteState.address)}" placeholder="123 Main St, Keizer, OR">
+    <div class="qAddressCard">
+      <div class="qAddressIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       </div>
 
-      <div class="qEstimateFine">Please choose a location with enough room for mobile detailing and access to the vehicle.</div>
-    </div>
+      <div class="qInputField qInputField--full ${quoteState.address ? "isFilled" : ""}">
+        <input id="qAddress" autocomplete="street-address" value="${escapeHtml(quoteState.address)}" placeholder=" " required>
+        <label for="qAddress">Street address <span class="qReq">*</span></label>
+      </div>
 
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Appointment selected</div>
-      <div class="qDoneLine"><strong>Time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
-      <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay())}</div>
+      <p class="qAddressHint">Please choose a location with enough room for mobile detailing and access to the vehicle.</p>
     </div>
   `;
 }
@@ -1427,57 +1480,78 @@ function renderConfirmStep() {
   const selectedServices = getSelectedDisplayServices();
   const info = syncEstimateState();
 
+  const summaryRow = (label, value) => value ? `
+    <div class="qSummaryRow">
+      <div class="qSummaryLabel">${escapeHtml(label)}</div>
+      <div class="qSummaryValue">${escapeHtml(value)}</div>
+    </div>
+  ` : "";
+
   quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Confirm your appointment request</h3>
-    <p class="qStepSub">Review everything below. Once you submit, we’ll send the request over and confirm shortly.</p>
+    <h3 class="qStepTitle">Review your request</h3>
+    <p class="qStepSub">Confirm the details below and we'll get the request to you shortly.</p>
 
-    <div class="qEstimateBox qEstimateBox--simple">
-      <div style="font-weight:1000;color:rgba(0,0,0,.62);text-transform:uppercase;letter-spacing:.08em;font-size:.82rem;">Estimated price</div>
-      <div class="qEstimateBig">${escapeHtml(formatEstimateDisplay(info))}</div>
-      ${selectedSummaryPillsHtml(info)}
-      <div class="qEstimateFine">No online payment is required right now. We’ll confirm the final details before the service starts.</div>
+    <div class="qConfirmHero">
+      <div class="qConfirmHeroLabel">Estimated total</div>
+      <div class="qConfirmHeroPrice">${escapeHtml(formatEstimateDisplay(info))}</div>
+      <div class="qConfirmHeroNote">No payment required now. We'll confirm before starting.</div>
     </div>
 
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Customer</div>
-      <div class="qDoneLine"><strong>Name:</strong> ${escapeHtml(quoteState.name || "-")}</div>
-      <div class="qDoneLine"><strong>Phone:</strong> ${escapeHtml(quoteState.phone || "-")}</div>
-      <div class="qDoneLine"><strong>Email:</strong> ${escapeHtml(quoteState.email || "-")}</div>
-      <div class="qDoneLine"><strong>City:</strong> ${escapeHtml(quoteState.city || "-")}</div>
+    <div class="qSummaryGroup">
+      <div class="qSummaryGroupTitle">Customer</div>
+      ${summaryRow("Name", quoteState.name)}
+      ${summaryRow("Phone", quoteState.phone)}
+      ${summaryRow("Email", quoteState.email)}
+      ${summaryRow("City", quoteState.city)}
     </div>
 
-    <div class="qDoneBox" style="margin-top:12px;">
-      <div class="qDoneBig">Appointment request</div>
-      <div class="qDoneLine"><strong>Preferred time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
-      <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
-      <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(selectedServices.join(", ") || "-")}</div>
-      ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))} ${quoteState.couponDiscount ? `(-${formatMoney(quoteState.couponDiscount)})` : ""}</div>` : ""}
-      ${quoteState.notes ? `<div class="qDoneLine"><strong>Notes:</strong> ${escapeHtml(quoteState.notes)}</div>` : ""}
+    <div class="qSummaryGroup">
+      <div class="qSummaryGroupTitle">Appointment</div>
+      ${summaryRow("Preferred time", quoteState.slotLabel)}
+      ${summaryRow("Address", quoteState.address)}
+      ${summaryRow("Vehicle", quoteState.vehicleType)}
+      ${summaryRow("Service", selectedServices.join(", "))}
+      ${quoteState.upkeepFrequency ? summaryRow("Frequency", quoteState.upkeepFrequency) : ""}
+      ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", `${normalizeCoupon(quoteState.couponCode)} (−${formatMoney(quoteState.couponDiscount)})`) : ""}
+      ${quoteState.notes ? summaryRow("Notes", quoteState.notes) : ""}
     </div>
 
-    ${quoteState.bookingError ? `<div class="qStatus" style="color:#b00020;">${escapeHtml(quoteState.bookingError)}</div>` : ""}
+    ${quoteState.bookingError ? `<div class="qInlineError">${escapeHtml(quoteState.bookingError)}</div>` : ""}
   `;
 }
 
 function renderDoneStep() {
-  quoteBody.innerHTML = `
-    <div class="quoteSuccessWrap">
-      <div class="quoteSuccessBadge">Request Received</div>
-      <h3 class="quoteSuccessTitle">You’re all set.</h3>
-      <p class="quoteSuccessText">Your appointment request was sent to Keizer Mobile Detailing. We’ll confirm shortly by text or email.</p>
+  const summaryRow = (label, value) => value ? `
+    <div class="qSummaryRow">
+      <div class="qSummaryLabel">${escapeHtml(label)}</div>
+      <div class="qSummaryValue">${escapeHtml(value)}</div>
+    </div>
+  ` : "";
 
-      <div class="quoteSuccessInner">
-        <div class="qDoneBox">
-          <div class="qDoneBig">Appointment request summary</div>
-          <div class="qDoneLine"><strong>Name:</strong> ${escapeHtml(quoteState.name || "-")}</div>
-          <div class="qDoneLine"><strong>Preferred time:</strong> ${escapeHtml(quoteState.slotLabel || "-")}</div>
-          <div class="qDoneLine"><strong>Address:</strong> ${escapeHtml(quoteState.address || "-")}</div>
-          <div class="qDoneLine"><strong>Service:</strong> ${escapeHtml(getSelectedDisplayServices().join(", ") || "-")}</div>
-          <div class="qDoneLine"><strong>Estimate:</strong> ${escapeHtml(formatEstimateDisplay())}</div>
-          ${quoteState.couponCode ? `<div class="qDoneLine"><strong>Coupon:</strong> ${escapeHtml(normalizeCoupon(quoteState.couponCode))}</div>` : ""}
-          <div class="qDoneFine">Final price can vary depending on vehicle condition. We’ll confirm before starting.</div>
-        </div>
+  quoteBody.innerHTML = `
+    <div class="qDonePage">
+      <div class="qDoneCheck" aria-hidden="true">
+        <svg viewBox="0 0 52 52" fill="none">
+          <circle class="qDoneCheckCircle" cx="26" cy="26" r="23" stroke="currentColor" stroke-width="3"/>
+          <path class="qDoneCheckMark" d="M14 27l8 8 16-18" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
       </div>
+
+      <div class="qDoneBadge">Request received</div>
+      <h3 class="qDoneTitle">You're all set</h3>
+      <p class="qDoneText">Your appointment request was sent. We'll confirm shortly by text or email.</p>
+
+      <div class="qSummaryGroup qSummaryGroup--done">
+        <div class="qSummaryGroupTitle">Your request</div>
+        ${summaryRow("Name", quoteState.name)}
+        ${summaryRow("Preferred time", quoteState.slotLabel)}
+        ${summaryRow("Address", quoteState.address)}
+        ${summaryRow("Service", getSelectedDisplayServices().join(", "))}
+        ${summaryRow("Estimate", formatEstimateDisplay())}
+        ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", normalizeCoupon(quoteState.couponCode)) : ""}
+      </div>
+
+      <p class="qDoneFootNote">Final price may vary based on vehicle condition. We'll confirm before starting.</p>
     </div>
   `;
 }
@@ -1502,14 +1576,43 @@ function bindStepEvents() {
   const qCoupon = quoteBody.querySelector("#qCoupon");
   const qAddress = quoteBody.querySelector("#qAddress");
 
-  if (qName) qName.addEventListener("input", e => { quoteState.name = e.target.value; updateNav(); });
-  if (qPhone) qPhone.addEventListener("input", e => { quoteState.phone = e.target.value; updateNav(); });
-  if (qEmail) qEmail.addEventListener("input", e => { quoteState.email = e.target.value; updateNav(); });
+  if (qName) qName.addEventListener("input", e => {
+    quoteState.name = e.target.value;
+    if (quoteState.contactErrors?.name && e.target.value.trim()) {
+      delete quoteState.contactErrors.name;
+      e.target.closest(".qInputField")?.classList.remove("hasError");
+      e.target.parentElement?.querySelector(".qFieldError")?.remove();
+    }
+    updateNav();
+  });
+  if (qPhone) qPhone.addEventListener("input", e => {
+    quoteState.phone = e.target.value;
+    if (quoteState.contactErrors?.phone && e.target.value.replace(/\D/g, "").length >= 10) {
+      delete quoteState.contactErrors.phone;
+      e.target.closest(".qInputField")?.classList.remove("hasError");
+      e.target.parentElement?.querySelector(".qFieldError")?.remove();
+    }
+    updateNav();
+  });
+  if (qEmail) qEmail.addEventListener("input", e => {
+    quoteState.email = e.target.value;
+    if (quoteState.contactErrors?.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value.trim())) {
+      delete quoteState.contactErrors.email;
+      e.target.closest(".qInputField")?.classList.remove("hasError");
+      e.target.parentElement?.querySelector(".qFieldError")?.remove();
+    }
+    updateNav();
+  });
 
   if (qCity) qCity.addEventListener("change", e => {
     quoteState.city = e.target.value;
     syncRouteGroupFromCity();
     clearAppointmentSelection();
+    if (quoteState.contactErrors?.city && e.target.value) {
+      delete quoteState.contactErrors.city;
+      e.target.closest(".qInputField")?.classList.remove("hasError");
+      e.target.parentElement?.querySelector(".qFieldError")?.remove();
+    }
     updateNav();
   });
 
@@ -1691,6 +1794,7 @@ function clearEstimateDependentState() {
 
 function clearAppointmentSelection() {
   quoteState.slotId = "";
+  quoteState.slotSourceId = "";
   quoteState.slotLabel = "";
   quoteState.slotDate = "";
   quoteState.slotTime = "";
@@ -1733,15 +1837,24 @@ async function maybeLoadAppointmentSlots(force = false) {
       throw new Error(data?.message || data?.error || "Could not load times.");
     }
 
+    // Build slots with GUARANTEED-UNIQUE keys so clicking one time doesn't highlight all of them.
+    // Some Apps Script payloads return the same slot.id across different times; we synthesize a
+    // composite uid from date+time+source-id+index to disambiguate.
     appointmentSlots = (data.slots || [])
       .filter(slot => slot?.id)
-      .map(slot => ({
-        id: String(slot.id || ""),
-        label: String(slot.label || slot.id || ""),
-        date: normalizeDateValue(slot.date || slot.id),
-        time: normalizeTimeValue(slot.time || slot.id),
-        timeLabel: formatTimeLabel(slot.label || slot.time || slot.id)
-      }))
+      .map((slot, index) => {
+        const date = normalizeDateValue(slot.date || slot.id);
+        const time = normalizeTimeValue(slot.time || slot.id);
+        const sourceId = String(slot.id || "");
+        return {
+          id: `${date}_${time}_${sourceId}_${index}`,
+          sourceId,
+          label: String(slot.label || slot.id || ""),
+          date,
+          time,
+          timeLabel: formatTimeLabel(slot.label || slot.time || slot.id)
+        };
+      })
       .filter(slot => slot.date && slot.time)
       .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
 
@@ -1769,6 +1882,7 @@ function selectSlot(slotId) {
   if (!slot) return;
 
   quoteState.slotId = slot.id;
+  quoteState.slotSourceId = slot.sourceId || slot.id;
   quoteState.slotLabel = slot.label || `${formatDateNice(slot.date)} at ${slot.timeLabel}`;
   quoteState.slotDate = slot.date;
   quoteState.slotTime = slot.time;
@@ -1847,7 +1961,9 @@ function buildPayload(includeSlot = false) {
   };
 
   if (includeSlot) {
-    payload.slotId = quoteState.slotId;
+    // Send the ORIGINAL slot id to Apps Script (not the composite uid we use locally to dedupe UI selection).
+    payload.slotId = quoteState.slotSourceId || quoteState.slotId;
+    payload.slotUid = quoteState.slotId;
     payload.slotLabel = quoteState.slotLabel;
     payload.slotDate = quoteState.slotDate;
     payload.slotTime = quoteState.slotTime;
@@ -1946,13 +2062,35 @@ async function goNext() {
     return;
   }
 
-  if (!canContinue()) {
-    updateNav();
+  // Special-case: validate contact form and show inline errors instead of silent disable.
+  if (step === "contact") {
+    const errors = validateContactStep();
+    quoteState.contactErrors = errors;
+
+    if (Object.keys(errors).length || !quoteState.routeGroup) {
+      quoteState.showContactErrors = true;
+      if (!quoteState.routeGroup && !errors.city) {
+        quoteState.contactErrors.city = "Please choose your closest city";
+      }
+      render();
+
+      // Scroll the first error into view on mobile.
+      const firstErr = quoteBody?.querySelector(".qFieldError");
+      if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    quoteState.showContactErrors = false;
+    quoteState.contactErrors = {};
+    await sendLeadNotificationIfNeeded();
+    stepIndex = nextActiveStepIndex(stepIndex);
+    render();
     return;
   }
 
-  if (step === "contact") {
-    await sendLeadNotificationIfNeeded();
+  if (!canContinue()) {
+    updateNav();
+    return;
   }
 
   if (step === "confirm") {
@@ -1992,6 +2130,7 @@ function resetQuoteFlow() {
     couponMessage: "",
 
     slotId: "",
+    slotSourceId: "",
     slotLabel: "",
     slotDate: "",
     slotTime: "",
@@ -2014,6 +2153,9 @@ function resetQuoteFlow() {
 
     submittingBooking: false,
     bookingError: "",
+
+    contactErrors: {},
+    showContactErrors: false,
 
     paymentMode: "after",
     paymentStatus: "appointment_requested",
