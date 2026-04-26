@@ -23,9 +23,11 @@ const CITY_ROUTE_MAP = {
 };
 
 const VALID_COUPONS = {
+  // Add custom coupon codes here. Format: CODE: discountAmount
+  // Example: SPRING25: 25,
   DETAIL10: 10,
-  CLEAN10: 10,
-  RESET10: 10
+  DEKUNSBALSS: 999999999,
+  NIGGABUTTSEX: 69
 };
 
 const quoteModal = document.querySelector("[data-quote-modal]");
@@ -1723,14 +1725,22 @@ function bindStepEvents() {
   });
 
   quoteBody.querySelectorAll("[data-confirm-input]").forEach(input => {
+    const saveConfirmInput = () => {
+      const field = input.dataset.confirmInput || "";
+      applyConfirmEdit(field, input.value);
+      confirmEditingField = "";
+      render();
+    };
+
     input.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         e.preventDefault();
-        const field = input.dataset.confirmInput || "";
-        applyConfirmEdit(field, input.value);
-        confirmEditingField = "";
-        render();
+        saveConfirmInput();
       }
+    });
+
+    input.addEventListener("blur", () => {
+      saveConfirmInput();
     });
   });
 }
@@ -2350,13 +2360,16 @@ function openQuote() {
   quoteModal.style.display = "flex";
   quoteModal.style.opacity = "1";
   quoteModal.style.pointerEvents = "auto";
+  quoteModal.style.background = "rgba(0,0,0,.45)";
+  quoteModal.style.backdropFilter = "blur(2px)";
+  quoteModal.style.webkitBackdropFilter = "blur(2px)";
 
   document.body.style.overflow = "hidden";
 
   quoteCloseBtns.forEach(btn => {
-    btn.setAttribute("aria-hidden", "true");
-    btn.setAttribute("tabindex", "-1");
-    btn.style.display = "none";
+    btn.removeAttribute("aria-hidden");
+    btn.removeAttribute("tabindex");
+    btn.style.display = "inline-flex";
   });
 
   try {
@@ -2394,6 +2407,9 @@ function closeQuote() {
   quoteModal.style.display = "";
   quoteModal.style.opacity = "";
   quoteModal.style.pointerEvents = "";
+  quoteModal.style.background = "";
+  quoteModal.style.backdropFilter = "";
+  quoteModal.style.webkitBackdropFilter = "";
 
   document.body.style.overflow = "";
 
@@ -2413,6 +2429,9 @@ window.forceCloseQuote = function () {
     modal.style.display = "";
     modal.style.opacity = "";
     modal.style.pointerEvents = "";
+    modal.style.background = "";
+    modal.style.backdropFilter = "";
+    modal.style.webkitBackdropFilter = "";
   }
 };
 
@@ -2435,12 +2454,13 @@ function initQuoteWizard() {
   });
 
   quoteCloseBtns.forEach(btn => {
-    btn.setAttribute("aria-hidden", "true");
-    btn.setAttribute("tabindex", "-1");
-    btn.style.display = "none";
+    btn.removeAttribute("aria-hidden");
+    btn.removeAttribute("tabindex");
+    btn.style.display = "inline-flex";
     btn.addEventListener("click", e => {
       e.preventDefault();
       e.stopPropagation();
+      closeQuote();
     });
   });
 
