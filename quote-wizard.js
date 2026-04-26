@@ -45,6 +45,7 @@ let appointmentSlotsLoadedKey = "";
 let appointmentSlotsError = "";
 let selectedCalendarDate = "";
 let calendarMonthDate = null;
+let confirmEditingField = "";
 
 const quoteState = {
   vehicleType: "",
@@ -73,6 +74,7 @@ const quoteState = {
   slotTime: "",
 
   address: "",
+  addressError: "",
 
   name: "",
   phone: "",
@@ -930,7 +932,8 @@ function canContinue() {
 
   if (step === "estimate") return !!computeEstimateInfo();
   if (step === "appointment") return !!quoteState.slotId;
-  if (step === "address") return !!quoteState.address;
+  // Let users click Review My Request so we can show an inline Required message.
+  if (step === "address") return true;
   if (step === "confirm") return !quoteState.submittingBooking;
   if (step === "done") return true;
 
@@ -1355,6 +1358,10 @@ function renderAppointmentStep() {
     ? appointmentSlots.filter(slot => slot.date === selectedCalendarDate)
     : [];
 
+  const key = getSlotsLoadKey();
+  const shouldStartFirstLoad = !appointmentSlotsLoading && appointmentSlotsLoadedKey !== key;
+  const showLoading = appointmentSlotsLoading || shouldStartFirstLoad;
+
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Pick your appointment time</h3>
 
@@ -1363,13 +1370,17 @@ function renderAppointmentStep() {
         <div class="qCalTz">Local time${quoteState.routeGroupLabel ? ` · ${escapeHtml(quoteState.routeGroupLabel)}` : ""}</div>
       </div>
 
-      <div class="qLoadBar ${appointmentSlotsLoading ? "isOn" : ""}"><span class="qLoadBarFill"></span></div>
+      <div class="qLoadBar ${showLoading ? "isOn" : ""}"><span class="qLoadBarFill"></span></div>
 
-      ${appointmentSlotsLoading ? `<div class="qStatus">Loading available times...</div>` : renderCalendarHtml(selectedDateSlots)}
+      ${showLoading ? `<div class="qStatus">Loading available times...</div>` : renderCalendarHtml(selectedDateSlots)}
     </div>
   `;
 
-  maybeLoadAppointmentSlots();
+  if (shouldStartFirstLoad) {
+    setTimeout(() => maybeLoadAppointmentSlots(), 0);
+  } else {
+    maybeLoadAppointmentSlots();
+  }
 }
 
 function renderCalendarHtml(selectedDateSlots) {
@@ -1454,23 +1465,96 @@ function renderCalendarHtml(selectedDateSlots) {
 }
 
 function renderAddressStep() {
+  const hasAddressError = !!quoteState.addressError;
+
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Where should we come for the detail?</h3>
-    <p class="qStepSub">We're mobile — we come to you. Add the address where the vehicle will be available.</p>
 
     <div class="qAddressCard">
       <div class="qAddressIcon" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       </div>
 
-      <div class="qInputField qInputField--full ${quoteState.address ? "isFilled" : ""}">
+      <div class="qInputField qInputField--full ${quoteState.address ? "isFilled" : ""} ${hasAddressError ? "hasError" : ""}">
         <input id="qAddress" autocomplete="street-address" value="${escapeHtml(quoteState.address)}" placeholder=" " required>
         <label for="qAddress">Street address <span class="qReq">*</span></label>
+        ${hasAddressError ? `<div class="qFieldError">${escapeHtml(quoteState.addressError)}</div>` : ""}
       </div>
 
       <p class="qAddressHint">Please choose a location with enough room for mobile detailing and access to the vehicle.</p>
     </div>
   `;
+}
+
+function getConfirmEditInputType(field) {
+  if (field === "email") return "email";
+  if (field === "phone") return "tel";
+  return "text";
+}
+
+function applyConfirmEdit(field, value) {
+  const clean = String(value || "").trim();
+
+  if (field === "name") quoteState.name = clean;
+  if (field === "phone") quoteState.phone = clean;
+  if (field === "email") quoteState.email = clean;
+  if (field === "address") {
+    quoteState.address = clean;
+    quoteState.addressError = clean ? "" : "Required";
+  }
+
+  if (["name", "phone", "email"].includes(field)) {
+    quoteState.leadEmailSent = false;
+    quoteState.leadEmailSignature = "";
+  }
+}
+
+function renderEditableSummaryRow(label, field, value) {
+  const safeLabel = escapeHtml(label);
+  const safeField = escapeHtml(field);
+  const safeValue = escapeHtml(value || "");
+
+  if (confirmEditingField === field) {
+    return `
+      <div class="qSummaryRow">
+        <div class="qSummaryLabel">${safeLabel}</div>
+        <div class="qSummaryValue" style="display:flex;gap:8px;align-items:center;">
+          <input
+            class="qSummaryEditInput"
+            data-confirm-input="${safeField}"
+            type="${getConfirmEditInputType(field)}"
+            value="${safeValue}"
+            style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(0,0,0,.14);font:inherit;font-weight:700;outline:none;"
+          >
+          <button
+            type="button"
+            data-action="save-confirm-edit"
+            data-field="${safeField}"
+            aria-label="Save ${safeLabel}"
+            style="width:38px;height:38px;border-radius:999px;border:1px solid rgba(214,178,94,.65);background:rgba(214,178,94,.14);color:#111;font-weight:1000;cursor:pointer;flex:0 0 auto;"
+          >✓</button>
+        </div>
+      </div>
+    `;
+  }
+
+  return value ? `
+    <div class="qSummaryRow">
+      <div class="qSummaryLabel">${safeLabel}</div>
+      <div class="qSummaryValue" style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+        <span>${safeValue}</span>
+        <button
+          type="button"
+          data-action="edit-confirm-field"
+          data-field="${safeField}"
+          aria-label="Edit ${safeLabel}"
+          style="width:34px;height:34px;border-radius:999px;border:1px solid rgba(0,0,0,.12);background:#fff;color:rgba(0,0,0,.68);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+        </button>
+      </div>
+    </div>
+  ` : "";
 }
 
 function renderConfirmStep() {
@@ -1486,26 +1570,24 @@ function renderConfirmStep() {
 
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Review your request</h3>
-    <p class="qStepSub">Confirm the details below and we'll get the request to you shortly.</p>
 
     <div class="qConfirmHero">
       <div class="qConfirmHeroLabel">Estimated total</div>
       <div class="qConfirmHeroPrice">${escapeHtml(formatEstimateDisplay(info))}</div>
-      <div class="qConfirmHeroNote">No payment required now. We'll confirm before starting.</div>
     </div>
 
     <div class="qSummaryGroup">
       <div class="qSummaryGroupTitle">Customer</div>
-      ${summaryRow("Name", quoteState.name)}
-      ${summaryRow("Phone", quoteState.phone)}
-      ${summaryRow("Email", quoteState.email)}
+      ${renderEditableSummaryRow("Name", "name", quoteState.name)}
+      ${renderEditableSummaryRow("Phone", "phone", quoteState.phone)}
+      ${renderEditableSummaryRow("Email", "email", quoteState.email)}
       ${summaryRow("City", quoteState.city)}
     </div>
 
     <div class="qSummaryGroup">
       <div class="qSummaryGroupTitle">Appointment</div>
       ${summaryRow("Preferred time", quoteState.slotLabel)}
-      ${summaryRow("Address", quoteState.address)}
+      ${renderEditableSummaryRow("Address", "address", quoteState.address)}
       ${summaryRow("Vehicle", quoteState.vehicleType)}
       ${summaryRow("Service", selectedServices.join(", "))}
       ${quoteState.upkeepFrequency ? summaryRow("Frequency", quoteState.upkeepFrequency) : ""}
@@ -1630,7 +1712,27 @@ function bindStepEvents() {
     });
   }
 
-  if (qAddress) qAddress.addEventListener("input", e => { quoteState.address = e.target.value; updateNav(); });
+  if (qAddress) qAddress.addEventListener("input", e => {
+    quoteState.address = e.target.value;
+    if (quoteState.addressError && e.target.value.trim()) {
+      quoteState.addressError = "";
+      e.target.closest(".qInputField")?.classList.remove("hasError");
+      e.target.parentElement?.querySelector(".qFieldError")?.remove();
+    }
+    updateNav();
+  });
+
+  quoteBody.querySelectorAll("[data-confirm-input]").forEach(input => {
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const field = input.dataset.confirmInput || "";
+        applyConfirmEdit(field, input.value);
+        confirmEditingField = "";
+        render();
+      }
+    });
+  });
 }
 
 function handleStepAction(e) {
@@ -1740,6 +1842,26 @@ function handleStepAction(e) {
     render();
     return;
   }
+
+  if (action === "edit-confirm-field") {
+    confirmEditingField = target.dataset.field || "";
+    render();
+    setTimeout(() => {
+      const input = quoteBody?.querySelector(`[data-confirm-input="${confirmEditingField}"]`);
+      input?.focus?.();
+      input?.select?.();
+    }, 30);
+    return;
+  }
+
+  if (action === "save-confirm-edit") {
+    const field = target.dataset.field || "";
+    const input = quoteBody?.querySelector(`[data-confirm-input="${field}"]`);
+    applyConfirmEdit(field, input?.value || "");
+    confirmEditingField = "";
+    render();
+    return;
+  }
 }
 
 function toggleService(label) {
@@ -1786,6 +1908,8 @@ function clearEstimateDependentState() {
   quoteState.leadEmailSent = false;
   quoteState.leadEmailSignature = "";
   quoteState.bookingError = "";
+  quoteState.addressError = "";
+  confirmEditingField = "";
   clearAppointmentSelection();
 }
 
@@ -1989,7 +2113,7 @@ function buildPayload(includeSlot = false) {
   return payload;
 }
 
-async function sendLeadNotificationIfNeeded() {
+async function sendLeadNotificationIfNeeded({ silent = false } = {}) {
   if (quoteState.honeypot) return { ok: true, skipped: true };
 
   if (!quoteState.leadId) quoteState.leadId = makeId();
@@ -2001,7 +2125,7 @@ async function sendLeadNotificationIfNeeded() {
   }
 
   quoteState.leadEmailSending = true;
-  render();
+  if (!silent) render();
 
   try {
     const payload = buildPayload(false);
@@ -2029,7 +2153,8 @@ async function sendLeadNotificationIfNeeded() {
     return { ok: false, error: err?.message || String(err) };
   } finally {
     quoteState.leadEmailSending = false;
-    if (steps[stepIndex] === "contact") render();
+    if (!silent && steps[stepIndex] === "contact") render();
+    if (silent) updateNav();
   }
 }
 
@@ -2099,10 +2224,24 @@ async function goNext() {
 
     quoteState.showContactErrors = false;
     quoteState.contactErrors = {};
-    await sendLeadNotificationIfNeeded();
+
+    // Move straight to the estimate. The lead email sends quietly in the background.
     stepIndex = nextActiveStepIndex(stepIndex);
     render();
+    sendLeadNotificationIfNeeded({ silent: true });
     return;
+  }
+
+  if (step === "address") {
+    if (!String(quoteState.address || "").trim()) {
+      quoteState.addressError = "Required";
+      render();
+      const firstErr = quoteBody?.querySelector(".qFieldError");
+      if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    quoteState.addressError = "";
   }
 
   if (!canContinue()) {
@@ -2153,6 +2292,7 @@ function resetQuoteFlow() {
     slotTime: "",
 
     address: "",
+    addressError: "",
 
     name: "",
     phone: "",
@@ -2189,6 +2329,7 @@ function resetQuoteFlow() {
   selectedCalendarDate = "";
   calendarMonthDate = null;
   stepIndex = 0;
+  confirmEditingField = "";
 }
 
 // -------------------------
@@ -2211,6 +2352,12 @@ function openQuote() {
   quoteModal.style.pointerEvents = "auto";
 
   document.body.style.overflow = "hidden";
+
+  quoteCloseBtns.forEach(btn => {
+    btn.setAttribute("aria-hidden", "true");
+    btn.setAttribute("tabindex", "-1");
+    btn.style.display = "none";
+  });
 
   try {
     render();
@@ -2288,9 +2435,12 @@ function initQuoteWizard() {
   });
 
   quoteCloseBtns.forEach(btn => {
+    btn.setAttribute("aria-hidden", "true");
+    btn.setAttribute("tabindex", "-1");
+    btn.style.display = "none";
     btn.addEventListener("click", e => {
       e.preventDefault();
-      closeQuote();
+      e.stopPropagation();
     });
   });
 
@@ -2304,11 +2454,11 @@ function initQuoteWizard() {
     goBack();
   });
 
-  // ✅ Click-outside-to-close DISABLED. Only the X button (data-quote-close) closes the modal.
-  // Escape key still works as a courtesy keyboard shortcut.
+  // Click-outside, X-close, and Escape-close are disabled so users stay inside the quote flow.
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && quoteModal && !quoteModal.hasAttribute("hidden")) {
-      closeQuote();
+      e.preventDefault();
+      e.stopPropagation();
     }
   });
 }
