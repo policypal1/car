@@ -1028,8 +1028,9 @@ function optionCard(item, selected, action, opts = {}) {
 }
 
 // Package feature card — IMAGES INTENTIONALLY REMOVED.
-// Standard / Deep / Premium cards show only the title, feature list, and price.
-function featureCard(pkg, selected, action, priceText) {
+// Standard / Deep / Premium cards show only the title and feature list.
+// Pricing is hidden here and only shown later on the estimate step.
+function featureCard(pkg, selected, action) {
   return `
     <button class="qCard qFeatureCard qFeatureCard--noImg ${selected ? "isSel" : ""}" type="button" data-action="${escapeHtml(action)}" data-value="${escapeHtml(pkg.serviceLabel)}">
       <div class="qFeatureCardInner">
@@ -1038,7 +1039,6 @@ function featureCard(pkg, selected, action, priceText) {
         <ul class="qFeatureList">
           ${(pkg.features || []).map(f => `<li>${escapeHtml(f)}</li>`).join("")}
         </ul>
-        <div class="qFeaturePrice">${escapeHtml(priceText || "")}</div>
       </div>
     </button>
   `;
@@ -1152,17 +1152,13 @@ function renderServiceStep() {
   `;
 }
 
-function renderInteriorPackageStep() {
-  // No "Selected services" chip tray, no images on cards.
+function renderExteriorPackageStep() {
   quoteBody.innerHTML = `
-    <h3 class="qStepTitle">Choose your interior package</h3>
-    <p class="qStepSub">Pick the level that best matches the condition of the inside of the vehicle.</p>
+    <h3 class="qStepTitle">Choose your exterior package</h3>
+    <p class="qStepSub">Pick the outside detail level you want.</p>
     <div class="qCards qCards--scroll qCards--big">
-      ${interiorPackages.map(pkg => {
-        const price = priceForVehicle(INTERIOR_DETAIL_PRICES, pkg.serviceLabel);
-        const high = Number.isFinite(price) ? price + INTERIOR_DISPLAY_RANGE_ADD : null;
-        const priceText = Number.isFinite(price) ? `${formatMoney(price)} - ${formatMoney(high)}` : "Select vehicle first";
-        return featureCard(pkg, quoteState.interiorPackage === pkg.serviceLabel, "select-interior-package", priceText);
+      ${exteriorPackages.map(pkg => {
+        return featureCard(pkg, quoteState.exteriorPackage === pkg.serviceLabel, "select-exterior-package");
       }).join("")}
     </div>
   `;
