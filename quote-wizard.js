@@ -26,8 +26,8 @@ const VALID_COUPONS = {
   // Add custom coupon codes here. Format: CODE: discountAmount
   // Example: SPRING25: 25,
   DETAIL10: 10,
-  CLEAN10: 10,
-  RESET10: 10
+  GAYNIGGABUTTFUCK: 69,
+  DEKUNLIKESITROUGH: 1
 };
 
 const quoteModal = document.querySelector("[data-quote-modal]");
