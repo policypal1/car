@@ -421,6 +421,116 @@
         object-fit: cover;
       }
 
+      .rImageExpandBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.95rem;
+        width: 100%;
+        padding: 0.82rem 1rem;
+        border: 1px solid rgba(214, 167, 63, 0.55);
+        border-radius: 14px;
+        background: rgba(214, 167, 63, 0.12);
+        color: #f6d98a;
+        font-family: Inter, Arial, sans-serif;
+        font-size: 0.92rem;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+      }
+
+      .rImageExpandBtn:hover {
+        transform: translateY(-1px);
+        background: rgba(214, 167, 63, 0.18);
+        border-color: rgba(214, 167, 63, 0.82);
+      }
+
+      .rImageExpandBtn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(214, 167, 63, 0.22);
+      }
+
+      .reviewImageModal[hidden] {
+        display: none !important;
+      }
+
+      .reviewImageModal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+      }
+
+      .reviewImageModal__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+
+      .reviewImageModal__panel {
+        position: relative;
+        z-index: 1;
+        width: min(980px, 100%);
+        max-height: 92vh;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #111111;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48);
+        overflow: hidden;
+      }
+
+      .reviewImageModal__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .reviewImageModal__title {
+        color: #ffffff;
+        font-weight: 900;
+        font-size: 0.95rem;
+      }
+
+      .reviewImageModal__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        font-size: 1.55rem;
+        font-weight: 900;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .reviewImageModal__close:hover {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .reviewImageModal__img {
+        display: block;
+        width: 100%;
+        max-height: calc(92vh - 64px);
+        object-fit: contain;
+        background: #070707;
+      }
+
       @media (max-width: 980px) {
         .hero__layout {
           grid-template-columns: 1fr;
@@ -1001,9 +1111,9 @@
               <p class="rText rText--dark">
                 My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!
               </p>
-              <div class="rReviewMedia">
-                <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
-              </div>
+              <button class="rImageExpandBtn" type="button" data-review-image-open="./unnamed.webp">
+                Expand Image
+              </button>
             </article>
           </div>
 
@@ -1049,6 +1159,17 @@
         </div>
       </div>
     </footer>
+
+    <div class="reviewImageModal" hidden data-review-image-modal aria-hidden="true">
+      <div class="reviewImageModal__overlay" data-review-image-close></div>
+      <div class="reviewImageModal__panel" role="dialog" aria-modal="true" aria-label="Expanded customer review image">
+        <div class="reviewImageModal__top">
+          <div class="reviewImageModal__title">Edgar Diaz Review Image</div>
+          <button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button>
+        </div>
+        <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" data-review-image-img />
+      </div>
+    </div>
 
     <div class="modal" aria-hidden="true" data-modal>
       <div class="modal__overlay" data-modal-close></div>
@@ -1351,6 +1472,51 @@
             characterData: true
           });
         }
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const reviewImageModal = document.querySelector("[data-review-image-modal]");
+        const reviewImageImg = document.querySelector("[data-review-image-img]");
+        const reviewImageOpenButtons = document.querySelectorAll("[data-review-image-open]");
+        const reviewImageCloseButtons = document.querySelectorAll("[data-review-image-close]");
+
+        function openReviewImage(src) {
+          if (!reviewImageModal) return;
+
+          if (reviewImageImg && src) {
+            reviewImageImg.src = src;
+          }
+
+          reviewImageModal.hidden = false;
+          reviewImageModal.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeReviewImage() {
+          if (!reviewImageModal) return;
+
+          reviewImageModal.hidden = true;
+          reviewImageModal.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+        }
+
+        reviewImageOpenButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            openReviewImage(button.getAttribute("data-review-image-open") || "./unnamed.webp");
+          });
+        });
+
+        reviewImageCloseButtons.forEach((button) => {
+          button.addEventListener("click", closeReviewImage);
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && reviewImageModal && !reviewImageModal.hidden) {
+            closeReviewImage();
+          }
+        });
       });
     </script>
 
