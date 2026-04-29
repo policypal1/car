@@ -32,7 +32,6 @@
     <link rel="apple-touch-icon" href="./Untitled design (2).png" />
 
     <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./quote-wizard.css" />
 
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -648,7 +647,7 @@
           <a href="#process">How It Works</a>
           <a href="#about">About</a>
           <a href="#reviews">Reviews</a>
-          <button class="btn btn--quote nav__cta" type="button" data-quote-open>GET QUOTE NOW</button>
+          <a class="btn btn--quote nav__cta" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
         </nav>
       </div>
     </header>
@@ -669,7 +668,7 @@
             </p>
 
             <div class="hero__actions">
-              <button class="btn btn--quote btn--lg" type="button" data-quote-open>GET QUOTE NOW</button>
+              <a class="btn btn--quote btn--lg" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
             </div>
           </div>
@@ -746,7 +745,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
-                <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -764,7 +763,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
-                <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -782,7 +781,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
-                <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -800,7 +799,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
-                <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -818,7 +817,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
-                <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1029,7 +1028,7 @@
             </div>
 
             <div class="areaActions">
-              <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
           </div>
@@ -1049,7 +1048,7 @@
             </p>
 
             <div class="aboutActions">
-              <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE NOW</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
           </div>
@@ -1135,7 +1134,7 @@
         </div>
         <div class="footerMini__right">
           <div class="footerMini__actions">
-            <button class="btn btn--quote" type="button" data-quote-open>GET QUOTE</button>
+            <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             <button class="btn btn--call" type="button" data-contact-open>CONTACT</button>
           </div>
@@ -1178,7 +1177,7 @@
         <h3 class="modal__title" data-modal-title>Service</h3>
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
-          <button class="btn btn--quote" type="button" data-quote-open data-modal-close>GET QUOTE NOW</button>
+          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
           <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
         </div>
       </div>
@@ -1252,32 +1251,11 @@
       </div>
     </div>
 
-    <div class="modal modal--quote" aria-hidden="true" data-quote-modal>
-      <div class="modal__overlay" data-quote-close></div>
-      <div class="quotePanel" role="dialog" aria-modal="true" aria-label="Get a quote">
-        <button class="modal__close" aria-label="Close" data-quote-close>&#215;</button>
-        <div class="quoteTop">
-          <h3 class="quoteTitle">GET A QUOTE</h3>
-          <div class="quoteProgress" aria-hidden="true">
-            <span class="qpDot isOn"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
-            <span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
-          </div>
-        </div>
-        <div class="quoteBody" data-quote-body></div>
-
-        <div class="quoteNav">
-          <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
-          <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
-        </div>
-      </div>
-    </div>
-
     <script>
       window.CONTACT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZQ_Jf4Rp27mL9nyRn_2oAVtwt_RIhXskoB2GjTmyJYGLBdkd7LKgKNNOK457clicn/exec";
     </script>
 
     <script src="./script.js"></script>
-    <script src="./quote-wizard.js"></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -1322,7 +1300,7 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const quoteButtons = document.querySelectorAll("[data-quote-open]");
+        const quoteButtons = document.querySelectorAll("[data-quote-link]");
         const callButtons = document.querySelectorAll("[data-call-open]");
         const contactButtons = document.querySelectorAll("[data-contact-open]");
         const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
