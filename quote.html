@@ -28,6 +28,7 @@
 
     <link rel="icon" href="./Untitled design (4).png" type="image/png" />
     <link rel="apple-touch-icon" href="./Untitled design (2).png" />
+
     <link rel="stylesheet" href="./styles.css" />
 
     <script>
@@ -1860,20 +1861,15 @@
   line-height:1.5;
 }
 
+      /* Quote page shell: copied as a structural idea only.
+         Header, centered page, quote card, form inside page. No popup. */
+      html {
+        scroll-behavior: smooth;
+      }
 
-/* Keep all quote buttons using the original site button font */
-.btn,
-.btn--quote,
-.nav__cta,
-.quoteNext,
-.quoteBack {
-  font-family: inherit !important;
-}
-
-
-      /* Quote page: direct embed, not a popup */
-      body {
+      body[data-quote-page="true"] {
         background: #fff;
+        overflow-x: hidden;
       }
 
       .quotePageMain {
@@ -1886,8 +1882,7 @@
       }
 
       .quotePageShell,
-      .quotePageShell[data-quote-modal],
-      .quotePageShell[data-quote-page-shell] {
+      .quotePageShell[data-quote-modal] {
         position: static !important;
         inset: auto !important;
         display: block !important;
@@ -1896,11 +1891,11 @@
         min-height: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
         opacity: 1 !important;
-        visibility: visible !important;
         pointer-events: auto !important;
         overflow: visible !important;
-        background: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         transform: none !important;
@@ -1908,7 +1903,9 @@
 
       .quotePageShell::before,
       .quotePageShell::after,
-      .quotePageShell .modal__overlay {
+      .quotePageShell .modal__overlay,
+      .quotePageShell [data-quote-close],
+      .quotePageShell .modal__close {
         display: none !important;
         content: none !important;
       }
@@ -1917,21 +1914,26 @@
         position: relative !important;
         width: min(860px, 100%);
         max-height: none !important;
-        min-height: 0 !important;
         overflow: visible !important;
-        margin: 0 auto !important;
+        margin: 0 auto;
         background: #fff;
-        box-shadow: var(--shadow);
       }
 
-      .quotePageShell [data-quote-close],
-      .quotePageShell .modal__close {
-        display: none !important;
+      .btn,
+      .btn--quote,
+      .nav__cta,
+      .quoteNext,
+      .quoteBack {
+        font-family: inherit !important;
       }
 
       @media (max-width: 720px) {
         .quotePageMain {
           padding-top: 1rem;
+        }
+
+        .quotePageEmbed {
+          width: 100%;
         }
 
         .quotePageShell .quotePanel {
@@ -1982,7 +1984,7 @@
     <main class="quotePageMain">
       <div class="container">
         <div class="quotePageEmbed">
-          <div class="quotePageShell" data-quote-modal data-quote-page-shell aria-hidden="false">
+          <div class="quotePageShell" data-quote-modal aria-hidden="false">
             <div class="quotePanel" aria-label="Get a quote">
               <div class="quoteTop">
                 <h1 class="quoteTitle">GET A QUOTE</h1>
@@ -4664,27 +4666,125 @@ function initQuoteWizard() {
 initQuoteWizard();
 
 
-/* Page-mode patch: the quote form is embedded directly in quote.html, not opened as a popup. */
 (function () {
-  document.addEventListener("DOMContentLoaded", function () {
+  function addFinalQuotePageOverrides() {
+    const style = document.createElement("style");
+    style.setAttribute("data-final-quote-page-overrides", "true");
+    style.textContent = `
+      html,
+      body {
+        overflow-x: hidden !important;
+      }
+
+      body[data-quote-page="true"] {
+        overflow: auto !important;
+        background: #fff !important;
+      }
+
+      body[data-quote-page="true"] .quotePageMain {
+        display: block !important;
+        padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(4rem, 6vw, 5rem) !important;
+        background: transparent !important;
+      }
+
+      body[data-quote-page="true"] [data-quote-modal],
+      body[data-quote-page="true"] .modal,
+      body[data-quote-page="true"] .modal--quote {
+        position: static !important;
+        inset: auto !important;
+        z-index: auto !important;
+        display: block !important;
+        align-items: initial !important;
+        justify-content: initial !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        overflow: visible !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: none !important;
+      }
+
+      body[data-quote-page="true"] [data-quote-modal]::before,
+      body[data-quote-page="true"] [data-quote-modal]::after,
+      body[data-quote-page="true"] .modal__overlay,
+      body[data-quote-page="true"] [data-quote-close] {
+        display: none !important;
+        content: none !important;
+      }
+
+      body[data-quote-page="true"] .quotePageEmbed {
+        width: min(920px, 100%) !important;
+        margin: 0 auto !important;
+      }
+
+      body[data-quote-page="true"] .quotePanel {
+        position: relative !important;
+        width: min(860px, 100%) !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        overflow: visible !important;
+        background: #fff !important;
+        border-radius: 18px !important;
+        box-shadow: var(--shadow) !important;
+        transform: none !important;
+      }
+
+      body[data-quote-page="true"] .btn,
+      body[data-quote-page="true"] .btn--quote,
+      body[data-quote-page="true"] .nav__cta,
+      body[data-quote-page="true"] .quoteNext,
+      body[data-quote-page="true"] .quoteBack,
+      .btn,
+      .btn--quote,
+      .nav__cta {
+        font-family: inherit !important;
+      }
+
+      @media (max-width: 720px) {
+        body[data-quote-page="true"] .quotePageMain {
+          padding-top: 1rem !important;
+        }
+
+        body[data-quote-page="true"] .quotePanel {
+          padding: 14px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function unlockPageMode() {
+    addFinalQuotePageOverrides();
+
     if (typeof resetQuoteFlow === "function") resetQuoteFlow();
     if (typeof render === "function") render();
 
-    const quoteShell = document.querySelector("[data-quote-page-shell]");
-    if (quoteShell) {
-      quoteShell.removeAttribute("hidden");
-      quoteShell.setAttribute("aria-hidden", "false");
-      quoteShell.style.position = "static";
-      quoteShell.style.inset = "auto";
-      quoteShell.style.display = "block";
-      quoteShell.style.opacity = "1";
-      quoteShell.style.pointerEvents = "auto";
-      quoteShell.style.background = "transparent";
-      quoteShell.style.backdropFilter = "none";
-      quoteShell.style.webkitBackdropFilter = "none";
+    const shell = document.querySelector("[data-quote-modal]");
+    if (shell) {
+      shell.hidden = false;
+      shell.removeAttribute("hidden");
+      shell.setAttribute("aria-hidden", "false");
+      shell.removeAttribute("role");
+      shell.style.cssText = "";
+      shell.classList.remove("isOpen", "is-open", "open", "active");
     }
 
+    document.querySelectorAll(".modal__overlay, [data-quote-close]").forEach(function (el) {
+      el.remove();
+    });
+
     document.body.style.overflow = "";
+    document.body.classList.remove("modalOpen", "modal-open", "quoteOpen", "quote-open");
 
     document.querySelectorAll("[data-year]").forEach(function (el) {
       el.textContent = new Date().getFullYear();
@@ -4692,7 +4792,8 @@ initQuoteWizard();
 
     const navToggle = document.querySelector("[data-nav-toggle]");
     const nav = document.querySelector("[data-nav]");
-    if (navToggle && nav) {
+    if (navToggle && nav && !navToggle.dataset.boundDirectQuoteNav) {
+      navToggle.dataset.boundDirectQuoteNav = "true";
       navToggle.addEventListener("click", function () {
         const isOpen = navToggle.getAttribute("aria-expanded") === "true";
         navToggle.setAttribute("aria-expanded", String(!isOpen));
@@ -4701,7 +4802,13 @@ initQuoteWizard();
         document.body.classList.toggle("navOpen", !isOpen);
       });
     }
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", unlockPageMode);
+  } else {
+    unlockPageMode();
+  }
 })();
 
     </script>
