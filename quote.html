@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-RZQ6CD7XZD"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -1859,90 +1860,89 @@
   line-height:1.5;
 }
 
-      .quotePageSection {
-        padding: clamp(2.25rem, 5vw, 4.5rem) 0 clamp(4rem, 7vw, 6rem);
+
+/* Keep all quote buttons using the original site button font */
+.btn,
+.btn--quote,
+.nav__cta,
+.quoteNext,
+.quoteBack {
+  font-family: inherit !important;
+}
+
+
+      /* Quote page: direct embed, not a popup */
+      body {
+        background: #fff;
       }
 
-      .quotePageWrap {
-        width: min(980px, 100%);
+      .quotePageMain {
+        padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(4rem, 6vw, 5rem);
+      }
+
+      .quotePageEmbed {
+        width: min(920px, 100%);
         margin: 0 auto;
       }
 
-      .quotePageShell[data-quote-modal] {
+      .quotePageShell,
+      .quotePageShell[data-quote-modal],
+      .quotePageShell[data-quote-page-shell] {
         position: static !important;
         inset: auto !important;
         display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
         opacity: 1 !important;
+        visibility: visible !important;
         pointer-events: auto !important;
+        overflow: visible !important;
         background: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
+        transform: none !important;
+      }
+
+      .quotePageShell::before,
+      .quotePageShell::after,
+      .quotePageShell .modal__overlay {
+        display: none !important;
+        content: none !important;
       }
 
       .quotePageShell .quotePanel {
+        position: relative !important;
         width: min(860px, 100%);
-        max-height: none;
-        overflow: visible;
-        margin: 0 auto;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.08);
+        max-height: none !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        margin: 0 auto !important;
+        background: #fff;
+        box-shadow: var(--shadow);
       }
 
-      .quotePageHead {
-        text-align: center;
-        margin-bottom: 1.4rem;
-      }
-
-      .quotePageEyebrow {
-        margin: 0 0 0.55rem;
-        color: rgba(0,0,0,.6);
-        font-size: .88rem;
-        font-weight: 800;
-        letter-spacing: .14em;
-        text-transform: uppercase;
-      }
-
-      .quotePageTitle {
-        margin: 0;
-        font-size: clamp(2rem, 5vw, 3rem);
-        line-height: 1;
-      }
-
-      .quotePageSub {
-        max-width: 44rem;
-        margin: .85rem auto 0;
-        color: rgba(0,0,0,.66);
-        line-height: 1.65;
-      }
-
-      .quotePageShell .modal__close,
-      .quotePageShell [data-quote-close] {
+      .quotePageShell [data-quote-close],
+      .quotePageShell .modal__close {
         display: none !important;
       }
 
-      @media (max-width: 768px) {
-        .quotePageSection {
-          padding-top: 1.6rem;
-        }
-
-        .quotePageHead {
-          text-align: left;
-          margin-bottom: 1rem;
-        }
-
-        .quotePageSub {
-          margin-left: 0;
-          margin-right: 0;
+      @media (max-width: 720px) {
+        .quotePageMain {
+          padding-top: 1rem;
         }
 
         .quotePageShell .quotePanel {
+          border-radius: 18px;
           padding: 14px;
         }
       }
     </style>
   </head>
 
-  <body data-quote-page-embed="true">
+  <body data-quote-page="true">
     <header class="header" id="top">
       <div class="container header__inner">
         <a class="brand" href="./index.html" aria-label="Home">
@@ -1979,39 +1979,29 @@
       </div>
     </header>
 
-    <main>
-      <section class="section section--light quotePageSection" aria-label="Quote page">
-        <div class="container">
-          <div class="quotePageWrap">
-            <div class="quotePageHead">
-              <p class="quotePageEyebrow">Online estimate</p>
-              <h1 class="section__title quotePageTitle">GET A QUOTE</h1>
-              <p class="quotePageSub">
-                Pick your vehicle, choose the service you want, and submit your request. The quote flow is now built right into the page instead of opening in a popup.
-              </p>
-            </div>
-
-            <div class="quotePageShell" data-quote-modal aria-hidden="false">
-              <div class="quotePanel" aria-label="Get a quote">
-                <div class="quoteTop">
-                  <h2 class="quoteTitle">GET A QUOTE</h2>
-                  <div class="quoteProgress" aria-hidden="true">
-                    <span class="qpDot isOn"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
-                    <span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
-                  </div>
+    <main class="quotePageMain">
+      <div class="container">
+        <div class="quotePageEmbed">
+          <div class="quotePageShell" data-quote-modal data-quote-page-shell aria-hidden="false">
+            <div class="quotePanel" aria-label="Get a quote">
+              <div class="quoteTop">
+                <h1 class="quoteTitle">GET A QUOTE</h1>
+                <div class="quoteProgress" aria-hidden="true">
+                  <span class="qpDot isOn"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
+                  <span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
                 </div>
+              </div>
 
-                <div class="quoteBody" data-quote-body></div>
+              <div class="quoteBody" data-quote-body></div>
 
-                <div class="quoteNav">
-                  <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
-                  <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
-                </div>
+              <div class="quoteNav">
+                <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
+                <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
     </main>
 
     <footer class="footer footer--light">
@@ -4672,29 +4662,48 @@ function initQuoteWizard() {
 }
 
 initQuoteWizard();
-    </script>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        if (typeof resetQuoteFlow === "function") resetQuoteFlow();
-        if (typeof render === "function") render();
 
-        document.querySelectorAll("[data-year]").forEach(function (el) {
-          el.textContent = new Date().getFullYear();
-        });
+/* Page-mode patch: the quote form is embedded directly in quote.html, not opened as a popup. */
+(function () {
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof resetQuoteFlow === "function") resetQuoteFlow();
+    if (typeof render === "function") render();
 
-        const navToggle = document.querySelector("[data-nav-toggle]");
-        const nav = document.querySelector("[data-nav]");
-        if (navToggle && nav) {
-          navToggle.addEventListener("click", function () {
-            const isOpen = navToggle.getAttribute("aria-expanded") === "true";
-            navToggle.setAttribute("aria-expanded", String(!isOpen));
-            nav.classList.toggle("is-open", !isOpen);
-            nav.classList.toggle("isOpen", !isOpen);
-            document.body.classList.toggle("navOpen", !isOpen);
-          });
-        }
+    const quoteShell = document.querySelector("[data-quote-page-shell]");
+    if (quoteShell) {
+      quoteShell.removeAttribute("hidden");
+      quoteShell.setAttribute("aria-hidden", "false");
+      quoteShell.style.position = "static";
+      quoteShell.style.inset = "auto";
+      quoteShell.style.display = "block";
+      quoteShell.style.opacity = "1";
+      quoteShell.style.pointerEvents = "auto";
+      quoteShell.style.background = "transparent";
+      quoteShell.style.backdropFilter = "none";
+      quoteShell.style.webkitBackdropFilter = "none";
+    }
+
+    document.body.style.overflow = "";
+
+    document.querySelectorAll("[data-year]").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+
+    const navToggle = document.querySelector("[data-nav-toggle]");
+    const nav = document.querySelector("[data-nav]");
+    if (navToggle && nav) {
+      navToggle.addEventListener("click", function () {
+        const isOpen = navToggle.getAttribute("aria-expanded") === "true";
+        navToggle.setAttribute("aria-expanded", String(!isOpen));
+        nav.classList.toggle("isOpen", !isOpen);
+        nav.classList.toggle("is-open", !isOpen);
+        document.body.classList.toggle("navOpen", !isOpen);
       });
+    }
+  });
+})();
+
     </script>
 
     <script>
