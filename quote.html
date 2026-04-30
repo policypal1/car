@@ -1941,6 +1941,54 @@
           padding: 14px;
         }
       }
+    
+      /* Final quote-page footer lock */
+      body[data-quote-page="true"] {
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      body[data-quote-page="true"] .header {
+        flex: 0 0 auto !important;
+      }
+
+      body[data-quote-page="true"] .quotePageMain {
+        flex: 1 0 auto !important;
+        min-height: calc(100vh - 96px) !important;
+        padding-bottom: clamp(5rem, 8vw, 7rem) !important;
+      }
+
+      body[data-quote-page="true"] .quotePageEmbed {
+        min-height: 760px !important;
+      }
+
+      body[data-quote-page="true"] .footer {
+        flex: 0 0 auto !important;
+        margin-top: auto !important;
+      }
+
+      /* Keep quote CTAs on the same font system as the rest of the site */
+      .btn,
+      .btn--quote,
+      .nav__cta,
+      .quoteNext,
+      .quoteBack {
+        font-family: Inter, Arial, sans-serif !important;
+        letter-spacing: inherit;
+      }
+
+      @media (max-width: 720px) {
+        body[data-quote-page="true"] .quotePageMain {
+          min-height: calc(100vh - 84px) !important;
+          padding-bottom: 5rem !important;
+        }
+
+        body[data-quote-page="true"] .quotePageEmbed {
+          min-height: 820px !important;
+        }
+      }
+
     </style>
   </head>
 
@@ -1976,7 +2024,6 @@
           <a href="./index.html#process">How It Works</a>
           <a href="./index.html#about">About</a>
           <a href="./index.html#reviews">Reviews</a>
-          <a class="btn btn--quote nav__cta" href="./quote.html">GET QUOTE NOW</a>
         </nav>
       </div>
     </header>
