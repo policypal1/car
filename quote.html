@@ -3094,7 +3094,7 @@ function renderMedia(item) {
   return `
     <div class="qCardMedia${zoomClass}" ${zoomStyle}>
       ${item.badge ? `<span class="qCardBadge">${escapeHtml(item.badge)}</span>` : ""}
-      ${(item.label === "Paint Correction" || item.label === "Ceramic Coating") ? `<span class="requires-badge">Requires Exterior Wash</span>` : ""}
+      ${(item.label === "Paint Correction" || item.label === "Ceramic Coating") ? `<span class="requires-badge">Includes Exterior Wash</span>` : ""}
       <img class="${containClass}" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.label || "")}" loading="lazy" decoding="async">
     </div>
   `;
