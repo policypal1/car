@@ -1,3 +1,2368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RZQ6CD7XZD"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RZQ6CD7XZD');
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Get a Quote | Keizer Mobile Detailing</title>
+    <meta name="description" content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking." />
+
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//vitals.vercel-insights.com" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="./Untitled design (4).png" type="image/png" />
+    <link rel="apple-touch-icon" href="./Untitled design (2).png" />
+
+    <link rel="stylesheet" href="./styles.css" />
+
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+
+    <style>
+/* quote-wizard.css */
+/* Quote wizard */
+.quotePanel{
+  position:relative;
+  width:min(820px, 100%);
+  background:#fff;
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  padding:18px;
+  max-height:calc(100vh - 3rem);
+  overflow:auto;
+}
+
+/* ✅ kill switch: if any old bottom price pill exists, never show it */
+.qNavPrice{ display:none !important; }
+
+.quoteTop{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.quoteTitle{
+  margin:0;
+  font-family:Oswald, Inter, sans-serif;
+  letter-spacing:.7px;
+  text-transform:uppercase;
+  color:var(--black);
+}
+
+.quoteProgress{ display:flex; gap:6px; margin-top:4px; }
+.qpDot{
+  width:10px; height:10px; border-radius:999px;
+  border:1px solid rgba(0,0,0,.18);
+  background:rgba(0,0,0,.06);
+  padding:0;
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  display:inline-block;
+  flex:0 0 auto;
+}
+.qpDot.isOn{
+  width:28px;
+  background:rgba(214,178,94,.85);
+  border-color:rgba(214,178,94,.95);
+}
+
+.quoteBody{ margin-top:14px; }
+.qStepTitle{ margin:0 0 8px; font-weight:900; color:#111; }
+.qStepSub{ margin:0 0 12px; color:rgba(0,0,0,.62); line-height:1.6; }
+
+/* ✅ sticky nav (remove blur line) */
+.quoteNav{
+  position:sticky;
+  bottom:0;
+  z-index:5;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  margin-top:14px;
+  padding-top:12px;
+  padding-bottom:4px;
+  background:#fff;
+  border-top:1px solid rgba(0,0,0,.08);
+}
+
+.quoteBack{
+  background:#fff;
+  color:#000;
+  border:2px solid rgba(0,0,0,.18);
+  box-shadow:none;
+}
+.quoteNext{ min-width:160px; }
+
+.qNavBundleNote{
+  flex:1 1 auto;
+  min-width:0;
+  align-self:center;
+  text-align:center;
+  padding:0 10px;
+  font-weight:850;
+  font-size:.95rem;
+  line-height:1.35;
+  color:rgba(0,0,0,.72);
+}
+
+/* Cards base grid */
+.qCards{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+
+/* Vehicle step: always 2x2 */
+.qCards--vehicle2x2{
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ✅ scroll row pattern */
+.qCards--scroll{
+  display:flex;
+  gap:12px;
+  flex-wrap:nowrap;
+  overflow-x:auto;
+  padding-bottom:8px;
+  -webkit-overflow-scrolling:touch;
+  scroll-snap-type:x mandatory;
+}
+.qCards--scroll .qCard{
+  flex:0 0 82%;
+  scroll-snap-align:start;
+}
+.qCards--scroll .qFeatureCard{
+  flex:0 0 90%;
+}
+@media (min-width:520px){
+  .qCards--scroll .qCard{ flex:0 0 62%; }
+  .qCards--scroll .qFeatureCard{ flex:0 0 72%; }
+}
+@media (min-width:768px){
+  .qCards--scroll{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    overflow:visible;
+    scroll-snap-type:none;
+    padding-bottom:0;
+  }
+  .qCards--scroll .qCard{ flex:initial; }
+}
+
+/* ✅ hero cards */
+.qCards--big .qCard{
+  padding:12px;
+  border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+}
+.qCards--big .qCardMedia{
+  border-radius:16px;
+}
+
+/* Card base */
+.qCard{
+  text-align:left;
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  padding:12px;
+  cursor:pointer;
+  box-shadow:0 12px 30px rgba(0,0,0,.08);
+  transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+}
+.qCard.isSel{
+  border-color:rgba(214,178,94,.70);
+  box-shadow:0 18px 44px rgba(214,178,94,.18);
+}
+.qCard:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(214,178,94,.22), 0 12px 30px rgba(0,0,0,.08);
+  border-color:rgba(214,178,94,.72);
+}
+
+.qCardMedia{
+  width:100%;
+  border-radius:16px;
+  overflow:hidden;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(0,0,0,.04);
+  position:relative;
+}
+
+.qCard--img .qCardMedia{
+  aspect-ratio: 16 / 9;
+}
+
+.qCardMedia img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+}
+
+/* ✅ zoom support (used for Exterior condition Normal) */
+.qCardMedia.isZoom img{
+  transform: scale(var(--imgZoom, 1));
+  transform-origin:center;
+}
+
+/* ✅ split media */
+.qCardMediaSplit{
+  display:flex;
+  width:100%;
+  height:100%;
+}
+.qCardMediaSplit img{
+  width:50%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.qCardMediaSplit img + img{
+  border-left:1px solid rgba(0,0,0,.10);
+}
+
+/* ✅ vertical split (Interior+Exterior category card) */
+.qCardMediaSplit--v{
+  flex-direction:column;
+}
+.qCardMediaSplit--v img{
+  width:100%;
+  height:50%;
+}
+.qCardMediaSplit--v img + img{
+  border-left:none;
+  border-top:1px solid rgba(0,0,0,.10);
+}
+
+/* ✅ badge (existing) */
+.qCardBadge{
+  position:absolute;
+  top:8px;
+  left:8px;
+  width:22px;
+  height:22px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:1000;
+  font-size:14px;
+  color:#111;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(0,0,0,.14);
+  box-shadow:0 8px 18px rgba(0,0,0,.14);
+}
+
+/* ✅ "Requires Exterior Wash" pill badge */
+.requires-badge{
+  position:absolute;
+  top:10px;
+  left:10px;
+  background:#ffffff;
+  color:#111;
+  font-size:12px;
+  padding:4px 8px;
+  border-radius:999px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  font-weight:500;
+  z-index:2;
+  border:1px solid rgba(0,0,0,.10);
+  pointer-events:none;
+  max-width:calc(100% - 20px);
+  white-space:nowrap;
+}
+
+/* Vehicle cards */
+.qCard--vehicle .qCardMedia{
+  aspect-ratio: 16 / 9;
+  padding:10px;
+  background:#fff;
+  --carZoom: 1.26;
+}
+.qCard--vehicle img.isContain{
+  object-fit:contain;
+  background:#fff;
+  transform: scale(var(--carZoom));
+  transform-origin:center;
+}
+
+/* Square cards */
+.qCard--square .qCardMedia{ aspect-ratio: 1 / 1; }
+.qCard--square .qCardMedia img{ object-fit:cover; }
+
+.qCardLabel{
+  margin:10px 2px 2px;
+  font-weight:900;
+  color:#111;
+}
+
+.qCard--servicePick,
+.qCard--condition{
+  display:flex;
+  flex-direction:column;
+}
+
+.qCard--servicePick .qCardMedia,
+.qCard--condition .qCardMedia{
+  width:100%;
+}
+
+.qCard--servicePick .qCardLabel,
+.qCard--condition .qCardLabel{
+  display:block;
+  min-height:0;
+}
+
+/* ✅ allow newline (used on condition cards for "Starting at") */
+.qCardHint{
+  margin:0 2px 0;
+  color:rgba(0,0,0,.62);
+  font-weight:700;
+  font-size:.95rem;
+  line-height:1.45;
+  white-space:pre-line;
+}
+.qCardHint:empty{ display:none; }
+
+/* ✅ NEW detail cards for interior/exterior package steps */
+.qFeatureCard{
+  display:flex;
+  align-items:stretch;
+  min-height:100%;
+}
+.qFeatureCardInner{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  min-height:100%;
+}
+.qFeatureCardTitle{
+  margin:2px 0 14px;
+  text-align:center;
+  font-weight:1000;
+  color:#111;
+  font-size:1.15rem;
+  line-height:1.25;
+}
+.qFeatureList{
+  margin:0;
+  padding-left:20px;
+  display:grid;
+  gap:8px;
+  color:rgba(0,0,0,.72);
+  font-weight:800;
+  font-size:.96rem;
+  line-height:1.45;
+}
+.qFeatureList li::marker{
+  color:rgba(0,0,0,.45);
+}
+.qFeaturePrice{
+  margin-top:auto;
+  padding-top:14px;
+  text-align:center;
+  font-weight:1000;
+  color:#111;
+  font-size:1rem;
+}
+
+/* ✅ Image-less package cards (Standard / Deep Clean / Premium) — premium feel */
+.qFeatureCard--noImg{
+  padding:0;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 16px 36px rgba(0,0,0,.06);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.qFeatureCard--noImg:hover{
+  transform:translateY(-2px);
+  box-shadow:0 22px 48px rgba(0,0,0,.10);
+}
+.qFeatureCard--noImg .qFeatureCardInner{
+  padding:22px 20px 20px;
+  position:relative;
+}
+.qFeatureCard--noImg .qFeatureCardInner::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:4px;
+  background:linear-gradient(90deg, rgba(214,178,94,.0), rgba(214,178,94,.85), rgba(214,178,94,.0));
+  opacity:0;
+  transition: opacity .2s ease;
+}
+.qFeatureCard--noImg.isSel{
+  border-color:rgba(214,178,94,.7);
+  box-shadow:0 24px 56px rgba(214,178,94,.20), 0 0 0 4px rgba(214,178,94,.16);
+  transform:translateY(-2px);
+}
+.qFeatureCard--noImg.isSel .qFeatureCardInner::before{
+  opacity:1;
+}
+.qFeatureCard--noImg .qFeatureCardTitle{
+  font-family:Oswald, Inter, sans-serif;
+  font-size:1.35rem;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  margin:0 0 6px;
+  text-align:center;
+  color:#111;
+}
+.qFeatureCard--noImg .qFeatureCardHint{
+  text-align:center;
+  color:rgba(0,0,0,.55);
+  font-weight:600;
+  font-size:.88rem;
+  line-height:1.45;
+  margin:0 0 16px;
+  padding:0 4px;
+}
+.qFeatureCard--noImg .qFeatureList{
+  list-style:none;
+  padding:0;
+  margin:0 0 16px;
+  font-size:.94rem;
+  gap:10px;
+  display:flex;
+  flex-direction:column;
+}
+.qFeatureCard--noImg .qFeatureList li{
+  position:relative;
+  padding-left:24px;
+  color:rgba(0,0,0,.78);
+  font-weight:600;
+  line-height:1.45;
+}
+.qFeatureCard--noImg .qFeatureList li::before{
+  content:"";
+  position:absolute;
+  left:2px;
+  top:6px;
+  width:14px;
+  height:8px;
+  border-left:2px solid rgba(214,178,94,.85);
+  border-bottom:2px solid rgba(214,178,94,.85);
+  transform:rotate(-45deg);
+}
+.qFeatureCard--noImg .qFeaturePrice{
+  margin-top:auto;
+  padding-top:16px;
+  border-top:1px solid rgba(0,0,0,.08);
+  font-family:Oswald, Inter, sans-serif;
+  font-size:1.2rem;
+  letter-spacing:.4px;
+  color:#111;
+  text-align:center;
+}
+.qFeatureCard--noImg.isSel .qFeaturePrice{
+  border-top-color:rgba(214,178,94,.4);
+}
+
+/* ✅ Services tray (chips) */
+.qServiceTray{
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:
+    radial-gradient(800px 260px at 12% 0%, rgba(214,178,94,.12), rgba(255,255,255,0) 55%),
+    rgba(0,0,0,.02);
+  padding:12px;
+  margin-bottom:12px;
+}
+.qServiceTrayTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+.qServiceTrayTitle{
+  font-weight:1000;
+  color:#111;
+  letter-spacing:.2px;
+}
+.qServiceTrayHint{
+  font-weight:850;
+  color:rgba(0,0,0,.60);
+  font-size:.95rem;
+  line-height:1.35;
+}
+.qChips{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.qChip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.92);
+  box-shadow:0 10px 26px rgba(0,0,0,.06);
+  font-weight:900;
+  color:#111;
+}
+.qChip button{
+  width:20px;
+  height:20px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.14);
+  background:#fff;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:1000;
+  line-height:1;
+}
+.qChip button:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(214,178,94,.22);
+  border-color:rgba(214,178,94,.72);
+}
+.qChipEmpty{
+  font-weight:850;
+  color:rgba(0,0,0,.55);
+}
+
+/* Fields */
+.qGrid2{ display:grid; grid-template-columns:1fr; gap:10px; }
+
+.qField label{ display:block; font-weight:900; margin-bottom:6px; color:#111; }
+.qField input, .qField textarea, .qField select{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.12);
+  outline:none;
+  font-weight:600;
+  font-family:inherit;
+  background:#fff;
+}
+.qField textarea{ min-height:92px; resize:vertical; }
+.qField input:focus, .qField textarea:focus, .qField select:focus{
+  border-color:rgba(214,178,94,.70);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18);
+}
+
+.qCheck{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.02);
+}
+.qCheck input{ margin-top:4px; }
+
+.qStatus{
+  margin-top:8px;
+  font-weight:800;
+  color:rgba(0,0,0,.65);
+}
+
+/* ✅ bubble-box style (used for upkeep frequency) */
+.qHearWrap{
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:
+    radial-gradient(700px 240px at 10% 0%, rgba(214,178,94,.12), rgba(255,255,255,0) 55%),
+    rgba(0,0,0,.02);
+  padding:12px;
+}
+.qHearGrid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-top:10px;
+}
+.qHearBtn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  text-align:left;
+  padding:12px 12px;
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.12);
+  background:rgba(255,255,255,.92);
+  cursor:pointer;
+  box-shadow:0 10px 26px rgba(0,0,0,.06);
+  transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+}
+.qHearBtn:hover{ transform: translateY(-1px); }
+.qHearBtn.isSel{
+  border-color:rgba(214,178,94,.72);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18), 0 18px 44px rgba(214,178,94,.14);
+}
+.qHearBtn:focus-visible{
+  outline:none;
+  border-color:rgba(214,178,94,.85);
+  box-shadow:0 0 0 4px rgba(214,178,94,.22), 0 10px 26px rgba(0,0,0,.08);
+}
+.qHearLeft{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:0;
+}
+.qHearLabel{
+  font-weight:1000;
+  letter-spacing:.2px;
+  color:#111;
+  line-height:1.1;
+}
+.qHearHint{
+  color:rgba(0,0,0,.62);
+  font-weight:750;
+  font-size:.95rem;
+  line-height:1.35;
+}
+.qHearRight{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  flex:0 0 auto;
+}
+.qHearPill{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.04);
+  color:rgba(0,0,0,.72);
+  font-weight:950;
+  font-size:.82rem;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+}
+.qHearCheck{
+  width:18px; height:18px;
+  border-radius:999px;
+  border:2px solid rgba(0,0,0,.16);
+  background:#fff;
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,1);
+}
+.qHearBtn.isSel .qHearPill{
+  border-color:rgba(214,178,94,.55);
+  background:rgba(214,178,94,.12);
+  color:rgba(0,0,0,.82);
+}
+.qHearBtn.isSel .qHearCheck{
+  border-color:rgba(214,178,94,.85);
+  background:rgba(214,178,94,.85);
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,1);
+}
+
+/* =========================
+   ✅ NEW: Estimate page
+   ========================= */
+
+.qEstimateHero{
+  position:relative;
+  border-radius:24px;
+  padding:28px 22px 26px;
+  background:
+    radial-gradient(900px 320px at 20% 15%, rgba(214,178,94,.18), rgba(255,255,255,0) 55%),
+    linear-gradient(180deg, #fff 0%, #fbf7ec 100%);
+  border:1px solid rgba(214,178,94,.35);
+  box-shadow:0 24px 60px rgba(0,0,0,.08);
+  text-align:center;
+  overflow:hidden;
+}
+
+.qEstimateEyebrow{
+  font-size:.78rem;
+  font-weight:1000;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(0,0,0,.55);
+  margin-bottom:8px;
+}
+
+.qEstimateHeroTitle{
+  margin:0 0 8px;
+  font-family:Oswald, Inter, sans-serif;
+  font-size:clamp(1.5rem, 4.5vw, 2rem);
+  font-weight:900;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:#111;
+  line-height:1.1;
+}
+
+.qEstimateHeroSub{
+  margin:0 auto 22px;
+  max-width:520px;
+  color:rgba(0,0,0,.62);
+  font-weight:600;
+  line-height:1.55;
+  font-size:.96rem;
+}
+
+.qEstimateHeroPrice{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+.qEstimateOld{
+  color:rgba(0,0,0,.42);
+  font-weight:900;
+  text-decoration:line-through;
+  font-size:1.05rem;
+}
+
+.qEstimateBig{
+  margin:0;
+  font-weight:1000;
+  font-size:clamp(2.4rem, 8vw, 3.4rem);
+  line-height:1;
+  color:#111;
+  letter-spacing:-.5px;
+}
+
+.qEstimatePills{
+  margin-top:14px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.qPill{
+  display:inline-flex;
+  gap:6px;
+  align-items:center;
+  padding:7px 12px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(255,255,255,.85);
+  color:rgba(0,0,0,.72);
+  font-weight:800;
+  font-size:.88rem;
+}
+
+
+/* Multiple vehicle estimate summary */
+.qVehicleSummaryBox{
+  margin-top:18px;
+  border-radius:22px;
+  border:1px solid rgba(0,0,0,.08);
+  background:#fff;
+  padding:16px;
+  box-shadow:0 16px 38px rgba(0,0,0,.06);
+}
+.qVehicleSummaryTitle{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-weight:1000;
+  color:#111;
+  font-size:1rem;
+  margin-bottom:6px;
+}
+.qVehicleSummaryTitle span{
+  color:rgba(0,0,0,.48);
+  font-size:.78rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.qVehicleSummaryHelp{
+  margin:0 0 12px;
+  color:rgba(0,0,0,.52);
+  font-weight:650;
+  font-size:.86rem;
+  line-height:1.45;
+}
+.qVehicleSummaryList{
+  display:grid;
+  gap:10px;
+}
+.qVehicleSummaryItem{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto;
+  justify-content:space-between;
+  gap:14px;
+  align-items:center;
+  padding:14px;
+  border-radius:18px;
+  background:
+    radial-gradient(420px 140px at 0% 0%, rgba(214,178,94,.10), rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, rgba(0,0,0,.012), rgba(0,0,0,.028));
+  border:1px solid rgba(0,0,0,.07);
+  box-shadow:0 10px 24px rgba(0,0,0,.035);
+}
+.qVehicleSummaryMain{
+  min-width:0;
+}
+.qVehicleSummaryName{
+  font-weight:1000;
+  color:#111;
+  line-height:1.25;
+}
+.qVehicleSummaryServices{
+  margin-top:4px;
+  color:rgba(0,0,0,.58);
+  font-weight:650;
+  font-size:.88rem;
+  line-height:1.35;
+}
+.qVehicleSummaryActions{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  justify-content:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+.qVehicleSummaryPrice{
+  flex:0 0 auto;
+  font-weight:1000;
+  color:#111;
+  text-align:right;
+  white-space:nowrap;
+}
+.qVehicleRemoveBtn{
+  min-width:0;
+  min-height:34px;
+  border-radius:999px;
+  border:1px solid rgba(201,52,35,.25);
+  background:#fff;
+  color:#c93423;
+  font-size:.82rem;
+  font-weight:1000;
+  line-height:1;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:8px 12px 8px 10px;
+  box-shadow:0 10px 22px rgba(201,52,35,.08);
+  transition:transform .15s ease, background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.qVehicleRemoveX{
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(201,52,35,.10);
+  font-size:1.1rem;
+  font-weight:1000;
+  line-height:1;
+  padding-bottom:1px;
+}
+.qVehicleRemoveBtn:hover{
+  transform:translateY(-1px);
+  background:#fff4f2;
+  color:#b82718;
+  border-color:rgba(201,52,35,.45);
+  box-shadow:0 14px 28px rgba(201,52,35,.14);
+}
+.qVehicleRemoveBtn:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(214,178,94,.20), 0 10px 22px rgba(0,0,0,.10);
+  border-color:rgba(214,178,94,.75);
+}
+.qVehicleRequiredBadge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:7px 10px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(0,0,0,.035);
+  color:rgba(0,0,0,.52);
+  font-size:.72rem;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+.qAddVehicleWrap{
+  margin-top:18px;
+  border-radius:24px;
+  border:1px solid rgba(214,178,94,.30);
+  background:#fff !important;
+  padding:14px;
+  box-shadow:0 16px 40px rgba(0,0,0,.045);
+}
+.qAddVehicleBtn{
+  width:100%;
+  min-height:68px;
+  border-radius:20px;
+  border:1.5px solid rgba(214,178,94,.62) !important;
+  background:
+    radial-gradient(320px 110px at 0% 0%, rgba(214,178,94,.20), rgba(255,255,255,0) 62%),
+    linear-gradient(135deg, #ffffff 0%, #fffaf0 100%) !important;
+  color:#111 !important;
+  font-family:inherit;
+  font-size:1rem;
+  font-weight:1000;
+  letter-spacing:.2px;
+  cursor:pointer;
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr) auto;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  text-align:left;
+  box-shadow:0 14px 32px rgba(214,178,94,.14), 0 6px 18px rgba(0,0,0,.045) !important;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+.qAddVehicleBtn::before{
+  content:"+";
+  width:40px;
+  height:40px;
+  border-radius:14px;
+  background:rgba(214,178,94,.18);
+  border:1px solid rgba(214,178,94,.40);
+  color:#111;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.75rem;
+  font-weight:900;
+  line-height:1;
+  margin-top:-1px;
+}
+.qAddVehicleBtn::after{
+  content:"Add";
+  min-width:48px;
+  height:32px;
+  padding:0 12px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:#111;
+  background:rgba(214,178,94,.18);
+  border:1px solid rgba(214,178,94,.34);
+  font-size:.78rem;
+  font-weight:1000;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  transition:transform .15s ease, background .15s ease, color .15s ease;
+}
+.qAddVehicleBtn:hover{
+  transform:translateY(-2px);
+  border-color:rgba(214,178,94,.88) !important;
+  background:
+    radial-gradient(320px 110px at 0% 0%, rgba(214,178,94,.24), rgba(255,255,255,0) 62%),
+    linear-gradient(135deg, #ffffff 0%, #fff7e5 100%) !important;
+  box-shadow:0 20px 46px rgba(214,178,94,.22), 0 8px 22px rgba(0,0,0,.06) !important;
+}
+.qAddVehicleBtn:hover::after{
+  transform:translateX(2px);
+  background:rgba(214,178,94,.28);
+  color:#111;
+}
+.qAddVehicleBtn:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 4px rgba(214,178,94,.25), 0 14px 32px rgba(214,178,94,.16) !important;
+}
+.qAddVehicleBtnText{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  min-width:0;
+}
+.qAddVehicleBtnTitle{
+  font-weight:1000;
+  color:#111;
+  line-height:1.15;
+}
+.qAddVehicleBtnSub{
+  font-size:.86rem;
+  font-weight:700;
+  line-height:1.35;
+  color:rgba(0,0,0,.55);
+}
+.qAddVehicleNote{
+  margin:10px 2px 0;
+  color:rgba(0,0,0,.50);
+  font-weight:650;
+  font-size:.86rem;
+  line-height:1.45;
+}
+@media (max-width:520px){
+  .qVehicleSummaryItem{
+    grid-template-columns:minmax(0, 1fr);
+    align-items:start;
+  }
+  .qVehicleSummaryActions{
+    width:100%;
+    flex-direction:row;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .qVehicleSummaryPrice{
+    text-align:left;
+  }
+  .qVehicleRemoveBtn{
+    min-height:34px;
+    padding:8px 11px 8px 9px;
+  }
+  .qAddVehicleBtn{
+    grid-template-columns:auto minmax(0, 1fr);
+    padding-right:14px;
+  }
+  .qAddVehicleBtn::after{
+    display:none;
+  }
+}
+
+/* Coupon box */
+.qCouponBox{
+  margin-top:18px;
+  border-radius:20px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  padding:20px;
+  box-shadow:0 12px 30px rgba(0,0,0,.05);
+}
+
+.qCouponHeader{
+  margin-bottom:14px;
+}
+
+.qCouponTitle{
+  font-weight:1000;
+  color:#111;
+  font-size:1.05rem;
+  margin-bottom:2px;
+}
+
+.qCouponSub{
+  color:rgba(0,0,0,.55);
+  font-weight:600;
+  font-size:.9rem;
+  line-height:1.4;
+}
+
+.qCouponRow{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+}
+
+.qCouponInput{
+  flex:1 1 auto;
+  min-width:0;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.14);
+  outline:none;
+  font-weight:700;
+  font-family:inherit;
+  font-size:1rem;
+  background:#fff;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:#111;
+}
+.qCouponInput::placeholder{
+  color:rgba(0,0,0,.32);
+  font-weight:600;
+  letter-spacing:normal;
+  text-transform:none;
+}
+.qCouponInput:focus{
+  border-color:rgba(214,178,94,.70);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18);
+}
+
+.qCouponBtn{
+  flex:0 0 auto;
+  min-width:110px;
+  padding:0 24px;
+  border-radius:14px;
+  border:2px solid #111;
+  background:#fff;
+  color:#111;
+  font-weight:1000;
+  font-size:.95rem;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition: background .15s ease, color .15s ease, transform .15s ease, border-color .15s ease;
+}
+.qCouponBtn:hover{
+  background:#111;
+  color:#fff;
+  transform:translateY(-1px);
+}
+.qCouponBtn.isApplied{
+  background:rgba(214,178,94,.95);
+  color:#111;
+  border-color:rgba(214,178,94,.95);
+}
+.qCouponBtn.isApplied:hover{
+  background:rgba(214,178,94,1);
+  color:#111;
+}
+
+.qCouponMsg{
+  margin-top:12px;
+  font-weight:800;
+  font-size:.92rem;
+  line-height:1.4;
+}
+.qCouponMsg.isOk{
+  color:rgba(80,140,60,1);
+}
+.qCouponMsg.isErr{
+  color:#b00020;
+}
+
+.qEstimateFinePrint{
+  margin:16px 0 0;
+  text-align:center;
+  color:rgba(0,0,0,.50);
+  font-weight:600;
+  font-size:.85rem;
+  line-height:1.5;
+  padding:0 8px;
+}
+
+/* Existing estimate box (still used on Confirm step) */
+.qEstimateBox{
+  border-radius:20px;
+  padding:16px;
+  border:2px solid rgba(214,178,94,.55);
+  box-shadow:0 18px 50px rgba(214,178,94,.18);
+  background:
+    radial-gradient(900px 320px at 20% 15%, rgba(214,178,94,.14), rgba(255,255,255,0) 55%),
+    linear-gradient(180deg, rgba(214,178,94,.08), rgba(0,0,0,.02));
+  text-align:center;
+}
+.qEstimateBox--simple{
+  border-color: rgba(0,0,0,.10);
+  box-shadow: 0 16px 44px rgba(0,0,0,.08);
+  background: linear-gradient(180deg, rgba(0,0,0,.02), rgba(0,0,0,.01));
+}
+.qEstimateBox .qEstimateBig{
+  font-size:2.15rem;
+}
+.qEstimateFine{
+  margin-top:12px;
+  color:rgba(0,0,0,.62);
+  font-weight:700;
+  line-height:1.6;
+}
+
+/* Calendar */
+.qCalWrap{
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.01);
+  padding:14px;
+}
+.qCalTopRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+.qCalTz{
+  font-weight:800;
+  color:rgba(0,0,0,.60);
+}
+.qReloadLink{
+  border:none;
+  background:transparent;
+  color:rgba(0,0,0,.55);
+  font-weight:900;
+  cursor:pointer;
+  padding:6px 8px;
+  border-radius:10px;
+}
+.qReloadLink:hover{ background:rgba(0,0,0,.05); }
+
+.qLoadBar{
+  height:10px;
+  border-radius:999px;
+  background:rgba(0,0,0,.06);
+  border:1px solid rgba(0,0,0,.08);
+  overflow:hidden;
+  margin:8px 0 10px;
+  display:none;
+}
+.qLoadBar.isOn{ display:block; }
+.qLoadBarFill{
+  display:block;
+  height:100%;
+  width:45%;
+  border-radius:999px;
+  background:rgba(214,178,94,.75);
+  animation:qLoadMove 1.1s infinite ease-in-out;
+}
+@keyframes qLoadMove{
+  0%{ transform:translateX(-110%); }
+  100%{ transform:translateX(260%); }
+}
+
+.qCal{
+  border-top:1px solid rgba(0,0,0,.10);
+  padding-top:10px;
+}
+.qCalHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:2px;
+}
+.qCalNav{
+  width:46px;
+  height:40px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  font-weight:1000;
+  cursor:pointer;
+}
+.qCalMonth{ font-weight:1000; color:#111; font-size:1.15rem; }
+.qCalWeek{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:8px;
+  margin-top:10px;
+}
+.qCalW{ font-weight:900; color:rgba(0,0,0,.55); text-align:center; font-size:.9rem; }
+.qCalGrid{
+  display:grid;
+  grid-template-columns:repeat(7, 1fr);
+  gap:8px;
+  margin-top:10px;
+}
+.qCalDay{
+  height:42px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  font-weight:1000;
+  cursor:pointer;
+}
+.qCalDay.isSel{
+  border-color:rgba(214,178,94,.85);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18);
+}
+.qCalDay.isDisabled{ opacity:.35; cursor:not-allowed; }
+.qCalDay--blank{ border:none; background:transparent; }
+
+.qTimes{
+  margin-top:14px;
+  border-top:1px solid rgba(0,0,0,.10);
+  padding-top:12px;
+}
+.qTimesTitle{ font-weight:1000; color:#111; margin-bottom:10px; }
+.qTimesNone{ font-weight:900; color:rgba(0,0,0,.60); padding:8px 0; }
+.qTimesGrid{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:10px;
+}
+.qTimeBtn{
+  height:44px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.12);
+  background:#fff;
+  font-weight:1000;
+  cursor:pointer;
+}
+.qTimeBtn.isSel{
+  border-color:rgba(214,178,94,.85);
+  box-shadow:0 0 0 4px rgba(214,178,94,.18);
+}
+.qNextAvail{
+  margin-top:12px;
+  width:100%;
+  justify-content:center;
+}
+
+/* Done */
+.qDoneBox{
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.10);
+  background:rgba(0,0,0,.02);
+  padding:14px;
+}
+.qDoneBig{ font-weight:1000; font-size:1.25rem; color:#111; margin-bottom:10px; }
+.qDoneLine{ font-weight:900; color:rgba(0,0,0,.70); line-height:1.7; }
+.qDoneFine{ margin-top:10px; font-weight:800; color:rgba(0,0,0,.55); }
+
+@media (min-width:768px){
+  .qCards{ grid-template-columns:repeat(3, 1fr); }
+  .qCards--vehicle2x2{ grid-template-columns:repeat(2, 1fr); }
+  .qGrid2{ grid-template-columns:1fr 1fr 1fr; }
+  .qHearGrid{ grid-template-columns:repeat(2, 1fr); }
+  .qTimesGrid{ grid-template-columns:repeat(3, 1fr); }
+}
+@media (min-width:1024px){
+  .qHearGrid{ grid-template-columns:repeat(3, 1fr); }
+  .qTimesGrid{ grid-template-columns:repeat(4, 1fr); }
+}
+
+#qSquareCard{
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:14px;
+  padding:12px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+  min-height:88px;
+  margin-top:12px;
+}
+
+#qPayDepositBtn{
+  min-width:180px;
+}
+
+/* =========================
+   Payment step cleanup
+   ========================= */
+
+.qPayCard{
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 18px 44px rgba(0,0,0,.10);
+  overflow:hidden;
+}
+
+.qPayHead{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:18px 18px 16px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+
+.qPayHeadTitle{
+  margin:0;
+  font-family:Oswald, Inter, sans-serif;
+  font-size:clamp(1.6rem, 4vw, 2.2rem);
+  line-height:1;
+  letter-spacing:.4px;
+  text-transform:uppercase;
+  color:#111;
+}
+
+.qPayCloseGhost{
+  width:54px;
+  height:54px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  color:rgba(0,0,0,.62);
+  font-size:2rem;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:none;
+}
+.qPayCloseGhost:hover{
+  background:rgba(0,0,0,.03);
+}
+
+.qPayBody{
+  padding:18px;
+}
+
+.qPayAmount{
+  text-align:center;
+}
+
+.qPayAmountBig{
+  margin:0;
+  font-size:clamp(3rem, 8vw, 4.2rem);
+  line-height:1;
+  font-weight:1000;
+  color:#111;
+}
+
+.qPayAmountSub{
+  margin:10px 0 0;
+  font-size:clamp(1.1rem, 3vw, 1.5rem);
+  line-height:1.25;
+  color:#222;
+  font-weight:500;
+}
+
+.qPayMeta{
+  margin-top:16px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+
+.qPayPill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  font-weight:900;
+  color:rgba(0,0,0,.78);
+  font-size:.98rem;
+}
+
+.qPayNotice{
+  margin-top:18px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(0,0,0,.08);
+  background:rgba(0,0,0,.03);
+}
+
+.qPayNoticeCheck{
+  flex:0 0 auto;
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:#4f97ff;
+  color:#fff;
+  font-size:1rem;
+  font-weight:1000;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:1px;
+}
+
+.qPayNoticeText{
+  min-width:0;
+}
+
+.qPayNoticeTitle{
+  margin:0;
+  font-size:1.05rem;
+  line-height:1.35;
+  color:#111;
+  font-weight:900;
+}
+
+.qPayNoticeSub{
+  margin:6px 0 0;
+  color:rgba(0,0,0,.66);
+  line-height:1.5;
+  font-weight:700;
+  font-size:.97rem;
+}
+
+.qPaySectionTitle{
+  margin:18px 0 10px;
+  font-size:1.1rem;
+  font-weight:1000;
+  color:#111;
+}
+
+.qPayCardWrap{
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:18px;
+  background:#fff;
+  padding:14px;
+}
+
+.qPayStatus{
+  margin:0 0 10px;
+  font-weight:800;
+  color:rgba(0,0,0,.62);
+}
+
+#qSquareCard{
+  border:1px solid rgba(0,0,0,.10);
+  border-radius:16px;
+  padding:12px;
+  background:#fff;
+  box-shadow:none;
+  min-height:84px;
+  margin-top:0;
+}
+
+.qPayBtnWrap{
+  margin-top:14px;
+}
+
+#qPayDepositBtn{
+  width:100%;
+  min-width:0;
+  min-height:58px;
+  border-radius:999px;
+  font-size:1.1rem;
+  font-weight:1000;
+}
+
+.qPayFoot{
+  margin-top:14px;
+  text-align:center;
+  color:rgba(0,0,0,.55);
+  font-weight:700;
+  line-height:1.45;
+}
+
+.qPayRequired{
+  margin-top:10px;
+  color:rgba(0,0,0,.62);
+  font-weight:800;
+}
+
+@media (max-width: 767px){
+  .qPayHead{
+    padding:16px 16px 14px;
+  }
+
+  .qPayBody{
+    padding:16px;
+  }
+
+  .qPayCloseGhost{
+    width:48px;
+    height:48px;
+    font-size:1.8rem;
+  }
+
+  .qPayMeta{
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .qPayPill{
+    width:100%;
+    text-align:center;
+  }
+
+  .qNavBundleNote{
+    font-size:.9rem;
+    padding:0 6px;
+  }
+}
+
+/* Payment step cleanup */
+.qCheck input{
+  width:18px;
+  height:18px;
+  margin-top:3px;
+  accent-color: rgba(214,178,94,.95);
+  cursor:pointer;
+  flex:0 0 auto;
+}
+
+.qCheck label{
+  cursor:pointer;
+  line-height:1.55;
+  color:#111;
+}
+
+#qSquareCard{
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:14px;
+  padding:12px;
+  background:#fff;
+  box-shadow:0 8px 20px rgba(0,0,0,.06);
+  min-height:88px;
+  margin-top:12px;
+}
+
+#qPayDepositBtn{
+  min-width:180px;
+}
+
+@media (max-width: 767px){
+  .qEstimateBig{
+    font-size:1.95rem;
+  }
+
+  .qEstimatePills{
+    gap:8px;
+  }
+
+  .qPill{
+    width:100%;
+    justify-content:center;
+    text-align:center;
+  }
+
+  /* Estimate page mobile tweaks */
+  .qEstimateHero{
+    padding:22px 16px 22px;
+    border-radius:20px;
+  }
+  .qEstimateHeroPrice .qEstimateBig{
+    font-size:clamp(2.2rem, 11vw, 2.8rem);
+  }
+  .qCouponBox{
+    padding:16px;
+    border-radius:16px;
+  }
+  .qCouponRow{
+    flex-direction:column;
+    gap:8px;
+  }
+  .qCouponBtn{
+    width:100%;
+    min-height:50px;
+  }
+}
+
+@media (max-width: 767px){
+  .quoteNav{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "note note"
+      "back next";
+    gap:10px;
+    align-items:center;
+    justify-content:stretch;
+  }
+
+  .qNavBundleNote{
+    grid-area:note;
+    margin:0;
+    padding:10px 12px;
+    text-align:left;
+    font-size:.92rem;
+    line-height:1.35;
+    border:1px solid rgba(214,178,94,.45);
+    border-radius:14px;
+    background:rgba(214,178,94,.10);
+  }
+
+  .quoteBack{
+    grid-area:back;
+    width:100%;
+    min-width:0;
+    justify-content:center;
+  }
+
+  .quoteNext{
+    grid-area:next;
+    width:100%;
+    min-width:0;
+    justify-content:center;
+  }
+}
+
+/* =========================
+   ✅ NEW: Contact step — floating-label inputs with icons
+   ========================= */
+
+.qContactGrid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+  margin-top:6px;
+}
+@media (min-width:640px){
+  .qContactGrid{ grid-template-columns:1fr 1fr; }
+  .qInputField--full{ grid-column:span 2; }
+}
+
+.qInputField{
+  position:relative;
+}
+
+.qInputField input,
+.qInputField select{
+  width:100%;
+  padding:22px 16px 12px 46px;
+  border-radius:14px;
+  border:1.5px solid rgba(0,0,0,.10);
+  background:#fff;
+  font-family:inherit;
+  font-size:1rem;
+  font-weight:600;
+  color:#111;
+  outline:none;
+  appearance:none;
+  -webkit-appearance:none;
+  transition:border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.qInputField select{
+  padding-right:42px;
+  cursor:pointer;
+  background:#fff url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 16px center;
+}
+
+.qInputField label{
+  position:absolute;
+  left:46px;
+  top:50%;
+  transform:translateY(-50%);
+  pointer-events:none;
+  color:rgba(0,0,0,.50);
+  font-weight:600;
+  font-size:1rem;
+  background:transparent;
+  transition:all .15s ease;
+  padding:0 4px;
+  margin-left:-4px;
+}
+
+.qInputField input:focus + label,
+.qInputField input:not(:placeholder-shown) + label,
+.qInputField.isFilled label,
+.qInputField--select label{
+  top:10px;
+  transform:translateY(0);
+  font-size:.72rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:rgba(0,0,0,.55);
+}
+
+.qInputField input:focus,
+.qInputField select:focus{
+  border-color:rgba(214,178,94,.75);
+  box-shadow:0 0 0 4px rgba(214,178,94,.15);
+}
+
+.qInputIcon{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  width:22px;
+  height:22px;
+  color:rgba(0,0,0,.45);
+  pointer-events:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.qInputIcon svg{ width:18px; height:18px; }
+
+.qInputField:focus-within .qInputIcon{
+  color:rgba(214,178,94,1);
+}
+
+.qReq{ color:rgba(214,90,60,.95); font-weight:1000; }
+.qOpt{ color:rgba(0,0,0,.40); font-weight:700; font-size:.85em; }
+
+.qInputField.hasError input,
+.qInputField.hasError select{
+  border-color:#e54b3a;
+  box-shadow:0 0 0 4px rgba(229,75,58,.12);
+  background:#fffafa;
+}
+.qInputField.hasError .qInputIcon{
+  color:#e54b3a;
+}
+
+.qFieldError{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-top:8px;
+  color:#c93423;
+  font-weight:800;
+  font-size:.86rem;
+  line-height:1.3;
+  padding-left:4px;
+}
+.qFieldError::before{
+  content:"!";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  border-radius:999px;
+  background:#e54b3a;
+  color:#fff;
+  font-weight:1000;
+  font-size:.7rem;
+  flex:0 0 auto;
+}
+
+/* =========================
+   ✅ NEW: Estimate savings line (replaces pills)
+   ========================= */
+
+.qEstimateSavings{
+  margin-top:18px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items:center;
+}
+.qSaveLine{
+  font-weight:700;
+  color:rgba(0,0,0,.62);
+  font-size:.92rem;
+}
+.qSaveLine strong{
+  font-weight:1000;
+  color:rgba(80,140,60,1);
+}
+
+/* =========================
+   ✅ NEW: No appointment times — slim
+   ========================= */
+
+.qNoTimes{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:28px 16px;
+  border-radius:18px;
+  border:1px dashed rgba(0,0,0,.14);
+  background:rgba(0,0,0,.015);
+}
+.qNoTimesIcon{
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  background:rgba(214,178,94,.15);
+  color:rgba(214,178,94,1);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-bottom:12px;
+}
+.qNoTimesIcon svg{ width:22px; height:22px; }
+.qNoTimesTitle{
+  font-weight:1000;
+  color:#111;
+  font-size:1.05rem;
+  margin-bottom:14px;
+}
+.qNoTimesBtn{
+  padding:10px 22px;
+  border-radius:999px;
+  border:2px solid #111;
+  background:#fff;
+  color:#111;
+  font-weight:1000;
+  font-size:.92rem;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.qNoTimesBtn:hover{
+  background:#111;
+  color:#fff;
+}
+
+/* =========================
+   ✅ NEW: Address card
+   ========================= */
+
+.qAddressCard{
+  border-radius:22px;
+  background:linear-gradient(180deg, #fff 0%, #fbf7ec 100%);
+  border:1px solid rgba(214,178,94,.35);
+  padding:28px 22px 24px;
+  text-align:center;
+  box-shadow:0 18px 46px rgba(0,0,0,.06);
+}
+.qAddressIcon{
+  width:60px;
+  height:60px;
+  margin:0 auto 16px;
+  border-radius:18px;
+  background:#fff;
+  border:1px solid rgba(214,178,94,.35);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color:rgba(214,178,94,1);
+  box-shadow:0 8px 22px rgba(214,178,94,.15);
+}
+.qAddressIcon svg{ width:28px; height:28px; }
+
+.qAddressCard .qInputField{
+  text-align:left;
+  max-width:480px;
+  margin:0 auto;
+}
+.qAddressCard .qInputField input{
+  padding-left:16px;
+}
+.qAddressCard .qInputField label{
+  left:16px;
+}
+.qAddressCard .qInputField input:focus + label,
+.qAddressCard .qInputField input:not(:placeholder-shown) + label,
+.qAddressCard .qInputField.isFilled label{
+  left:16px;
+}
+
+.qAddressHint{
+  margin:14px auto 0;
+  max-width:420px;
+  color:rgba(0,0,0,.55);
+  font-weight:600;
+  font-size:.88rem;
+  line-height:1.5;
+}
+
+/* =========================
+   ✅ NEW: Confirm + Done summary blocks
+   ========================= */
+
+.qConfirmHero{
+  text-align:center;
+  padding:24px 18px;
+  border-radius:22px;
+  background:linear-gradient(180deg, #111 0%, #1d1d1d 100%);
+  color:#fff;
+  margin-bottom:18px;
+  box-shadow:0 18px 46px rgba(0,0,0,.18);
+}
+.qConfirmHeroLabel{
+  font-size:.74rem;
+  font-weight:1000;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:rgba(214,178,94,.95);
+  margin-bottom:8px;
+}
+.qConfirmHeroPrice{
+  font-family:Oswald, Inter, sans-serif;
+  font-size:clamp(2rem, 6vw, 2.6rem);
+  font-weight:1000;
+  letter-spacing:.5px;
+  line-height:1.1;
+  color:#fff;
+}
+.qConfirmHeroNote{
+  margin-top:10px;
+  color:rgba(255,255,255,.65);
+  font-weight:600;
+  font-size:.88rem;
+  line-height:1.4;
+}
+
+.qSummaryGroup{
+  margin-top:14px;
+  border-radius:18px;
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  overflow:hidden;
+}
+.qSummaryGroupTitle{
+  padding:14px 18px;
+  font-size:.74rem;
+  font-weight:1000;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:rgba(0,0,0,.55);
+  background:rgba(0,0,0,.02);
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.qSummaryRow{
+  display:grid;
+  grid-template-columns: 130px 1fr;
+  gap:16px;
+  padding:14px 18px;
+  border-bottom:1px solid rgba(0,0,0,.05);
+  align-items:start;
+}
+.qSummaryRow:last-child{
+  border-bottom:none;
+}
+.qSummaryLabel{
+  color:rgba(0,0,0,.50);
+  font-weight:700;
+  font-size:.88rem;
+}
+.qSummaryValue{
+  color:#111;
+  font-weight:800;
+  font-size:.96rem;
+  line-height:1.4;
+  word-break:break-word;
+}
+
+.qInlineError{
+  margin-top:14px;
+  padding:14px 18px;
+  border-radius:14px;
+  background:rgba(229,75,58,.08);
+  border:1px solid rgba(229,75,58,.25);
+  color:#b00020;
+  font-weight:800;
+  font-size:.92rem;
+  line-height:1.45;
+}
+
+@media (max-width:520px){
+  .qSummaryRow{
+    grid-template-columns:1fr;
+    gap:4px;
+    padding:12px 16px;
+  }
+  .qSummaryLabel{
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+}
+
+/* =========================
+   ✅ NEW: Done page
+   ========================= */
+
+.qDonePage{
+  text-align:center;
+  padding:8px 4px 4px;
+}
+
+.qDoneCheck{
+  width:84px;
+  height:84px;
+  margin:0 auto 18px;
+  color:rgba(80,140,60,1);
+}
+.qDoneCheck svg{
+  width:100%;
+  height:100%;
+  display:block;
+}
+.qDoneCheckCircle{
+  fill:rgba(80,140,60,.1);
+  stroke:rgba(80,140,60,1);
+}
+.qDoneCheckMark{
+  stroke:rgba(80,140,60,1);
+  stroke-dasharray:50;
+  stroke-dashoffset:50;
+  animation: qDoneDraw .55s ease-out forwards;
+  animation-delay:.1s;
+}
+@keyframes qDoneDraw{
+  to{ stroke-dashoffset:0; }
+}
+
+.qDoneBadge{
+  display:inline-block;
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(80,140,60,.12);
+  color:rgba(60,110,45,1);
+  font-size:.74rem;
+  font-weight:1000;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+.qDoneTitle{
+  margin:0 0 10px;
+  font-family:Oswald, Inter, sans-serif;
+  font-size:clamp(1.8rem, 5.5vw, 2.4rem);
+  font-weight:900;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:#111;
+  line-height:1.1;
+}
+
+.qDoneText{
+  margin:0 auto 22px;
+  max-width:440px;
+  color:rgba(0,0,0,.62);
+  font-weight:600;
+  line-height:1.55;
+  font-size:.96rem;
+}
+
+.qSummaryGroup--done{
+  text-align:left;
+  margin-top:0;
+  margin-bottom:18px;
+}
+
+.qDoneFootNote{
+  margin:0 auto;
+  max-width:440px;
+  color:rgba(0,0,0,.45);
+  font-weight:600;
+  font-size:.82rem;
+  line-height:1.5;
+}
+
+      /* Quote page shell: copied as a structural idea only.
+         Header, centered page, quote card, form inside page. No popup. */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body[data-quote-page="true"] {
+        background: #fff;
+        overflow-x: hidden;
+      }
+
+      .quotePageMain {
+        padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(4rem, 6vw, 5rem);
+      }
+
+      .quotePageEmbed {
+        width: min(920px, 100%);
+        margin: 0 auto;
+      }
+
+      .quotePageShell,
+      .quotePageShell[data-quote-modal] {
+        position: static !important;
+        inset: auto !important;
+        display: block !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        overflow: visible !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: none !important;
+      }
+
+      .quotePageShell::before,
+      .quotePageShell::after,
+      .quotePageShell .modal__overlay,
+      .quotePageShell [data-quote-close],
+      .quotePageShell .modal__close {
+        display: none !important;
+        content: none !important;
+      }
+
+      .quotePageShell .quotePanel {
+        position: relative !important;
+        width: min(860px, 100%);
+        max-height: none !important;
+        overflow: visible !important;
+        margin: 0 auto;
+        background: #fff;
+      }
+
+      .btn,
+      .btn--quote,
+      .nav__cta,
+      .quoteNext,
+      .quoteBack {
+        font-family: inherit !important;
+      }
+
+      @media (max-width: 720px) {
+        .quotePageMain {
+          padding-top: 1rem;
+        }
+
+        .quotePageEmbed {
+          width: 100%;
+        }
+
+        .quotePageShell .quotePanel {
+          border-radius: 18px;
+          padding: 14px;
+        }
+      }
+    
+      /* Final quote-page footer lock */
+      body[data-quote-page="true"] {
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+      }
+
+      body[data-quote-page="true"] .header {
+        flex: 0 0 auto !important;
+      }
+
+      body[data-quote-page="true"] .quotePageMain {
+        flex: 1 0 auto !important;
+        min-height: calc(100vh - 96px) !important;
+        padding-bottom: clamp(5rem, 8vw, 7rem) !important;
+      }
+
+      body[data-quote-page="true"] .quotePageEmbed {
+        min-height: 760px !important;
+      }
+
+      body[data-quote-page="true"] .footer {
+        flex: 0 0 auto !important;
+        margin-top: auto !important;
+      }
+
+      /* Keep quote CTAs on the same font system as the rest of the site */
+      .btn,
+      .btn--quote,
+      .nav__cta,
+      .quoteNext,
+      .quoteBack {
+        font-family: Inter, Arial, sans-serif !important;
+        letter-spacing: inherit;
+      }
+
+      @media (max-width: 720px) {
+        body[data-quote-page="true"] .quotePageMain {
+          min-height: calc(100vh - 84px) !important;
+          padding-bottom: 5rem !important;
+        }
+
+        body[data-quote-page="true"] .quotePageEmbed {
+          min-height: 820px !important;
+        }
+      }
+
+    </style>
+  </head>
+
+  <body data-quote-page="true">
+    <header class="header" id="top">
+      <div class="container header__inner">
+        <a class="brand" href="./index.html" aria-label="Home">
+          <img
+            class="brand__logo"
+            src="./Untitled design (2).png"
+            alt="Keizer Mobile Detailing logo"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width="74"
+            height="74"
+          />
+          <div class="brand__text">
+            <span class="brand__name">
+              <span class="brand__nameLine">Keizer Mobile</span>
+              <span class="brand__nameLine">Detailing</span>
+            </span>
+          </div>
+        </a>
+
+        <button class="navToggle" aria-label="Open menu" aria-expanded="false" data-nav-toggle>
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" data-nav>
+          <a href="./index.html#services">Services</a>
+          <a href="./index.html#work">Our Work</a>
+          <a href="./index.html#process">How It Works</a>
+          <a href="./index.html#about">About</a>
+          <a href="./index.html#reviews">Reviews</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="quotePageMain">
+      <div class="container">
+        <div class="quotePageEmbed">
+          <div class="quotePageShell" data-quote-modal aria-hidden="false">
+            <div class="quotePanel" aria-label="Get a quote">
+              <div class="quoteTop">
+                <h1 class="quoteTitle">GET A QUOTE</h1>
+                <div class="quoteProgress" aria-hidden="true">
+                  <span class="qpDot isOn"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
+                  <span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span><span class="qpDot"></span>
+                </div>
+              </div>
+
+              <div class="quoteBody" data-quote-body></div>
+
+              <div class="quoteNav">
+                <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
+                <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer footer--light">
+      <div class="container footerMini footerMini--light">
+        <div class="footerMini__left">
+          <div class="footerMini__name footerMini__name--light">Keizer Mobile Detailing</div>
+        </div>
+        <div class="footerMini__right">
+          <div class="footerMini__actions">
+            <a class="btn btn--quote" href="./quote.html">GET QUOTE</a>
+            <button class="btn btn--call" type="button">CALL / TEXT</button>
+            <a class="btn btn--call" href="./index.html#contact">CONTACT</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom footer__bottom--light">
+        <div class="container footer__bottomInner footer__bottomInner--light">
+          <span>&#169; <span data-year></span> Keizer Mobile Detailing</span>
+          <span class="footerProduced">
+            <a
+              class="footerLink"
+              href="https://www.instagram.com/keizermobiledetail?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw%3D%3D"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Instagram</a>
+            <span class="footerSep">&#8226;</span>
+            Website produced by Kumpula Marketing
+          </span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
 // -------------------------
 // QUOTE WIZARD
 // Conversion Flow v13.0
@@ -25,9 +2390,7 @@ const CITY_ROUTE_MAP = {
 const VALID_COUPONS = {
   // Add custom coupon codes here. Format: CODE: discountAmount
   // Example: SPRING25: 25,
-  DETAIL10: 10,
-  GAYNIGGABUTTFUCK: 69,
-  DEKUNLIKESITROUGH: 1
+  DETAIL10: 10
 };
 
 const quoteModal = document.querySelector("[data-quote-modal]");
@@ -37,6 +2400,7 @@ const quoteBackBtn = document.querySelector("[data-quote-back]");
 const quoteCloseBtns = document.querySelectorAll("[data-quote-close]");
 const quoteProgressEl = document.querySelector(".quoteProgress");
 const quoteDots = () => Array.from(document.querySelectorAll(".qpDot"));
+const isQuotePage = document.body?.dataset.quotePage === "true";
 
 let lastActiveElQuote = null;
 let stepIndex = 0;
@@ -53,6 +2417,7 @@ const quoteState = {
   vehicleType: "",
   serviceCategory: "",
   services: [],
+  vehicles: [],
 
   interiorPackage: "",
   exteriorPackage: "",
@@ -661,6 +3026,10 @@ function stepIsActive(stepName) {
   if (stepName === "paintCorrectionPackage") return anyServiceRequiresPaintCorrectionPackage();
   if (stepName === "ceramicPackage") return anyServiceRequiresCeramicPackage();
   if (stepName === "upkeepFrequency") return isUpkeepPlanSelected();
+
+  // After the first vehicle has been saved, keep the customer from re-entering contact info.
+  if (stepName === "contact") return !quoteState.vehicles.length || !isContactInfoComplete();
+
   return true;
 }
 
@@ -842,7 +3211,7 @@ function computeEstimateInfo() {
 }
 
 function syncEstimateState() {
-  const info = computeEstimateInfo();
+  const info = computeTotalEstimateInfo();
 
   if (!info) {
     quoteState.estimateLow = "";
@@ -860,17 +3229,259 @@ function syncEstimateState() {
   return info;
 }
 
-function formatEstimateDisplay(info = computeEstimateInfo()) {
-  if (!info) return "We’ll confirm after assessment";
+function formatEstimateRange(low, high, hasStartingAt = false) {
+  if (!Number.isFinite(Number(low))) return "We’ll confirm after assessment";
 
-  const lowText = formatMoney(info.low);
-  const highText = formatMoney(info.high);
+  const lowNum = clampInt(low);
+  const highNum = Number.isFinite(Number(high)) ? clampInt(high) : lowNum;
+  const lowText = formatMoney(lowNum);
+  const highText = formatMoney(highNum);
 
-  if (Number(info.high) > Number(info.low)) {
-    return info.hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
+  if (highNum > lowNum) {
+    return hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
   }
 
-  return info.hasStartingAt ? `Starting at ${lowText}` : lowText;
+  return hasStartingAt ? `Starting at ${lowText}` : lowText;
+}
+
+function formatEstimateDisplay(info = computeTotalEstimateInfo()) {
+  if (!info) return "We’ll confirm after assessment";
+  return formatEstimateRange(info.low, info.high, !!info.hasStartingAt);
+}
+
+function isContactInfoComplete() {
+  return !Object.keys(validateContactStep()).length && !!quoteState.routeGroup;
+}
+
+function buildCurrentVehicleQuoteItem({ transient = false } = {}) {
+  const info = computeEstimateInfo();
+  if (!info) return null;
+
+  return {
+    id: transient ? "current" : makeId(),
+    vehicleType: quoteState.vehicleType,
+    serviceCategory: quoteState.serviceCategory,
+    services: getSelectedDisplayServices(),
+    baseServices: quoteState.services.slice(),
+
+    interiorPackage: quoteState.interiorPackage,
+    exteriorPackage: quoteState.exteriorPackage,
+    paintCorrectionPackage: quoteState.paintCorrectionPackage,
+    ceramicPackage: quoteState.ceramicPackage,
+    upkeepFrequency: quoteState.upkeepFrequency,
+
+    subtotal: info.subtotal,
+    lowBeforeCoupon: info.lowBeforeCoupon,
+    highBeforeCoupon: info.highBeforeCoupon,
+    hasStartingAt: !!info.hasStartingAt,
+    savings: info.savings || 0,
+    estimateDisplay: formatEstimateRange(info.lowBeforeCoupon, info.highBeforeCoupon, !!info.hasStartingAt)
+  };
+}
+
+function getAllVehicleQuoteItems(includeCurrent = true) {
+  const saved = Array.isArray(quoteState.vehicles) ? quoteState.vehicles.slice() : [];
+
+  if (!includeCurrent) return saved;
+
+  const current = buildCurrentVehicleQuoteItem({ transient: true });
+  if (current) saved.push(current);
+
+  return saved;
+}
+
+function getVehicleLowBeforeCoupon(item) {
+  return Number(item?.lowBeforeCoupon ?? item?.estimateLowBeforeCoupon ?? item?.estimateLow ?? 0);
+}
+
+function getVehicleHighBeforeCoupon(item) {
+  const low = getVehicleLowBeforeCoupon(item);
+  return Number(item?.highBeforeCoupon ?? item?.estimateHighBeforeCoupon ?? item?.estimateHigh ?? low);
+}
+
+function computeTotalEstimateInfo() {
+  const currentInfo = computeEstimateInfo();
+  const savedVehicles = Array.isArray(quoteState.vehicles) ? quoteState.vehicles : [];
+
+  if (!currentInfo && !savedVehicles.length) return null;
+
+  let subtotal = 0;
+  let lowBeforeCoupon = 0;
+  let highBeforeCoupon = 0;
+  let hasStartingAt = false;
+  let savings = 0;
+
+  savedVehicles.forEach(item => {
+    subtotal += Number(item?.subtotal || 0);
+    lowBeforeCoupon += getVehicleLowBeforeCoupon(item);
+    highBeforeCoupon += getVehicleHighBeforeCoupon(item);
+    hasStartingAt = hasStartingAt || !!item?.hasStartingAt;
+    savings += Number(item?.savings || 0);
+  });
+
+  if (currentInfo) {
+    subtotal += Number(currentInfo.subtotal || 0);
+    lowBeforeCoupon += Number(currentInfo.lowBeforeCoupon || 0);
+    highBeforeCoupon += Number(currentInfo.highBeforeCoupon || currentInfo.lowBeforeCoupon || 0);
+    hasStartingAt = hasStartingAt || !!currentInfo.hasStartingAt;
+    savings += Number(currentInfo.savings || 0);
+  }
+
+  const couponDiscount = Math.min(getCouponDiscount(), lowBeforeCoupon);
+  const low = clampInt(Math.max(0, lowBeforeCoupon - couponDiscount));
+  const high = clampInt(Math.max(0, highBeforeCoupon - couponDiscount));
+
+  return {
+    subtotal: clampInt(subtotal),
+    lowBeforeCoupon: clampInt(lowBeforeCoupon),
+    highBeforeCoupon: clampInt(highBeforeCoupon),
+    low,
+    high,
+    total: low,
+    hasStartingAt,
+    savings: clampInt(savings),
+    couponCode: normalizeCoupon(quoteState.couponCode),
+    couponDiscount,
+    vehicleCount: savedVehicles.length + (currentInfo ? 1 : 0),
+    currentInfo
+  };
+}
+
+function resetCurrentVehicleSelection() {
+  Object.assign(quoteState, {
+    vehicleType: "",
+    serviceCategory: "",
+    services: [],
+
+    interiorPackage: "",
+    exteriorPackage: "",
+    paintCorrectionPackage: "",
+    ceramicPackage: "",
+
+    upkeepFrequency: "",
+
+    estimateLow: "",
+    estimateHigh: "",
+    estimateIsStartingAt: false
+  });
+}
+
+function restoreVehicleQuoteItem(item) {
+  if (!item) return;
+
+  Object.assign(quoteState, {
+    vehicleType: item.vehicleType || "",
+    serviceCategory: item.serviceCategory || "",
+    services: Array.isArray(item.baseServices) ? item.baseServices.slice() : [],
+
+    interiorPackage: item.interiorPackage || "",
+    exteriorPackage: item.exteriorPackage || "",
+    paintCorrectionPackage: item.paintCorrectionPackage || "",
+    ceramicPackage: item.ceramicPackage || "",
+
+    upkeepFrequency: item.upkeepFrequency || ""
+  });
+}
+
+function getVehicleSummaryLines(items = getAllVehicleQuoteItems(true)) {
+  return items.map((item, index) => {
+    const services = Array.isArray(item.services) ? item.services.join(", ") : "";
+    const vehicle = item.vehicleType || `Vehicle ${index + 1}`;
+    return `Vehicle ${index + 1}: ${vehicle}${services ? ` — ${services}` : ""}`;
+  });
+}
+
+function renderVehicleEstimateSummary() {
+  const items = getAllVehicleQuoteItems(true);
+  if (!items.length) return "";
+
+  const canRemoveVehicle = items.length > 1;
+  const vehicleCountText = `${items.length} vehicle${items.length === 1 ? "" : "s"}`;
+
+  return `
+    <div class="qVehicleSummaryBox">
+      <div class="qVehicleSummaryTitle">
+        Vehicles in this quote
+        <span>${vehicleCountText}</span>
+      </div>
+      <p class="qVehicleSummaryHelp">${canRemoveVehicle ? "Use the remove button to take a vehicle off this quote." : "Add another vehicle to unlock remove buttons. One vehicle has to stay on the quote."}</p>
+      <div class="qVehicleSummaryList">
+        ${items.map((item, index) => `
+          <div class="qVehicleSummaryItem">
+            <div class="qVehicleSummaryMain">
+              <div class="qVehicleSummaryName">Vehicle ${index + 1}: ${escapeHtml(item.vehicleType || "Vehicle")}</div>
+              <div class="qVehicleSummaryServices">${escapeHtml(Array.isArray(item.services) ? item.services.join(", ") : "")}</div>
+            </div>
+            <div class="qVehicleSummaryActions">
+              <div class="qVehicleSummaryPrice">${escapeHtml(item.estimateDisplay || formatEstimateRange(getVehicleLowBeforeCoupon(item), getVehicleHighBeforeCoupon(item), !!item.hasStartingAt))}</div>
+              ${canRemoveVehicle ? `
+                <button
+                  class="qVehicleRemoveBtn"
+                  type="button"
+                  data-action="remove-vehicle"
+                  data-index="${index}"
+                  aria-label="Remove Vehicle ${index + 1} from this quote"
+                  title="Remove this vehicle"
+                ><span class="qVehicleRemoveX" aria-hidden="true">×</span><span>Remove</span></button>
+              ` : `<span class="qVehicleRequiredBadge">Required</span>`}
+            </div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function markQuoteChangedAfterVehicleListUpdate() {
+  quoteState.leadEmailSent = false;
+  quoteState.leadEmailSignature = "";
+  quoteState.bookingError = "";
+  quoteState.addressError = "";
+  confirmEditingField = "";
+  clearAppointmentSelection();
+}
+
+function addAnotherVehicleToQuote() {
+  const item = buildCurrentVehicleQuoteItem();
+
+  if (!item) {
+    updateNav();
+    return;
+  }
+
+  quoteState.vehicles = [...(Array.isArray(quoteState.vehicles) ? quoteState.vehicles : []), item];
+
+  resetCurrentVehicleSelection();
+  markQuoteChangedAfterVehicleListUpdate();
+
+  stepIndex = steps.indexOf("vehicleType");
+  render();
+}
+
+function removeVehicleFromQuote(index) {
+  const vehicleIndex = Number(index);
+  const savedVehicles = Array.isArray(quoteState.vehicles) ? quoteState.vehicles.slice() : [];
+  const currentItem = buildCurrentVehicleQuoteItem({ transient: true });
+  const totalVehicles = savedVehicles.length + (currentItem ? 1 : 0);
+
+  if (!Number.isInteger(vehicleIndex) || vehicleIndex < 0 || vehicleIndex >= totalVehicles || totalVehicles <= 1) {
+    return;
+  }
+
+  // Saved vehicles are stored before the currently edited vehicle.
+  if (vehicleIndex < savedVehicles.length) {
+    savedVehicles.splice(vehicleIndex, 1);
+    quoteState.vehicles = savedVehicles;
+  } else if (savedVehicles.length) {
+    // If the user removes the current vehicle, restore the most recent saved vehicle
+    // as the active one so the quote still has at least one vehicle.
+    const replacementVehicle = savedVehicles.pop();
+    quoteState.vehicles = savedVehicles;
+    restoreVehicleQuoteItem(replacementVehicle);
+  }
+
+  markQuoteChangedAfterVehicleListUpdate();
+  render();
 }
 
 // -------------------------
@@ -950,7 +3561,7 @@ function getNextButtonText() {
   if (step === "appointment") return "Continue With This Time";
   if (step === "address") return "Review My Request";
   if (step === "confirm") return quoteState.submittingBooking ? "Sending..." : "Request My Appointment";
-  if (step === "done") return "Close";
+  if (step === "done") return isQuotePage ? "Back to Home" : "Close";
 
   return "Continue";
 }
@@ -963,7 +3574,7 @@ function updateNav() {
   // Hide Continue button on auto-advance steps so users can't accidentally double-tap.
   const isAutoAdvanceStep = step === "vehicleType" || step === "serviceCategory";
 
-  quoteBackBtn.style.display = stepIndex <= 0 || step === "done" ? "none" : "inline-flex";
+  quoteBackBtn.style.display = (stepIndex <= 0 && !quoteState.vehicles.length) || step === "done" ? "none" : "inline-flex";
 
   if (isAutoAdvanceStep) {
     quoteNextBtn.style.display = "none";
@@ -977,7 +3588,7 @@ function updateNav() {
   if (step === "done") {
     quoteBackBtn.style.display = "none";
     quoteNextBtn.style.display = "inline-flex";
-    quoteNextBtn.textContent = "Close";
+    quoteNextBtn.textContent = isQuotePage ? "Back to Home" : "Close";
     quoteNextBtn.disabled = false;
   }
 }
@@ -1008,7 +3619,7 @@ function renderMedia(item) {
   return `
     <div class="qCardMedia${zoomClass}" ${zoomStyle}>
       ${item.badge ? `<span class="qCardBadge">${escapeHtml(item.badge)}</span>` : ""}
-      ${(item.label === "Paint Correction" || item.label === "Ceramic Coating") ? `<span class="requires-badge">Requires Exterior Wash</span>` : ""}
+      ${(item.label === "Paint Correction" || item.label === "Ceramic Coating") ? `<span class="requires-badge">Includes Exterior Wash</span>` : ""}
       <img class="${containClass}" src="${escapeHtml(item.img)}" alt="${escapeHtml(item.label || "")}" loading="lazy" decoding="async">
     </div>
   `;
@@ -1327,6 +3938,18 @@ function renderEstimateStep() {
       ` : ""}
     </div>
 
+    ${renderVehicleEstimateSummary()}
+
+    <div class="qAddVehicleWrap">
+      <button class="qAddVehicleBtn" type="button" data-action="add-another-vehicle">
+        <span class="qAddVehicleBtnText">
+          <span class="qAddVehicleBtnTitle">Add another vehicle</span>
+          <span class="qAddVehicleBtnSub">Quote a second car, truck, or SUV in the same appointment.</span>
+        </span>
+      </button>
+      <div class="qAddVehicleNote">The quote updates instantly when you add or remove vehicles. One vehicle always has to stay on the quote.</div>
+    </div>
+
     <div class="qCouponBox">
       <div class="qCouponHeader">
         <div class="qCouponTitle">Have a coupon code?</div>
@@ -1560,8 +4183,8 @@ function renderEditableSummaryRow(label, field, value) {
 }
 
 function renderConfirmStep() {
-  const selectedServices = getSelectedDisplayServices();
   const info = syncEstimateState();
+  const vehicleItems = getAllVehicleQuoteItems(true);
 
   const summaryRow = (label, value) => value ? `
     <div class="qSummaryRow">
@@ -1569,6 +4192,17 @@ function renderConfirmStep() {
       <div class="qSummaryValue">${escapeHtml(value)}</div>
     </div>
   ` : "";
+
+  const vehicleRows = vehicleItems.length
+    ? vehicleItems.map((item, index) => {
+        const services = Array.isArray(item.services) ? item.services.join(", ") : "";
+        const price = item.estimateDisplay || formatEstimateRange(getVehicleLowBeforeCoupon(item), getVehicleHighBeforeCoupon(item), !!item.hasStartingAt);
+        return summaryRow(`Vehicle ${index + 1}`, `${item.vehicleType || "Vehicle"}${services ? ` — ${services}` : ""} (${price})`);
+      }).join("")
+    : `
+      ${summaryRow("Vehicle", quoteState.vehicleType)}
+      ${summaryRow("Service", getSelectedDisplayServices().join(", "))}
+    `;
 
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Review your request</h3>
@@ -1590,9 +4224,11 @@ function renderConfirmStep() {
       <div class="qSummaryGroupTitle">Appointment</div>
       ${summaryRow("Preferred time", quoteState.slotLabel)}
       ${renderEditableSummaryRow("Address", "address", quoteState.address)}
-      ${summaryRow("Vehicle", quoteState.vehicleType)}
-      ${summaryRow("Service", selectedServices.join(", "))}
-      ${quoteState.upkeepFrequency ? summaryRow("Frequency", quoteState.upkeepFrequency) : ""}
+    </div>
+
+    <div class="qSummaryGroup">
+      <div class="qSummaryGroupTitle">Vehicle & service</div>
+      ${vehicleRows}
       ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", `${normalizeCoupon(quoteState.couponCode)} (−${formatMoney(quoteState.couponDiscount)})`) : ""}
       ${quoteState.notes ? summaryRow("Notes", quoteState.notes) : ""}
     </div>
@@ -1602,12 +4238,21 @@ function renderConfirmStep() {
 }
 
 function renderDoneStep() {
+  const vehicleItems = getAllVehicleQuoteItems(true);
+
   const summaryRow = (label, value) => value ? `
     <div class="qSummaryRow">
       <div class="qSummaryLabel">${escapeHtml(label)}</div>
       <div class="qSummaryValue">${escapeHtml(value)}</div>
     </div>
   ` : "";
+
+  const vehicleRows = vehicleItems.length
+    ? vehicleItems.map((item, index) => {
+        const services = Array.isArray(item.services) ? item.services.join(", ") : "";
+        return summaryRow(`Vehicle ${index + 1}`, `${item.vehicleType || "Vehicle"}${services ? ` — ${services}` : ""}`);
+      }).join("")
+    : summaryRow("Service", getSelectedDisplayServices().join(", "));
 
   quoteBody.innerHTML = `
     <div class="qDonePage">
@@ -1627,7 +4272,7 @@ function renderDoneStep() {
         ${summaryRow("Name", quoteState.name)}
         ${summaryRow("Preferred time", quoteState.slotLabel)}
         ${summaryRow("Address", quoteState.address)}
-        ${summaryRow("Service", getSelectedDisplayServices().join(", "))}
+        ${vehicleRows}
         ${summaryRow("Estimate", formatEstimateDisplay())}
         ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", normalizeCoupon(quoteState.couponCode)) : ""}
       </div>
@@ -1636,6 +4281,10 @@ function renderDoneStep() {
     </div>
   `;
 }
+
+// -------------------------
+// EVENTS
+// -------------------------
 
 // -------------------------
 // EVENTS
@@ -1816,6 +4465,16 @@ function handleStepAction(e) {
     quoteState.upkeepFrequency = value;
     clearEstimateDependentState();
     render();
+    return;
+  }
+
+  if (action === "add-another-vehicle") {
+    addAnotherVehicleToQuote();
+    return;
+  }
+
+  if (action === "remove-vehicle") {
+    removeVehicleFromQuote(target.dataset.index);
     return;
   }
 
@@ -2044,15 +4703,22 @@ function selectSlot(slotId) {
 // -------------------------
 
 function buildLeadSignature() {
+  const vehicleSignature = getAllVehicleQuoteItems(true)
+    .map(item => [
+      item.vehicleType,
+      item.serviceCategory,
+      Array.isArray(item.services) ? item.services.join("|") : "",
+      item.upkeepFrequency,
+      item.estimateDisplay
+    ].join("~"))
+    .join("##");
+
   return [
     quoteState.name,
     quoteState.phone,
     quoteState.email,
     quoteState.city,
-    quoteState.vehicleType,
-    quoteState.serviceCategory,
-    getSelectedDisplayServices().join("|"),
-    quoteState.upkeepFrequency,
+    vehicleSignature,
     quoteState.notes,
     normalizeCoupon(quoteState.couponCode)
   ]
@@ -2062,7 +4728,24 @@ function buildLeadSignature() {
 
 function buildPayload(includeSlot = false) {
   const info = syncEstimateState();
-  const displayServices = getSelectedDisplayServices();
+  const currentDisplayServices = getSelectedDisplayServices();
+  const vehicleItems = getAllVehicleQuoteItems(true);
+  const hasMultipleVehicles = vehicleItems.length > 1;
+
+  const vehicleSummaryLines = getVehicleSummaryLines(vehicleItems);
+  const combinedVehicleType = hasMultipleVehicles
+    ? `${vehicleItems.length} vehicles: ${vehicleItems.map(item => item.vehicleType).filter(Boolean).join(", ")}`
+    : quoteState.vehicleType;
+
+  const combinedServices = hasMultipleVehicles
+    ? vehicleSummaryLines
+    : currentDisplayServices;
+
+  const combinedBaseServices = hasMultipleVehicles
+    ? vehicleItems.flatMap((item, index) =>
+        (Array.isArray(item.baseServices) ? item.baseServices : []).map(service => `Vehicle ${index + 1}: ${service}`)
+      )
+    : quoteState.services.slice();
 
   const payload = {
     leadId: quoteState.leadId || "",
@@ -2074,18 +4757,22 @@ function buildPayload(includeSlot = false) {
     routeGroup: quoteState.routeGroup,
     routeGroupLabel: quoteState.routeGroupLabel,
 
-    vehicleType: quoteState.vehicleType,
-    serviceCategory: quoteState.serviceCategory,
-    services: displayServices,
-    baseServices: quoteState.services.slice(),
+    vehicleType: combinedVehicleType,
+    serviceCategory: hasMultipleVehicles ? "Multiple vehicles" : quoteState.serviceCategory,
+    services: combinedServices,
+    baseServices: combinedBaseServices,
 
-    interiorPackage: quoteState.interiorPackage,
-    interiorCondition: quoteState.interiorPackage,
-    exteriorPackage: quoteState.exteriorPackage,
-    exteriorCondition: quoteState.exteriorPackage,
-    paintCorrectionPackage: quoteState.paintCorrectionPackage,
-    ceramicPackage: quoteState.ceramicPackage,
-    upkeepFrequency: quoteState.upkeepFrequency,
+    interiorPackage: hasMultipleVehicles ? "" : quoteState.interiorPackage,
+    interiorCondition: hasMultipleVehicles ? "" : quoteState.interiorPackage,
+    exteriorPackage: hasMultipleVehicles ? "" : quoteState.exteriorPackage,
+    exteriorCondition: hasMultipleVehicles ? "" : quoteState.exteriorPackage,
+    paintCorrectionPackage: hasMultipleVehicles ? "" : quoteState.paintCorrectionPackage,
+    ceramicPackage: hasMultipleVehicles ? "" : quoteState.ceramicPackage,
+    upkeepFrequency: hasMultipleVehicles ? "" : quoteState.upkeepFrequency,
+
+    vehicles: vehicleItems,
+    vehicleCount: vehicleItems.length,
+    vehicleSummary: vehicleSummaryLines.join("\n"),
 
     estimateLow: info?.low ?? "",
     estimateHigh: info?.high ?? "",
@@ -2269,7 +4956,18 @@ async function goNext() {
 }
 
 function goBack() {
-  if (stepIndex <= 0) return;
+  if (stepIndex <= 0) {
+    // If they tapped "Add another vehicle" by mistake, Back restores the last saved vehicle.
+    if (Array.isArray(quoteState.vehicles) && quoteState.vehicles.length) {
+      const lastVehicle = quoteState.vehicles.pop();
+      restoreVehicleQuoteItem(lastVehicle);
+      clearAppointmentSelection();
+      stepIndex = steps.indexOf("estimate");
+      render();
+    }
+    return;
+  }
+
   stepIndex = prevActiveStepIndex(stepIndex);
   render();
 }
@@ -2279,6 +4977,7 @@ function resetQuoteFlow() {
     vehicleType: "",
     serviceCategory: "",
     services: [],
+    vehicles: [],
 
     interiorPackage: "",
     exteriorPackage: "",
@@ -2392,6 +5091,11 @@ function openQuote() {
 }
 
 function closeQuote() {
+  if (isQuotePage) {
+    window.location.href = "./index.html";
+    return;
+  }
+
   if (!quoteModal) return;
 
   quoteModal.setAttribute("hidden", "");
@@ -2544,18 +5248,10 @@ function initQuoteWizard() {
   preventBackdropClose();
   styleQuoteCloseButtons();
 
-  if (!quoteModal || !quoteBody) {
-    console.warn("Quote wizard missing modal/body elements.");
+  if (!quoteBody) {
+    console.warn("Quote wizard missing body element.");
     return;
   }
-
-  document.querySelectorAll("[data-quote-open]").forEach(btn => {
-    btn.addEventListener("click", e => {
-      e.preventDefault();
-      resetQuoteFlow();
-      openQuote();
-    });
-  });
 
   quoteCloseBtns.forEach(btn => {
     btn.removeAttribute("aria-hidden");
@@ -2578,6 +5274,46 @@ function initQuoteWizard() {
     goBack();
   });
 
+  if (isQuotePage) {
+    if (quoteModal) {
+      quoteModal.hidden = false;
+      quoteModal.removeAttribute("hidden");
+      quoteModal.setAttribute("aria-hidden", "false");
+    }
+
+    resetQuoteFlow();
+
+    try {
+      render();
+    } catch (err) {
+      console.error("Quote wizard render error:", err);
+
+      quoteBody.innerHTML = `
+        <h3 class="qStepTitle">Quote form loading issue</h3>
+        <p class="qStepSub">Something went wrong while loading the quote form.</p>
+        <div class="qDoneBox">
+          <div class="qDoneBig">Temporary error</div>
+          <div class="qDoneLine">Open the browser console and send the red JavaScript error.</div>
+        </div>
+      `;
+    }
+
+    return;
+  }
+
+  if (!quoteModal) {
+    console.warn("Quote wizard missing modal element.");
+    return;
+  }
+
+  document.querySelectorAll("[data-quote-open]").forEach(btn => {
+    btn.addEventListener("click", e => {
+      e.preventDefault();
+      resetQuoteFlow();
+      openQuote();
+    });
+  });
+
   // Click-outside, X-close, and Escape-close are disabled so users stay inside the quote flow.
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && quoteModal && !quoteModal.hasAttribute("hidden")) {
@@ -2588,3 +5324,158 @@ function initQuoteWizard() {
 }
 
 initQuoteWizard();
+
+
+(function () {
+  function addFinalQuotePageOverrides() {
+    const style = document.createElement("style");
+    style.setAttribute("data-final-quote-page-overrides", "true");
+    style.textContent = `
+      html,
+      body {
+        overflow-x: hidden !important;
+      }
+
+      body[data-quote-page="true"] {
+        overflow: auto !important;
+        background: #fff !important;
+      }
+
+      body[data-quote-page="true"] .quotePageMain {
+        display: block !important;
+        padding: clamp(2rem, 4vw, 3.5rem) 0 clamp(4rem, 6vw, 5rem) !important;
+        background: transparent !important;
+      }
+
+      body[data-quote-page="true"] [data-quote-modal],
+      body[data-quote-page="true"] .modal,
+      body[data-quote-page="true"] .modal--quote {
+        position: static !important;
+        inset: auto !important;
+        z-index: auto !important;
+        display: block !important;
+        align-items: initial !important;
+        justify-content: initial !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        overflow: visible !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        transform: none !important;
+      }
+
+      body[data-quote-page="true"] [data-quote-modal]::before,
+      body[data-quote-page="true"] [data-quote-modal]::after,
+      body[data-quote-page="true"] .modal__overlay,
+      body[data-quote-page="true"] [data-quote-close] {
+        display: none !important;
+        content: none !important;
+      }
+
+      body[data-quote-page="true"] .quotePageEmbed {
+        width: min(920px, 100%) !important;
+        margin: 0 auto !important;
+      }
+
+      body[data-quote-page="true"] .quotePanel {
+        position: relative !important;
+        width: min(860px, 100%) !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        margin: 0 auto !important;
+        overflow: visible !important;
+        background: #fff !important;
+        border-radius: 18px !important;
+        box-shadow: var(--shadow) !important;
+        transform: none !important;
+      }
+
+      body[data-quote-page="true"] .btn,
+      body[data-quote-page="true"] .btn--quote,
+      body[data-quote-page="true"] .nav__cta,
+      body[data-quote-page="true"] .quoteNext,
+      body[data-quote-page="true"] .quoteBack,
+      .btn,
+      .btn--quote,
+      .nav__cta {
+        font-family: inherit !important;
+      }
+
+      @media (max-width: 720px) {
+        body[data-quote-page="true"] .quotePageMain {
+          padding-top: 1rem !important;
+        }
+
+        body[data-quote-page="true"] .quotePanel {
+          padding: 14px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function unlockPageMode() {
+    addFinalQuotePageOverrides();
+
+    if (typeof resetQuoteFlow === "function") resetQuoteFlow();
+    if (typeof render === "function") render();
+
+    const shell = document.querySelector("[data-quote-modal]");
+    if (shell) {
+      shell.hidden = false;
+      shell.removeAttribute("hidden");
+      shell.setAttribute("aria-hidden", "false");
+      shell.removeAttribute("role");
+      shell.style.cssText = "";
+      shell.classList.remove("isOpen", "is-open", "open", "active");
+    }
+
+    document.querySelectorAll(".modal__overlay, [data-quote-close]").forEach(function (el) {
+      el.remove();
+    });
+
+    document.body.style.overflow = "";
+    document.body.classList.remove("modalOpen", "modal-open", "quoteOpen", "quote-open");
+
+    document.querySelectorAll("[data-year]").forEach(function (el) {
+      el.textContent = new Date().getFullYear();
+    });
+
+    const navToggle = document.querySelector("[data-nav-toggle]");
+    const nav = document.querySelector("[data-nav]");
+    if (navToggle && nav && !navToggle.dataset.boundDirectQuoteNav) {
+      navToggle.dataset.boundDirectQuoteNav = "true";
+      navToggle.addEventListener("click", function () {
+        const isOpen = navToggle.getAttribute("aria-expanded") === "true";
+        navToggle.setAttribute("aria-expanded", String(!isOpen));
+        nav.classList.toggle("isOpen", !isOpen);
+        nav.classList.toggle("is-open", !isOpen);
+        document.body.classList.toggle("navOpen", !isOpen);
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", unlockPageMode);
+  } else {
+    unlockPageMode();
+  }
+})();
+
+    </script>
+
+    <script>
+      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+  </body>
+</html>
