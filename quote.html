@@ -1055,7 +1055,7 @@
 
 
 
-/* SIMPLE_ADD_VEHICLE_UI_V5 */
+/* SIMPLE_ADD_VEHICLE_UI_V6 */
 .qVehicleSummaryTitle span,
 .qVehicleSummaryHelp,
 .qVehicleRequiredBadge,
@@ -1064,12 +1064,82 @@
 }
 .qVehicleSummaryTitle{
   display:block !important;
+  margin-bottom:10px !important;
 }
 .qVehicleSummaryItem{
-  padding-right:14px !important;
+  display:grid !important;
+  grid-template-columns:minmax(0, 1fr) auto auto !important;
+  gap:12px !important;
+  align-items:center !important;
+  padding:14px 14px !important;
+  position:relative !important;
 }
 .qVehicleSummaryItem.hasRemove{
-  padding-right:112px !important;
+  padding-right:14px !important;
+}
+.qVehicleSummaryActions{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-end !important;
+  gap:10px !important;
+  min-width:0 !important;
+}
+.qVehicleSummaryPrice{
+  white-space:nowrap !important;
+  text-align:right !important;
+}
+.qVehicleRemoveBtn,
+.qVehicleRemoveBtn--corner{
+  width:28px !important;
+  height:28px !important;
+  min-width:28px !important;
+  min-height:28px !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:999px !important;
+  background:transparent !important;
+  color:#111 !important;
+  box-shadow:none !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:0 !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+  position:static !important;
+  transform:none !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  flex:0 0 auto !important;
+}
+.qVehicleRemoveBtn:hover,
+.qVehicleRemoveBtn--corner:hover{
+  background:rgba(0,0,0,.06) !important;
+  color:#000 !important;
+  transform:none !important;
+  box-shadow:none !important;
+}
+.qVehicleRemoveBtn:focus-visible,
+.qVehicleRemoveBtn--corner:focus-visible{
+  outline:none !important;
+  box-shadow:0 0 0 3px rgba(214,178,94,.25) !important;
+}
+.qVehicleRemoveX{
+  width:auto !important;
+  height:auto !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:#111 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:1.45rem !important;
+  font-weight:900 !important;
+  line-height:1 !important;
+  padding:0 !important;
+}
+.qVehicleRemoveText{
+  display:none !important;
 }
 .qAddVehicleWrap{
   margin-top:16px !important;
@@ -1082,7 +1152,7 @@
 }
 .qAddVehicleBtn{
   width:100% !important;
-  min-height:62px !important;
+  min-height:64px !important;
   border:0 !important;
   border-radius:0 !important;
   background:linear-gradient(180deg, #fff 0%, #fffaf0 100%) !important;
@@ -1104,25 +1174,29 @@
   display:none !important;
 }
 .qAddVehicleLeft{
-  display:flex !important;
-  align-items:center !important;
-  gap:12px !important;
+  display:block !important;
   min-width:0 !important;
 }
 .qAddVehicleIcon{
+  order:2 !important;
   flex:0 0 auto !important;
-  width:36px !important;
-  height:36px !important;
-  border-radius:12px !important;
+  width:34px !important;
+  height:34px !important;
+  border-radius:999px !important;
   display:inline-flex !important;
   align-items:center !important;
   justify-content:center !important;
   background:rgba(214,178,94,.16) !important;
-  border:1px solid rgba(214,178,94,.38) !important;
+  border:1px solid rgba(214,178,94,.42) !important;
   color:#111 !important;
   font-size:1.45rem !important;
   line-height:1 !important;
   font-weight:1000 !important;
+  margin-left:12px !important;
+}
+.qAddVehicleBtnText{
+  display:block !important;
+  min-width:0 !important;
 }
 .qAddVehicleBtnTitle{
   display:block !important;
@@ -1144,33 +1218,31 @@
   letter-spacing:0 !important;
 }
 .qAddVehicleArrow{
-  flex:0 0 auto !important;
-  width:32px !important;
-  height:32px !important;
-  border-radius:999px !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  border:1px solid rgba(214,178,94,.35) !important;
-  background:rgba(214,178,94,.11) !important;
-  color:#111 !important;
-  font-weight:1000 !important;
-  font-size:1.1rem !important;
-  transition:transform .15s ease, background .15s ease !important;
+  display:none !important;
 }
 .qAddVehicleBtn:hover{
   transform:none !important;
   background:linear-gradient(180deg, #fff 0%, #fff6df 100%) !important;
-}
-.qAddVehicleBtn:hover .qAddVehicleArrow{
-  transform:translateX(2px) !important;
-  background:rgba(214,178,94,.18) !important;
 }
 .qAddVehicleBtn:focus-visible{
   outline:none !important;
   box-shadow:0 0 0 4px rgba(214,178,94,.20) inset !important;
 }
 @media (max-width:520px){
+  .qVehicleSummaryItem{
+    grid-template-columns:minmax(0, 1fr) auto !important;
+    gap:8px !important;
+  }
+  .qVehicleSummaryActions{
+    grid-column:1 / 3 !important;
+    width:100% !important;
+    flex-direction:row !important;
+    justify-content:space-between !important;
+    align-items:center !important;
+  }
+  .qVehicleSummaryPrice{
+    text-align:left !important;
+  }
   .qAddVehicleBtn{
     padding:13px 14px !important;
   }
@@ -2513,6 +2585,7 @@ const DEFAULT_SCRIPT_URL =
 const INTERIOR_DISPLAY_RANGE_ADD = 40;
 const EXTERIOR_DISPLAY_RANGE_ADD = 15;
 const HEADLIGHT_RESTORATION_PRICE = 80;
+const MAX_QUOTE_VEHICLES = 3;
 
 const ROUTE_GROUP_SOUTH = "south";
 const ROUTE_GROUP_NORTH = "north";
@@ -3540,24 +3613,23 @@ function renderVehicleEstimateSummary() {
       <div class="qVehicleSummaryTitle">Vehicles in this quote</div>
       <div class="qVehicleSummaryList">
         ${items.map((item, index) => `
-          <div class="qVehicleSummaryItem${canRemoveVehicle ? " hasRemove" : ""}" style="position:relative !important; padding-right:${canRemoveVehicle ? '112px' : '14px'} !important;">
-            ${canRemoveVehicle ? `
-              <button
-                class="qVehicleRemoveBtn qVehicleRemoveBtn--corner"
-                type="button"
-                data-action="remove-vehicle"
-                data-index="${index}"
-                aria-label="Remove Vehicle ${index + 1} from this quote"
-                title="Remove this vehicle"
-                style="position:absolute !important; top:50% !important; right:12px !important; transform:translateY(-50%) !important; z-index:50 !important; display:inline-flex !important; align-items:center !important; justify-content:center !important; gap:6px !important; min-height:34px !important; min-width:88px !important; padding:8px 12px 8px 10px !important; border-radius:999px !important; border:1px solid rgba(201,52,35,.35) !important; background:#fff4f2 !important; color:#b82718 !important; box-shadow:0 10px 22px rgba(201,52,35,.14) !important; font-weight:1000 !important; font-size:.78rem !important; line-height:1 !important; text-transform:uppercase !important; cursor:pointer !important; opacity:1 !important; visibility:visible !important;"
-              ><span class="qVehicleRemoveX" aria-hidden="true" style="display:inline-flex !important; align-items:center !important; justify-content:center !important; width:18px !important; height:18px !important; border-radius:999px !important; background:rgba(201,52,35,.14) !important; color:#b82718 !important; font-size:1.1rem !important; line-height:1 !important;">×</span><span>Remove</span></button>
-            ` : ""}
+          <div class="qVehicleSummaryItem${canRemoveVehicle ? " hasRemove" : ""}">
             <div class="qVehicleSummaryMain">
               <div class="qVehicleSummaryName">Vehicle ${index + 1}: ${escapeHtml(item.vehicleType || "Vehicle")}</div>
               <div class="qVehicleSummaryServices">${escapeHtml(Array.isArray(item.services) ? item.services.join(", ") : "")}</div>
             </div>
             <div class="qVehicleSummaryActions">
               <div class="qVehicleSummaryPrice">${escapeHtml(item.estimateDisplay || formatEstimateRange(getVehicleLowBeforeCoupon(item), getVehicleHighBeforeCoupon(item), !!item.hasStartingAt))}</div>
+              ${canRemoveVehicle ? `
+                <button
+                  class="qVehicleRemoveBtn qVehicleRemoveBtn--corner"
+                  type="button"
+                  data-action="remove-vehicle"
+                  data-index="${index}"
+                  aria-label="Remove Vehicle ${index + 1} from this quote"
+                  title="Remove this vehicle"
+                ><span class="qVehicleRemoveX" aria-hidden="true">×</span><span class="qVehicleRemoveText">Remove</span></button>
+              ` : ""}
             </div>
           </div>
         `).join("")}
@@ -3576,6 +3648,13 @@ function markQuoteChangedAfterVehicleListUpdate() {
 }
 
 function addAnotherVehicleToQuote() {
+  const currentTotalVehicles = getAllVehicleQuoteItems(true).length;
+
+  if (currentTotalVehicles >= MAX_QUOTE_VEHICLES) {
+    render();
+    return;
+  }
+
   const item = buildCurrentVehicleQuoteItem();
 
   if (!item) {
@@ -4074,18 +4153,19 @@ function renderEstimateStep() {
 
     ${renderVehicleEstimateSummary()}
 
-    <div class="qAddVehicleWrap">
-      <button class="qAddVehicleBtn" type="button" data-action="add-another-vehicle">
-        <span class="qAddVehicleLeft">
-          <span class="qAddVehicleIcon" aria-hidden="true">+</span>
-          <span class="qAddVehicleBtnText">
-            <span class="qAddVehicleBtnTitle">Add another vehicle</span>
-            <span class="qAddVehicleBtnSub">Same appointment, one quote.</span>
+    ${Number(info?.vehicleCount || 0) < MAX_QUOTE_VEHICLES ? `
+      <div class="qAddVehicleWrap">
+        <button class="qAddVehicleBtn" type="button" data-action="add-another-vehicle">
+          <span class="qAddVehicleLeft">
+            <span class="qAddVehicleBtnText">
+              <span class="qAddVehicleBtnTitle">Add another vehicle</span>
+              <span class="qAddVehicleBtnSub">Same appointment, one quote.</span>
+            </span>
           </span>
-        </span>
-        <span class="qAddVehicleArrow" aria-hidden="true">›</span>
-      </button>
-    </div>
+          <span class="qAddVehicleIcon" aria-hidden="true">+</span>
+        </button>
+      </div>
+    ` : ""}
 
     <div class="qCouponBox">
       <div class="qCouponHeader">
