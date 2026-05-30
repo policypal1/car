@@ -775,6 +775,102 @@
   font-size:.88rem;
 }
 
+
+/* Multiple vehicle estimate summary */
+.qVehicleSummaryBox{
+  margin-top:18px;
+  border-radius:20px;
+  border:1px solid rgba(0,0,0,.10);
+  background:#fff;
+  padding:16px;
+  box-shadow:0 12px 30px rgba(0,0,0,.05);
+}
+.qVehicleSummaryTitle{
+  font-weight:1000;
+  color:#111;
+  font-size:1rem;
+  margin-bottom:10px;
+}
+.qVehicleSummaryList{
+  display:grid;
+  gap:8px;
+}
+.qVehicleSummaryItem{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  padding:10px 12px;
+  border-radius:14px;
+  background:rgba(0,0,0,.025);
+  border:1px solid rgba(0,0,0,.06);
+}
+.qVehicleSummaryMain{
+  min-width:0;
+}
+.qVehicleSummaryName{
+  font-weight:1000;
+  color:#111;
+  line-height:1.25;
+}
+.qVehicleSummaryServices{
+  margin-top:3px;
+  color:rgba(0,0,0,.58);
+  font-weight:650;
+  font-size:.88rem;
+  line-height:1.35;
+}
+.qVehicleSummaryPrice{
+  flex:0 0 auto;
+  font-weight:1000;
+  color:#111;
+  text-align:right;
+  white-space:nowrap;
+}
+.qAddVehicleWrap{
+  margin-top:18px;
+  border-radius:20px;
+  border:1px solid rgba(214,178,94,.35);
+  background:linear-gradient(180deg, rgba(214,178,94,.08), rgba(255,255,255,1));
+  padding:16px;
+  text-align:center;
+}
+.qAddVehicleBtn{
+  width:100%;
+  min-height:52px;
+  border-radius:999px;
+  border:2px solid #111;
+  background:#111;
+  color:#fff;
+  font-family:inherit;
+  font-size:.98rem;
+  font-weight:1000;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:transform .15s ease, background .15s ease, color .15s ease;
+}
+.qAddVehicleBtn:hover{
+  transform:translateY(-1px);
+  background:#fff;
+  color:#111;
+}
+.qAddVehicleNote{
+  margin-top:10px;
+  color:rgba(0,0,0,.56);
+  font-weight:650;
+  font-size:.88rem;
+  line-height:1.4;
+}
+@media (max-width:520px){
+  .qVehicleSummaryItem{
+    flex-direction:column;
+  }
+  .qVehicleSummaryPrice{
+    text-align:left;
+  }
+}
+
 /* Coupon box */
 .qCouponBox{
   margin-top:18px;
@@ -2139,6 +2235,7 @@ const quoteState = {
   vehicleType: "",
   serviceCategory: "",
   services: [],
+  vehicles: [],
 
   interiorPackage: "",
   exteriorPackage: "",
@@ -2747,6 +2844,10 @@ function stepIsActive(stepName) {
   if (stepName === "paintCorrectionPackage") return anyServiceRequiresPaintCorrectionPackage();
   if (stepName === "ceramicPackage") return anyServiceRequiresCeramicPackage();
   if (stepName === "upkeepFrequency") return isUpkeepPlanSelected();
+
+  // After the first vehicle has been saved, keep the customer from re-entering contact info.
+  if (stepName === "contact") return !quoteState.vehicles.length || !isContactInfoComplete();
+
   return true;
 }
 
@@ -2928,7 +3029,7 @@ function computeEstimateInfo() {
 }
 
 function syncEstimateState() {
-  const info = computeEstimateInfo();
+  const info = computeTotalEstimateInfo();
 
   if (!info) {
     quoteState.estimateLow = "";
@@ -2946,17 +3047,212 @@ function syncEstimateState() {
   return info;
 }
 
-function formatEstimateDisplay(info = computeEstimateInfo()) {
-  if (!info) return "We’ll confirm after assessment";
+function formatEstimateRange(low, high, hasStartingAt = false) {
+  if (!Number.isFinite(Number(low))) return "We’ll confirm after assessment";
 
-  const lowText = formatMoney(info.low);
-  const highText = formatMoney(info.high);
+  const lowNum = clampInt(low);
+  const highNum = Number.isFinite(Number(high)) ? clampInt(high) : lowNum;
+  const lowText = formatMoney(lowNum);
+  const highText = formatMoney(highNum);
 
-  if (Number(info.high) > Number(info.low)) {
-    return info.hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
+  if (highNum > lowNum) {
+    return hasStartingAt ? `Starting at ${lowText} - ${highText}` : `${lowText} - ${highText}`;
   }
 
-  return info.hasStartingAt ? `Starting at ${lowText}` : lowText;
+  return hasStartingAt ? `Starting at ${lowText}` : lowText;
+}
+
+function formatEstimateDisplay(info = computeTotalEstimateInfo()) {
+  if (!info) return "We’ll confirm after assessment";
+  return formatEstimateRange(info.low, info.high, !!info.hasStartingAt);
+}
+
+function isContactInfoComplete() {
+  return !Object.keys(validateContactStep()).length && !!quoteState.routeGroup;
+}
+
+function buildCurrentVehicleQuoteItem({ transient = false } = {}) {
+  const info = computeEstimateInfo();
+  if (!info) return null;
+
+  return {
+    id: transient ? "current" : makeId(),
+    vehicleType: quoteState.vehicleType,
+    serviceCategory: quoteState.serviceCategory,
+    services: getSelectedDisplayServices(),
+    baseServices: quoteState.services.slice(),
+
+    interiorPackage: quoteState.interiorPackage,
+    exteriorPackage: quoteState.exteriorPackage,
+    paintCorrectionPackage: quoteState.paintCorrectionPackage,
+    ceramicPackage: quoteState.ceramicPackage,
+    upkeepFrequency: quoteState.upkeepFrequency,
+
+    subtotal: info.subtotal,
+    lowBeforeCoupon: info.lowBeforeCoupon,
+    highBeforeCoupon: info.highBeforeCoupon,
+    hasStartingAt: !!info.hasStartingAt,
+    savings: info.savings || 0,
+    estimateDisplay: formatEstimateRange(info.lowBeforeCoupon, info.highBeforeCoupon, !!info.hasStartingAt)
+  };
+}
+
+function getAllVehicleQuoteItems(includeCurrent = true) {
+  const saved = Array.isArray(quoteState.vehicles) ? quoteState.vehicles.slice() : [];
+
+  if (!includeCurrent) return saved;
+
+  const current = buildCurrentVehicleQuoteItem({ transient: true });
+  if (current) saved.push(current);
+
+  return saved;
+}
+
+function getVehicleLowBeforeCoupon(item) {
+  return Number(item?.lowBeforeCoupon ?? item?.estimateLowBeforeCoupon ?? item?.estimateLow ?? 0);
+}
+
+function getVehicleHighBeforeCoupon(item) {
+  const low = getVehicleLowBeforeCoupon(item);
+  return Number(item?.highBeforeCoupon ?? item?.estimateHighBeforeCoupon ?? item?.estimateHigh ?? low);
+}
+
+function computeTotalEstimateInfo() {
+  const currentInfo = computeEstimateInfo();
+  const savedVehicles = Array.isArray(quoteState.vehicles) ? quoteState.vehicles : [];
+
+  if (!currentInfo && !savedVehicles.length) return null;
+
+  let subtotal = 0;
+  let lowBeforeCoupon = 0;
+  let highBeforeCoupon = 0;
+  let hasStartingAt = false;
+  let savings = 0;
+
+  savedVehicles.forEach(item => {
+    subtotal += Number(item?.subtotal || 0);
+    lowBeforeCoupon += getVehicleLowBeforeCoupon(item);
+    highBeforeCoupon += getVehicleHighBeforeCoupon(item);
+    hasStartingAt = hasStartingAt || !!item?.hasStartingAt;
+    savings += Number(item?.savings || 0);
+  });
+
+  if (currentInfo) {
+    subtotal += Number(currentInfo.subtotal || 0);
+    lowBeforeCoupon += Number(currentInfo.lowBeforeCoupon || 0);
+    highBeforeCoupon += Number(currentInfo.highBeforeCoupon || currentInfo.lowBeforeCoupon || 0);
+    hasStartingAt = hasStartingAt || !!currentInfo.hasStartingAt;
+    savings += Number(currentInfo.savings || 0);
+  }
+
+  const couponDiscount = Math.min(getCouponDiscount(), lowBeforeCoupon);
+  const low = clampInt(Math.max(0, lowBeforeCoupon - couponDiscount));
+  const high = clampInt(Math.max(0, highBeforeCoupon - couponDiscount));
+
+  return {
+    subtotal: clampInt(subtotal),
+    lowBeforeCoupon: clampInt(lowBeforeCoupon),
+    highBeforeCoupon: clampInt(highBeforeCoupon),
+    low,
+    high,
+    total: low,
+    hasStartingAt,
+    savings: clampInt(savings),
+    couponCode: normalizeCoupon(quoteState.couponCode),
+    couponDiscount,
+    vehicleCount: savedVehicles.length + (currentInfo ? 1 : 0),
+    currentInfo
+  };
+}
+
+function resetCurrentVehicleSelection() {
+  Object.assign(quoteState, {
+    vehicleType: "",
+    serviceCategory: "",
+    services: [],
+
+    interiorPackage: "",
+    exteriorPackage: "",
+    paintCorrectionPackage: "",
+    ceramicPackage: "",
+
+    upkeepFrequency: "",
+
+    estimateLow: "",
+    estimateHigh: "",
+    estimateIsStartingAt: false
+  });
+}
+
+function restoreVehicleQuoteItem(item) {
+  if (!item) return;
+
+  Object.assign(quoteState, {
+    vehicleType: item.vehicleType || "",
+    serviceCategory: item.serviceCategory || "",
+    services: Array.isArray(item.baseServices) ? item.baseServices.slice() : [],
+
+    interiorPackage: item.interiorPackage || "",
+    exteriorPackage: item.exteriorPackage || "",
+    paintCorrectionPackage: item.paintCorrectionPackage || "",
+    ceramicPackage: item.ceramicPackage || "",
+
+    upkeepFrequency: item.upkeepFrequency || ""
+  });
+}
+
+function getVehicleSummaryLines(items = getAllVehicleQuoteItems(true)) {
+  return items.map((item, index) => {
+    const services = Array.isArray(item.services) ? item.services.join(", ") : "";
+    const vehicle = item.vehicleType || `Vehicle ${index + 1}`;
+    return `Vehicle ${index + 1}: ${vehicle}${services ? ` — ${services}` : ""}`;
+  });
+}
+
+function renderVehicleEstimateSummary() {
+  const items = getAllVehicleQuoteItems(true);
+  if (items.length <= 1) return "";
+
+  return `
+    <div class="qVehicleSummaryBox">
+      <div class="qVehicleSummaryTitle">Vehicles in this quote</div>
+      <div class="qVehicleSummaryList">
+        ${items.map((item, index) => `
+          <div class="qVehicleSummaryItem">
+            <div class="qVehicleSummaryMain">
+              <div class="qVehicleSummaryName">Vehicle ${index + 1}: ${escapeHtml(item.vehicleType || "Vehicle")}</div>
+              <div class="qVehicleSummaryServices">${escapeHtml(Array.isArray(item.services) ? item.services.join(", ") : "")}</div>
+            </div>
+            <div class="qVehicleSummaryPrice">${escapeHtml(item.estimateDisplay || formatEstimateRange(getVehicleLowBeforeCoupon(item), getVehicleHighBeforeCoupon(item), !!item.hasStartingAt))}</div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function addAnotherVehicleToQuote() {
+  const item = buildCurrentVehicleQuoteItem();
+
+  if (!item) {
+    updateNav();
+    return;
+  }
+
+  quoteState.vehicles = [...(Array.isArray(quoteState.vehicles) ? quoteState.vehicles : []), item];
+
+  resetCurrentVehicleSelection();
+
+  quoteState.leadEmailSent = false;
+  quoteState.leadEmailSignature = "";
+  quoteState.bookingError = "";
+  quoteState.addressError = "";
+  confirmEditingField = "";
+
+  clearAppointmentSelection();
+
+  stepIndex = steps.indexOf("vehicleType");
+  render();
 }
 
 // -------------------------
@@ -3049,7 +3345,7 @@ function updateNav() {
   // Hide Continue button on auto-advance steps so users can't accidentally double-tap.
   const isAutoAdvanceStep = step === "vehicleType" || step === "serviceCategory";
 
-  quoteBackBtn.style.display = stepIndex <= 0 || step === "done" ? "none" : "inline-flex";
+  quoteBackBtn.style.display = (stepIndex <= 0 && !quoteState.vehicles.length) || step === "done" ? "none" : "inline-flex";
 
   if (isAutoAdvanceStep) {
     quoteNextBtn.style.display = "none";
@@ -3413,6 +3709,13 @@ function renderEstimateStep() {
       ` : ""}
     </div>
 
+    ${renderVehicleEstimateSummary()}
+
+    <div class="qAddVehicleWrap">
+      <button class="qAddVehicleBtn" type="button" data-action="add-another-vehicle">Add another vehicle</button>
+      <div class="qAddVehicleNote">Add a second car, truck, or SUV to this same quote before choosing an appointment time.</div>
+    </div>
+
     <div class="qCouponBox">
       <div class="qCouponHeader">
         <div class="qCouponTitle">Have a coupon code?</div>
@@ -3646,8 +3949,8 @@ function renderEditableSummaryRow(label, field, value) {
 }
 
 function renderConfirmStep() {
-  const selectedServices = getSelectedDisplayServices();
   const info = syncEstimateState();
+  const vehicleItems = getAllVehicleQuoteItems(true);
 
   const summaryRow = (label, value) => value ? `
     <div class="qSummaryRow">
@@ -3655,6 +3958,17 @@ function renderConfirmStep() {
       <div class="qSummaryValue">${escapeHtml(value)}</div>
     </div>
   ` : "";
+
+  const vehicleRows = vehicleItems.length
+    ? vehicleItems.map((item, index) => {
+        const services = Array.isArray(item.services) ? item.services.join(", ") : "";
+        const price = item.estimateDisplay || formatEstimateRange(getVehicleLowBeforeCoupon(item), getVehicleHighBeforeCoupon(item), !!item.hasStartingAt);
+        return summaryRow(`Vehicle ${index + 1}`, `${item.vehicleType || "Vehicle"}${services ? ` — ${services}` : ""} (${price})`);
+      }).join("")
+    : `
+      ${summaryRow("Vehicle", quoteState.vehicleType)}
+      ${summaryRow("Service", getSelectedDisplayServices().join(", "))}
+    `;
 
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Review your request</h3>
@@ -3676,9 +3990,11 @@ function renderConfirmStep() {
       <div class="qSummaryGroupTitle">Appointment</div>
       ${summaryRow("Preferred time", quoteState.slotLabel)}
       ${renderEditableSummaryRow("Address", "address", quoteState.address)}
-      ${summaryRow("Vehicle", quoteState.vehicleType)}
-      ${summaryRow("Service", selectedServices.join(", "))}
-      ${quoteState.upkeepFrequency ? summaryRow("Frequency", quoteState.upkeepFrequency) : ""}
+    </div>
+
+    <div class="qSummaryGroup">
+      <div class="qSummaryGroupTitle">Vehicle & service</div>
+      ${vehicleRows}
       ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", `${normalizeCoupon(quoteState.couponCode)} (−${formatMoney(quoteState.couponDiscount)})`) : ""}
       ${quoteState.notes ? summaryRow("Notes", quoteState.notes) : ""}
     </div>
@@ -3688,12 +4004,21 @@ function renderConfirmStep() {
 }
 
 function renderDoneStep() {
+  const vehicleItems = getAllVehicleQuoteItems(true);
+
   const summaryRow = (label, value) => value ? `
     <div class="qSummaryRow">
       <div class="qSummaryLabel">${escapeHtml(label)}</div>
       <div class="qSummaryValue">${escapeHtml(value)}</div>
     </div>
   ` : "";
+
+  const vehicleRows = vehicleItems.length
+    ? vehicleItems.map((item, index) => {
+        const services = Array.isArray(item.services) ? item.services.join(", ") : "";
+        return summaryRow(`Vehicle ${index + 1}`, `${item.vehicleType || "Vehicle"}${services ? ` — ${services}` : ""}`);
+      }).join("")
+    : summaryRow("Service", getSelectedDisplayServices().join(", "));
 
   quoteBody.innerHTML = `
     <div class="qDonePage">
@@ -3713,7 +4038,7 @@ function renderDoneStep() {
         ${summaryRow("Name", quoteState.name)}
         ${summaryRow("Preferred time", quoteState.slotLabel)}
         ${summaryRow("Address", quoteState.address)}
-        ${summaryRow("Service", getSelectedDisplayServices().join(", "))}
+        ${vehicleRows}
         ${summaryRow("Estimate", formatEstimateDisplay())}
         ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", normalizeCoupon(quoteState.couponCode)) : ""}
       </div>
@@ -3722,6 +4047,10 @@ function renderDoneStep() {
     </div>
   `;
 }
+
+// -------------------------
+// EVENTS
+// -------------------------
 
 // -------------------------
 // EVENTS
@@ -3902,6 +4231,11 @@ function handleStepAction(e) {
     quoteState.upkeepFrequency = value;
     clearEstimateDependentState();
     render();
+    return;
+  }
+
+  if (action === "add-another-vehicle") {
+    addAnotherVehicleToQuote();
     return;
   }
 
@@ -4130,15 +4464,22 @@ function selectSlot(slotId) {
 // -------------------------
 
 function buildLeadSignature() {
+  const vehicleSignature = getAllVehicleQuoteItems(true)
+    .map(item => [
+      item.vehicleType,
+      item.serviceCategory,
+      Array.isArray(item.services) ? item.services.join("|") : "",
+      item.upkeepFrequency,
+      item.estimateDisplay
+    ].join("~"))
+    .join("##");
+
   return [
     quoteState.name,
     quoteState.phone,
     quoteState.email,
     quoteState.city,
-    quoteState.vehicleType,
-    quoteState.serviceCategory,
-    getSelectedDisplayServices().join("|"),
-    quoteState.upkeepFrequency,
+    vehicleSignature,
     quoteState.notes,
     normalizeCoupon(quoteState.couponCode)
   ]
@@ -4148,7 +4489,24 @@ function buildLeadSignature() {
 
 function buildPayload(includeSlot = false) {
   const info = syncEstimateState();
-  const displayServices = getSelectedDisplayServices();
+  const currentDisplayServices = getSelectedDisplayServices();
+  const vehicleItems = getAllVehicleQuoteItems(true);
+  const hasMultipleVehicles = vehicleItems.length > 1;
+
+  const vehicleSummaryLines = getVehicleSummaryLines(vehicleItems);
+  const combinedVehicleType = hasMultipleVehicles
+    ? `${vehicleItems.length} vehicles: ${vehicleItems.map(item => item.vehicleType).filter(Boolean).join(", ")}`
+    : quoteState.vehicleType;
+
+  const combinedServices = hasMultipleVehicles
+    ? vehicleSummaryLines
+    : currentDisplayServices;
+
+  const combinedBaseServices = hasMultipleVehicles
+    ? vehicleItems.flatMap((item, index) =>
+        (Array.isArray(item.baseServices) ? item.baseServices : []).map(service => `Vehicle ${index + 1}: ${service}`)
+      )
+    : quoteState.services.slice();
 
   const payload = {
     leadId: quoteState.leadId || "",
@@ -4160,18 +4518,22 @@ function buildPayload(includeSlot = false) {
     routeGroup: quoteState.routeGroup,
     routeGroupLabel: quoteState.routeGroupLabel,
 
-    vehicleType: quoteState.vehicleType,
-    serviceCategory: quoteState.serviceCategory,
-    services: displayServices,
-    baseServices: quoteState.services.slice(),
+    vehicleType: combinedVehicleType,
+    serviceCategory: hasMultipleVehicles ? "Multiple vehicles" : quoteState.serviceCategory,
+    services: combinedServices,
+    baseServices: combinedBaseServices,
 
-    interiorPackage: quoteState.interiorPackage,
-    interiorCondition: quoteState.interiorPackage,
-    exteriorPackage: quoteState.exteriorPackage,
-    exteriorCondition: quoteState.exteriorPackage,
-    paintCorrectionPackage: quoteState.paintCorrectionPackage,
-    ceramicPackage: quoteState.ceramicPackage,
-    upkeepFrequency: quoteState.upkeepFrequency,
+    interiorPackage: hasMultipleVehicles ? "" : quoteState.interiorPackage,
+    interiorCondition: hasMultipleVehicles ? "" : quoteState.interiorPackage,
+    exteriorPackage: hasMultipleVehicles ? "" : quoteState.exteriorPackage,
+    exteriorCondition: hasMultipleVehicles ? "" : quoteState.exteriorPackage,
+    paintCorrectionPackage: hasMultipleVehicles ? "" : quoteState.paintCorrectionPackage,
+    ceramicPackage: hasMultipleVehicles ? "" : quoteState.ceramicPackage,
+    upkeepFrequency: hasMultipleVehicles ? "" : quoteState.upkeepFrequency,
+
+    vehicles: vehicleItems,
+    vehicleCount: vehicleItems.length,
+    vehicleSummary: vehicleSummaryLines.join("\n"),
 
     estimateLow: info?.low ?? "",
     estimateHigh: info?.high ?? "",
@@ -4355,7 +4717,18 @@ async function goNext() {
 }
 
 function goBack() {
-  if (stepIndex <= 0) return;
+  if (stepIndex <= 0) {
+    // If they tapped "Add another vehicle" by mistake, Back restores the last saved vehicle.
+    if (Array.isArray(quoteState.vehicles) && quoteState.vehicles.length) {
+      const lastVehicle = quoteState.vehicles.pop();
+      restoreVehicleQuoteItem(lastVehicle);
+      clearAppointmentSelection();
+      stepIndex = steps.indexOf("estimate");
+      render();
+    }
+    return;
+  }
+
   stepIndex = prevActiveStepIndex(stepIndex);
   render();
 }
@@ -4365,6 +4738,7 @@ function resetQuoteFlow() {
     vehicleType: "",
     serviceCategory: "",
     services: [],
+    vehicles: [],
 
     interiorPackage: "",
     exteriorPackage: "",
