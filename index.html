@@ -612,6 +612,146 @@
         }
       }
     
+
+
+      /* MOST_POPULAR_CTA_V1 */
+      .btn--quote {
+        position: relative;
+        isolation: isolate;
+      }
+
+      @keyframes quoteButtonPulse {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 0.55;
+        }
+        50% {
+          transform: scale(1.045);
+          opacity: 0.18;
+        }
+      }
+
+      @keyframes popularBubbleFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+
+      .popularQuoteBubble {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 1200;
+        width: min(280px, calc(100vw - 32px));
+        display: flex;
+        flex-direction: column;
+        gap: 0.18rem;
+        padding: 0.92rem 1rem 0.95rem;
+        border: 1px solid rgba(246, 217, 138, 0.64);
+        border-radius: 22px;
+        background:
+          radial-gradient(180px 90px at 12% 0%, rgba(246, 217, 138, 0.28), rgba(246, 217, 138, 0) 66%),
+          linear-gradient(135deg, rgba(17, 17, 17, 0.98) 0%, rgba(35, 30, 19, 0.98) 100%);
+        color: #ffffff;
+        text-decoration: none;
+        box-shadow: 0 22px 58px rgba(0, 0, 0, 0.34), 0 0 0 4px rgba(214, 167, 63, 0.08);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        animation: popularBubbleFloat 3.4s ease-in-out infinite;
+      }
+
+      .popularQuoteBubble:hover {
+        transform: translateY(-2px);
+        border-color: rgba(246, 217, 138, 0.92);
+        box-shadow: 0 26px 66px rgba(0, 0, 0, 0.42), 0 0 0 5px rgba(214, 167, 63, 0.13);
+      }
+
+      .popularQuoteBubble:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(246, 217, 138, 0.34), 0 22px 58px rgba(0, 0, 0, 0.34);
+      }
+
+      .popularQuoteBubble__badge {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        padding: 0.28rem 0.52rem;
+        border-radius: 999px;
+        background: rgba(246, 217, 138, 0.16);
+        color: #f6d98a;
+        font-size: 0.68rem;
+        font-weight: 1000;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .popularQuoteBubble__title {
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 1.12rem;
+        font-weight: 800;
+        letter-spacing: 0.035em;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      .popularQuoteBubble__sub {
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.84rem;
+        font-weight: 700;
+        line-height: 1.25;
+      }
+
+      @media (max-width: 640px) {
+        .hero__actions .btn--quote {
+          min-height: 64px;
+          border-radius: 18px;
+          border: 1px solid rgba(246, 217, 138, 0.74);
+          background:
+            radial-gradient(240px 90px at 18% 0%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 68%),
+            linear-gradient(135deg, #f6d98a 0%, #d6a73f 100%);
+          color: #111111;
+          font-size: 1.08rem;
+          font-weight: 1000;
+          letter-spacing: 0.055em;
+          box-shadow: 0 18px 44px rgba(214, 167, 63, 0.34), 0 0 0 5px rgba(214, 167, 63, 0.12);
+        }
+
+        .hero__actions .btn--quote::after {
+          content: "";
+          position: absolute;
+          inset: -7px;
+          z-index: -1;
+          border-radius: 24px;
+          background: rgba(246, 217, 138, 0.36);
+          animation: quoteButtonPulse 1.9s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        .nav__cta.btn--quote {
+          border-color: rgba(246, 217, 138, 0.66);
+          box-shadow: 0 12px 28px rgba(214, 167, 63, 0.24);
+        }
+
+        .popularQuoteBubble {
+          left: 12px;
+          right: 12px;
+          bottom: 12px;
+          width: auto;
+          min-height: 74px;
+          padding: 0.82rem 0.95rem;
+          border-radius: 20px;
+          animation: none;
+        }
+
+        .popularQuoteBubble__title {
+          font-size: 1rem;
+        }
+
+        .popularQuoteBubble__sub {
+          font-size: 0.8rem;
+        }
+      }
+
 /* Keep all quote buttons using the original site button font */
 .btn,
 .btn--quote,
@@ -1195,6 +1335,19 @@
       </div>
     </footer>
 
+    <a
+      class="popularQuoteBubble"
+      href="./quote.html?preset=most-popular"
+      data-quote-link
+      data-popular-quote-bubble
+      aria-label="Get the most popular standard inside and outside detail quote"
+    >
+      <span class="popularQuoteBubble__badge">Most Popular</span>
+      <span class="popularQuoteBubble__title">Standard Inside + Outside</span>
+      <span class="popularQuoteBubble__sub">Tap for the fastest full detail quote</span>
+    </a>
+
+
     <div class="reviewImageModal" hidden data-review-image-modal aria-hidden="true">
       <div class="reviewImageModal__overlay" data-review-image-close></div>
       <div class="reviewImageModal__panel" role="dialog" aria-modal="true" aria-label="Expanded customer review image">
@@ -1347,7 +1500,7 @@
             if (typeof gtag === "function") {
               gtag("event", "generate_lead", {
                 event_category: "engagement",
-                event_label: "quote_button_click"
+                event_label: button.matches("[data-popular-quote-bubble]") ? "most_popular_bubble_click" : "quote_button_click"
               });
             }
           });
