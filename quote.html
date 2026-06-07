@@ -3370,6 +3370,8 @@ function getRequestedQuotePreset() {
   const fromUrl = {
     preset: params.get("preset") || "",
     quick: params.get("quick") || "",
+    autoPreset: params.get("autoPreset") || "",
+    forcePreset: params.get("forcePreset") || "",
     service: params.get("service") || "",
     category: params.get("category") || "",
     interiorPackage: params.get("interiorPackage") || "",
@@ -3377,7 +3379,7 @@ function getRequestedQuotePreset() {
     start: params.get("start") || ""
   };
 
-  // URL values win, but stored values are kept as a backup.
+  // URL values win, but storage stays as a backup.
   // This makes the bubble work even if a browser/cache strips part of the query string.
   return {
     ...storedPreset,
@@ -3386,18 +3388,22 @@ function getRequestedQuotePreset() {
     )
   };
 }
+
 function isStandardInsideOutsidePresetRequest(request) {
   if (!request || typeof request !== "object") return false;
 
   const tokens = [
     request.preset,
     request.quick,
+    request.autoPreset,
+    request.forcePreset,
     request.service,
     request.category
   ].map(normalizePresetToken);
 
   return (
     tokens.includes("most-popular") ||
+    tokens.includes("standard-in-out") ||
     tokens.includes("standard-inside-outside") ||
     tokens.includes("inside-outside") ||
     tokens.includes("interior-exterior") ||
@@ -3456,6 +3462,36 @@ function applyQuotePresetFromRequest() {
   }
 
   return false;
+}
+
+function jumpStandardInsideOutsidePresetToContact() {
+  // This is the important part for the yellow bubble flow.
+  // Once the customer picks a vehicle, do not let the wizard continue through normal package steps.
+  quoteState.presetMode = QUICK_PRESET_STANDARD_INSIDE_OUTSIDE;
+  quoteState.presetLabel = "Standard Inside + Outside";
+  quoteState.serviceCategory = "Interior + Exterior";
+  quoteState.services = ["Interior Detail", "Exterior Wash"];
+  quoteState.interiorPackage = "Standard Interior Detail";
+  quoteState.exteriorPackage = "Standard Exterior Detail";
+  quoteState.paintCorrectionPackage = "";
+  quoteState.ceramicPackage = "";
+  quoteState.upkeepFrequency = "";
+  quoteState.showContactErrors = false;
+  quoteState.contactErrors = {};
+  stepIndex = steps.indexOf("contact");
+}
+
+function enforcePresetStepBeforeRender() {
+  if (!isStandardInsideOutsidePresetActive() || !quoteState.vehicleType) return;
+
+  const contactIndex = steps.indexOf("contact");
+  if (contactIndex < 0) return;
+
+  // Safety net: if anything tries to send the preset flow through category/service/package steps,
+  // force it back to contact before the customer sees the wrong screen.
+  if (stepIndex > steps.indexOf("vehicleType") && stepIndex < contactIndex) {
+    jumpStandardInsideOutsidePresetToContact();
+  }
 }
 
 function stepIsActive(stepName) {
@@ -4162,6 +4198,7 @@ function selectedSummaryPillsHtml(info = computeEstimateInfo()) {
 function render() {
   if (!quoteBody) return;
 
+  enforcePresetStepBeforeRender();
   syncEstimateState();
   setProgress();
 
@@ -4846,16 +4883,8 @@ function handleStepAction(e) {
     quoteState.vehicleType = value;
 
     if (isStandardInsideOutsidePresetActive()) {
-      // Bubble flow: vehicle is the only manual choice.
-      // Keep Standard Interior + Standard Exterior selected, then jump straight to contact info.
-      applyStandardInsideOutsidePreset({}, { startAtVehicle: false });
       clearEstimateDependentState();
-      quoteState.showContactErrors = false;
-      quoteState.contactErrors = {};
-      stepIndex = steps.indexOf("contact");
-      if (stepIndex < 0 || !stepIsActive("contact")) {
-        stepIndex = nextActiveStepIndex(steps.indexOf("vehicleType"));
-      }
+      jumpStandardInsideOutsidePresetToContact();
       render();
       return;
     }
@@ -5898,6 +5927,7 @@ initQuoteWizard();
     addFinalQuotePageOverrides();
 
     if (typeof resetQuoteFlow === "function") resetQuoteFlow();
+    if (typeof applyQuotePresetFromRequest === "function") applyQuotePresetFromRequest();
     if (typeof render === "function") render();
 
     const shell = document.querySelector("[data-quote-modal]");
