@@ -3365,6 +3365,7 @@ function consumeStoredQuotePreset() {
 
 function getRequestedQuotePreset() {
   const params = new URLSearchParams(window.location.search || "");
+  const storedPreset = consumeStoredQuotePreset() || {};
 
   const fromUrl = {
     preset: params.get("preset") || "",
@@ -3376,12 +3377,15 @@ function getRequestedQuotePreset() {
     start: params.get("start") || ""
   };
 
-  const hasUrlPreset = Object.values(fromUrl).some(Boolean);
-  if (hasUrlPreset) return fromUrl;
-
-  return consumeStoredQuotePreset() || {};
+  // URL values win, but stored values are kept as a backup.
+  // This makes the bubble work even if a browser/cache strips part of the query string.
+  return {
+    ...storedPreset,
+    ...Object.fromEntries(
+      Object.entries(fromUrl).filter(([, value]) => Boolean(value))
+    )
+  };
 }
-
 function isStandardInsideOutsidePresetRequest(request) {
   if (!request || typeof request !== "object") return false;
 
@@ -4842,7 +4846,18 @@ function handleStepAction(e) {
     quoteState.vehicleType = value;
 
     if (isStandardInsideOutsidePresetActive()) {
+      // Bubble flow: vehicle is the only manual choice.
+      // Keep Standard Interior + Standard Exterior selected, then jump straight to contact info.
       applyStandardInsideOutsidePreset({}, { startAtVehicle: false });
+      clearEstimateDependentState();
+      quoteState.showContactErrors = false;
+      quoteState.contactErrors = {};
+      stepIndex = steps.indexOf("contact");
+      if (stepIndex < 0 || !stepIsActive("contact")) {
+        stepIndex = nextActiveStepIndex(steps.indexOf("vehicleType"));
+      }
+      render();
+      return;
     }
 
     clearEstimateDependentState();
