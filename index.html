@@ -757,20 +757,20 @@
           left: auto;
           right: 12px;
           bottom: 12px;
-          width: 104px;
-          height: 104px;
+          width: 118px;
+          height: 118px;
           min-height: 0;
-          padding: 0.62rem;
+          padding: 0.72rem;
           border-radius: 999px;
         }
 
         .popularQuoteBubble__badge {
-          font-size: 0.5rem;
-          padding: 0.18rem 0.34rem;
+          font-size: 0.54rem;
+          padding: 0.2rem 0.38rem;
         }
 
         .popularQuoteBubble__title {
-          font-size: 0.78rem;
+          font-size: 0.88rem;
         }
 
         .popularQuoteBubble__sub {
@@ -1363,7 +1363,7 @@
 
     <a
       class="popularQuoteBubble"
-      href="./quote.html?preset=most-popular&quick=standard-inside-outside&category=both&service=inside-outside&interiorPackage=standard&exteriorPackage=standard&start=vehicle"
+      href="./quote.html?preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=standard&exteriorPackage=standard&start=vehicle"
       data-quote-link
       data-popular-quote-bubble
       aria-label="Get the most popular standard inside and outside detail quote"
@@ -1524,14 +1524,16 @@
           button.addEventListener("click", function () {
             if (button.matches("[data-popular-quote-bubble]")) {
               const popularPreset = {
-                preset: "most-popular",
+                preset: "standard-in-out",
                 quick: "standard-inside-outside",
+                autoPreset: "standard-in-out",
                 category: "both",
                 service: "inside-outside",
                 interiorPackage: "standard",
                 exteriorPackage: "standard",
                 start: "vehicle",
-                skipServiceSelection: true
+                skipServiceSelection: true,
+                forceContactAfterVehicle: true
               };
 
               try {
