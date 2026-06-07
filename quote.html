@@ -2729,6 +2729,8 @@ let selectedCalendarDate = "";
 let calendarMonthDate = null;
 let confirmEditingField = "";
 
+const QUICK_PRESET_STANDARD_INSIDE_OUTSIDE = "standard-inside-outside";
+
 const quoteState = {
   vehicleType: "",
   serviceCategory: "",
@@ -2784,6 +2786,9 @@ const quoteState = {
   paymentStatus: "appointment_requested",
   paymentAmountCharged: 0,
   squarePaymentId: "",
+
+  presetMode: "",
+  presetLabel: "",
 
   honeypot: ""
 };
@@ -3329,7 +3334,141 @@ function anyServiceRequiresCeramicPackage() {
   return quoteState.services.includes("Ceramic Coating");
 }
 
+// -------------------------
+// QUICK PRESET SUPPORT
+// -------------------------
+
+function normalizePresetToken(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function consumeStoredQuotePreset() {
+  try {
+    const raw =
+      sessionStorage.getItem("kmdQuotePreset") ||
+      localStorage.getItem("kmdQuotePreset");
+
+    sessionStorage.removeItem("kmdQuotePreset");
+    localStorage.removeItem("kmdQuotePreset");
+
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function getRequestedQuotePreset() {
+  const params = new URLSearchParams(window.location.search || "");
+
+  const fromUrl = {
+    preset: params.get("preset") || "",
+    quick: params.get("quick") || "",
+    service: params.get("service") || "",
+    category: params.get("category") || "",
+    interiorPackage: params.get("interiorPackage") || "",
+    exteriorPackage: params.get("exteriorPackage") || "",
+    start: params.get("start") || ""
+  };
+
+  const hasUrlPreset = Object.values(fromUrl).some(Boolean);
+  if (hasUrlPreset) return fromUrl;
+
+  return consumeStoredQuotePreset() || {};
+}
+
+function isStandardInsideOutsidePresetRequest(request) {
+  if (!request || typeof request !== "object") return false;
+
+  const tokens = [
+    request.preset,
+    request.quick,
+    request.service,
+    request.category
+  ].map(normalizePresetToken);
+
+  return (
+    tokens.includes("most-popular") ||
+    tokens.includes("standard-inside-outside") ||
+    tokens.includes("inside-outside") ||
+    tokens.includes("interior-exterior") ||
+    tokens.includes("both")
+  );
+}
+
+function resolveInteriorPackagePreset(value) {
+  const token = normalizePresetToken(value);
+
+  if (!token || token.includes("standard")) return "Standard Interior Detail";
+  if (token.includes("premium")) return "Premium Deep Clean Interior Detail";
+  if (token.includes("deep")) return "Deep Clean Interior Detail";
+
+  return "Standard Interior Detail";
+}
+
+function resolveExteriorPackagePreset(value) {
+  const token = normalizePresetToken(value);
+
+  if (!token || token.includes("standard")) return "Standard Exterior Detail";
+  if (token.includes("clay")) return "Clay Decontamination Exterior Detail";
+  if (token.includes("premium")) return "Premium Exterior Detail";
+
+  return "Standard Exterior Detail";
+}
+
+function isStandardInsideOutsidePresetActive() {
+  return quoteState.presetMode === QUICK_PRESET_STANDARD_INSIDE_OUTSIDE;
+}
+
+function applyStandardInsideOutsidePreset(request = {}, options = {}) {
+  const startAtVehicle = options.startAtVehicle !== false;
+
+  quoteState.presetMode = QUICK_PRESET_STANDARD_INSIDE_OUTSIDE;
+  quoteState.presetLabel = "Standard Inside + Outside";
+  quoteState.serviceCategory = "Interior + Exterior";
+  quoteState.services = ["Interior Detail", "Exterior Wash"];
+  quoteState.interiorPackage = resolveInteriorPackagePreset(request.interiorPackage);
+  quoteState.exteriorPackage = resolveExteriorPackagePreset(request.exteriorPackage);
+  quoteState.paintCorrectionPackage = "";
+  quoteState.ceramicPackage = "";
+  quoteState.upkeepFrequency = "";
+
+  if (startAtVehicle) {
+    stepIndex = steps.indexOf("vehicleType");
+  }
+}
+
+function applyQuotePresetFromRequest() {
+  const request = getRequestedQuotePreset();
+
+  if (isStandardInsideOutsidePresetRequest(request)) {
+    applyStandardInsideOutsidePreset(request, { startAtVehicle: true });
+    return true;
+  }
+
+  return false;
+}
+
 function stepIsActive(stepName) {
+  if (isStandardInsideOutsidePresetActive()) {
+    if (
+      stepName === "serviceCategory" ||
+      stepName === "service" ||
+      stepName === "interiorPackage" ||
+      stepName === "exteriorPackage" ||
+      stepName === "paintCorrectionPackage" ||
+      stepName === "ceramicPackage" ||
+      stepName === "upkeepFrequency"
+    ) {
+      return false;
+    }
+  }
+
   if (stepName === "interiorPackage") return anyServiceRequiresInteriorPackage();
   if (stepName === "exteriorPackage") return anyServiceRequiresExteriorPackage();
   if (stepName === "paintCorrectionPackage") return anyServiceRequiresPaintCorrectionPackage();
@@ -3673,6 +3812,10 @@ function resetCurrentVehicleSelection() {
     estimateHigh: "",
     estimateIsStartingAt: false
   });
+
+  if (isStandardInsideOutsidePresetActive()) {
+    applyStandardInsideOutsidePreset({}, { startAtVehicle: false });
+  }
 }
 
 function restoreVehicleQuoteItem(item) {
@@ -4697,6 +4840,11 @@ function handleStepAction(e) {
   // ✅ AUTO-ADVANCE on vehicle pick
   if (action === "select-vehicle") {
     quoteState.vehicleType = value;
+
+    if (isStandardInsideOutsidePresetActive()) {
+      applyStandardInsideOutsidePreset({}, { startAtVehicle: false });
+    }
+
     clearEstimateDependentState();
     stepIndex = nextActiveStepIndex(stepIndex);
     render();
@@ -5331,6 +5479,9 @@ function resetQuoteFlow() {
     paymentAmountCharged: 0,
     squarePaymentId: "",
 
+    presetMode: "",
+    presetLabel: "",
+
     honeypot: ""
   });
 
@@ -5371,6 +5522,7 @@ function openQuote() {
   styleQuoteCloseButtons();
 
   try {
+    applyQuotePresetFromRequest();
     render();
 
     setTimeout(() => {
@@ -5585,6 +5737,7 @@ function initQuoteWizard() {
     }
 
     resetQuoteFlow();
+    applyQuotePresetFromRequest();
 
     try {
       render();
