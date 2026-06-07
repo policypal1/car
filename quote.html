@@ -3170,7 +3170,6 @@ function validateContactStep() {
   const errors = {};
   const name = String(quoteState.name || "").trim();
   const phone = String(quoteState.phone || "").trim();
-  const email = String(quoteState.email || "").trim();
   const city = String(quoteState.city || "").trim();
 
   if (!name) errors.name = "Please enter your name";
@@ -3180,12 +3179,6 @@ function validateContactStep() {
   } else {
     const digits = phone.replace(/\D/g, "");
     if (digits.length < 10) errors.phone = "Please enter a valid phone number";
-  }
-
-  if (!email) {
-    errors.email = "Please enter your email";
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    errors.email = "Please enter a valid email";
   }
 
   if (!city) errors.city = "Please choose your closest city";
@@ -4188,15 +4181,6 @@ function renderContactStep() {
         ${errors.phone ? `<div class="qFieldError">${escapeHtml(errors.phone)}</div>` : ""}
       </div>
 
-      <div class="${fieldClass("email")}">
-        <span class="qInputIcon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        </span>
-        <input id="qEmail" type="email" autocomplete="email" inputmode="email" value="${escapeHtml(quoteState.email)}" placeholder=" " required>
-        <label for="qEmail">Email address <span class="qReq">*</span></label>
-        ${errors.email ? `<div class="qFieldError">${escapeHtml(errors.email)}</div>` : ""}
-      </div>
-
       <div class="${fieldClass("city")} qInputField--select">
         <span class="qInputIcon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -4587,7 +4571,7 @@ function renderDoneStep() {
 
       <div class="qDoneBadge">Request received</div>
       <h3 class="qDoneTitle">You're all set</h3>
-      <p class="qDoneText">Your appointment request was sent. We'll confirm shortly by text or email.</p>
+      <p class="qDoneText">Your appointment request was sent. We'll confirm shortly by text.</p>
 
       <div class="qSummaryGroup qSummaryGroup--done">
         <div class="qSummaryGroupTitle">Your request</div>
@@ -4621,7 +4605,6 @@ function bindStepEvents() {
 
   const qName = quoteBody.querySelector("#qName");
   const qPhone = quoteBody.querySelector("#qPhone");
-  const qEmail = quoteBody.querySelector("#qEmail");
   const qCity = quoteBody.querySelector("#qCity");
   const qNotes = quoteBody.querySelector("#qNotes");
   const qCompany = quoteBody.querySelector("#qCompany");
@@ -4646,16 +4629,6 @@ function bindStepEvents() {
     }
     updateNav();
   });
-  if (qEmail) qEmail.addEventListener("input", e => {
-    quoteState.email = e.target.value;
-    if (quoteState.contactErrors?.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value.trim())) {
-      delete quoteState.contactErrors.email;
-      e.target.closest(".qInputField")?.classList.remove("hasError");
-      e.target.parentElement?.querySelector(".qFieldError")?.remove();
-    }
-    updateNav();
-  });
-
   if (qCity) qCity.addEventListener("change", e => {
     quoteState.city = e.target.value;
     syncRouteGroupFromCity();
@@ -5038,7 +5011,6 @@ function buildLeadSignature() {
   return [
     quoteState.name,
     quoteState.phone,
-    quoteState.email,
     quoteState.city,
     vehicleSignature,
     quoteState.notes,
@@ -5177,6 +5149,14 @@ async function sendLeadNotificationIfNeeded({ silent = false } = {}) {
   }
 }
 
+function maybeSendUpdatedLeadFromEstimateStep() {
+  if (steps[stepIndex] !== "estimate") return;
+  if (!isContactInfoComplete()) return;
+  if (!computeEstimateInfo()) return;
+
+  sendLeadNotificationIfNeeded({ silent: true });
+}
+
 async function submitAppointmentRequest() {
   if (!canContinue()) return;
 
@@ -5275,6 +5255,7 @@ async function goNext() {
 
   stepIndex = nextActiveStepIndex(stepIndex);
   render();
+  maybeSendUpdatedLeadFromEstimateStep();
 }
 
 function goBack() {
