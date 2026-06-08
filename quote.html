@@ -2811,6 +2811,151 @@ const steps = [
 ];
 
 // -------------------------
+// QUOTE FORM TRACKING - GA4
+// Tracks how far people get through the quote form.
+// Does not send name, phone, email, notes, or address to Google Analytics.
+// -------------------------
+
+const quoteStepTrackingMap = {
+  vehicleType: {
+    label: "Vehicle Type",
+    reachedEvent: "quote_reached_01_vehicle"
+  },
+  serviceCategory: {
+    label: "Service Category",
+    reachedEvent: "quote_reached_02_category"
+  },
+  service: {
+    label: "Service Selection",
+    reachedEvent: "quote_reached_03_service"
+  },
+  interiorPackage: {
+    label: "Interior Package",
+    reachedEvent: "quote_reached_04_interior"
+  },
+  exteriorPackage: {
+    label: "Exterior Package",
+    reachedEvent: "quote_reached_05_exterior"
+  },
+  paintCorrectionPackage: {
+    label: "Paint Correction Package",
+    reachedEvent: "quote_reached_06_paint"
+  },
+  ceramicPackage: {
+    label: "Ceramic Package",
+    reachedEvent: "quote_reached_07_ceramic"
+  },
+  upkeepFrequency: {
+    label: "Upkeep Frequency",
+    reachedEvent: "quote_reached_08_upkeep"
+  },
+  contact: {
+    label: "Contact Info",
+    reachedEvent: "quote_reached_09_contact"
+  },
+  estimate: {
+    label: "Estimate",
+    reachedEvent: "quote_reached_10_estimate"
+  },
+  appointment: {
+    label: "Appointment",
+    reachedEvent: "quote_reached_11_appointment"
+  },
+  address: {
+    label: "Address",
+    reachedEvent: "quote_reached_12_address"
+  },
+  confirm: {
+    label: "Confirm",
+    reachedEvent: "quote_reached_13_confirm"
+  },
+  done: {
+    label: "Done",
+    reachedEvent: "quote_reached_14_done"
+  }
+};
+
+const trackedQuoteStepViews = new Set();
+const trackedQuoteReachedEvents = new Set();
+
+function quoteTrackingValue(value, fallback = "not_selected") {
+  const clean = String(value || "").trim();
+  return clean ? clean.slice(0, 100) : fallback;
+}
+
+function quoteTrackingList(values, fallback = "none") {
+  if (!Array.isArray(values) || !values.length) return fallback;
+
+  const clean = values
+    .map((value) => String(value || "").trim())
+    .filter(Boolean)
+    .slice(0, 10)
+    .join(", ");
+
+  return clean ? clean.slice(0, 250) : fallback;
+}
+
+function sendQuoteTrackingEvent(eventName, params = {}) {
+  if (typeof gtag !== "function") return;
+
+  gtag("event", eventName, {
+    event_category: "quote_form",
+    ...params
+  });
+}
+
+function trackQuoteStepView(stepName) {
+  if (!stepName) return;
+
+  const stepMeta = quoteStepTrackingMap[stepName] || {
+    label: stepName,
+    reachedEvent: `quote_reached_${stepName}`
+  };
+
+  const visibleSteps = getVisibleSteps();
+  const visibleStepIndex = Math.max(0, visibleSteps.indexOf(stepName));
+  const visibleStepNumber = visibleStepIndex + 1;
+  const visibleStepTotal = Math.max(visibleSteps.length, 1);
+  const progressPercent = Math.round((visibleStepNumber / visibleStepTotal) * 100);
+
+  const trackingPayload = {
+    quote_step: stepName,
+    quote_step_label: stepMeta.label,
+    quote_step_number: visibleStepNumber,
+    quote_step_total: visibleStepTotal,
+    quote_progress_percent: progressPercent,
+    quote_vehicle_type: quoteTrackingValue(quoteState.vehicleType),
+    quote_service_category: quoteTrackingValue(quoteState.serviceCategory),
+    quote_services: quoteTrackingList(quoteState.services),
+    quote_preset_mode: quoteTrackingValue(quoteState.presetMode, "none"),
+    quote_vehicle_count: getAllVehicleQuoteItems(true).length || 1,
+    quote_route_group: quoteTrackingValue(quoteState.routeGroup, "not_selected")
+  };
+
+  // Fires once per step view per page load.
+  if (!trackedQuoteStepViews.has(stepName)) {
+    trackedQuoteStepViews.add(stepName);
+    sendQuoteTrackingEvent("quote_step_view", trackingPayload);
+  }
+
+  // Fires once per reached step with a unique event name.
+  // This makes GA4's Events report easy to read without needing custom setup first.
+  if (stepMeta.reachedEvent && !trackedQuoteReachedEvents.has(stepMeta.reachedEvent)) {
+    trackedQuoteReachedEvents.add(stepMeta.reachedEvent);
+    sendQuoteTrackingEvent(stepMeta.reachedEvent, trackingPayload);
+  }
+
+  if (stepName === "done" && !trackedQuoteReachedEvents.has("quote_form_completed")) {
+    trackedQuoteReachedEvents.add("quote_form_completed");
+    sendQuoteTrackingEvent("quote_form_completed", {
+      ...trackingPayload,
+      value: Number(quoteState.estimateLow || quoteState.estimateHigh || 0) || undefined,
+      currency: "USD"
+    });
+  }
+}
+
+// -------------------------
 // OPTIONS / IMAGES
 // -------------------------
 
@@ -4224,6 +4369,7 @@ function render() {
   bindStepEvents();
   updateNav();
   renderNavPrice();
+  trackQuoteStepView(step);
 }
 
 function renderVehicleTypeStep() {
