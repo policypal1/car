@@ -3377,6 +3377,20 @@ function normalizeDateValue(raw) {
   return isoDate(parsed);
 }
 
+function formatNormalizedTimeLabel(normalized) {
+  const match = String(normalized || "").match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
+  if (!match) return "";
+
+  let hour = Number(match[1]);
+  const minute = String(match[2]).padStart(2, "0");
+
+  const meridiem = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+
+  return `${hour}:${minute} ${meridiem}`;
+}
+
 function extractTimeInfo(raw) {
   const value = String(raw || "").trim();
   if (!value) return null;
@@ -3393,20 +3407,21 @@ function extractTimeInfo(raw) {
     let hour24 = rawHour % 12;
     if (meridiem === "PM") hour24 += 12;
 
+    const normalized = `${String(hour24).padStart(2, "0")}:${minute}`;
+
     return {
-      normalized: `${String(hour24).padStart(2, "0")}:${minute}`,
-      label: `${rawHour}:${minute} ${meridiem}`
+      normalized,
+      label: formatNormalizedTimeLabel(normalized)
     };
   }
 
   const match24 = value.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
   if (match24) {
-    const hour = String(match24[1]).padStart(2, "0");
-    const minute = String(match24[2]).padStart(2, "0");
+    const normalized = `${String(match24[1]).padStart(2, "0")}:${String(match24[2]).padStart(2, "0")}`;
 
     return {
-      normalized: `${hour}:${minute}`,
-      label: `${hour}:${minute}`
+      normalized,
+      label: formatNormalizedTimeLabel(normalized)
     };
   }
 
@@ -3418,18 +3433,7 @@ function normalizeTimeValue(raw) {
 }
 
 function formatTimeLabel(raw, normalized = normalizeTimeValue(raw)) {
-  const found = extractTimeInfo(raw);
-  if (found?.label) return found.label;
-  if (!normalized) return "";
-
-  const [h, m] = normalized.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h, m, 0, 0);
-
-  return d.toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit"
-  });
+  return formatNormalizedTimeLabel(normalized);
 }
 
 function formatDateNice(ymd) {
@@ -5326,7 +5330,7 @@ function selectSlot(slotId) {
 
   quoteState.slotId = slot.id;
   quoteState.slotSourceId = slot.sourceId || slot.id;
-  quoteState.slotLabel = slot.label || `${formatDateNice(slot.date)} at ${slot.timeLabel}`;
+  quoteState.slotLabel = `${formatDateNice(slot.date)} at ${slot.timeLabel || formatTimeLabel(slot.time)} Pacific Time`;
   quoteState.slotDate = slot.date;
   quoteState.slotTime = slot.time;
 }
