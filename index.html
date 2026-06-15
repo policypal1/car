@@ -1433,11 +1433,12 @@
       overflow:hidden;
       width:min(460px,100%);
       border-radius:28px;
-      padding:1.35rem;
+      padding:1.45rem;
       color:#ffffff;
       border:1px solid rgba(255,255,255,.34);
       box-shadow:0 30px 90px rgba(0,0,0,.46);
       animation:julyPopupIn .2s ease both;
+      text-align:center;
     }
     .julySalePopup__panel::before{
       content:"";
@@ -1475,39 +1476,44 @@
       cursor:pointer;
     }
     .julySalePopup__kicker{
-      margin:0 0 .55rem;
+      margin:0 0 .65rem;
       color:#f6d98a;
       font-size:.78rem;
       font-weight:950;
       letter-spacing:.13em;
       text-transform:uppercase;
       text-shadow:0 4px 14px rgba(0,0,0,.75);
+      padding-right:2.4rem;
+      padding-left:2.4rem;
     }
     .julySalePopup__title{
-      margin:0;
-      max-width:9.5ch;
+      margin:0 auto;
+      width:100%;
+      max-width:100%;
       font-family:Oswald,Inter,sans-serif;
-      font-size:clamp(2.25rem,9vw,3.5rem);
-      line-height:.92;
+      font-size:clamp(2.2rem,8vw,3.35rem);
+      line-height:.95;
       letter-spacing:.025em;
       text-transform:uppercase;
+      text-wrap:balance;
       text-shadow:0 7px 22px rgba(0,0,0,.78);
     }
     .julySalePopup__text{
-      margin:.8rem 0 1rem;
+      margin:.95rem auto 1.15rem;
+      max-width:34ch;
       color:rgba(255,255,255,.94);
       font-weight:750;
       line-height:1.58;
       text-shadow:0 4px 14px rgba(0,0,0,.7);
     }
-    .julySalePopup__actions{display:flex;gap:.7rem;flex-wrap:wrap;}
-    .julySalePopup__actions .btn{flex:1 1 150px;border-radius:16px;min-height:54px;}
-    .julySalePopup__note{
-      margin:.8rem 0 0;
-      color:rgba(255,255,255,.72);
-      font-size:.86rem;
-      font-weight:750;
-      line-height:1.45;
+    .julySalePopup__actions{
+      display:block;
+      width:100%;
+    }
+    .julySalePopup__actions .btn{
+      width:100%;
+      min-height:56px;
+      border-radius:16px;
     }
 
 </style>
@@ -1981,12 +1987,10 @@
       <button class="julySalePopup__close" type="button" data-july-popup-close aria-label="Close 4th of July sale popup">×</button>
       <p class="julySalePopup__kicker">4th of July sale</p>
       <h2 class="julySalePopup__title" id="julySalePopupTitle">30% off your second car.</h2>
-      <p class="julySalePopup__text">Hey, come get the 4th of July sale. Book one car at full price and get the next car 30% off when both are quoted together.</p>
+      <p class="julySalePopup__text">Book one car at full price and get the next car 30% off when both are quoted together.</p>
       <div class="julySalePopup__actions">
         <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
-        <button class="btn btn--dark" type="button" data-july-popup-close>NOT NOW</button>
       </div>
-      <p class="julySalePopup__note">Limited holiday offer for multi-car details.</p>
     </div>
   </div>
 
