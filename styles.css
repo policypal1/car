@@ -1,3 +1,11 @@
+/*
+  Keizer Mobile Detailing
+  styles.css
+
+  Base website styling + premium Fourth of July campaign layer.
+  Keep this file next to index.html and script.js.
+*/
+
 :root{
   --gold:#d6b25e;
   --black:#0b0b0c;
@@ -1047,4 +1055,1374 @@ body{
   font-weight:900;
   text-decoration:underline;
   text-underline-offset:3px;
+}
+
+
+/* =========================================================
+   Premium Fourth of July campaign layer
+   ========================================================= */
+
+.hero {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(4, 7, 14, 0.72) 0%, rgba(4, 7, 14, 0.54) 44%, rgba(4, 7, 14, 0.38) 100%), linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.38) 100%);
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .hero__inner {
+        position: relative;
+        z-index: 2;
+        padding-top: clamp(4.5rem, 7vw, 7rem);
+        padding-bottom: clamp(4.5rem, 7vw, 7rem);
+      }
+
+      .hero__layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 420px);
+        gap: clamp(1.5rem, 3vw, 3rem);
+        align-items: center;
+      }
+
+      .hero__content {
+        max-width: 700px;
+      }
+
+      .hero__content > * {
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        background: rgba(12, 12, 12, 0.45);
+        color: #f6e7bb;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+      }
+
+      .hero__eyebrowDot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6d98a 0%, #d6a73f 100%);
+        box-shadow: 0 0 14px rgba(214, 167, 63, 0.55);
+      }
+
+      .hero__headline {
+        max-width: 10.8ch;
+        margin: 0 0 1rem;
+        color: #ffffff;
+        font-size: clamp(3.4rem, 7vw, 6rem);
+        font-weight: 700;
+        line-height: 0.94;
+        letter-spacing: 0.02em;
+        text-wrap: balance;
+        text-shadow: 0 10px 35px rgba(0, 0, 0, 0.48);
+      }
+
+      .hero__headlineAccent {
+        color: #f6d98a;
+      }
+
+      .hero__sub {
+        max-width: 34rem;
+        margin: 0 0 1.5rem;
+        color: rgba(255, 255, 255, 0.94);
+        font-size: clamp(1rem, 1.8vw, 1.16rem);
+        line-height: 1.7;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      }
+
+      .hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.85rem;
+        margin-top: 1.7rem;
+      }
+
+      .btn--heroSecondary {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(17, 17, 17, 0.32);
+        color: #ffffff;
+        backdrop-filter: blur(10px);
+      }
+
+      .btn--heroSecondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .hero__micro {
+        margin-top: 1rem;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.93rem;
+        line-height: 1.6;
+      }
+
+      .heroReview {
+        position: relative;
+        align-self: center;
+        padding: 1.55rem;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(28, 29, 33, 0.94) 0%, rgba(17, 18, 22, 0.9) 100%);
+        color: #ffffff;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(18px);
+        overflow: hidden;
+      }
+
+      .heroReview::before {
+        content: "";
+        position: absolute;
+        inset: -35% auto auto 55%;
+        width: 220px;
+        height: 220px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(214, 167, 63, 0.28) 0%, rgba(214, 167, 63, 0) 72%);
+        pointer-events: none;
+      }
+
+      .heroReview__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.15rem;
+      }
+
+      .heroReview__pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f6e7bb;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .heroReview__stars {
+        color: #f6d98a;
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+      }
+
+      .heroReview__media {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .heroReview__media img {
+        display: block;
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+      }
+
+      .heroReview__quote {
+        margin: 0 0 1.15rem;
+        color: rgba(255, 255, 255, 0.98);
+        font-size: 1.08rem;
+        font-weight: 500;
+        line-height: 1.82;
+      }
+
+      .heroReview__footer {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+      }
+
+      .heroReview__avatar {
+        display: grid;
+        place-items: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6e7bb 0%, #d6a73f 100%);
+        color: #111111;
+        font-weight: 800;
+      }
+
+      .heroReview__name {
+        font-weight: 700;
+      }
+
+      .heroReview__meta {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.92rem;
+      }
+
+      .quoteBody--success {
+        padding: 0.15rem 0 0.35rem;
+      }
+
+      .quoteSuccessWrap {
+        padding: 1.15rem;
+        border: 1px solid rgba(214, 167, 63, 0.24);
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(214,167,63,0.08) 100%);
+      }
+
+      .quoteSuccessBadge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.8rem;
+        padding: 0.42rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(214, 167, 63, 0.16);
+        color: #f6d98a;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .quoteSuccessTitle {
+        margin: 0 0 0.45rem;
+        font-size: 1.35rem;
+        line-height: 1.2;
+      }
+
+      .quoteSuccessText {
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.78);
+        line-height: 1.65;
+      }
+
+      .quoteSuccessInner {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .mobileServiceReview {
+        display: none;
+      }
+
+      .mobileServiceReview__card {
+        position: relative;
+        padding: 1rem 1rem 1.05rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(30, 32, 37, 0.98) 0%, rgba(16, 18, 22, 0.98) 100%);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16);
+        overflow: hidden;
+      }
+
+      .mobileServiceReview__card::before {
+        content: "";
+        position: absolute;
+        inset: -38% auto auto 62%;
+        width: 190px;
+        height: 190px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(214, 167, 63, 0.18) 0%, rgba(214, 167, 63, 0) 72%);
+        pointer-events: none;
+      }
+
+      .mobileServiceReview__top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.95rem;
+      }
+
+      .mobileServiceReview__pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.72rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f6e7bb;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .mobileServiceReview__stars {
+        color: #f6d98a;
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+      }
+
+      .mobileServiceReview__media {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 0.95rem;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .mobileServiceReview__media img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .mobileServiceReview__quote {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.96);
+        font-size: 1rem;
+        line-height: 1.68;
+      }
+
+      .mobileServiceReview__footer {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .mobileServiceReview__avatar {
+        display: grid;
+        place-items: center;
+        width: 2.9rem;
+        height: 2.9rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6e7bb 0%, #d6a73f 100%);
+        color: #111111;
+        font-weight: 900;
+      }
+
+      .mobileServiceReview__name {
+        color: #ffffff;
+        font-weight: 800;
+      }
+
+      .mobileServiceReview__meta {
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 0.92rem;
+      }
+
+      .rReviewMedia {
+        margin: 0.85rem 0 0;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .rReviewMedia img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .rImageExpandBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.95rem;
+        width: 100%;
+        padding: 0.82rem 1rem;
+        border: 1px solid rgba(214, 167, 63, 0.55);
+        border-radius: 14px;
+        background: rgba(214, 167, 63, 0.12);
+        color: #f6d98a;
+        font-family: Inter, Arial, sans-serif;
+        font-size: 0.92rem;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+      }
+
+      .rImageExpandBtn:hover {
+        transform: translateY(-1px);
+        background: rgba(214, 167, 63, 0.18);
+        border-color: rgba(214, 167, 63, 0.82);
+      }
+
+      .rImageExpandBtn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(214, 167, 63, 0.22);
+      }
+
+      .reviewImageModal[hidden] {
+        display: none !important;
+      }
+
+      .reviewImageModal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+      }
+
+      .reviewImageModal__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+
+      .reviewImageModal__panel {
+        position: relative;
+        z-index: 1;
+        width: min(980px, 100%);
+        max-height: 92vh;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #111111;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48);
+        overflow: hidden;
+      }
+
+      .reviewImageModal__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .reviewImageModal__title {
+        color: #ffffff;
+        font-weight: 900;
+        font-size: 0.95rem;
+      }
+
+      .reviewImageModal__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        font-size: 1.55rem;
+        font-weight: 900;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .reviewImageModal__close:hover {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .reviewImageModal__img {
+        display: block;
+        width: 100%;
+        max-height: calc(92vh - 64px);
+        object-fit: contain;
+        background: #070707;
+      }
+
+      @media (max-width: 980px) {
+        .hero__layout {
+          grid-template-columns: 1fr;
+        }
+
+        .hero__content {
+          max-width: 100%;
+        }
+
+        .hero__headline {
+          max-width: 13ch;
+        }
+
+        .heroReview {
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero {
+          min-height: auto;
+          overflow: hidden;
+        }
+
+        .hero::after {
+          background: linear-gradient(180deg, rgba(4, 7, 14, 0.74) 0%, rgba(4, 7, 14, 0.58) 72%, rgba(4, 7, 14, 0.3) 100%);
+        }
+
+        .hero__inner {
+          padding-top: 5.1rem;
+          padding-bottom: 7.8rem;
+        }
+
+        .hero__eyebrow {
+          margin-bottom: 0.85rem;
+          font-size: 0.75rem;
+        }
+
+        .hero__headline {
+          max-width: 14ch;
+          font-size: clamp(2.65rem, 11.9vw, 3.95rem);
+          line-height: 0.98;
+        }
+
+        .hero__content {
+          max-width: 100%;
+          padding-inline: 0.45rem;
+        }
+
+        .hero__sub {
+          max-width: 100%;
+          margin-bottom: 0;
+          font-size: 1rem;
+        }
+
+        .hero__actions {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+          margin-top: 4.9rem;
+          margin-bottom: 0;
+        }
+
+        .hero__actions .btn {
+          width: 100%;
+          max-width: none;
+          border-radius: 16px;
+        }
+
+        .heroReview {
+          display: none;
+        }
+
+        .mobileServiceReview {
+          display: block;
+          margin: 0.35rem 0 4rem;
+          padding: 0;
+          background: transparent;
+        }
+      }
+    
+
+
+      /* MOST_POPULAR_CTA_V2 */
+      .btn--quote {
+        position: relative;
+        isolation: isolate;
+      }
+
+      @keyframes quoteButtonPulse {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 0.55;
+        }
+        50% {
+          transform: scale(1.045);
+          opacity: 0.18;
+        }
+      }
+
+      @keyframes popularBubbleFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+
+      @media (min-width: 641px) {
+        .nav .nav__cta.btn--quote,
+        .hero__actions .btn--quote {
+          top: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+          left: auto !important;
+          transform: none !important;
+          align-self: center;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+      }
+
+      .popularQuoteBubble {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 1200;
+        width: 126px;
+        height: 126px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.28rem;
+        padding: 0.8rem;
+        border: 1px solid rgba(255, 236, 166, 0.92);
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 34%),
+          linear-gradient(135deg, #ffe58d 0%, #f6d98a 34%, #d6a73f 100%);
+        color: #111111;
+        text-align: center;
+        text-decoration: none;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32), 0 0 0 5px rgba(214, 167, 63, 0.14);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        animation: popularBubbleFloat 3.4s ease-in-out infinite;
+      }
+
+      .popularQuoteBubble:hover {
+        border-color: rgba(255, 247, 218, 1);
+        box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(214, 167, 63, 0.18);
+      }
+
+      .popularQuoteBubble:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(246, 217, 138, 0.44), 0 18px 42px rgba(0, 0, 0, 0.32);
+      }
+
+      .popularQuoteBubble__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.22rem 0.42rem;
+        border-radius: 999px;
+        background: rgba(17, 17, 17, 0.14);
+        color: #111111;
+        font-size: 0.58rem;
+        font-weight: 1000;
+        letter-spacing: 0.1em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .popularQuoteBubble__title {
+        color: #111111;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 0.96rem;
+        font-weight: 900;
+        letter-spacing: 0.025em;
+        line-height: 1.02;
+        text-transform: uppercase;
+      }
+
+      .popularQuoteBubble__sub {
+        color: rgba(17, 17, 17, 0.74);
+        font-size: 0.68rem;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      @media (max-width: 640px) {
+        .hero__actions .btn--quote {
+          min-height: 64px;
+          border-radius: 18px;
+          border: 1px solid rgba(246, 217, 138, 0.74);
+          background:
+            radial-gradient(240px 90px at 18% 0%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 68%),
+            linear-gradient(135deg, #f6d98a 0%, #d6a73f 100%);
+          color: #111111;
+          font-size: 1.08rem;
+          font-weight: 1000;
+          letter-spacing: 0.055em;
+          box-shadow: 0 18px 44px rgba(214, 167, 63, 0.34), 0 0 0 5px rgba(214, 167, 63, 0.12);
+        }
+
+        .hero__actions .btn--quote::after {
+          content: "";
+          position: absolute;
+          inset: -7px;
+          z-index: -1;
+          border-radius: 24px;
+          background: rgba(246, 217, 138, 0.36);
+          animation: quoteButtonPulse 1.9s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        .nav__cta.btn--quote {
+          border-color: rgba(246, 217, 138, 0.66);
+          box-shadow: 0 12px 28px rgba(214, 167, 63, 0.24);
+        }
+
+        .popularQuoteBubble {
+          left: auto;
+          right: 12px;
+          bottom: 12px;
+          width: 118px;
+          height: 118px;
+          min-height: 0;
+          padding: 0.72rem;
+          border-radius: 999px;
+        }
+
+        .popularQuoteBubble__badge {
+          font-size: 0.54rem;
+          padding: 0.2rem 0.38rem;
+        }
+
+        .popularQuoteBubble__title {
+          font-size: 0.88rem;
+        }
+
+        .popularQuoteBubble__sub {
+          display: none;
+        }
+      }
+
+
+      /* TEMP_HIDE_POPULAR_QUOTE_BUBBLE
+         Remove this block when you want the shortcut bubble live again. */
+      .popularQuoteBubble {
+        display: none !important;
+      }
+
+      :root {
+        --july-red: #b91c1c;
+        --july-red-bright: #ef233c;
+        --july-blue: #143b8f;
+        --july-blue-bright: #2454d6;
+        --july-navy: #050b18;
+        --july-ink: #10131b;
+        --july-cream: #fff4d6;
+        --july-gold: #f6d98a;
+        --july-muted: rgba(255, 255, 255, 0.72);
+      }
+
+      .hero {
+        background: #05070d;
+      }
+
+      .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background:
+          linear-gradient(115deg, rgba(5, 11, 24, 0.92) 0%, rgba(9, 19, 42, 0.7) 48%, rgba(109, 20, 28, 0.5) 100%),
+          linear-gradient(90deg, rgba(255,255,255,0.055) 0 7%, rgba(255,255,255,0) 7% 14%);
+        opacity: 0.94;
+        pointer-events: none;
+      }
+
+      .hero::after {
+        background:
+          radial-gradient(circle at 14% 12%, rgba(246, 217, 138, 0.16), rgba(246, 217, 138, 0) 30%),
+          radial-gradient(circle at 88% 10%, rgba(36, 84, 214, 0.28), rgba(36, 84, 214, 0) 26%),
+          linear-gradient(90deg, rgba(3, 7, 16, 0.62) 0%, rgba(3, 7, 16, 0.42) 58%, rgba(3, 7, 16, 0.26) 100%);
+      }
+
+      .hero__inner {
+        padding-top: clamp(4.6rem, 6.4vw, 6.7rem);
+        padding-bottom: clamp(4.8rem, 7vw, 7.4rem);
+      }
+
+      .hero__headline {
+        max-width: 11.6ch;
+        letter-spacing: 0.015em;
+      }
+
+      .hero__headlineAccent,
+      .heroReview__stars,
+      .mobileServiceReview__stars,
+      .rStars {
+        color: var(--july-gold) !important;
+      }
+
+      .hero__sub {
+        max-width: 39rem;
+      }
+
+      .hero__micro {
+        max-width: 38rem;
+        margin-top: 0.95rem;
+        color: rgba(255, 255, 255, 0.74);
+      }
+
+      .hero__eyebrow {
+        border-color: rgba(246, 217, 138, 0.24);
+        background: rgba(5, 11, 24, 0.54);
+        color: var(--july-cream);
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+      }
+
+      .hero__eyebrowDot {
+        width: 0.72rem;
+        height: 0.72rem;
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        background:
+          linear-gradient(180deg, var(--july-blue-bright) 0 33%, #ffffff 33% 66%, var(--july-red-bright) 66% 100%);
+        box-shadow: 0 0 20px rgba(246, 217, 138, 0.36);
+      }
+
+      .btn--quote,
+      .quoteNext,
+      .contactSubmit {
+        border-color: rgba(246, 217, 138, 0.74) !important;
+        background:
+          linear-gradient(135deg, #f7e5a8 0%, #d6a73f 100%) !important;
+        color: #101010 !important;
+        box-shadow: 0 18px 42px rgba(214, 167, 63, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.12) inset !important;
+      }
+
+      .btn--quote:hover,
+      .quoteNext:hover,
+      .contactSubmit:hover {
+        border-color: rgba(255, 255, 255, 0.72) !important;
+        filter: brightness(1.04);
+      }
+
+      .hero__actions .btn--quote::after {
+        display: none !important;
+      }
+
+      .btn--call,
+      .btn--heroSecondary {
+        border-color: rgba(255, 255, 255, 0.18) !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        color: #ffffff !important;
+      }
+
+      .tag,
+      .stepNum,
+      .popularQuoteBubble__badge {
+        background: linear-gradient(135deg, var(--july-blue) 0%, var(--july-red) 100%) !important;
+        color: #ffffff !important;
+      }
+
+      .julyPromoBanner {
+        position: relative;
+        z-index: 3;
+        margin: 0 0 clamp(1.25rem, 2.3vw, 2rem);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        background:
+          linear-gradient(90deg, rgba(5, 11, 24, 0.94) 0%, rgba(10, 28, 71, 0.92) 52%, rgba(105, 19, 29, 0.9) 100%);
+        color: #ffffff;
+        box-shadow: 0 24px 66px rgba(0, 0, 0, 0.34);
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .julyPromoBanner::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 7px;
+        background: linear-gradient(180deg, var(--july-blue-bright) 0 33%, #ffffff 33% 66%, var(--july-red-bright) 66% 100%);
+        pointer-events: none;
+      }
+
+      .julyPromoBanner::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(110deg, rgba(255,255,255,0.1), rgba(255,255,255,0) 34%),
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.055) 0 1px, rgba(255,255,255,0) 1px 42px);
+        pointer-events: none;
+      }
+
+      .julyPromoBanner__inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: clamp(0.92rem, 1.9vw, 1.14rem) clamp(1rem, 2.4vw, 1.5rem) clamp(0.92rem, 1.9vw, 1.14rem) clamp(1.18rem, 2.5vw, 1.7rem);
+      }
+
+      .julyPromoBanner__copy {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.72rem;
+        min-width: 0;
+      }
+
+      .julyPromoBanner__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.7rem;
+        border: 1px solid rgba(246, 217, 138, 0.36);
+        border-radius: 10px;
+        background: rgba(246, 217, 138, 0.11);
+        color: var(--july-cream);
+        font-size: 0.7rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .julyPromoBanner__main {
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: clamp(1.08rem, 1.9vw, 1.44rem);
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      .julyPromoBanner__sub {
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 0.93rem;
+        font-weight: 600;
+      }
+
+      .julyPromoBanner__cta {
+        flex: 0 0 auto;
+        min-height: 46px;
+        border-radius: 13px !important;
+      }
+
+      .julyDealCard {
+        position: relative;
+        align-self: center;
+        padding: clamp(1.15rem, 2.1vw, 1.65rem);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        background:
+          linear-gradient(180deg, rgba(20, 24, 34, 0.96) 0%, rgba(8, 12, 22, 0.94) 100%);
+        color: #ffffff;
+        box-shadow: 0 30px 82px rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .julyDealCard::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 18% 0%, rgba(246, 217, 138, 0.18), rgba(246, 217, 138, 0) 35%),
+          radial-gradient(circle at 100% 24%, rgba(239, 35, 60, 0.22), rgba(239, 35, 60, 0) 34%),
+          repeating-linear-gradient(135deg, rgba(255,255,255,0.045) 0 1px, rgba(255,255,255,0) 1px 18px);
+        pointer-events: none;
+      }
+
+      .julyDealCard > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .julyDealCard__flag {
+        width: 100%;
+        height: 8px;
+        margin: 0 0 1.1rem;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--july-blue-bright) 0 32%, #ffffff 32% 66%, var(--july-red-bright) 66% 100%);
+        box-shadow: 0 0 28px rgba(255, 255, 255, 0.16);
+      }
+
+      .julyDealCard__kicker,
+      .julySaleKicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0 0 0.75rem;
+        color: var(--july-cream);
+        font-size: 0.74rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .julyDealCard__title {
+        margin: 0 0 0.72rem;
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        line-height: 0.96;
+        text-transform: uppercase;
+      }
+
+      .julyDealCard__text {
+        margin: 0 0 1.15rem;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 1rem;
+        line-height: 1.65;
+      }
+
+      .julyDealSplit {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.72rem;
+        margin: 1rem 0;
+      }
+
+      .julyDealSplit__item {
+        padding: 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.065);
+      }
+
+      .julyDealSplit__label {
+        color: rgba(255, 255, 255, 0.62);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+      }
+
+      .julyDealSplit__value {
+        margin-top: 0.35rem;
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 1.35rem;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .julyDealSplit__item--discount {
+        border-color: rgba(246, 217, 138, 0.34);
+        background: rgba(246, 217, 138, 0.1);
+      }
+
+      .julyDealSplit__item--discount .julyDealSplit__value {
+        color: var(--july-gold);
+      }
+
+      .julyDealCard__list {
+        display: grid;
+        gap: 0.55rem;
+        margin: 1rem 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .julyDealCard__list li {
+        display: flex;
+        gap: 0.55rem;
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.94rem;
+        line-height: 1.45;
+      }
+
+      .julyDealCard__list li::before {
+        content: "";
+        flex: 0 0 auto;
+        width: 0.42rem;
+        height: 0.42rem;
+        margin-top: 0.47rem;
+        border-radius: 999px;
+        background: var(--july-gold);
+      }
+
+      .julySaleSection {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .julySaleSection::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 8% 12%, rgba(36, 84, 214, 0.1), rgba(36, 84, 214, 0) 28%),
+          radial-gradient(circle at 92% 8%, rgba(239, 35, 60, 0.09), rgba(239, 35, 60, 0) 28%);
+        pointer-events: none;
+      }
+
+      .julySaleSection .container {
+        position: relative;
+        z-index: 1;
+      }
+
+      .julySaleIntro {
+        display: grid;
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+        gap: clamp(1.2rem, 3vw, 2.4rem);
+        align-items: end;
+        margin-bottom: clamp(1.3rem, 3vw, 2.2rem);
+      }
+
+      .julySaleKicker {
+        color: var(--july-red);
+      }
+
+      .julySaleTitle {
+        margin: 0;
+        color: #10131b;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: clamp(2.25rem, 5vw, 4.4rem);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        line-height: 0.95;
+        text-transform: uppercase;
+      }
+
+      .julySaleText {
+        margin: 0;
+        color: rgba(16, 19, 27, 0.72);
+        font-size: clamp(1rem, 1.5vw, 1.12rem);
+        line-height: 1.75;
+      }
+
+      .julySaleGrid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+        gap: clamp(1rem, 2.4vw, 1.6rem);
+      }
+
+      .julySalePanel,
+      .julySaleCard {
+        position: relative;
+        overflow: hidden;
+        border-radius: 26px;
+      }
+
+      .julySalePanel {
+        padding: clamp(1.2rem, 2.5vw, 1.65rem);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background:
+          linear-gradient(180deg, rgba(12, 20, 43, 0.98) 0%, rgba(5, 9, 18, 0.98) 100%);
+        color: #ffffff;
+        box-shadow: 0 24px 64px rgba(16, 19, 27, 0.2);
+      }
+
+      .julySalePanel::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 7px;
+        background: linear-gradient(90deg, var(--july-blue-bright) 0 33%, #ffffff 33% 66%, var(--july-red-bright) 66% 100%);
+      }
+
+      .julySalePanel__label {
+        margin: 0 0 0.85rem;
+        color: var(--july-cream);
+        font-size: 0.74rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .julySalePanel__headline {
+        margin: 0 0 0.75rem;
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: clamp(1.8rem, 3vw, 2.7rem);
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        line-height: 0.98;
+        text-transform: uppercase;
+      }
+
+      .julySalePanel__copy {
+        margin: 0 0 1.15rem;
+        color: rgba(255, 255, 255, 0.72);
+        line-height: 1.7;
+      }
+
+      .julySaleFine {
+        margin: 1rem 0 0;
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.86rem;
+        line-height: 1.55;
+      }
+
+      .julySaleCards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.85rem;
+      }
+
+      .julySaleCard {
+        min-height: 196px;
+        padding: 1.1rem;
+        border: 1px solid rgba(16, 19, 27, 0.09);
+        background: #ffffff;
+        box-shadow: 0 18px 46px rgba(16, 19, 27, 0.09);
+      }
+
+      .julySaleCard::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 5px;
+        background: linear-gradient(180deg, var(--july-blue-bright), var(--july-red-bright));
+      }
+
+      .julySaleCard__num {
+        display: grid;
+        place-items: center;
+        width: 2.35rem;
+        height: 2.35rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        background: rgba(20, 59, 143, 0.09);
+        color: var(--july-blue);
+        font-family: Oswald, Inter, sans-serif;
+        font-weight: 900;
+      }
+
+      .julySaleCard h3 {
+        margin: 0 0 0.45rem;
+        color: #10131b;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 1.24rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+      }
+
+      .julySaleCard p {
+        margin: 0;
+        color: rgba(16, 19, 27, 0.68);
+        font-size: 0.94rem;
+        line-height: 1.6;
+      }
+
+      .section--light {
+        background:
+          radial-gradient(circle at 8% 8%, rgba(20, 59, 143, 0.06), rgba(20, 59, 143, 0) 24%),
+          radial-gradient(circle at 92% 18%, rgba(185, 28, 28, 0.055), rgba(185, 28, 28, 0) 24%),
+          #ffffff;
+      }
+
+      .section--dark,
+      .footer {
+        background:
+          radial-gradient(circle at 10% 0%, rgba(185, 28, 28, 0.13), rgba(185, 28, 28, 0) 28%),
+          radial-gradient(circle at 88% 8%, rgba(20, 59, 143, 0.2), rgba(20, 59, 143, 0) 30%),
+          #070b16 !important;
+      }
+
+      .heroReview,
+      .mobileServiceReview__card,
+      .rCard--dark,
+      .areaCard,
+      .quoteSuccessWrap {
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(246, 217, 138, 0.06) !important;
+      }
+
+      .serviceCard__overlay {
+        background: linear-gradient(180deg, rgba(7, 19, 45, 0.14) 0%, rgba(7, 19, 45, 0.8) 100%) !important;
+      }
+
+      .serviceCard__shine {
+        background: linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 44%, rgba(255,255,255,0) 80%) !important;
+      }
+
+      @media (max-width: 980px) {
+        .julySaleIntro,
+        .julySaleGrid {
+          grid-template-columns: 1fr;
+        }
+
+        .julySaleCards {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .julyPromoBanner__inner {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .julyPromoBanner__copy {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 0.48rem;
+        }
+
+        .julyPromoBanner__sub {
+          font-size: 0.88rem;
+        }
+
+        .julyPromoBanner__cta {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .julyDealSplit {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero::after {
+          background:
+            radial-gradient(circle at 12% 6%, rgba(246, 217, 138, 0.15), rgba(246, 217, 138, 0) 32%),
+            linear-gradient(180deg, rgba(5, 11, 24, 0.78) 0%, rgba(5, 11, 24, 0.6) 72%, rgba(5, 11, 24, 0.36) 100%);
+        }
+
+        .hero__inner {
+          padding-top: 5rem;
+          padding-bottom: 4.2rem;
+        }
+
+        .hero__headline {
+          max-width: 10.6ch;
+          font-size: clamp(2.55rem, 11.2vw, 3.8rem);
+        }
+
+        .hero__actions {
+          margin-top: 1.35rem !important;
+        }
+
+        .julyDealCard {
+          margin-top: 1.35rem;
+          border-radius: 24px;
+        }
+
+        .julySaleTitle {
+          font-size: clamp(2.15rem, 11vw, 3.4rem);
+        }
+
+        .julySaleCard {
+          min-height: auto;
+        }
+      }
+
+
+/* Keep all quote buttons using the original site button font */
+.btn,
+.btn--quote,
+.nav__cta,
+.quoteNext,
+.quoteBack {
+  font-family: inherit !important;
 }
