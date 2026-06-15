@@ -785,6 +785,225 @@
         display: none !important;
       }
 
+
+      /* FOURTH_OF_JULY_PROMO_THEME
+         Temporary patriotic theme layer. Remove this block + the julyPromoBanner markup after the promo ends. */
+      :root {
+        --july-red: #ef233c;
+        --july-blue: #1d4ed8;
+        --july-navy: #07132d;
+        --july-white: #ffffff;
+        --july-cream: #fff4d6;
+        --july-gold: #ffd166;
+      }
+
+      .julyPromoBanner {
+        position: relative;
+        z-index: 3;
+        margin: 0 0 clamp(1.3rem, 2.2vw, 2rem);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at 9% 16%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 18%),
+          radial-gradient(circle at 89% 24%, rgba(239, 35, 60, 0.34), rgba(239, 35, 60, 0) 26%),
+          linear-gradient(110deg, rgba(7, 19, 45, 0.94) 0%, rgba(29, 78, 216, 0.92) 47%, rgba(239, 35, 60, 0.9) 100%);
+        color: #ffffff;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), 0 0 0 5px rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .julyPromoBanner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 8px, rgba(255, 255, 255, 0) 8px 18px);
+        opacity: 0.22;
+        pointer-events: none;
+      }
+
+      .julyPromoBanner::after {
+        content: "★ ★ ★";
+        position: absolute;
+        right: clamp(0.9rem, 2vw, 1.4rem);
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.22);
+        font-size: clamp(2.5rem, 5vw, 4.6rem);
+        letter-spacing: 0.13em;
+        pointer-events: none;
+      }
+
+      .julyPromoBanner__inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: clamp(0.95rem, 2vw, 1.18rem) clamp(1rem, 2.4vw, 1.45rem);
+      }
+
+      .julyPromoBanner__copy {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.72rem;
+        min-width: 0;
+      }
+
+      .julyPromoBanner__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.72rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff4d6;
+        font-size: 0.72rem;
+        font-weight: 1000;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .julyPromoBanner__main {
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: clamp(1.08rem, 2vw, 1.48rem);
+        font-weight: 900;
+        letter-spacing: 0.025em;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      .julyPromoBanner__sub {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.93rem;
+        font-weight: 700;
+      }
+
+      .julyPromoBanner__cta {
+        flex: 0 0 auto;
+        border: 1px solid rgba(255, 255, 255, 0.85) !important;
+        background:
+          radial-gradient(130px 70px at 20% 0%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 72%),
+          linear-gradient(135deg, #ffffff 0%, #fff4d6 100%) !important;
+        color: #07132d !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+      }
+
+      .hero::after {
+        background:
+          linear-gradient(90deg, rgba(7, 19, 45, 0.78) 0%, rgba(7, 19, 45, 0.56) 44%, rgba(29, 78, 216, 0.28) 100%),
+          linear-gradient(180deg, rgba(239, 35, 60, 0.08) 0%, rgba(0,0,0,0.42) 100%);
+      }
+
+      .hero__eyebrow,
+      .heroReview__pill,
+      .mobileServiceReview__pill,
+      .quoteSuccessBadge {
+        color: #fff4d6;
+      }
+
+      .hero__eyebrowDot {
+        background: linear-gradient(135deg, var(--july-red) 0%, var(--july-white) 48%, var(--july-blue) 100%);
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.55), 0 0 26px rgba(239, 35, 60, 0.35);
+      }
+
+      .hero__headlineAccent,
+      .heroReview__stars,
+      .mobileServiceReview__stars,
+      .rStars {
+        color: var(--july-gold) !important;
+      }
+
+      .btn--quote,
+      .quoteNext,
+      .contactSubmit {
+        border-color: rgba(239, 35, 60, 0.72) !important;
+        background:
+          radial-gradient(220px 90px at 18% 0%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 68%),
+          linear-gradient(135deg, var(--july-red) 0%, #b91c1c 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 16px 38px rgba(239, 35, 60, 0.26), 0 0 0 4px rgba(239, 35, 60, 0.08) !important;
+      }
+
+      .btn--quote:hover,
+      .quoteNext:hover,
+      .contactSubmit:hover {
+        border-color: rgba(255, 255, 255, 0.7) !important;
+        filter: brightness(1.05);
+      }
+
+      .btn--call,
+      .btn--heroSecondary {
+        border-color: rgba(255, 255, 255, 0.22) !important;
+        background: rgba(29, 78, 216, 0.18) !important;
+      }
+
+      .tag,
+      .stepNum,
+      .popularQuoteBubble__badge {
+        background: linear-gradient(135deg, var(--july-blue) 0%, var(--july-red) 100%) !important;
+        color: #ffffff !important;
+      }
+
+      .section--light {
+        background:
+          radial-gradient(circle at 8% 8%, rgba(29, 78, 216, 0.08), rgba(29, 78, 216, 0) 24%),
+          radial-gradient(circle at 92% 18%, rgba(239, 35, 60, 0.07), rgba(239, 35, 60, 0) 24%),
+          #ffffff;
+      }
+
+      .section--dark,
+      .footer {
+        background:
+          radial-gradient(circle at 10% 0%, rgba(239, 35, 60, 0.14), rgba(239, 35, 60, 0) 28%),
+          radial-gradient(circle at 88% 8%, rgba(29, 78, 216, 0.18), rgba(29, 78, 216, 0) 30%),
+          #070b16 !important;
+      }
+
+      .heroReview,
+      .mobileServiceReview__card,
+      .rCard--dark,
+      .areaCard,
+      .quoteSuccessWrap {
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(239, 35, 60, 0.08) !important;
+      }
+
+      .serviceCard__overlay {
+        background: linear-gradient(180deg, rgba(7, 19, 45, 0.18) 0%, rgba(7, 19, 45, 0.78) 100%) !important;
+      }
+
+      .serviceCard__shine {
+        background: linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 44%, rgba(255,255,255,0) 80%) !important;
+      }
+
+      @media (max-width: 760px) {
+        .julyPromoBanner__inner {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .julyPromoBanner__copy {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 0.48rem;
+        }
+
+        .julyPromoBanner__sub {
+          font-size: 0.88rem;
+        }
+
+        .julyPromoBanner__cta {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
 /* Keep all quote buttons using the original site button font */
 .btn,
 .btn--quote,
@@ -792,434 +1011,6 @@
 .quoteNext,
 .quoteBack {
   font-family: inherit !important;
-}
-
-
-/* 4TH_OF_JULY_PREMIUM_SALE_THEME_V3
-   Premium summer sale layer. Keeps the existing site structure intact. */
-:root {
-  --sale-navy: #071531;
-  --sale-blue: #123f94;
-  --sale-red: #d73a46;
-  --sale-red-bright: #ff4d58;
-  --sale-cream: #fff6dc;
-  --sale-gold: #f6d98a;
-  --sale-white: #ffffff;
-}
-
-.hero::after {
-  background:
-    radial-gradient(circle at 12% 14%, rgba(18, 63, 148, 0.44) 0%, rgba(18, 63, 148, 0) 34%),
-    radial-gradient(circle at 88% 20%, rgba(215, 58, 70, 0.20) 0%, rgba(215, 58, 70, 0) 30%),
-    linear-gradient(90deg, rgba(4, 7, 14, 0.76) 0%, rgba(4, 7, 14, 0.56) 44%, rgba(4, 7, 14, 0.38) 100%),
-    linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.40) 100%);
-}
-
-.promoStrip {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0 0 clamp(1.35rem, 2.4vw, 2rem);
-  padding: 0.85rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 20px;
-  background:
-    linear-gradient(90deg, rgba(7, 21, 49, 0.88) 0%, rgba(14, 37, 88, 0.84) 50%, rgba(95, 27, 38, 0.82) 100%);
-  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.promoStrip::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(135deg, rgba(255,255,255,0.055) 0 1px, rgba(255,255,255,0) 1px 14px),
-    radial-gradient(circle at 8% 50%, rgba(246, 217, 138, 0.24), rgba(246, 217, 138, 0) 34%);
-  pointer-events: none;
-}
-
-.promoStrip__copy,
-.promoStrip__action {
-  position: relative;
-  z-index: 1;
-}
-
-.promoStrip__copy {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  min-width: 0;
-}
-
-.promoStrip__label {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.42rem 0.72rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.11);
-  color: var(--sale-gold);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.promoStrip__main {
-  display: block;
-  color: var(--sale-white);
-  font-family: Oswald, Inter, sans-serif;
-  font-size: clamp(1.02rem, 1.55vw, 1.35rem);
-  font-weight: 800;
-  letter-spacing: 0.045em;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.promoStrip__sub {
-  display: block;
-  margin-top: 0.18rem;
-  color: rgba(255, 255, 255, 0.74);
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.25;
-}
-
-.promoStrip__action {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 0.72rem 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--sale-red-bright) 0%, var(--sale-red) 100%);
-  color: #ffffff;
-  font-size: 0.82rem;
-  font-weight: 950;
-  letter-spacing: 0.055em;
-  text-decoration: none;
-  text-transform: uppercase;
-  box-shadow: 0 14px 32px rgba(215, 58, 70, 0.32);
-  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
-}
-
-.promoStrip__action:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.04);
-  box-shadow: 0 18px 40px rgba(215, 58, 70, 0.4);
-}
-
-.hero__eyebrow {
-  border-color: rgba(246, 217, 138, 0.24);
-  background: rgba(7, 21, 49, 0.54);
-  color: var(--sale-cream);
-}
-
-.hero__eyebrowDot {
-  background: linear-gradient(135deg, var(--sale-red-bright) 0%, var(--sale-gold) 100%);
-  box-shadow: 0 0 16px rgba(255, 77, 88, 0.42);
-}
-
-.hero__headlineAccent {
-  color: var(--sale-gold);
-  text-shadow: 0 0 28px rgba(246, 217, 138, 0.22);
-}
-
-.summerPromo {
-  position: relative;
-  max-width: 620px;
-  margin: 1.35rem 0 0;
-  padding: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, rgba(7, 21, 49, 0.84) 0%, rgba(13, 31, 70, 0.78) 54%, rgba(70, 20, 32, 0.78) 100%);
-  color: #ffffff;
-  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-}
-
-.summerPromo::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 12% 0%, rgba(246, 217, 138, 0.24) 0%, rgba(246, 217, 138, 0) 36%),
-    radial-gradient(circle at 96% 18%, rgba(255, 77, 88, 0.20) 0%, rgba(255, 77, 88, 0) 30%),
-    repeating-linear-gradient(135deg, rgba(255,255,255,0.045) 0 1px, rgba(255,255,255,0) 1px 13px);
-  pointer-events: none;
-}
-
-.summerPromo__inner {
-  position: relative;
-  z-index: 1;
-}
-
-.summerPromo__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  margin-bottom: 0.72rem;
-}
-
-.summerPromo__kicker {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.42rem 0.7rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.10);
-  color: var(--sale-gold);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.summerPromo__flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.24rem;
-  color: rgba(255, 255, 255, 0.52);
-  font-size: 0.92rem;
-  letter-spacing: 0.12em;
-}
-
-.summerPromo__title {
-  margin: 0;
-  color: #ffffff;
-  font-family: Oswald, Inter, sans-serif;
-  font-size: clamp(1.45rem, 2.65vw, 2.25rem);
-  font-weight: 900;
-  letter-spacing: 0.045em;
-  line-height: 1.02;
-  text-transform: uppercase;
-}
-
-.summerPromo__title span {
-  color: var(--sale-gold);
-}
-
-.summerPromo__text {
-  max-width: 35rem;
-  margin: 0.65rem 0 0;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.98rem;
-  font-weight: 600;
-  line-height: 1.55;
-}
-
-.summerPromo__details {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.52rem;
-  margin-top: 0.95rem;
-}
-
-.summerPromo__detail {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.38rem;
-  padding: 0.48rem 0.66rem;
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.075);
-  color: rgba(255, 255, 255, 0.84);
-  font-size: 0.78rem;
-  font-weight: 850;
-  letter-spacing: 0.02em;
-}
-
-.summerPromo__detail::before {
-  content: "";
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: 999px;
-  background: var(--sale-red-bright);
-  box-shadow: 0 0 12px rgba(255, 77, 88, 0.44);
-}
-
-.hero__actions {
-  margin-top: 1.2rem;
-}
-
-.btn--quote,
-.nav__cta.btn--quote,
-.quoteNext {
-  border-color: rgba(246, 217, 138, 0.52) !important;
-  background:
-    radial-gradient(140px 60px at 15% 0%, rgba(255, 255, 255, 0.30), rgba(255,255,255,0) 66%),
-    linear-gradient(135deg, var(--sale-gold) 0%, #edc45f 42%, var(--sale-red) 100%) !important;
-  color: #111111 !important;
-  box-shadow: 0 16px 34px rgba(215, 58, 70, 0.18), 0 8px 24px rgba(246, 217, 138, 0.14);
-}
-
-.btn--quote:hover,
-.nav__cta.btn--quote:hover,
-.quoteNext:hover {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-}
-
-.btn--call,
-.btn--heroSecondary {
-  border-color: rgba(255, 255, 255, 0.18);
-  background: rgba(7, 21, 49, 0.44);
-}
-
-.tag,
-.heroReview__pill,
-.mobileServiceReview__pill,
-.quoteSuccessBadge {
-  background: rgba(18, 63, 148, 0.34) !important;
-  color: var(--sale-cream) !important;
-  border: 1px solid rgba(246, 217, 138, 0.18);
-}
-
-.heroReview,
-.mobileServiceReview__card,
-.rCard--dark,
-.areaCard,
-.callPanel,
-.contactPanel,
-.modal__panel {
-  border-color: rgba(246, 217, 138, 0.16) !important;
-}
-
-.heroReview::before,
-.mobileServiceReview__card::before {
-  background: radial-gradient(circle, rgba(255, 77, 88, 0.16) 0%, rgba(255, 77, 88, 0) 72%);
-}
-
-.heroReview__avatar,
-.mobileServiceReview__avatar,
-.rAvatar--dark,
-.stepNum {
-  background: linear-gradient(135deg, var(--sale-cream) 0%, var(--sale-gold) 52%, #e85b62 100%) !important;
-  color: #101010 !important;
-}
-
-.section--dark {
-  background:
-    radial-gradient(circle at 8% 0%, rgba(18, 63, 148, 0.16), rgba(18, 63, 148, 0) 32%),
-    radial-gradient(circle at 92% 12%, rgba(215, 58, 70, 0.12), rgba(215, 58, 70, 0) 32%),
-    #0a0d14 !important;
-}
-
-.section--light {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 255, 1) 100%) !important;
-}
-
-.section__title::after {
-  background: linear-gradient(90deg, var(--sale-red), var(--sale-gold), var(--sale-blue));
-}
-
-@media (max-width: 980px) {
-  .promoStrip {
-    align-items: flex-start;
-  }
-
-  .promoStrip__copy {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
-
-@media (max-width: 640px) {
-  .hero::after {
-    background:
-      radial-gradient(circle at 10% 8%, rgba(18, 63, 148, 0.45) 0%, rgba(18, 63, 148, 0) 42%),
-      radial-gradient(circle at 92% 12%, rgba(215, 58, 70, 0.22) 0%, rgba(215, 58, 70, 0) 34%),
-      linear-gradient(180deg, rgba(4, 7, 14, 0.78) 0%, rgba(4, 7, 14, 0.60) 72%, rgba(4, 7, 14, 0.36) 100%);
-  }
-
-  .promoStrip {
-    flex-direction: column;
-    align-items: stretch;
-    margin-bottom: 1.1rem;
-    padding: 0.92rem;
-    border-radius: 18px;
-  }
-
-  .promoStrip__action {
-    width: 100%;
-  }
-
-  .promoStrip__main {
-    font-size: 1.08rem;
-  }
-
-  .promoStrip__sub {
-    font-size: 0.86rem;
-  }
-
-  .summerPromo {
-    margin-top: 1rem;
-    padding: 0.92rem;
-    border-radius: 20px;
-  }
-
-  .summerPromo__top {
-    align-items: flex-start;
-  }
-
-  .summerPromo__flag {
-    display: none;
-  }
-
-  .summerPromo__title {
-    font-size: clamp(1.42rem, 8vw, 1.9rem);
-  }
-
-  .summerPromo__text {
-    font-size: 0.92rem;
-  }
-
-  .summerPromo__detail {
-    font-size: 0.74rem;
-  }
-
-  .hero__actions {
-    margin-top: 1rem !important;
-  }
-}
-
-
-.serviceSaleNote {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.9rem;
-  padding: 0.72rem 1rem;
-  border: 1px solid rgba(215, 58, 70, 0.18);
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(18, 63, 148, 0.08), rgba(246, 217, 138, 0.15), rgba(215, 58, 70, 0.08));
-  color: #101827;
-  font-size: 0.92rem;
-  font-weight: 850;
-  line-height: 1.4;
-}
-
-@media (max-width: 640px) {
-  .serviceSaleNote {
-    display: flex;
-    width: 100%;
-    border-radius: 18px;
-    font-size: 0.86rem;
-  }
 }
 
     </style>
@@ -1266,17 +1057,17 @@
     <section class="hero" aria-label="Hero">
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__inner">
-        <div class="promoStrip" aria-label="4th of July summer sale">
-          <div class="promoStrip__copy">
-            <span class="promoStrip__label">4th of July Summer Sale</span>
-            <span>
-              <span class="promoStrip__main">Book 1 car, get the next 30% off</span>
-              <span class="promoStrip__sub">Premium multi-car detailing promo for summer appointments.</span>
-            </span>
-          </div>
-          <a class="promoStrip__action" href="./quote.html" data-quote-link>Get Quote</a>
-        </div>
 
+        <div class="julyPromoBanner" role="region" aria-label="Fourth of July promotion">
+          <div class="julyPromoBanner__inner">
+            <div class="julyPromoBanner__copy">
+              <span class="julyPromoBanner__badge">4th of July Special</span>
+              <span class="julyPromoBanner__main">Book 1 car, get the next 30% off.</span>
+              <span class="julyPromoBanner__sub">Summer promo for multi-car details.</span>
+            </div>
+            <a class="btn btn--quote julyPromoBanner__cta" href="./quote.html" data-quote-link>GET QUOTE</a>
+          </div>
+        </div>
         <div class="hero__layout">
           <div class="hero__content">
             <div class="hero__eyebrow">
@@ -1288,24 +1079,6 @@
             <p class="hero__sub">
               Interior and exterior detailing that makes your car feel fresh, clean, and reset the second you get back in.
             </p>
-
-            <div class="summerPromo" aria-label="Summer multi-car detailing deal">
-              <div class="summerPromo__inner">
-                <div class="summerPromo__top">
-                  <span class="summerPromo__kicker">Limited Summer Offer</span>
-                  <span class="summerPromo__flag" aria-hidden="true">★ ★ ★</span>
-                </div>
-                <h2 class="summerPromo__title">Book one detail. <span>Save 30% on the next.</span></h2>
-                <p class="summerPromo__text">
-                  Bring both cars back at once. Book one vehicle and get 30% off the second vehicle when they are scheduled together.
-                </p>
-                <div class="summerPromo__details" aria-label="Sale details">
-                  <span class="summerPromo__detail">Multi-car appointments</span>
-                  <span class="summerPromo__detail">Same-location service</span>
-                  <span class="summerPromo__detail">Summer promo pricing</span>
-                </div>
-              </div>
-            </div>
 
             <div class="hero__actions">
               <a class="btn btn--quote btn--lg" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
@@ -1369,7 +1142,6 @@
         <div class="section__head">
           <h2 class="section__title">SERVICES</h2>
           <p class="section__sub">Tap a service to see what's included. Quotes are based on vehicle size and condition.</p>
-          <div class="serviceSaleNote">Summer sale: book one car and receive 30% off the second car when booked together.</div>
         </div>
 
         <div class="serviceWrap">
