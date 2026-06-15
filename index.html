@@ -1778,6 +1778,62 @@
       .footer .btn--quote::after{display:none!important;}
     }
 
+
+    /* =========================================================
+       Thin red countdown bar revision
+       ========================================================= */
+    .saleTopBar{
+      color:#ffffff!important;
+      background:#bf0a30!important;
+      border-bottom:0!important;
+      box-shadow:none!important;
+    }
+    .saleTopBar::before{display:none!important;}
+    .saleTopBar__inner{
+      min-height:30px!important;
+      padding:.28rem 0!important;
+      gap:.58rem!important;
+      color:#ffffff!important;
+      font-size:.72rem!important;
+      font-weight:950!important;
+      letter-spacing:.08em!important;
+      line-height:1!important;
+      text-transform:uppercase!important;
+    }
+    .saleTopBar__copy,
+    .saleTopBar__timer{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      color:#ffffff!important;
+      white-space:nowrap;
+    }
+    .saleTopBar__copy{max-width:none!important;}
+    .saleTopBar__timer{
+      padding-left:.58rem;
+      border-left:1px solid rgba(255,255,255,.42);
+      font-size:.68rem;
+      letter-spacing:.07em;
+    }
+    .saleTopBar__star{display:none!important;}
+    .patriotDivider,
+    .julyCta{display:none!important;}
+
+    @media (max-width:767px){
+      .saleTopBar__inner{
+        min-height:24px!important;
+        padding:.16rem 0!important;
+        gap:.38rem!important;
+        font-size:.59rem!important;
+        letter-spacing:.055em!important;
+      }
+      .saleTopBar__timer{
+        padding-left:.38rem;
+        font-size:.57rem;
+        letter-spacing:.045em;
+      }
+    }
+
 </style>
 
   <script>
@@ -1787,11 +1843,10 @@
 </head>
 
 <body>
-  <div class="saleTopBar" aria-label="4th of July limited time offer">
+  <div class="saleTopBar" aria-label="4th of July sale countdown">
     <div class="container saleTopBar__inner">
-      <span class="saleTopBar__star" aria-hidden="true">★</span>
-      <span class="saleTopBar__copy">Holiday offer available for a limited time. <strong>Book one car, get the second 30% off.</strong></span>
-      <span class="saleTopBar__star" aria-hidden="true">★</span>
+      <span class="saleTopBar__copy">4TH OF JULY SALE</span>
+      <span class="saleTopBar__timer" data-july-countdown>LOADING TIMER</span>
     </div>
   </div>
 
@@ -1866,11 +1921,6 @@
       </div>
     </div>
   </section>
-
-  <div class="patriotDivider" aria-label="4th of July sale divider">
-    <div class="patriotDivider__inner">★ 4TH OF JULY SALE ★ <strong>BOOK ONE CAR, GET 30% OFF THE SECOND</strong> ★</div>
-  </div>
-
   <section class="promo" id="promo">
     <div class="container">
       <div class="promo__intro">
@@ -2015,27 +2065,6 @@
       </div>
     </div>
   </section>
-
-  <div class="patriotDivider patriotDivider--second" aria-label="Limited holiday offer divider">
-    <div class="patriotDivider__inner">★ LIMITED HOLIDAY MULTI-CAR OFFER ★ <strong>BEST FOR HOUSEHOLDS BOOKING TWO VEHICLES TOGETHER</strong> ★</div>
-  </div>
-
-  <section class="julyCta" aria-label="4th of July discount call to action">
-    <div class="container">
-      <div class="julyCta__card">
-        <div class="julyCta__flag" aria-hidden="true"></div>
-        <div>
-          <p class="julyCta__kicker">4th of July detailing discount</p>
-          <h2 class="julyCta__title">Ready to get your 4th of July discount?</h2>
-          <p class="julyCta__text">Book one car at full price and get the next car 30% off when both vehicles are quoted together.</p>
-        </div>
-        <div class="julyCta__actions">
-          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section class="section section--dark" id="work">
     <div class="container">
       <div class="section__head">
@@ -2532,6 +2561,36 @@
   </script>
 
 
+  <script>
+    (() => {
+      const countdown = document.querySelector("[data-july-countdown]");
+      if (!countdown) return;
+
+      const target = new Date("2026-07-04T00:00:00");
+
+      function renderCountdown() {
+        const now = new Date();
+        const diff = target.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          countdown.textContent = "SALE LIVE NOW";
+          return;
+        }
+
+        const totalMinutes = Math.floor(diff / 60000);
+        const days = Math.floor(totalMinutes / 1440);
+        const hours = Math.floor((totalMinutes % 1440) / 60);
+        const minutes = totalMinutes % 60;
+
+        countdown.textContent = `${days}D ${String(hours).padStart(2, "0")}H ${String(minutes).padStart(2, "0")}M`;
+      }
+
+      renderCountdown();
+      window.setInterval(renderCountdown, 60000);
+    })();
+  </script>
+
+
 
   <script>
     (() => {
@@ -2560,7 +2619,7 @@
         }
       }
 
-      const watchedSections = Array.from(document.querySelectorAll(".promo, #services, .julyCta, #work, #reviews, .footer"));
+      const watchedSections = Array.from(document.querySelectorAll(".promo, #services, #work, #reviews, .footer"));
       function checkSectionBursts() {
         const now = performance.now();
         if (now - lastBurstTime < 480) return;
