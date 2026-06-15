@@ -437,6 +437,7 @@
       line-height:1.78;
       font-size:clamp(1rem,1.55vw,1.12rem);
     }
+    .promo__mobileText{display:none;}
     .promo__grid{
       display:grid;
       grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
@@ -718,14 +719,51 @@
       .brand__name{font-size:.95rem;}
       .hero{min-height:auto;}
       .hero__inner{padding-top:5.1rem;padding-bottom:4.2rem;}
+      .hero__bg::before{
+        background:
+          radial-gradient(circle at 9% 16%,rgba(255,255,255,.86) 0 1px,transparent 1.45px),
+          radial-gradient(circle at 17% 31%,rgba(255,255,255,.66) 0 1px,transparent 1.45px),
+          radial-gradient(circle at 27% 12%,rgba(255,255,255,.76) 0 1px,transparent 1.45px),
+          radial-gradient(circle at 68% 17%,rgba(255,255,255,.68) 0 1px,transparent 1.45px),
+          radial-gradient(circle at 84% 28%,rgba(255,255,255,.76) 0 1px,transparent 1.45px),
+          repeating-conic-gradient(from 20deg at 14% 12%, rgba(37,99,235,.16) 0 12deg, rgba(255,255,255,.055) 12deg 21deg, rgba(239,35,60,.15) 21deg 33deg, rgba(255,255,255,0) 33deg 54deg),
+          repeating-conic-gradient(from -22deg at 88% 10%, rgba(239,35,60,.13) 0 12deg, rgba(255,255,255,.05) 12deg 21deg, rgba(37,99,235,.14) 21deg 34deg, rgba(255,255,255,0) 34deg 56deg),
+          linear-gradient(105deg,rgba(15,40,110,.28) 0%,rgba(7,10,18,.08) 43%,rgba(185,28,28,.2) 100%);
+        opacity:.56;
+      }
       .hero__eyebrow{font-size:.74rem;margin-bottom:.85rem;}
       .hero__headline{max-width:14ch;font-size:clamp(2.65rem,11.9vw,3.95rem);line-height:.98;}
       .hero__sub{max-width:100%;margin-bottom:0;font-size:1rem;}
-      .hero__actions{flex-direction:column;align-items:stretch;gap:1rem;margin-top:1.35rem;}
+      .hero__actions{flex-direction:column;align-items:stretch;gap:1rem;margin-top:4.35rem;}
       .hero__actions .btn{width:100%;border-radius:16px;min-height:58px;}
       .heroReview{display:none;}
-      .promo{padding:3rem 0;}
+      .promo{
+        padding:3rem 0;
+        color:#10131b;
+        background:
+          radial-gradient(circle at 12% 12%,rgba(37,99,235,.09),transparent 26%),
+          radial-gradient(circle at 88% 10%,rgba(239,35,60,.075),transparent 27%),
+          repeating-conic-gradient(from 22deg at 15% 5%, rgba(37,99,235,.055) 0 12deg, rgba(255,255,255,0) 12deg 25deg, rgba(239,35,60,.05) 25deg 38deg, rgba(255,255,255,0) 38deg 58deg),
+          #fff;
+        border-top:1px solid rgba(16,19,27,.08);
+        border-bottom:1px solid rgba(16,19,27,.08);
+      }
+      .promo::before{opacity:.16;}
+      .promo__kicker{color:#b91c1c;}
+      .promo__title{color:#10131b;text-shadow:none;}
+      .promo__text{display:none;}
+      .promo__mobileText{display:block;margin:.95rem 0 0;color:rgba(16,19,27,.72);line-height:1.65;font-weight:650;}
+      .promoCards{display:none;}
+      .promo__grid{display:block;}
+      .dealCard{background:linear-gradient(180deg,#0b101d 0%,#070b14 100%);box-shadow:0 22px 54px rgba(16,19,27,.22);border-radius:26px;}
+      .dealCard__label,.dealCard__copy,.dealList{display:none;}
+      .dealCard__headline{margin-bottom:1.05rem;}
+      .dealCard__discount{color:#ef233c;}
       .dealSplit{grid-template-columns:1fr;}
+      .dealSplit__item--discount .dealSplit__value{color:#ef233c;}
+      .dealActions{margin-top:1.25rem!important;display:block!important;}
+      .dealActions .btn{width:100%;border-radius:16px;min-height:58px;}
+      .dealActions .dealActions__call{display:none;}
       .serviceCard{min-height:380px;}
       .carousel__frame{grid-template-columns:1fr;}
       .carouselArrow{display:none;}
@@ -829,12 +867,13 @@
           <h2 class="promo__title">Detail more than one car and save.</h2>
         </div>
         <p class="promo__text">Book the first vehicle at regular price and get <strong>30% off the second vehicle</strong>. It is built for families, couples, and multi-car households that want both vehicles cleaned up in one clean booking.</p>
+        <p class="promo__mobileText">Book the first car at regular price and get <strong>30% off the second car</strong>.</p>
       </div>
 
       <div class="promo__grid">
         <article class="dealCard">
           <div class="dealCard__label">Limited summer offer</div>
-          <h3 class="dealCard__headline">First car full price.<br />Second car 30% off.</h3>
+          <h3 class="dealCard__headline">First car full price.<br />Second car <span class="dealCard__discount">30% off.</span></h3>
           <p class="dealCard__copy">A premium detail offer without making the site feel cheap or spammy. Same quality, cleaner booking, better value when you schedule multiple vehicles.</p>
 
           <div class="dealSplit">
@@ -854,9 +893,9 @@
             <li>Include both vehicles in your quote request</li>
           </ul>
 
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.1rem;">
+          <div class="dealActions" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.1rem;">
             <a class="btn btn--quote" href="./quote.html" data-quote-link>CLAIM THE DEAL</a>
-            <button class="btn btn--dark" type="button" data-call-open>CALL / TEXT</button>
+            <button class="btn btn--dark dealActions__call" type="button" data-call-open>CALL / TEXT</button>
           </div>
         </article>
 
