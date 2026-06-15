@@ -1,0 +1,1977 @@
+<!doctype html>
+<html lang="en">
+  <head>
+
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RZQ6CD7XZD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-RZQ6CD7XZD');
+</script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Keizer Mobile Detailing</title>
+    <meta name="description" content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking." />
+
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="//vitals.vercel-insights.com" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="./Untitled design (4).png" type="image/png" />
+    <link rel="apple-touch-icon" href="./Untitled design (2).png" />
+
+    <link rel="stylesheet" href="./styles.css" />
+
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/insights/script.js"></script>
+
+    <style>
+      .hero {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(4, 7, 14, 0.72) 0%, rgba(4, 7, 14, 0.54) 44%, rgba(4, 7, 14, 0.38) 100%), linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.38) 100%);
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .hero__inner {
+        position: relative;
+        z-index: 2;
+        padding-top: clamp(4.5rem, 7vw, 7rem);
+        padding-bottom: clamp(4.5rem, 7vw, 7rem);
+      }
+
+      .hero__layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 420px);
+        gap: clamp(1.5rem, 3vw, 3rem);
+        align-items: center;
+      }
+
+      .hero__content {
+        max-width: 700px;
+      }
+
+      .hero__content > * {
+        position: relative;
+        z-index: 2;
+      }
+
+      .hero__eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+        padding: 0.55rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        background: rgba(12, 12, 12, 0.45);
+        color: #f6e7bb;
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        backdrop-filter: blur(10px);
+      }
+
+      .hero__eyebrowDot {
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6d98a 0%, #d6a73f 100%);
+        box-shadow: 0 0 14px rgba(214, 167, 63, 0.55);
+      }
+
+      .hero__headline {
+        max-width: 10.8ch;
+        margin: 0 0 1rem;
+        color: #ffffff;
+        font-size: clamp(3.4rem, 7vw, 6rem);
+        font-weight: 700;
+        line-height: 0.94;
+        letter-spacing: 0.02em;
+        text-wrap: balance;
+        text-shadow: 0 10px 35px rgba(0, 0, 0, 0.48);
+      }
+
+      .hero__headlineAccent {
+        color: #f6d98a;
+      }
+
+      .hero__sub {
+        max-width: 34rem;
+        margin: 0 0 1.5rem;
+        color: rgba(255, 255, 255, 0.94);
+        font-size: clamp(1rem, 1.8vw, 1.16rem);
+        line-height: 1.7;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+      }
+
+      .hero__actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 0.85rem;
+        margin-top: 1.7rem;
+      }
+
+      .btn--heroSecondary {
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(17, 17, 17, 0.32);
+        color: #ffffff;
+        backdrop-filter: blur(10px);
+      }
+
+      .btn--heroSecondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .hero__micro {
+        margin-top: 1rem;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 0.93rem;
+        line-height: 1.6;
+      }
+
+      .heroReview {
+        position: relative;
+        align-self: center;
+        padding: 1.55rem;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(28, 29, 33, 0.94) 0%, rgba(17, 18, 22, 0.9) 100%);
+        color: #ffffff;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
+        backdrop-filter: blur(18px);
+        overflow: hidden;
+      }
+
+      .heroReview::before {
+        content: "";
+        position: absolute;
+        inset: -35% auto auto 55%;
+        width: 220px;
+        height: 220px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(214, 167, 63, 0.28) 0%, rgba(214, 167, 63, 0) 72%);
+        pointer-events: none;
+      }
+
+      .heroReview__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.15rem;
+      }
+
+      .heroReview__pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f6e7bb;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .heroReview__stars {
+        color: #f6d98a;
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+      }
+
+      .heroReview__media {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .heroReview__media img {
+        display: block;
+        width: 100%;
+        height: 190px;
+        object-fit: cover;
+      }
+
+      .heroReview__quote {
+        margin: 0 0 1.15rem;
+        color: rgba(255, 255, 255, 0.98);
+        font-size: 1.08rem;
+        font-weight: 500;
+        line-height: 1.82;
+      }
+
+      .heroReview__footer {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+      }
+
+      .heroReview__avatar {
+        display: grid;
+        place-items: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6e7bb 0%, #d6a73f 100%);
+        color: #111111;
+        font-weight: 800;
+      }
+
+      .heroReview__name {
+        font-weight: 700;
+      }
+
+      .heroReview__meta {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.92rem;
+      }
+
+      .quoteBody--success {
+        padding: 0.15rem 0 0.35rem;
+      }
+
+      .quoteSuccessWrap {
+        padding: 1.15rem;
+        border: 1px solid rgba(214, 167, 63, 0.24);
+        border-radius: 20px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(214,167,63,0.08) 100%);
+      }
+
+      .quoteSuccessBadge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-bottom: 0.8rem;
+        padding: 0.42rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(214, 167, 63, 0.16);
+        color: #f6d98a;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .quoteSuccessTitle {
+        margin: 0 0 0.45rem;
+        font-size: 1.35rem;
+        line-height: 1.2;
+      }
+
+      .quoteSuccessText {
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.78);
+        line-height: 1.65;
+      }
+
+      .quoteSuccessInner {
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .mobileServiceReview {
+        display: none;
+      }
+
+      .mobileServiceReview__card {
+        position: relative;
+        padding: 1rem 1rem 1.05rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(30, 32, 37, 0.98) 0%, rgba(16, 18, 22, 0.98) 100%);
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16);
+        overflow: hidden;
+      }
+
+      .mobileServiceReview__card::before {
+        content: "";
+        position: absolute;
+        inset: -38% auto auto 62%;
+        width: 190px;
+        height: 190px;
+        border-radius: 999px;
+        background: radial-gradient(circle, rgba(214, 167, 63, 0.18) 0%, rgba(214, 167, 63, 0) 72%);
+        pointer-events: none;
+      }
+
+      .mobileServiceReview__top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 0.95rem;
+      }
+
+      .mobileServiceReview__pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45rem 0.72rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #f6e7bb;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .mobileServiceReview__stars {
+        color: #f6d98a;
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+      }
+
+      .mobileServiceReview__media {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 0.95rem;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .mobileServiceReview__media img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .mobileServiceReview__quote {
+        position: relative;
+        z-index: 1;
+        margin: 0 0 1rem;
+        color: rgba(255, 255, 255, 0.96);
+        font-size: 1rem;
+        line-height: 1.68;
+      }
+
+      .mobileServiceReview__footer {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+      }
+
+      .mobileServiceReview__avatar {
+        display: grid;
+        place-items: center;
+        width: 2.9rem;
+        height: 2.9rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #f6e7bb 0%, #d6a73f 100%);
+        color: #111111;
+        font-weight: 900;
+      }
+
+      .mobileServiceReview__name {
+        color: #ffffff;
+        font-weight: 800;
+      }
+
+      .mobileServiceReview__meta {
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 0.92rem;
+      }
+
+      .rReviewMedia {
+        margin: 0.85rem 0 0;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .rReviewMedia img {
+        display: block;
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+      }
+
+      .rImageExpandBtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.95rem;
+        width: 100%;
+        padding: 0.82rem 1rem;
+        border: 1px solid rgba(214, 167, 63, 0.55);
+        border-radius: 14px;
+        background: rgba(214, 167, 63, 0.12);
+        color: #f6d98a;
+        font-family: Inter, Arial, sans-serif;
+        font-size: 0.92rem;
+        font-weight: 900;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+      }
+
+      .rImageExpandBtn:hover {
+        transform: translateY(-1px);
+        background: rgba(214, 167, 63, 0.18);
+        border-color: rgba(214, 167, 63, 0.82);
+      }
+
+      .rImageExpandBtn:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(214, 167, 63, 0.22);
+      }
+
+      .reviewImageModal[hidden] {
+        display: none !important;
+      }
+
+      .reviewImageModal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.25rem;
+      }
+
+      .reviewImageModal__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.78);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+
+      .reviewImageModal__panel {
+        position: relative;
+        z-index: 1;
+        width: min(980px, 100%);
+        max-height: 92vh;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: #111111;
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48);
+        overflow: hidden;
+      }
+
+      .reviewImageModal__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .reviewImageModal__title {
+        color: #ffffff;
+        font-weight: 900;
+        font-size: 0.95rem;
+      }
+
+      .reviewImageModal__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #ffffff;
+        font-size: 1.55rem;
+        font-weight: 900;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .reviewImageModal__close:hover {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .reviewImageModal__img {
+        display: block;
+        width: 100%;
+        max-height: calc(92vh - 64px);
+        object-fit: contain;
+        background: #070707;
+      }
+
+      @media (max-width: 980px) {
+        .hero__layout {
+          grid-template-columns: 1fr;
+        }
+
+        .hero__content {
+          max-width: 100%;
+        }
+
+        .hero__headline {
+          max-width: 13ch;
+        }
+
+        .heroReview {
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .hero {
+          min-height: auto;
+          overflow: hidden;
+        }
+
+        .hero::after {
+          background: linear-gradient(180deg, rgba(4, 7, 14, 0.74) 0%, rgba(4, 7, 14, 0.58) 72%, rgba(4, 7, 14, 0.3) 100%);
+        }
+
+        .hero__inner {
+          padding-top: 5.1rem;
+          padding-bottom: 7.8rem;
+        }
+
+        .hero__eyebrow {
+          margin-bottom: 0.85rem;
+          font-size: 0.75rem;
+        }
+
+        .hero__headline {
+          max-width: 14ch;
+          font-size: clamp(2.65rem, 11.9vw, 3.95rem);
+          line-height: 0.98;
+        }
+
+        .hero__content {
+          max-width: 100%;
+          padding-inline: 0.45rem;
+        }
+
+        .hero__sub {
+          max-width: 100%;
+          margin-bottom: 0;
+          font-size: 1rem;
+        }
+
+        .hero__actions {
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          gap: 1rem;
+          margin-top: 4.9rem;
+          margin-bottom: 0;
+        }
+
+        .hero__actions .btn {
+          width: 100%;
+          max-width: none;
+          border-radius: 16px;
+        }
+
+        .heroReview {
+          display: none;
+        }
+
+        .mobileServiceReview {
+          display: block;
+          margin: 0.35rem 0 4rem;
+          padding: 0;
+          background: transparent;
+        }
+      }
+    
+
+
+      /* MOST_POPULAR_CTA_V2 */
+      .btn--quote {
+        position: relative;
+        isolation: isolate;
+      }
+
+      @keyframes quoteButtonPulse {
+        0%, 100% {
+          transform: scale(1);
+          opacity: 0.55;
+        }
+        50% {
+          transform: scale(1.045);
+          opacity: 0.18;
+        }
+      }
+
+      @keyframes popularBubbleFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+      }
+
+      @media (min-width: 641px) {
+        .nav .nav__cta.btn--quote,
+        .hero__actions .btn--quote {
+          top: auto !important;
+          right: auto !important;
+          bottom: auto !important;
+          left: auto !important;
+          transform: none !important;
+          align-self: center;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+      }
+
+      .popularQuoteBubble {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 1200;
+        width: 126px;
+        height: 126px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.28rem;
+        padding: 0.8rem;
+        border: 1px solid rgba(255, 236, 166, 0.92);
+        border-radius: 999px;
+        background:
+          radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 34%),
+          linear-gradient(135deg, #ffe58d 0%, #f6d98a 34%, #d6a73f 100%);
+        color: #111111;
+        text-align: center;
+        text-decoration: none;
+        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32), 0 0 0 5px rgba(214, 167, 63, 0.14);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        animation: popularBubbleFloat 3.4s ease-in-out infinite;
+      }
+
+      .popularQuoteBubble:hover {
+        border-color: rgba(255, 247, 218, 1);
+        box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(214, 167, 63, 0.18);
+      }
+
+      .popularQuoteBubble:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(246, 217, 138, 0.44), 0 18px 42px rgba(0, 0, 0, 0.32);
+      }
+
+      .popularQuoteBubble__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.22rem 0.42rem;
+        border-radius: 999px;
+        background: rgba(17, 17, 17, 0.14);
+        color: #111111;
+        font-size: 0.58rem;
+        font-weight: 1000;
+        letter-spacing: 0.1em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .popularQuoteBubble__title {
+        color: #111111;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: 0.96rem;
+        font-weight: 900;
+        letter-spacing: 0.025em;
+        line-height: 1.02;
+        text-transform: uppercase;
+      }
+
+      .popularQuoteBubble__sub {
+        color: rgba(17, 17, 17, 0.74);
+        font-size: 0.68rem;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      @media (max-width: 640px) {
+        .hero__actions .btn--quote {
+          min-height: 64px;
+          border-radius: 18px;
+          border: 1px solid rgba(246, 217, 138, 0.74);
+          background:
+            radial-gradient(240px 90px at 18% 0%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 68%),
+            linear-gradient(135deg, #f6d98a 0%, #d6a73f 100%);
+          color: #111111;
+          font-size: 1.08rem;
+          font-weight: 1000;
+          letter-spacing: 0.055em;
+          box-shadow: 0 18px 44px rgba(214, 167, 63, 0.34), 0 0 0 5px rgba(214, 167, 63, 0.12);
+        }
+
+        .hero__actions .btn--quote::after {
+          content: "";
+          position: absolute;
+          inset: -7px;
+          z-index: -1;
+          border-radius: 24px;
+          background: rgba(246, 217, 138, 0.36);
+          animation: quoteButtonPulse 1.9s ease-in-out infinite;
+          pointer-events: none;
+        }
+
+        .nav__cta.btn--quote {
+          border-color: rgba(246, 217, 138, 0.66);
+          box-shadow: 0 12px 28px rgba(214, 167, 63, 0.24);
+        }
+
+        .popularQuoteBubble {
+          left: auto;
+          right: 12px;
+          bottom: 12px;
+          width: 118px;
+          height: 118px;
+          min-height: 0;
+          padding: 0.72rem;
+          border-radius: 999px;
+        }
+
+        .popularQuoteBubble__badge {
+          font-size: 0.54rem;
+          padding: 0.2rem 0.38rem;
+        }
+
+        .popularQuoteBubble__title {
+          font-size: 0.88rem;
+        }
+
+        .popularQuoteBubble__sub {
+          display: none;
+        }
+      }
+
+
+      /* TEMP_HIDE_POPULAR_QUOTE_BUBBLE
+         Remove this block when you want the shortcut bubble live again. */
+      .popularQuoteBubble {
+        display: none !important;
+      }
+
+
+      /* FOURTH_OF_JULY_PROMO_THEME
+         Temporary patriotic theme layer. Remove this block + the julyPromoBanner markup after the promo ends. */
+      :root {
+        --july-red: #ef233c;
+        --july-blue: #1d4ed8;
+        --july-navy: #07132d;
+        --july-white: #ffffff;
+        --july-cream: #fff4d6;
+        --july-gold: #ffd166;
+      }
+
+      .julyPromoBanner {
+        position: relative;
+        z-index: 3;
+        margin: 0 0 clamp(1.3rem, 2.2vw, 2rem);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 26px;
+        background:
+          radial-gradient(circle at 9% 16%, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 18%),
+          radial-gradient(circle at 89% 24%, rgba(239, 35, 60, 0.34), rgba(239, 35, 60, 0) 26%),
+          linear-gradient(110deg, rgba(7, 19, 45, 0.94) 0%, rgba(29, 78, 216, 0.92) 47%, rgba(239, 35, 60, 0.9) 100%);
+        color: #ffffff;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.34), 0 0 0 5px rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        isolation: isolate;
+      }
+
+      .julyPromoBanner::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0 8px, rgba(255, 255, 255, 0) 8px 18px);
+        opacity: 0.22;
+        pointer-events: none;
+      }
+
+      .julyPromoBanner::after {
+        content: "★ ★ ★";
+        position: absolute;
+        right: clamp(0.9rem, 2vw, 1.4rem);
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.22);
+        font-size: clamp(2.5rem, 5vw, 4.6rem);
+        letter-spacing: 0.13em;
+        pointer-events: none;
+      }
+
+      .julyPromoBanner__inner {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: clamp(0.95rem, 2vw, 1.18rem) clamp(1rem, 2.4vw, 1.45rem);
+      }
+
+      .julyPromoBanner__copy {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.72rem;
+        min-width: 0;
+      }
+
+      .julyPromoBanner__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.42rem 0.72rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff4d6;
+        font-size: 0.72rem;
+        font-weight: 1000;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .julyPromoBanner__main {
+        color: #ffffff;
+        font-family: Oswald, Inter, sans-serif;
+        font-size: clamp(1.08rem, 2vw, 1.48rem);
+        font-weight: 900;
+        letter-spacing: 0.025em;
+        line-height: 1.05;
+        text-transform: uppercase;
+      }
+
+      .julyPromoBanner__sub {
+        color: rgba(255, 255, 255, 0.78);
+        font-size: 0.93rem;
+        font-weight: 700;
+      }
+
+      .julyPromoBanner__cta {
+        flex: 0 0 auto;
+        border: 1px solid rgba(255, 255, 255, 0.85) !important;
+        background:
+          radial-gradient(130px 70px at 20% 0%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 72%),
+          linear-gradient(135deg, #ffffff 0%, #fff4d6 100%) !important;
+        color: #07132d !important;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28) !important;
+      }
+
+      .hero::after {
+        background:
+          linear-gradient(90deg, rgba(7, 19, 45, 0.78) 0%, rgba(7, 19, 45, 0.56) 44%, rgba(29, 78, 216, 0.28) 100%),
+          linear-gradient(180deg, rgba(239, 35, 60, 0.08) 0%, rgba(0,0,0,0.42) 100%);
+      }
+
+      .hero__eyebrow,
+      .heroReview__pill,
+      .mobileServiceReview__pill,
+      .quoteSuccessBadge {
+        color: #fff4d6;
+      }
+
+      .hero__eyebrowDot {
+        background: linear-gradient(135deg, var(--july-red) 0%, var(--july-white) 48%, var(--july-blue) 100%);
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.55), 0 0 26px rgba(239, 35, 60, 0.35);
+      }
+
+      .hero__headlineAccent,
+      .heroReview__stars,
+      .mobileServiceReview__stars,
+      .rStars {
+        color: var(--july-gold) !important;
+      }
+
+      .btn--quote,
+      .quoteNext,
+      .contactSubmit {
+        border-color: rgba(239, 35, 60, 0.72) !important;
+        background:
+          radial-gradient(220px 90px at 18% 0%, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 68%),
+          linear-gradient(135deg, var(--july-red) 0%, #b91c1c 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 16px 38px rgba(239, 35, 60, 0.26), 0 0 0 4px rgba(239, 35, 60, 0.08) !important;
+      }
+
+      .btn--quote:hover,
+      .quoteNext:hover,
+      .contactSubmit:hover {
+        border-color: rgba(255, 255, 255, 0.7) !important;
+        filter: brightness(1.05);
+      }
+
+      .btn--call,
+      .btn--heroSecondary {
+        border-color: rgba(255, 255, 255, 0.22) !important;
+        background: rgba(29, 78, 216, 0.18) !important;
+      }
+
+      .tag,
+      .stepNum,
+      .popularQuoteBubble__badge {
+        background: linear-gradient(135deg, var(--july-blue) 0%, var(--july-red) 100%) !important;
+        color: #ffffff !important;
+      }
+
+      .section--light {
+        background:
+          radial-gradient(circle at 8% 8%, rgba(29, 78, 216, 0.08), rgba(29, 78, 216, 0) 24%),
+          radial-gradient(circle at 92% 18%, rgba(239, 35, 60, 0.07), rgba(239, 35, 60, 0) 24%),
+          #ffffff;
+      }
+
+      .section--dark,
+      .footer {
+        background:
+          radial-gradient(circle at 10% 0%, rgba(239, 35, 60, 0.14), rgba(239, 35, 60, 0) 28%),
+          radial-gradient(circle at 88% 8%, rgba(29, 78, 216, 0.18), rgba(29, 78, 216, 0) 30%),
+          #070b16 !important;
+      }
+
+      .heroReview,
+      .mobileServiceReview__card,
+      .rCard--dark,
+      .areaCard,
+      .quoteSuccessWrap {
+        border-color: rgba(255, 255, 255, 0.16) !important;
+        box-shadow: 0 28px 70px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(239, 35, 60, 0.08) !important;
+      }
+
+      .serviceCard__overlay {
+        background: linear-gradient(180deg, rgba(7, 19, 45, 0.18) 0%, rgba(7, 19, 45, 0.78) 100%) !important;
+      }
+
+      .serviceCard__shine {
+        background: linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 44%, rgba(255,255,255,0) 80%) !important;
+      }
+
+      @media (max-width: 760px) {
+        .julyPromoBanner__inner {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .julyPromoBanner__copy {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 0.48rem;
+        }
+
+        .julyPromoBanner__sub {
+          font-size: 0.88rem;
+        }
+
+        .julyPromoBanner__cta {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+
+/* Keep all quote buttons using the original site button font */
+.btn,
+.btn--quote,
+.nav__cta,
+.quoteNext,
+.quoteBack {
+  font-family: inherit !important;
+}
+
+    </style>
+
+  </head>
+
+  <body>
+    <header class="header" id="top">
+      <div class="container header__inner">
+        <a class="brand" href="#top" aria-label="Home">
+          <img
+            class="brand__logo"
+            src="./Untitled design (2).png"
+            alt="Keizer Mobile Detailing logo"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            width="74"
+            height="74"
+          />
+          <div class="brand__text">
+            <span class="brand__name">
+              <span class="brand__nameLine">Keizer Mobile</span>
+              <span class="brand__nameLine">Detailing</span>
+            </span>
+          </div>
+        </a>
+
+        <button class="navToggle" aria-label="Open menu" aria-expanded="false" data-nav-toggle>
+          <span></span><span></span><span></span>
+        </button>
+
+        <nav class="nav" data-nav>
+          <a href="#services">Services</a>
+          <a href="#work">Our Work</a>
+          <a href="#process">How It Works</a>
+          <a href="#about">About</a>
+          <a href="#reviews">Reviews</a>
+          <a class="btn btn--quote nav__cta" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero" aria-label="Hero">
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="container hero__inner">
+
+        <div class="julyPromoBanner" role="region" aria-label="Fourth of July promotion">
+          <div class="julyPromoBanner__inner">
+            <div class="julyPromoBanner__copy">
+              <span class="julyPromoBanner__badge">4th of July Special</span>
+              <span class="julyPromoBanner__main">Book 1 car, get the next 30% off.</span>
+              <span class="julyPromoBanner__sub">Summer promo for multi-car details.</span>
+            </div>
+            <a class="btn btn--quote julyPromoBanner__cta" href="./quote.html" data-quote-link>GET QUOTE</a>
+          </div>
+        </div>
+        <div class="hero__layout">
+          <div class="hero__content">
+            <div class="hero__eyebrow">
+              <span class="hero__eyebrowDot" aria-hidden="true"></span>
+              Mobile detailing in Keizer &amp; Salem
+            </div>
+
+            <h1 class="hero__headline">BRING YOUR <span class="hero__headlineAccent">CAR</span> BACK TO LIFE.</h1>
+            <p class="hero__sub">
+              Interior and exterior detailing that makes your car feel fresh, clean, and reset the second you get back in.
+            </p>
+
+            <div class="hero__actions">
+              <a class="btn btn--quote btn--lg" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+              <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
+            </div>
+          </div>
+
+          <aside class="heroReview" aria-label="Featured customer review">
+            <div class="heroReview__top">
+              <span class="heroReview__pill">Top Review</span>
+              <div class="heroReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+
+            <div class="heroReview__media">
+              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+            </div>
+
+            <p class="heroReview__quote">
+              “My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!”
+            </p>
+
+            <div class="heroReview__footer">
+              <div class="heroReview__avatar" aria-hidden="true">ED</div>
+              <div>
+                <div class="heroReview__name">Edgar Diaz</div>
+                <div class="heroReview__meta">Google review · G-Wagon detail</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--light" id="services">
+      <div class="container">
+        <div class="mobileServiceReview" aria-label="Mobile review section">
+          <article class="mobileServiceReview__card">
+            <div class="mobileServiceReview__top">
+              <span class="mobileServiceReview__pill">Featured Review</span>
+              <div class="mobileServiceReview__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            </div>
+
+            <div class="mobileServiceReview__media">
+              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+            </div>
+
+            <p class="mobileServiceReview__quote">
+              “My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!”
+            </p>
+
+            <div class="mobileServiceReview__footer">
+              <div class="mobileServiceReview__avatar" aria-hidden="true">ED</div>
+              <div>
+                <div class="mobileServiceReview__name">Edgar Diaz</div>
+                <div class="mobileServiceReview__meta">Google review · G-Wagon detail</div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="section__head">
+          <h2 class="section__title">SERVICES</h2>
+          <p class="section__sub">Tap a service to see what's included. Quotes are based on vehicle size and condition.</p>
+        </div>
+
+        <div class="serviceWrap">
+          <article class="serviceCard" data-bg="./2017-05-22-07-32-26.jpg">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <div class="serviceCard__titleBlock">
+                  <h3>INTERIOR</h3>
+                  <p class="serviceCard__mini">3 levels — from quick refresh to deep reset.</p>
+                </div>
+                <span class="tag">Most Popular</span>
+              </div>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="serviceCard" data-bg="./c36084da09340612d8431de0221ea985.jpg">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <div class="serviceCard__titleBlock">
+                  <h3>EXTERIOR</h3>
+                  <p class="serviceCard__mini">3 wash levels. Safe wash to premium protection.</p>
+                </div>
+                <span class="tag">Gloss Reset</span>
+              </div>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="serviceCard" data-bg="./img_6480.webp">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <div class="serviceCard__titleBlock">
+                  <h3>UPKEEP</h3>
+                  <p class="serviceCard__mini">Maintenance plan for returning clients.</p>
+                </div>
+                <span class="tag">Returning</span>
+              </div>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="serviceCard" data-bg="./2626cb4b-d7f8-4cb3-b79b-be682b3b9112.png">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <div class="serviceCard__titleBlock">
+                  <h3>CERAMIC</h3>
+                  <p class="serviceCard__mini">Longer gloss, easier washes, protection.</p>
+                </div>
+                <span class="tag tag--ghost">Hidden</span>
+              </div>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="serviceCard" data-bg="./bee.jpg">
+            <div class="serviceCard__overlay"></div>
+            <div class="serviceCard__shine" aria-hidden="true"></div>
+            <div class="serviceCard__content">
+              <div class="serviceCard__top">
+                <div class="serviceCard__titleBlock">
+                  <h3>CORRECTION</h3>
+                  <p class="serviceCard__mini">Swirl removal, clarity, deeper shine.</p>
+                </div>
+                <span class="tag tag--ghost">Hidden</span>
+              </div>
+              <div class="serviceCard__actions">
+                <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
+                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--dark" id="work">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title section__title--dark">RECENT TRANSFORMATIONS</h2>
+          <p class="section__sub section__sub--dark">Drag the slider to reveal the after.</p>
+        </div>
+
+        <div class="carousel carousel--outsideNav" data-carousel="work">
+          <div class="carousel__frame">
+            <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous">&#8249;</button>
+
+            <div class="carousel__viewport" data-carousel-viewport>
+              <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
+
+              <div class="carousel__track" data-carousel-track>
+                <div class="carousel__slide">
+                  <div
+                    class="compare compare--fill"
+                    data-compare
+                    data-before="./IMG_2469.jpg"
+                    data-after="./IMG_2461.jpg"
+                    aria-label="Before and after comparison"
+                  >
+                    <div class="compare__stage" aria-hidden="true"></div>
+                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+                    <div class="compare__handle" aria-hidden="true"></div>
+                  </div>
+                </div>
+
+                <div class="carousel__slide">
+                  <div
+                    class="compare compare--fill"
+                    data-compare
+                    data-before="./IMG_2919 (1).jpg"
+                    data-after="./IMG_2912.jpg"
+                    aria-label="Before and after comparison"
+                  >
+                    <div class="compare__stage" aria-hidden="true"></div>
+                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+                    <div class="compare__handle" aria-hidden="true"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next">&#8250;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--light" id="reels">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">REAL JOB CLIPS</h2>
+          <p class="section__sub">Tap a clip to play on desktop.</p>
+        </div>
+
+        <div class="reelsWrap">
+          <div class="reelsBar" aria-hidden="true">
+            <div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div>
+          </div>
+
+          <div class="reels" data-reels aria-label="Short video clips of detailing work">
+            <article class="reel" data-reel>
+              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 1">
+                <source
+                  src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
+                  type="video/mp4"
+                />
+              </video>
+
+              <div class="reel__overlay" aria-hidden="true">
+                <div class="reel__playBadge">
+                  <span class="reel__playIcon"></span>
+                  <span class="reel__playText">PLAY VIDEO</span>
+                </div>
+              </div>
+
+              <div class="reel__meta">
+                <div class="reel__title">Interior Reset</div>
+              </div>
+            </article>
+
+            <article class="reel" data-reel>
+              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 2">
+                <source
+                  src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4"
+                  type="video/mp4"
+                />
+              </video>
+
+              <div class="reel__overlay" aria-hidden="true">
+                <div class="reel__playBadge">
+                  <span class="reel__playIcon"></span>
+                  <span class="reel__playText">PLAY VIDEO</span>
+                </div>
+              </div>
+
+              <div class="reel__meta">
+                <div class="reel__title">Deep Clean Moment</div>
+              </div>
+            </article>
+
+            <article class="reel" data-reel>
+              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 3">
+                <source
+                  src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4"
+                  type="video/mp4"
+                />
+              </video>
+
+              <div class="reel__overlay" aria-hidden="true">
+                <div class="reel__playBadge">
+                  <span class="reel__playIcon"></span>
+                  <span class="reel__playText">PLAY VIDEO</span>
+                </div>
+              </div>
+
+              <div class="reel__meta">
+                <div class="reel__title">Finish &amp; Shine</div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--light" id="process">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title">HOW IT WORKS</h2>
+          <p class="section__sub">Simple process. Clear communication. Clean results.</p>
+        </div>
+
+        <div class="steps">
+          <article class="stepCard">
+            <div class="stepTop">
+              <span class="stepNum">1</span>
+              <h3 class="stepTitle">Get a quote online</h3>
+            </div>
+            <p class="stepText">Choose your vehicle size and condition. It takes under a minute.</p>
+          </article>
+
+          <article class="stepCard">
+            <div class="stepTop">
+              <span class="stepNum">2</span>
+              <h3 class="stepTitle">We reach out and schedule</h3>
+            </div>
+            <p class="stepText">We confirm details, give you the earliest opening, and lock in a time that works.</p>
+          </article>
+
+          <article class="stepCard">
+            <div class="stepTop">
+              <span class="stepNum">3</span>
+              <h3 class="stepTitle">We provide the service</h3>
+            </div>
+            <p class="stepText">We show up ready, do the work properly, and focus on what you care about most.</p>
+          </article>
+
+          <article class="stepCard stepCard--finish">
+            <div class="stepTop">
+              <span class="stepNum">4</span>
+              <h3 class="stepTitle">Enjoy a clean, spotless car</h3>
+            </div>
+            <p class="stepText">That "reset" feeling you notice immediately.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--dark" id="service-area">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title section__title--dark">SERVICE AREA</h2>
+          <p class="section__sub section__sub--dark">Serving Keizer, Salem, Portland, and nearby areas.</p>
+        </div>
+
+        <div class="areaGrid">
+          <div class="areaMap">
+            <img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" decoding="async" />
+          </div>
+
+          <div class="areaCard">
+            <h3 class="areaTitle">Where we come to you</h3>
+            <p class="areaText">
+              We're mobile — we detail at your home or location. If you're in the Keizer/Salem area or up in Portland and surrounding suburbs,
+              there's a strong chance you're in range. Not sure? Send your address and we'll confirm quickly.
+            </p>
+
+            <div class="areaList">
+              <div class="areaList__title">Areas we serve:</div>
+              <ul class="areaList__ul">
+                <li>Keizer</li>
+                <li>Salem</li>
+                <li>Portland</li>
+                <li>Tigard</li>
+                <li>Lake Oswego</li>
+                <li>Nearby areas (ask to confirm)</li>
+              </ul>
+            </div>
+
+            <div class="areaActions">
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+              <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--light" id="about">
+      <div class="container">
+        <div class="aboutGrid">
+          <div class="aboutCopy">
+            <h3 class="aboutTitle">About Keizer Mobile Detailing</h3>
+            <p class="aboutText">
+              Keizer Mobile Detailing is a professional mobile detailing company serving the local area with high-quality interior and exterior services.
+              We bring everything needed directly to your home or workplace, making it simple to keep your vehicle clean and protected.
+              Our focus is on reliable service, attention to detail, and results that make your car look its best.
+            </p>
+
+            <div class="aboutActions">
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+              <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            </div>
+          </div>
+
+          <div class="aboutMedia">
+            <img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--dark" id="reviews">
+      <div class="container">
+        <div class="section__head">
+          <h2 class="section__title section__title--dark">REVIEWS</h2>
+          <p class="section__sub section__sub--dark">This is what people are saying.</p>
+        </div>
+
+        <div class="reviewsRailWrap reviewsRailWrap--roomy" data-rail>
+          <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">&#8249;</button>
+
+          <div class="reviewsRail reviewsRail--dark" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">SK</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">Samuel Kumpula</div>
+                  <div class="rLoc rLoc--dark">1 review</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              </div>
+              <p class="rText rText--dark">Was professional and I love supporting local businesses!</p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">CF</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">Carhart Family</div>
+                  <div class="rLoc rLoc--dark">1 review</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              </div>
+              <p class="rText rText--dark">
+                Was great with scheduling, showed up on time and messaged ahead! Quality work showed up prepared to finish job. Did better than expected
+                to an older car. Would recommend them to anyone looking for a good price and quality job!
+              </p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">ED</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">Edgar Diaz</div>
+                  <div class="rLoc rLoc--dark">5 reviews · Google review</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              </div>
+              <p class="rText rText--dark">
+                My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!
+              </p>
+              <button class="rImageExpandBtn" type="button" data-review-image-open="./unnamed.webp">
+                Expand Image
+              </button>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">TS</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">Tony Salazar</div>
+                  <div class="rLoc rLoc--dark">2 reviews · Google review</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              </div>
+              <p class="rText rText--dark">The guy did an amazing Job with our car , loved it.</p>
+            </article>
+
+            <article class="rCard rCard--rail rCard--dark">
+              <div class="rHead">
+                <div class="rAvatar rAvatar--dark">CR</div>
+                <div class="rMeta">
+                  <div class="rName rName--dark">Customer Review</div>
+                  <div class="rLoc rLoc--dark">Google review</div>
+                </div>
+                <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+              </div>
+              <p class="rText rText--dark">
+                Josh was on time. Professional and detailed. Did an excellent job overall on two cars. Would recommend him anytime. Top quality.
+              </p>
+            </article>
+          </div>
+
+          <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">&#8250;</button>
+        </div>
+
+        <div class="sectionCtas sectionCtas--dark">
+          <a class="btn btn--call" href="https://share.google/3BiUyeanYHarNl1i2" target="_blank" rel="noopener noreferrer">
+            LEAVE A REVIEW
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer footer--light">
+      <div class="container footerMini footerMini--light">
+        <div class="footerMini__left">
+          <div class="footerMini__name footerMini__name--light">Keizer Mobile Detailing</div>
+        </div>
+        <div class="footerMini__right">
+          <div class="footerMini__actions">
+            <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            <button class="btn btn--call" type="button" data-contact-open>CONTACT</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom footer__bottom--light">
+        <div class="container footer__bottomInner footer__bottomInner--light">
+          <span>&#169; <span data-year></span> Keizer Mobile Detailing</span>
+          <span class="footerProduced">
+            <a
+              class="footerLink"
+              href="https://www.instagram.com/keizermobiledetail?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw%3D%3D"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Instagram</a
+            >
+            <span class="footerSep">&#8226;</span>
+            Website produced by Kumpula Marketing
+          </span>
+        </div>
+      </div>
+    </footer>
+
+    <a
+      class="popularQuoteBubble"
+      href="./quote.html?preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=standard&exteriorPackage=standard&start=vehicle"
+      data-quote-link
+      data-popular-quote-bubble
+      aria-label="Get the most popular standard inside and outside detail quote"
+    >
+      <span class="popularQuoteBubble__badge">Most Popular</span>
+      <span class="popularQuoteBubble__title">Standard In + Out</span>
+    </a>
+
+
+    <div class="reviewImageModal" hidden data-review-image-modal aria-hidden="true">
+      <div class="reviewImageModal__overlay" data-review-image-close></div>
+      <div class="reviewImageModal__panel" role="dialog" aria-modal="true" aria-label="Expanded customer review image">
+        <div class="reviewImageModal__top">
+          <div class="reviewImageModal__title">Edgar Diaz Review Image</div>
+          <button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button>
+        </div>
+        <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" data-review-image-img />
+      </div>
+    </div>
+
+    <div class="modal" aria-hidden="true" data-modal>
+      <div class="modal__overlay" data-modal-close></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
+        <button class="modal__close" aria-label="Close" data-modal-close>&#215;</button>
+        <h3 class="modal__title" data-modal-title>Service</h3>
+        <div class="modal__content" data-modal-content></div>
+        <div class="modal__actions">
+          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+          <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal modal--call" aria-hidden="true" data-call-modal>
+      <div class="modal__overlay" data-call-close></div>
+      <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
+        <button class="modal__close" aria-label="Close" data-call-close>&#215;</button>
+        <h3 class="callTitle">CALL OR TEXT</h3>
+        <p class="callText">Text 2 to 3 photos for the fastest quote.</p>
+        <a class="callNumber" href="tel:+19712865503">(971) 286-5503</a>
+        <p class="callHint">Include: vehicle size and condition if you know it.</p>
+      </div>
+    </div>
+
+    <div class="modal modal--contact" aria-hidden="true" data-contact-modal>
+      <div class="modal__overlay" data-contact-close></div>
+
+      <div class="contactPanel" role="dialog" aria-modal="true" aria-label="Contact us">
+        <button class="modal__close" aria-label="Close" data-contact-close>&#215;</button>
+
+        <h3 class="contactTitle">CONTACT US</h3>
+        <p class="contactText">Ask a question or send a message. We usually reply fast.</p>
+
+        <form class="contactForm" data-contact-form novalidate>
+          <div class="contactGrid">
+            <div class="cField">
+              <label for="cName">Name</label>
+              <input id="cName" name="name" type="text" autocomplete="name" required placeholder="Your name" />
+            </div>
+
+            <div class="cField">
+              <label for="cPhone">Phone</label>
+              <input id="cPhone" name="phone" type="tel" autocomplete="tel" placeholder="(971) 555-1234" />
+            </div>
+          </div>
+
+          <div class="contactGrid">
+            <div class="cField">
+              <label for="cEmail">Email</label>
+              <input id="cEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+            </div>
+
+            <div class="cField">
+              <label for="cPreferredContact">Preferred Contact Method</label>
+              <select id="cPreferredContact" name="preferredContact">
+                <option value="phone">Phone</option>
+                <option value="email">Email</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="cField">
+            <label for="cMessage">Message</label>
+            <textarea id="cMessage" name="message" required placeholder="What can we help with?"></textarea>
+          </div>
+
+          <input type="text" name="website" tabindex="-1" autocomplete="off" class="hpField" aria-hidden="true" />
+
+          <button class="btn btn--quote contactSubmit" type="submit" data-contact-submit>
+            SEND MESSAGE
+          </button>
+
+          <div class="contactStatus" data-contact-status aria-live="polite"></div>
+        </form>
+
+        <p class="contactFine">
+          Prefer texting? <a href="tel:+19712865503">(971) 286-5503</a>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      window.CONTACT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZQ_Jf4Rp27mL9nyRn_2oAVtwt_RIhXskoB2GjTmyJYGLBdkd7LKgKNNOK457clicn/exec";
+    </script>
+
+    <script src="./script.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const lazyBackgrounds = Array.from(document.querySelectorAll("[data-bg]"));
+        const lazyCompares = Array.from(document.querySelectorAll(".compare[data-before][data-after]"));
+
+        function loadBackground(el) {
+          const bg = el.getAttribute("data-bg");
+          if (!bg) return;
+          el.style.backgroundImage = `url('${bg}')`;
+          el.removeAttribute("data-bg");
+        }
+
+        function loadCompare(el) {
+          const before = el.getAttribute("data-before");
+          const after = el.getAttribute("data-after");
+          if (before) el.style.setProperty("--before", `url('${before}')`);
+          if (after) el.style.setProperty("--after", `url('${after}')`);
+          el.removeAttribute("data-before");
+          el.removeAttribute("data-after");
+        }
+
+        if ("IntersectionObserver" in window) {
+          const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+              if (!entry.isIntersecting) return;
+              const el = entry.target;
+              if (el.hasAttribute("data-bg")) loadBackground(el);
+              if (el.matches(".compare")) loadCompare(el);
+              obs.unobserve(el);
+            });
+          }, { rootMargin: "180px 0px" });
+
+          lazyBackgrounds.forEach(el => observer.observe(el));
+          lazyCompares.forEach(el => observer.observe(el));
+        } else {
+          lazyBackgrounds.forEach(loadBackground);
+          lazyCompares.forEach(loadCompare);
+        }
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const quoteButtons = document.querySelectorAll("[data-quote-link]");
+        const callButtons = document.querySelectorAll("[data-call-open]");
+        const contactButtons = document.querySelectorAll("[data-contact-open]");
+        const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+        const contactForm = document.querySelector("[data-contact-form]");
+
+        quoteButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            if (button.matches("[data-popular-quote-bubble]")) {
+              const popularPreset = {
+                preset: "standard-in-out",
+                quick: "standard-inside-outside",
+                autoPreset: "standard-in-out",
+                category: "both",
+                service: "inside-outside",
+                interiorPackage: "standard",
+                exteriorPackage: "standard",
+                start: "vehicle",
+                skipServiceSelection: true,
+                forceContactAfterVehicle: true
+              };
+
+              try {
+                sessionStorage.setItem("kmdQuotePreset", JSON.stringify(popularPreset));
+                localStorage.setItem("kmdQuotePreset", JSON.stringify(popularPreset));
+              } catch (error) {}
+            }
+
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: button.matches("[data-popular-quote-bubble]") ? "most_popular_bubble_click" : "quote_button_click"
+              });
+            }
+          });
+        });
+
+        callButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "call_button_click"
+              });
+            }
+          });
+        });
+
+        contactButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "contact_button_click"
+              });
+            }
+          });
+        });
+
+        phoneLinks.forEach((link) => {
+          link.addEventListener("click", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "contact", {
+                event_category: "engagement",
+                event_label: "phone_number_click"
+              });
+            }
+          });
+        });
+
+        if (contactForm) {
+          contactForm.addEventListener("submit", function () {
+            if (typeof gtag === "function") {
+              gtag("event", "generate_lead", {
+                event_category: "engagement",
+                event_label: "contact_form_submit"
+              });
+            }
+          });
+        }
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const contactForm = document.querySelector("[data-contact-form]");
+        const contactStatus = document.querySelector("[data-contact-status]");
+        const quoteBody = document.querySelector("[data-quote-body]");
+
+        const spamKeywords = [
+          "seo",
+          "backlink",
+          "guest post",
+          "website traffic",
+          "crypto",
+          "forex",
+          "viagra",
+          "casino",
+          "loan",
+          "loan approval",
+          "telegram"
+        ];
+
+        if (contactForm) {
+          contactForm.addEventListener("submit", function (event) {
+            const honeyPot = contactForm.querySelector('input[name="website"]');
+            const messageField = contactForm.querySelector("#cMessage");
+            const emailField = contactForm.querySelector("#cEmail");
+            const combinedText = [
+              honeyPot ? honeyPot.value : "",
+              messageField ? messageField.value : "",
+              emailField ? emailField.value : ""
+            ].join(" ").toLowerCase();
+
+            const isSpam = spamKeywords.some((keyword) => combinedText.includes(keyword)) || (honeyPot && honeyPot.value.trim() !== "");
+
+            if (isSpam) {
+              event.preventDefault();
+              if (contactStatus) {
+                contactStatus.textContent = "Message blocked. Please remove promotional or spam-like wording and try again.";
+              }
+            }
+          });
+        }
+
+        function enhanceBookedScreen() {
+          if (!quoteBody) return;
+
+          const bodyText = quoteBody.textContent.toLowerCase();
+          const looksLikeSuccess =
+            bodyText.includes("you're booked") ||
+            bodyText.includes("you’re booked") ||
+            bodyText.includes("booking confirmed") ||
+            bodyText.includes("thank you") ||
+            bodyText.includes("we'll reach out") ||
+            bodyText.includes("we’ll reach out");
+
+          quoteBody.classList.toggle("quoteBody--success", looksLikeSuccess);
+
+          if (!looksLikeSuccess) return;
+          if (quoteBody.querySelector(".quoteSuccessWrap")) return;
+
+          const originalMarkup = quoteBody.innerHTML.trim();
+          if (!originalMarkup) return;
+
+          quoteBody.innerHTML = `
+            <div class="quoteSuccessWrap">
+              <div class="quoteSuccessBadge">Request received</div>
+              <h4 class="quoteSuccessTitle">You’re booked in.</h4>
+              <p class="quoteSuccessText">
+                Your request came through. We’ll reach out shortly to confirm the details and lock everything in.
+              </p>
+              <div class="quoteSuccessInner">${originalMarkup}</div>
+            </div>
+          `;
+        }
+
+        enhanceBookedScreen();
+
+        if (quoteBody) {
+          const quoteObserver = new MutationObserver(function () {
+            enhanceBookedScreen();
+          });
+
+          quoteObserver.observe(quoteBody, {
+            childList: true,
+            subtree: true,
+            characterData: true
+          });
+        }
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const reviewImageModal = document.querySelector("[data-review-image-modal]");
+        const reviewImageImg = document.querySelector("[data-review-image-img]");
+        const reviewImageOpenButtons = document.querySelectorAll("[data-review-image-open]");
+        const reviewImageCloseButtons = document.querySelectorAll("[data-review-image-close]");
+
+        function openReviewImage(src) {
+          if (!reviewImageModal) return;
+
+          if (reviewImageImg && src) {
+            reviewImageImg.src = src;
+          }
+
+          reviewImageModal.hidden = false;
+          reviewImageModal.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+        }
+
+        function closeReviewImage() {
+          if (!reviewImageModal) return;
+
+          reviewImageModal.hidden = true;
+          reviewImageModal.setAttribute("aria-hidden", "true");
+          document.body.style.overflow = "";
+        }
+
+        reviewImageOpenButtons.forEach((button) => {
+          button.addEventListener("click", function () {
+            openReviewImage(button.getAttribute("data-review-image-open") || "./unnamed.webp");
+          });
+        });
+
+        reviewImageCloseButtons.forEach((button) => {
+          button.addEventListener("click", closeReviewImage);
+        });
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && reviewImageModal && !reviewImageModal.hidden) {
+            closeReviewImage();
+          }
+        });
+      });
+    </script>
+
+    <script>
+      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+  </body>
+</html>
