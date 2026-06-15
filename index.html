@@ -1731,19 +1731,32 @@
     }
     .fireworkSpark{
       position:absolute;
-      width:6px;
-      height:6px;
+      width:10px;
+      height:10px;
       border-radius:999px;
       background:var(--spark-color,#f6d98a);
-      box-shadow:0 0 16px var(--spark-color,#f6d98a);
+      box-shadow:
+        0 0 10px var(--spark-color,#f6d98a),
+        0 0 26px var(--spark-color,#f6d98a),
+        0 0 54px rgba(255,255,255,.36);
       transform:translate(-50%,-50%);
-      animation:fireworkSpark .85s cubic-bezier(.16,.78,.27,1) forwards;
+      animation:fireworkSpark 1.18s cubic-bezier(.16,.78,.27,1) forwards;
       will-change:transform,opacity;
     }
+    .fireworkSpark::after{
+      content:"";
+      position:absolute;
+      inset:-7px;
+      border-radius:999px;
+      border:1px solid var(--spark-color,#f6d98a);
+      opacity:.55;
+      filter:blur(.2px);
+    }
     @keyframes fireworkSpark{
-      0%{opacity:0;transform:translate(-50%,-50%) scale(.65);}
-      14%{opacity:1;}
-      100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.15);}
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.45);}
+      10%{opacity:1;}
+      56%{opacity:.95;}
+      100%{opacity:0;transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(.18);}
     }
 
     @media (max-width:767px){
@@ -1767,7 +1780,7 @@
       .footerMini__deal{font-size:.66rem;letter-spacing:.08em;}
       .footerMini__actions .btn{width:100%;border-radius:16px;min-height:54px;}
       .footer::before{background-position:center;}
-      .fireworkSpark{width:5px;height:5px;}
+      .fireworkSpark{width:8px;height:8px;}
     }
 
     @media (prefers-reduced-motion:reduce){
@@ -1788,11 +1801,26 @@
       border-bottom:0!important;
       box-shadow:none!important;
     }
-    .saleTopBar::before{display:none!important;}
+    .saleTopBar::before{
+      display:block!important;
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 6% 50%,rgba(255,255,255,.9) 0 1px,transparent 1.8px),
+        radial-gradient(circle at 18% 24%,rgba(255,255,255,.7) 0 1px,transparent 1.7px),
+        radial-gradient(circle at 31% 72%,rgba(255,255,255,.62) 0 1px,transparent 1.7px),
+        radial-gradient(circle at 47% 34%,rgba(255,255,255,.72) 0 1px,transparent 1.7px),
+        radial-gradient(circle at 64% 66%,rgba(255,255,255,.72) 0 1px,transparent 1.7px),
+        radial-gradient(circle at 82% 28%,rgba(255,255,255,.66) 0 1px,transparent 1.7px),
+        radial-gradient(circle at 95% 58%,rgba(255,255,255,.86) 0 1px,transparent 1.8px);
+      opacity:.72;
+      pointer-events:none;
+    }
     .saleTopBar__inner{
       min-height:30px!important;
-      padding:.28rem 0!important;
-      gap:.58rem!important;
+      padding:.26rem 0!important;
+      gap:.44rem!important;
       color:#ffffff!important;
       font-size:.72rem!important;
       font-weight:950!important;
@@ -1801,37 +1829,58 @@
       text-transform:uppercase!important;
     }
     .saleTopBar__copy,
-    .saleTopBar__timer{
+    .saleTopBar__timer,
+    .saleTopBar__timerWrap{
       display:inline-flex;
       align-items:center;
       justify-content:center;
       color:#ffffff!important;
       white-space:nowrap;
+      position:relative;
+      z-index:1;
     }
     .saleTopBar__copy{max-width:none!important;}
+    .saleTopBar__timerWrap{
+      gap:.32rem;
+      padding-left:.48rem;
+      border-left:1px solid rgba(255,255,255,.46);
+    }
     .saleTopBar__timer{
-      padding-left:.58rem;
-      border-left:1px solid rgba(255,255,255,.42);
       font-size:.68rem;
       letter-spacing:.07em;
+      font-variant-numeric:tabular-nums;
     }
-    .saleTopBar__star{display:none!important;}
-    .patriotDivider,
-    .julyCta{display:none!important;}
+    .saleTopBar__star{
+      display:inline-flex!important;
+      color:#ffffff!important;
+      opacity:.96;
+      font-size:.74em;
+      line-height:1;
+      text-shadow:0 0 10px rgba(255,255,255,.5);
+      position:relative;
+      z-index:1;
+    }
+    .patriotDivider{display:none!important;}
+    .julyCta{display:block!important;}
 
     @media (max-width:767px){
       .saleTopBar__inner{
         min-height:24px!important;
-        padding:.16rem 0!important;
-        gap:.38rem!important;
-        font-size:.59rem!important;
-        letter-spacing:.055em!important;
+        padding:.14rem 0!important;
+        gap:.26rem!important;
+        font-size:.57rem!important;
+        letter-spacing:.048em!important;
+      }
+      .saleTopBar__timerWrap{
+        gap:.2rem;
+        padding-left:.27rem;
       }
       .saleTopBar__timer{
-        padding-left:.38rem;
-        font-size:.57rem;
-        letter-spacing:.045em;
+        font-size:.55rem;
+        letter-spacing:.035em;
       }
+      .saleTopBar__star{font-size:.7em;}
+      .saleTopBar__star--mid{display:none!important;}
     }
 
 </style>
@@ -1845,8 +1894,14 @@
 <body>
   <div class="saleTopBar" aria-label="4th of July sale countdown">
     <div class="container saleTopBar__inner">
+      <span class="saleTopBar__star" aria-hidden="true">★</span>
       <span class="saleTopBar__copy">4TH OF JULY SALE</span>
-      <span class="saleTopBar__timer" data-july-countdown>LOADING TIMER</span>
+      <span class="saleTopBar__star saleTopBar__star--mid" aria-hidden="true">★</span>
+      <span class="saleTopBar__timerWrap" aria-label="Countdown until July 4th">
+        <span class="saleTopBar__star" aria-hidden="true">★</span>
+        <span class="saleTopBar__timer" data-july-countdown>LOADING</span>
+        <span class="saleTopBar__star" aria-hidden="true">★</span>
+      </span>
     </div>
   </div>
 
@@ -2065,6 +2120,23 @@
       </div>
     </div>
   </section>
+
+  <section class="julyCta" aria-label="4th of July discount call to action">
+    <div class="container">
+      <div class="julyCta__card">
+        <div class="julyCta__flag" aria-hidden="true"></div>
+        <div>
+          <p class="julyCta__kicker">4th of July detailing discount</p>
+          <h2 class="julyCta__title">Ready to get your 4th of July discount?</h2>
+          <p class="julyCta__text">Book one car at full price and get the next car 30% off when both vehicles are quoted together.</p>
+        </div>
+        <div class="julyCta__actions">
+          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section section--dark" id="work">
     <div class="container">
       <div class="section__head">
@@ -2566,7 +2638,7 @@
       const countdown = document.querySelector("[data-july-countdown]");
       if (!countdown) return;
 
-      const target = new Date("2026-07-04T00:00:00");
+      const target = new Date(2026, 6, 4, 0, 0, 0);
 
       function renderCountdown() {
         const now = new Date();
@@ -2577,16 +2649,17 @@
           return;
         }
 
-        const totalMinutes = Math.floor(diff / 60000);
-        const days = Math.floor(totalMinutes / 1440);
-        const hours = Math.floor((totalMinutes % 1440) / 60);
-        const minutes = totalMinutes % 60;
+        const totalSeconds = Math.floor(diff / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
 
-        countdown.textContent = `${days}D ${String(hours).padStart(2, "0")}H ${String(minutes).padStart(2, "0")}M`;
+        countdown.textContent = `${days}D ${String(hours).padStart(2, "0")}H ${String(minutes).padStart(2, "0")}M ${String(seconds).padStart(2, "0")}S`;
       }
 
       renderCountdown();
-      window.setInterval(renderCountdown, 60000);
+      window.setInterval(renderCountdown, 1000);
     })();
   </script>
 
@@ -2602,27 +2675,30 @@
       let lastBurstTime = 0;
       let sectionBursts = new WeakSet();
 
-      function burst(x, y, count = 18) {
-        const maxParticles = window.innerWidth < 768 ? 14 : count;
+      function burst(x, y, count = 32) {
+        const maxParticles = window.innerWidth < 768 ? Math.max(22, Math.floor(count * 0.78)) : count;
         for (let i = 0; i < maxParticles; i += 1) {
           const spark = document.createElement("span");
-          const angle = (Math.PI * 2 * i) / maxParticles + Math.random() * 0.25;
-          const distance = 42 + Math.random() * (window.innerWidth < 768 ? 56 : 78);
+          const angle = (Math.PI * 2 * i) / maxParticles + Math.random() * 0.18;
+          const distance = 76 + Math.random() * (window.innerWidth < 768 ? 92 : 132);
+          const size = window.innerWidth < 768 ? 7 + Math.random() * 5 : 8 + Math.random() * 7;
           spark.className = "fireworkSpark";
           spark.style.left = `${x}px`;
           spark.style.top = `${y}px`;
+          spark.style.width = `${size}px`;
+          spark.style.height = `${size}px`;
           spark.style.setProperty("--tx", `${Math.cos(angle) * distance}px`);
           spark.style.setProperty("--ty", `${Math.sin(angle) * distance}px`);
           spark.style.setProperty("--spark-color", colors[i % colors.length]);
           layer.appendChild(spark);
-          window.setTimeout(() => spark.remove(), 920);
+          window.setTimeout(() => spark.remove(), 1300);
         }
       }
 
       const watchedSections = Array.from(document.querySelectorAll(".promo, #services, #work, #reviews, .footer"));
       function checkSectionBursts() {
         const now = performance.now();
-        if (now - lastBurstTime < 480) return;
+        if (now - lastBurstTime < 320) return;
         watchedSections.forEach((section) => {
           if (sectionBursts.has(section)) return;
           const rect = section.getBoundingClientRect();
@@ -2632,7 +2708,7 @@
             lastBurstTime = now;
             const x = window.innerWidth * (Math.random() > 0.5 ? 0.72 : 0.28);
             const y = Math.max(96, Math.min(window.innerHeight * 0.55, rect.top + 80));
-            burst(x, y, window.innerWidth < 768 ? 12 : 18);
+            burst(x, y, window.innerWidth < 768 ? 28 : 38);
           }
         });
       }
@@ -2641,10 +2717,10 @@
         const now = performance.now();
         const distance = Math.abs(window.scrollY - lastBurstY);
         checkSectionBursts();
-        if (distance > 720 && now - lastBurstTime > 900) {
+        if (distance > 420 && now - lastBurstTime > 520) {
           lastBurstY = window.scrollY;
           lastBurstTime = now;
-          burst(window.innerWidth * (0.25 + Math.random() * 0.5), window.innerHeight * (0.22 + Math.random() * 0.32), window.innerWidth < 768 ? 10 : 16);
+          burst(window.innerWidth * (0.22 + Math.random() * 0.56), window.innerHeight * (0.18 + Math.random() * 0.36), window.innerWidth < 768 ? 24 : 34);
         }
       }
 
