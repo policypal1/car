@@ -924,6 +924,181 @@
         color:#ef233c!important;
       }
     }
+
+
+    /* =========================================================
+       Final requested tweaks: solid mobile header, tighter hero,
+       promo readability, and small July CTA
+       ========================================================= */
+    .header{
+      background:#ffffff!important;
+      border-bottom:1px solid rgba(16,19,27,.09);
+      backdrop-filter:none;
+      -webkit-backdrop-filter:none;
+      box-shadow:0 10px 26px rgba(16,19,27,.06);
+    }
+    .header::before{display:none!important;}
+    .header__inner{position:relative;z-index:2;}
+    .dealCard__headline{color:#ffffff;}
+    .dealCard__highlight{color:#ef233c!important;}
+
+    .julyCta{
+      position:relative;
+      overflow:hidden;
+      padding:2.25rem 0;
+      background:#ffffff;
+      border-top:1px solid rgba(16,19,27,.08);
+      border-bottom:1px solid rgba(16,19,27,.08);
+    }
+    .julyCta::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 11% 24%,rgba(255,255,255,.85) 0 1px,transparent 1.4px),
+        radial-gradient(circle at 16% 41%,rgba(255,255,255,.72) 0 1px,transparent 1.4px),
+        radial-gradient(circle at 22% 29%,rgba(255,255,255,.8) 0 1px,transparent 1.4px),
+        linear-gradient(90deg,rgba(29,78,216,.92) 0 22%,transparent 22%),
+        repeating-linear-gradient(180deg,rgba(191,10,48,.13) 0 11px,rgba(191,10,48,.13) 11px,rgba(255,255,255,.14) 11px 22px),
+        linear-gradient(135deg,rgba(29,78,216,.12),rgba(239,35,60,.08));
+      opacity:.38;
+      pointer-events:none;
+    }
+    .julyCta .container{position:relative;z-index:1;}
+    .julyCta__card{
+      display:grid;
+      grid-template-columns:120px minmax(0,1fr) auto;
+      align-items:center;
+      gap:1.15rem;
+      padding:1.15rem;
+      border-radius:26px;
+      color:#fff;
+      background:
+        radial-gradient(circle at 6% 0%,rgba(246,217,138,.2),transparent 34%),
+        radial-gradient(circle at 96% 0%,rgba(239,35,60,.22),transparent 32%),
+        linear-gradient(135deg,#07132d 0%,#0b1020 58%,#3b0b16 100%);
+      border:1px solid rgba(255,255,255,.13);
+      box-shadow:0 24px 70px rgba(16,19,27,.2);
+    }
+    .julyCta__flag{
+      min-height:82px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.24);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 14px 28px rgba(0,0,0,.18);
+      background:
+        radial-gradient(circle at 12% 18%,rgba(255,255,255,.95) 0 1.1px,transparent 1.5px),
+        radial-gradient(circle at 20% 33%,rgba(255,255,255,.9) 0 1.1px,transparent 1.5px),
+        radial-gradient(circle at 30% 20%,rgba(255,255,255,.92) 0 1.1px,transparent 1.5px),
+        radial-gradient(circle at 38% 36%,rgba(255,255,255,.86) 0 1.1px,transparent 1.5px),
+        linear-gradient(90deg,#1d4ed8 0 46%,transparent 46%),
+        repeating-linear-gradient(180deg,#bf0a30 0 8px,#bf0a30 8px,#ffffff 8px 16px);
+      transform:skewX(-7deg);
+    }
+    .julyCta__kicker{
+      margin:0 0 .32rem;
+      color:#f6d98a;
+      font-size:.76rem;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+    .julyCta__title{
+      margin:0;
+      color:#ffffff;
+      font-family:Oswald,Inter,sans-serif;
+      font-size:clamp(1.6rem,3vw,2.35rem);
+      line-height:1;
+      letter-spacing:.035em;
+      text-transform:uppercase;
+    }
+    .julyCta__text{
+      margin:.45rem 0 0;
+      color:rgba(255,255,255,.75);
+      line-height:1.55;
+    }
+    .julyCta__actions{display:flex;justify-content:flex-end;}
+    .julyCta__actions .btn{white-space:nowrap;}
+
+    @media (max-width:767px){
+      .header{
+        position:sticky;
+        overflow:hidden;
+        isolation:isolate;
+        background:#ffffff!important;
+      }
+      .header::before{
+        display:block!important;
+        content:"";
+        position:absolute;
+        top:0;
+        right:0;
+        bottom:0;
+        left:60%;
+        height:auto;
+        opacity:.72;
+        pointer-events:none;
+        clip-path:polygon(18% 0,100% 0,100% 100%,0 100%);
+        background:
+          radial-gradient(circle at 15% 18%,rgba(255,255,255,.95) 0 1px,transparent 1.45px),
+          radial-gradient(circle at 24% 34%,rgba(255,255,255,.88) 0 1px,transparent 1.45px),
+          radial-gradient(circle at 34% 21%,rgba(255,255,255,.9) 0 1px,transparent 1.45px),
+          linear-gradient(90deg,#1d4ed8 0 38%,transparent 38%),
+          repeating-linear-gradient(180deg,#bf0a30 0 7px,#bf0a30 7px,#ffffff 7px 14px);
+      }
+      .header::after{
+        content:"";
+        position:absolute;
+        top:-10px;
+        bottom:-10px;
+        left:58%;
+        width:34px;
+        transform:skewX(-24deg);
+        background:#ffffff;
+        box-shadow:12px 0 22px rgba(16,19,27,.08);
+        pointer-events:none;
+        z-index:1;
+      }
+      .brand,
+      .navToggle{position:relative;z-index:3;}
+      .navToggle{background:rgba(255,255,255,.94);}
+      .hero{
+        min-height:auto!important;
+        align-items:flex-start!important;
+      }
+      .hero__inner{
+        padding-top:4.55rem!important;
+        padding-bottom:3.15rem!important;
+      }
+      .hero__actions{
+        margin-top:2.65rem!important;
+      }
+      .dealCard__headline{
+        color:#ffffff!important;
+      }
+      .dealSplit__label,
+      .dealSplit__value{
+        color:#ffffff!important;
+      }
+      .dealSplit__value--discount,
+      .dealSplit__item--discount .dealSplit__value,
+      .dealCard__highlight{
+        color:#ef233c!important;
+      }
+      .julyCta{padding:1.5rem 0;}
+      .julyCta__card{
+        grid-template-columns:1fr;
+        gap:.9rem;
+        padding:1rem;
+        border-radius:22px;
+      }
+      .julyCta__flag{
+        min-height:58px;
+        transform:none;
+      }
+      .julyCta__actions{justify-content:stretch;}
+      .julyCta__actions .btn{width:100%;border-radius:16px;min-height:56px;}
+    }
+
 </style>
 
   <script>
@@ -1144,6 +1319,24 @@
             </div>
           </div>
         </article>
+      </div>
+    </div>
+  </section>
+
+
+
+  <section class="julyCta" aria-label="4th of July discount call to action">
+    <div class="container">
+      <div class="julyCta__card">
+        <div class="julyCta__flag" aria-hidden="true"></div>
+        <div>
+          <p class="julyCta__kicker">4th of July detailing discount</p>
+          <h2 class="julyCta__title">Ready to get your 4th of July discount?</h2>
+          <p class="julyCta__text">Book one car at full price and get the next car 30% off when both vehicles are quoted together.</p>
+        </div>
+        <div class="julyCta__actions">
+          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+        </div>
       </div>
     </div>
   </section>
