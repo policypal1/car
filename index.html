@@ -13,17 +13,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Keizer Mobile Detailing | 4th of July Sale</title>
-  <meta
-    name="description"
-    content="Keizer Mobile Detailing — premium mobile detailing in Keizer, Salem, and nearby areas. Interior, exterior, and maintenance details with a limited 4th of July promotion."
-  />
+  <meta name="description" content="Keizer Mobile Detailing — premium mobile detailing in Keizer, Salem, Portland, and nearby areas." />
 
+  <link rel="preconnect" href="https://www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="//www.googletagmanager.com" />
+  <link rel="dns-prefetch" href="//vitals.vercel-insights.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <link rel="icon" href="./Untitled design (4).png" type="image/png" />
   <link rel="apple-touch-icon" href="./Untitled design (2).png" />
@@ -31,234 +28,229 @@
   <style>
     :root{
       --gold:#d6b25e;
-      --gold-2:#f6d98a;
-      --black:#0b0b0c;
-      --navy:#07142e;
-      --blue:#1f4dbf;
-      --blue-bright:#2f66ea;
-      --red:#c32033;
+      --gold-soft:#f6d98a;
+      --black:#090a0d;
+      --ink:#0f1117;
+      --navy:#07132d;
+      --navy-2:#0d1d42;
+      --blue:#1d4ed8;
+      --red:#c91f35;
       --red-bright:#ef233c;
-      --white:#ffffff;
-      --bg:#f6f7fa;
-      --text:#0f1115;
-      --muted:#5d6470;
-      --line:rgba(0,0,0,.09);
-      --shadow:0 20px 50px rgba(0,0,0,.12);
-      --shadow-lg:0 28px 80px rgba(0,0,0,.18);
-      --radius:22px;
+      --white:#fff;
+      --cream:#fff4d6;
+      --bg:#f5f6f8;
+      --text:#10131b;
+      --muted:#666d78;
+      --line:rgba(16,19,27,.1);
+      --ring:rgba(214,178,94,.35);
+      --shadow:0 18px 48px rgba(16,19,27,.12);
+      --shadow-heavy:0 30px 90px rgba(0,0,0,.28);
       --max:1120px;
+      --radius:24px;
     }
 
-    *{ box-sizing:border-box; }
-    html{ scroll-behavior:smooth; }
+    *{box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
     body{
       margin:0;
-      font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
       background:var(--bg);
+      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
     }
-    img{ max-width:100%; display:block; }
-    button, input, textarea, select{ font:inherit; }
-    a{ color:inherit; }
-    .container{
-      width:min(var(--max), calc(100% - 2rem));
-      margin:0 auto;
+    img,video{display:block;max-width:100%;}
+    button,input,textarea,select{font:inherit;}
+    a{color:inherit;}
+    .container{width:min(var(--max),calc(100% - 2rem));margin:0 auto;}
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.55rem;
+      min-height:46px;
+      padding:.86rem 1.12rem;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:900;
+      letter-spacing:.02em;
+      text-decoration:none;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      transition:transform .18s ease,box-shadow .18s ease,background .18s ease,border-color .18s ease,filter .18s ease;
     }
+    .btn:hover{transform:translateY(-1px);}
+    .btn:active{transform:translateY(0);}
+    .btn:focus-visible{outline:none;box-shadow:0 0 0 4px var(--ring);}
+    .btn--quote{
+      color:#fff;
+      border-color:rgba(239,35,60,.62);
+      background:
+        radial-gradient(180px 80px at 18% 0%,rgba(255,255,255,.28),rgba(255,255,255,0) 68%),
+        linear-gradient(135deg,#ef233c 0%,#b91c1c 100%);
+      box-shadow:0 18px 38px rgba(239,35,60,.22),inset 0 0 0 1px rgba(255,255,255,.1);
+    }
+    .btn--quote:hover{filter:brightness(1.04);border-color:rgba(255,255,255,.65);}
+    .btn--dark{
+      color:#fff;
+      border-color:rgba(255,255,255,.16);
+      background:rgba(255,255,255,.075);
+      box-shadow:0 18px 38px rgba(0,0,0,.18);
+      backdrop-filter:blur(10px);
+    }
+    .btn--dark:hover{background:rgba(255,255,255,.12);}
+    .btn--light{
+      color:#111;
+      background:#fff;
+      border-color:rgba(16,19,27,.08);
+      box-shadow:0 14px 30px rgba(16,19,27,.1);
+    }
+    .btn--ghostGold{
+      color:#fff;
+      border-color:rgba(246,217,138,.46);
+      background:rgba(0,0,0,.34);
+      box-shadow:0 14px 30px rgba(0,0,0,.18);
+      backdrop-filter:blur(8px);
+    }
+
+    .starRow{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:.2rem;
+      line-height:1;
+      pointer-events:none;
+    }
+    .starRow span{font-size:.62rem;line-height:1;}
+    .starRow span:nth-child(1){color:#2563eb;}
+    .starRow span:nth-child(2){color:#d6b25e;}
+    .starRow span:nth-child(3){color:#ef233c;}
 
     /* Header */
     .header{
       position:sticky;
       top:0;
       z-index:100;
-      background:rgba(255,255,255,.88);
-      backdrop-filter:blur(12px);
-      border-bottom:1px solid rgba(0,0,0,.06);
+      background:rgba(255,255,255,.9);
+      border-bottom:1px solid rgba(16,19,27,.07);
+      backdrop-filter:blur(14px);
     }
     .header__inner{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:1rem;
-      padding:.8rem 0;
+      min-width:0;
+      padding:.78rem 0;
     }
     .brand{
       display:flex;
       align-items:center;
-      gap:.75rem;
+      gap:.74rem;
+      color:inherit;
       text-decoration:none;
       min-width:0;
+      flex:0 0 auto;
     }
     .brand__logo{
       width:46px;
       height:46px;
-      border-radius:12px;
       object-fit:cover;
-      border:1px solid rgba(0,0,0,.12);
-      box-shadow:0 10px 24px rgba(0,0,0,.12);
+      border-radius:12px;
+      border:1px solid rgba(16,19,27,.12);
       background:#000;
+      box-shadow:0 12px 26px rgba(16,19,27,.14);
     }
-    .brand__text{ line-height:1.04; }
     .brand__name{
       display:block;
-      font-family:Oswald, Inter, sans-serif;
+      font-family:Oswald,Inter,sans-serif;
       font-weight:700;
-      letter-spacing:.4px;
+      font-size:1.02rem;
+      line-height:1.04;
+      letter-spacing:.04em;
       text-transform:uppercase;
-      font-size:1.05rem;
+      white-space:nowrap;
     }
-    .brand__subStars{
-      display:flex;
-      gap:.22rem;
-      margin-top:.2rem;
-      font-size:.62rem;
-      line-height:1;
-    }
-    .brand__subStars span:nth-child(1){ color:var(--blue-bright); }
-    .brand__subStars span:nth-child(2){ color:var(--gold); }
-    .brand__subStars span:nth-child(3){ color:var(--red-bright); }
+    .brand .starRow{justify-content:flex-start;margin-top:.25rem;gap:.22rem;}
 
     .navToggle{
       display:flex;
       flex-direction:column;
       gap:5px;
-      border:1px solid rgba(0,0,0,.1);
+      border:1px solid rgba(16,19,27,.12);
       background:#fff;
       border-radius:14px;
-      padding:.55rem .6rem;
+      padding:.55rem .62rem;
       cursor:pointer;
+      flex:0 0 auto;
     }
-    .navToggle span{
-      width:22px;
-      height:2px;
-      border-radius:99px;
-      background:#111;
-      display:block;
-    }
+    .navToggle span{display:block;width:22px;height:2px;border-radius:999px;background:#111;}
 
     .nav{
       position:fixed;
       top:72px;
       left:0;
       right:0;
-      background:#fff;
-      box-shadow:var(--shadow);
-      padding:14px;
       display:none;
+      padding:14px;
+      background:#fff;
+      border-radius:0 0 20px 20px;
+      box-shadow:0 24px 70px rgba(16,19,27,.18);
+      z-index:101;
       max-height:calc(100vh - 72px);
       overflow:auto;
-      border-radius:0 0 20px 20px;
-      z-index:101;
     }
-    .nav.isOpen{ display:block; }
-    .nav__links{
+    .nav.isOpen{display:block;}
+    .nav__links{display:flex;flex-direction:column;gap:2px;}
+    .nav__link{
       display:flex;
       flex-direction:column;
-      gap:2px;
-    }
-    .nav__link{
-      position:relative;
-      display:block;
-      padding:.8rem .75rem 1rem;
-      text-decoration:none;
-      font-weight:800;
+      align-items:flex-start;
+      gap:.34rem;
+      padding:.8rem .75rem;
       border-radius:14px;
-      color:#12151b;
-    }
-    .nav__link:hover{ background:rgba(0,0,0,.04); }
-    .nav__link::after{
-      content:"★ ★ ★";
-      display:block;
-      margin-top:.3rem;
-      font-size:.52rem;
-      letter-spacing:.22rem;
-      color:rgba(195,32,51,.75);
-      opacity:.7;
-    }
-    .nav__cta{
-      margin-top:.75rem;
-      width:100%;
-    }
-
-    /* Buttons */
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:.55rem;
-      padding:.9rem 1.15rem;
-      border-radius:999px;
-      font-weight:900;
-      letter-spacing:.02em;
       text-decoration:none;
-      border:1px solid transparent;
-      cursor:pointer;
-      transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+      color:#12151b;
+      font-weight:900;
+      line-height:1.05;
     }
-    .btn:hover{ transform:translateY(-1px); }
-    .btn:focus-visible{
-      outline:none;
-      box-shadow:0 0 0 4px rgba(214,178,94,.24);
-    }
-    .btn--quote{
-      color:#fff;
-      border-color:rgba(239,35,60,.7);
-      background:
-        radial-gradient(180px 70px at 18% 0%, rgba(255,255,255,.26), rgba(255,255,255,0) 68%),
-        linear-gradient(135deg, var(--red-bright) 0%, var(--red) 100%);
-      box-shadow:0 16px 36px rgba(239,35,60,.22);
-    }
-    .btn--quote:hover{
-      filter:brightness(1.04);
-      border-color:rgba(255,255,255,.7);
-    }
-    .btn--call{
-      color:#fff;
-      border-color:rgba(255,255,255,.2);
-      background:rgba(255,255,255,.08);
-      box-shadow:0 14px 28px rgba(0,0,0,.16);
-      backdrop-filter:blur(8px);
-    }
-    .btn--ghost{
-      color:#fff;
-      border:1px solid rgba(246,217,138,.45);
-      background:rgba(0,0,0,.3);
-    }
-    .btn--light{
-      background:#fff;
-      color:#0f1115;
-      border:1px solid rgba(0,0,0,.08);
-      box-shadow:0 10px 26px rgba(0,0,0,.08);
-    }
+    .nav__link:hover{background:rgba(16,19,27,.045);}
+    .nav__link .starRow{justify-content:flex-start;gap:.18rem;opacity:.95;}
+    .nav__link .starRow span{font-size:.52rem;}
+    .nav__cta{width:100%;margin-top:.8rem;}
 
-    /* Hero */
+    /* Hero, modeled after the original hero structure with one clean patriotic layer */
     .hero{
       position:relative;
-      overflow:hidden;
       min-height:74vh;
       display:flex;
       align-items:center;
-      background:#050912;
+      overflow:hidden;
+      isolation:isolate;
+      background:#05070d;
     }
     .hero__bg{
       position:absolute;
       inset:0;
+      z-index:0;
       background:url("./b1d23148-c3e1-4497-bab9-7c6aa4b9c5cf.png") center/cover no-repeat;
-      transform:scale(1.04);
-      filter:saturate(1.02) contrast(1.03);
     }
     .hero__bg::before{
       content:"";
       position:absolute;
       inset:0;
       background:
-        radial-gradient(circle at 10% 16%, rgba(255,255,255,.95) 0 1.15px, transparent 1.5px),
-        radial-gradient(circle at 18% 32%, rgba(255,255,255,.88) 0 1px, transparent 1.4px),
-        radial-gradient(circle at 28% 13%, rgba(255,255,255,.92) 0 1.15px, transparent 1.45px),
-        radial-gradient(circle at 73% 18%, rgba(255,255,255,.9) 0 1.05px, transparent 1.4px),
-        radial-gradient(circle at 84% 31%, rgba(255,255,255,.8) 0 1px, transparent 1.35px),
-        radial-gradient(circle at 92% 13%, rgba(255,255,255,.95) 0 1.1px, transparent 1.45px),
-        linear-gradient(90deg, rgba(31,77,191,.28) 0%, rgba(31,77,191,.08) 34%, rgba(195,32,51,.26) 100%);
-      opacity:.52;
+        radial-gradient(circle at 9% 16%,rgba(255,255,255,.96) 0 1px,transparent 1.45px),
+        radial-gradient(circle at 15% 28%,rgba(255,255,255,.82) 0 1px,transparent 1.45px),
+        radial-gradient(circle at 25% 12%,rgba(255,255,255,.9) 0 1px,transparent 1.45px),
+        radial-gradient(circle at 36% 22%,rgba(255,255,255,.72) 0 1px,transparent 1.45px),
+        radial-gradient(circle at 66% 16%,rgba(255,255,255,.78) 0 1px,transparent 1.45px),
+        radial-gradient(circle at 77% 30%,rgba(255,255,255,.88) 0 1px,transparent 1.45px),
+        radial-gradient(circle at 90% 14%,rgba(255,255,255,.94) 0 1px,transparent 1.45px),
+        linear-gradient(105deg,rgba(15,40,110,.44) 0%,rgba(7,10,18,.12) 43%,rgba(185,28,28,.34) 100%);
+      opacity:.72;
       pointer-events:none;
     }
     .hero__bg::after{
@@ -266,1469 +258,489 @@
       position:absolute;
       inset:0;
       background:
-        linear-gradient(90deg, rgba(5,11,24,.74) 0%, rgba(5,11,24,.58) 45%, rgba(5,11,24,.44) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.16) 0%, rgba(0,0,0,.38) 100%);
+        linear-gradient(90deg,rgba(4,7,14,.74) 0%,rgba(4,7,14,.58) 44%,rgba(4,7,14,.4) 100%),
+        linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.4) 100%);
+      pointer-events:none;
     }
     .hero__inner{
       position:relative;
       z-index:2;
       width:100%;
-      padding:4.6rem 0 4.8rem;
+      padding-top:clamp(4.5rem,7vw,7rem);
+      padding-bottom:clamp(4.5rem,7vw,7rem);
     }
-    .hero__content{
-      max-width:720px;
+    .hero__layout{
+      display:grid;
+      grid-template-columns:minmax(0,1.15fr) minmax(320px,420px);
+      gap:clamp(1.5rem,3vw,3rem);
+      align-items:center;
     }
+    .hero__content{max-width:700px;}
+    .hero__content>*{position:relative;z-index:2;}
     .hero__eyebrow{
       display:inline-flex;
       align-items:center;
       gap:.55rem;
-      padding:.58rem .92rem;
       margin-bottom:1rem;
+      padding:.55rem .9rem;
+      border:1px solid rgba(255,255,255,.18);
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(6,14,29,.48);
-      color:#fff4d6;
-      font-size:.82rem;
+      background:rgba(12,12,12,.45);
+      color:#f6e7bb;
+      font-size:.85rem;
       font-weight:800;
       letter-spacing:.08em;
       text-transform:uppercase;
       backdrop-filter:blur(10px);
-      box-shadow:0 12px 30px rgba(0,0,0,.16);
+      box-shadow:0 14px 38px rgba(0,0,0,.18);
     }
     .hero__eyebrowDot{
-      width:.72rem;
-      height:.72rem;
+      width:.55rem;
+      height:.55rem;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.7);
-      background:linear-gradient(180deg, var(--blue-bright) 0 33%, #fff 33% 66%, var(--red-bright) 66% 100%);
-      box-shadow:0 0 18px rgba(246,217,138,.3);
+      background:linear-gradient(135deg,#2563eb 0%,#fff 48%,#ef233c 100%);
+      box-shadow:0 0 16px rgba(255,255,255,.44);
     }
     .hero__headline{
-      margin:0 0 .9rem;
       max-width:10.8ch;
+      margin:0 0 1rem;
       color:#fff;
-      font-family:Oswald, Inter, sans-serif;
+      font-family:Oswald,Inter,sans-serif;
+      font-size:clamp(3.4rem,7vw,6rem);
       font-weight:700;
-      font-size:clamp(3rem, 7vw, 5.9rem);
       line-height:.94;
       letter-spacing:.02em;
+      text-wrap:balance;
       text-transform:uppercase;
-      text-shadow:0 10px 30px rgba(0,0,0,.38);
+      text-shadow:0 10px 35px rgba(0,0,0,.48);
     }
-    .hero__headlineAccent{
-      color:var(--gold-2);
-    }
+    .hero__headlineAccent{color:#f6d98a;}
     .hero__sub{
-      max-width:38rem;
-      margin:0;
-      color:rgba(255,255,255,.92);
-      font-size:clamp(1rem, 1.7vw, 1.15rem);
-      line-height:1.72;
-      text-shadow:0 4px 18px rgba(0,0,0,.3);
+      max-width:34rem;
+      margin:0 0 1.5rem;
+      color:rgba(255,255,255,.94);
+      font-size:clamp(1rem,1.8vw,1.16rem);
+      line-height:1.7;
+      text-shadow:0 4px 20px rgba(0,0,0,.35);
     }
     .hero__actions{
       display:flex;
       flex-wrap:wrap;
-      gap:.9rem;
-      margin-top:1.5rem;
-    }
-
-    /* Promo strip inside hero */
-    .heroPromoStrip{
-      display:flex;
+      justify-content:flex-start;
       align-items:center;
-      justify-content:space-between;
-      gap:1rem;
-      margin-bottom:1.45rem;
-      padding:1rem 1.15rem;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.16);
-      background:
-        linear-gradient(90deg, rgba(7,20,46,.94) 0%, rgba(22,48,110,.93) 52%, rgba(132,21,34,.9) 100%);
-      color:#fff;
-      box-shadow:0 20px 50px rgba(0,0,0,.28);
-      overflow:hidden;
-      position:relative;
-      isolation:isolate;
+      gap:.85rem;
+      margin-top:1.7rem;
     }
-    .heroPromoStrip::before{
+    .heroReview{
+      position:relative;
+      align-self:center;
+      padding:1.55rem;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:28px;
+      background:linear-gradient(180deg,rgba(28,29,33,.94) 0%,rgba(17,18,22,.9) 100%);
+      color:#fff;
+      box-shadow:0 28px 70px rgba(0,0,0,.42);
+      backdrop-filter:blur(18px);
+      overflow:hidden;
+    }
+    .heroReview::before{
+      content:"";
+      position:absolute;
+      inset:-35% auto auto 55%;
+      width:220px;
+      height:220px;
+      border-radius:999px;
+      background:radial-gradient(circle,rgba(214,167,63,.28) 0%,rgba(214,167,63,0) 72%);
+      pointer-events:none;
+    }
+    .heroReview>*{position:relative;z-index:1;}
+    .heroReview__top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.15rem;}
+    .heroReview__pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.45rem .75rem;
+      border-radius:999px;
+      background:rgba(255,255,255,.08);
+      color:#f6e7bb;
+      font-size:.76rem;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .heroReview__stars{color:#f6d98a;font-size:1rem;letter-spacing:.1em;}
+    .heroReview__media{margin:0 0 1rem;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);}
+    .heroReview__media img{width:100%;height:190px;object-fit:cover;}
+    .heroReview__quote{margin:0 0 1.15rem;color:rgba(255,255,255,.98);font-size:1.08rem;font-weight:500;line-height:1.82;}
+    .heroReview__footer{display:flex;align-items:center;gap:.9rem;}
+    .heroReview__avatar{display:grid;place-items:center;width:3rem;height:3rem;border-radius:999px;background:linear-gradient(135deg,#f6e7bb 0%,#d6a73f 100%);color:#111;font-weight:900;}
+    .heroReview__name{font-weight:800;}
+    .heroReview__meta{color:rgba(255,255,255,.78);font-size:.92rem;}
+
+    /* Premium promo section */
+    .promo{
+      position:relative;
+      overflow:hidden;
+      padding:3.6rem 0;
+      color:#fff;
+      background:
+        radial-gradient(circle at 8% 0%,rgba(239,35,60,.18),transparent 31%),
+        radial-gradient(circle at 92% 12%,rgba(37,99,235,.22),transparent 32%),
+        linear-gradient(180deg,#080c16 0%,#05070d 100%);
+      border-top:1px solid rgba(255,255,255,.08);
+      border-bottom:1px solid rgba(255,255,255,.08);
+    }
+    .promo::before{
       content:"";
       position:absolute;
       inset:0;
-      background:repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, rgba(255,255,255,0) 1px 42px);
+      background:
+        radial-gradient(circle at 16% 24%,rgba(255,255,255,.36) 0 1px,transparent 1.35px),
+        radial-gradient(circle at 28% 14%,rgba(255,255,255,.25) 0 1px,transparent 1.35px),
+        radial-gradient(circle at 82% 20%,rgba(255,255,255,.26) 0 1px,transparent 1.35px),
+        repeating-linear-gradient(115deg,rgba(255,255,255,.04) 0 1px,transparent 1px 32px);
+      opacity:.45;
       pointer-events:none;
-      z-index:0;
     }
-    .heroPromoStrip__copy{
-      position:relative;
-      z-index:1;
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      gap:.7rem;
-    }
-    .heroPromoStrip__badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:.42rem .72rem;
-      border-radius:999px;
-      background:rgba(255,255,255,.13);
-      color:#fff4d6;
-      font-size:.72rem;
-      font-weight:900;
-      letter-spacing:.11em;
-      text-transform:uppercase;
-      white-space:nowrap;
-    }
-    .heroPromoStrip__badge::before{
-      content:"★";
-      margin-right:.45rem;
-    }
-    .heroPromoStrip__main{
-      font-family:Oswald, Inter, sans-serif;
-      font-size:clamp(1.05rem, 2vw, 1.42rem);
-      font-weight:900;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-      line-height:1.05;
-    }
-    .heroPromoStrip__sub{
-      color:rgba(255,255,255,.76);
-      font-size:.92rem;
-      font-weight:700;
-    }
-
-    /* Sections */
-    .section{
-      padding:3.35rem 0;
-    }
-    .section--light{
-      background:
-        radial-gradient(circle at 8% 8%, rgba(31,77,191,.06), rgba(31,77,191,0) 22%),
-        radial-gradient(circle at 92% 18%, rgba(195,32,51,.05), rgba(195,32,51,0) 22%),
-        #fff;
-    }
-    .section--dark{
-      background:
-        radial-gradient(circle at 10% 0%, rgba(195,32,51,.14), rgba(195,32,51,0) 28%),
-        radial-gradient(circle at 88% 8%, rgba(31,77,191,.18), rgba(31,77,191,0) 30%),
-        #070b16;
-      color:#fff;
-    }
-    .section__head{
-      text-align:center;
-      margin-bottom:1.5rem;
-    }
-    .section__title{
-      margin:0 0 .38rem;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:clamp(1.95rem, 5vw, 3.2rem);
-      line-height:1;
-      letter-spacing:.03em;
-      text-transform:uppercase;
-      color:#0f1115;
-    }
-    .section__title--dark{ color:#fff; }
-    .section__sub{
-      margin:0 auto;
-      max-width:70ch;
-      color:var(--muted);
-      line-height:1.65;
-    }
-    .section__sub--dark{ color:rgba(255,255,255,.74); }
-
-    /* Promo section */
-    .promoSection{
-      position:relative;
-      overflow:hidden;
-    }
-    .promoIntro{
+    .promo .container{position:relative;z-index:1;}
+    .promo__intro{
       display:grid;
-      grid-template-columns:.9fr 1.1fr;
-      gap:1.6rem;
+      grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+      gap:clamp(1.1rem,3vw,2.3rem);
       align-items:end;
-      margin-bottom:1.5rem;
+      margin-bottom:1.6rem;
     }
-    .promoKicker{
+    .promo__kicker{
       display:inline-flex;
       align-items:center;
       gap:.5rem;
-      margin:0 0 .75rem;
-      color:var(--red);
+      margin:0 0 .82rem;
+      color:var(--cream);
       font-size:.76rem;
       font-weight:900;
       letter-spacing:.12em;
       text-transform:uppercase;
     }
-    .promoTitle{
+    .promo__title{
       margin:0;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:clamp(2.2rem, 5vw, 4.1rem);
+      color:#fff;
+      font-family:Oswald,Inter,sans-serif;
+      font-size:clamp(2.25rem,5vw,4.35rem);
       line-height:.95;
       letter-spacing:.02em;
       text-transform:uppercase;
-      color:#10131b;
+      text-shadow:0 20px 54px rgba(0,0,0,.34);
     }
-    .promoText{
+    .promo__text{
       margin:0;
-      color:rgba(16,19,27,.72);
-      line-height:1.75;
-      font-size:1.04rem;
+      color:rgba(255,255,255,.76);
+      line-height:1.78;
+      font-size:clamp(1rem,1.55vw,1.12rem);
     }
-    .promoGrid{
+    .promo__grid{
       display:grid;
-      grid-template-columns:.95fr 1.05fr;
+      grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);
       gap:1rem;
+      align-items:stretch;
     }
-    .promoMainCard{
+    .dealCard{
       position:relative;
       overflow:hidden;
-      border-radius:28px;
-      padding:1.35rem;
-      color:#fff;
-      background:
-        linear-gradient(180deg, rgba(12,20,43,.98) 0%, rgba(5,9,18,.98) 100%);
-      box-shadow:var(--shadow-lg);
-      border:1px solid rgba(255,255,255,.14);
+      min-height:100%;
+      padding:clamp(1.25rem,2.4vw,1.7rem);
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.16);
+      background:linear-gradient(180deg,rgba(255,255,255,.09) 0%,rgba(255,255,255,.045) 100%);
+      box-shadow:0 28px 80px rgba(0,0,0,.32),inset 0 0 0 1px rgba(255,255,255,.04);
+      backdrop-filter:blur(12px);
     }
-    .promoMainCard::before{
+    .dealCard::before{
       content:"";
       position:absolute;
       inset:0 0 auto;
-      height:8px;
-      background:linear-gradient(90deg, var(--blue-bright) 0 33%, #fff 33% 66%, var(--red-bright) 66% 100%);
+      height:7px;
+      background:linear-gradient(90deg,#2563eb 0 33%,#fff 33% 66%,#ef233c 66% 100%);
     }
-    .promoMainCard::after{
+    .dealCard::after{
       content:"";
       position:absolute;
       inset:0;
       background:
-        radial-gradient(circle at 18% 0%, rgba(246,217,138,.18), rgba(246,217,138,0) 34%),
-        radial-gradient(circle at 100% 24%, rgba(239,35,60,.2), rgba(239,35,60,0) 30%),
-        repeating-linear-gradient(135deg, rgba(255,255,255,.045) 0 1px, rgba(255,255,255,0) 1px 18px);
+        radial-gradient(circle at 18% 4%,rgba(246,217,138,.18),transparent 32%),
+        radial-gradient(circle at 100% 30%,rgba(239,35,60,.18),transparent 34%);
       pointer-events:none;
     }
-    .promoMainCard > *{ position:relative; z-index:1; }
-    .promoMainCard__kicker{
-      display:inline-flex;
-      align-items:center;
-      gap:.45rem;
-      margin:0 0 .75rem;
-      color:#fff4d6;
-      font-size:.74rem;
-      font-weight:900;
-      letter-spacing:.11em;
-      text-transform:uppercase;
-    }
-    .promoMainCard__title{
-      margin:0 0 .65rem;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:clamp(2rem, 4vw, 3rem);
-      line-height:.95;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-    }
-    .promoMainCard__copy{
-      margin:0 0 1rem;
-      color:rgba(255,255,255,.78);
-      line-height:1.68;
-    }
-    .promoSplit{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:.75rem;
-      margin:1rem 0;
-    }
-    .promoSplit__item{
-      padding:.95rem;
-      border-radius:18px;
-      background:rgba(255,255,255,.065);
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .promoSplit__label{
-      color:rgba(255,255,255,.6);
-      font-size:.72rem;
-      font-weight:800;
-      letter-spacing:.11em;
-      text-transform:uppercase;
-    }
-    .promoSplit__value{
-      margin-top:.35rem;
-      color:#fff;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:1.38rem;
-      font-weight:900;
-      text-transform:uppercase;
-    }
-    .promoSplit__item--discount{
-      background:rgba(246,217,138,.1);
-      border-color:rgba(246,217,138,.34);
-    }
-    .promoSplit__item--discount .promoSplit__value{
-      color:var(--gold-2);
-    }
-    .promoMainCard__list{
-      display:grid;
-      gap:.58rem;
-      margin:1rem 0 0;
-      padding:0;
-      list-style:none;
-    }
-    .promoMainCard__list li{
-      display:flex;
-      gap:.58rem;
-      color:rgba(255,255,255,.78);
-      line-height:1.45;
-      font-size:.95rem;
-    }
-    .promoMainCard__list li::before{
-      content:"";
-      width:.45rem;
-      height:.45rem;
-      flex:0 0 auto;
-      margin-top:.45rem;
-      border-radius:999px;
-      background:var(--gold-2);
-    }
-
-    .promoCards{
-      display:grid;
-      grid-template-columns:repeat(3, 1fr);
-      gap:.85rem;
-    }
-    .promoMini{
+    .dealCard>*{position:relative;z-index:1;}
+    .dealCard__label{margin:0 0 .78rem;color:var(--cream);font-size:.74rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;}
+    .dealCard__headline{margin:0 0 .75rem;font-family:Oswald,Inter,sans-serif;font-size:clamp(1.95rem,3.7vw,3rem);line-height:.96;letter-spacing:.02em;text-transform:uppercase;}
+    .dealCard__copy{margin:0 0 1rem;color:rgba(255,255,255,.72);line-height:1.68;}
+    .dealSplit{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin:1rem 0;}
+    .dealSplit__item{padding:.95rem;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(255,255,255,.06);}
+    .dealSplit__label{color:rgba(255,255,255,.58);font-size:.72rem;font-weight:900;letter-spacing:.11em;text-transform:uppercase;}
+    .dealSplit__value{margin-top:.35rem;font-family:Oswald,Inter,sans-serif;font-size:1.42rem;font-weight:900;text-transform:uppercase;}
+    .dealSplit__item--discount{border-color:rgba(246,217,138,.34);background:rgba(246,217,138,.1);}
+    .dealSplit__item--discount .dealSplit__value{color:var(--gold-soft);}
+    .dealList{display:grid;gap:.58rem;margin:1rem 0 0;padding:0;list-style:none;}
+    .dealList li{display:flex;gap:.58rem;color:rgba(255,255,255,.74);line-height:1.45;font-size:.95rem;}
+    .dealList li::before{content:"";flex:0 0 auto;width:.45rem;height:.45rem;margin-top:.48rem;border-radius:999px;background:var(--gold-soft);}
+    .promoCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;}
+    .promoCard{
       position:relative;
       overflow:hidden;
-      min-height:205px;
+      min-height:210px;
       padding:1.1rem;
-      background:#fff;
       border-radius:24px;
-      border:1px solid rgba(16,19,27,.08);
-      box-shadow:0 18px 44px rgba(16,19,27,.08);
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.94);
+      color:#10131b;
+      box-shadow:0 18px 46px rgba(0,0,0,.18);
     }
-    .promoMini::before{
-      content:"";
-      position:absolute;
-      inset:0 auto 0 0;
-      width:5px;
-      background:linear-gradient(180deg, var(--blue-bright), var(--red-bright));
-    }
-    .promoMini__icon{
+    .promoCard::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:linear-gradient(180deg,#2563eb,#ef233c);}
+    .promoCard__icon{
       display:grid;
       place-items:center;
-      width:2.5rem;
-      height:2.5rem;
+      width:2.65rem;
+      height:2.65rem;
       margin-bottom:1rem;
-      border-radius:14px;
-      background:rgba(31,77,191,.08);
-      color:var(--blue);
-      font-size:1.1rem;
+      border-radius:15px;
+      background:rgba(29,78,216,.09);
+      color:#1d4ed8;
+      font-size:1.16rem;
       font-weight:900;
-      box-shadow:inset 0 0 0 1px rgba(31,77,191,.08);
+      border:1px solid rgba(29,78,216,.08);
     }
-    .promoMini h3{
-      margin:0 0 .42rem;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:1.22rem;
-      letter-spacing:.02em;
-      text-transform:uppercase;
-      color:#10131b;
-    }
-    .promoMini p{
-      margin:0;
-      color:rgba(16,19,27,.68);
-      line-height:1.6;
-      font-size:.95rem;
-    }
+    .promoCard h3{margin:0 0 .45rem;font-family:Oswald,Inter,sans-serif;font-size:1.24rem;letter-spacing:.025em;text-transform:uppercase;}
+    .promoCard p{margin:0;color:rgba(16,19,27,.68);line-height:1.6;font-size:.95rem;}
 
-    /* Services */
-    .serviceWrap{
-      display:flex;
-      flex-wrap:wrap;
-      justify-content:center;
-      gap:18px;
-      margin-top:22px;
+    .section{padding:3.35rem 0;}
+    .section--light{background:#fff;}
+    .section--soft{
+      background:
+        radial-gradient(circle at 8% 8%,rgba(29,78,216,.06),transparent 24%),
+        radial-gradient(circle at 92% 18%,rgba(239,35,60,.055),transparent 24%),
+        #f7f8fb;
     }
+    .section--dark{
+      color:#fff;
+      background:
+        radial-gradient(circle at 10% 0%,rgba(239,35,60,.14),transparent 28%),
+        radial-gradient(circle at 88% 8%,rgba(29,78,216,.18),transparent 30%),
+        #070b16;
+    }
+    .section__head{text-align:center;margin-bottom:1.5rem;}
+    .section__title{margin:0 0 .35rem;color:#10131b;font-family:Oswald,Inter,sans-serif;font-size:clamp(1.85rem,5vw,3rem);letter-spacing:.04em;line-height:1;text-transform:uppercase;}
+    .section__title--dark{color:#fff;}
+    .section__sub{margin:0 auto;max-width:70ch;color:var(--muted);line-height:1.65;}
+    .section__sub--dark{color:rgba(255,255,255,.74);}
+
+    .serviceWrap{display:grid;grid-template-columns:1fr;gap:18px;margin-top:22px;}
     .serviceCard{
       position:relative;
       overflow:hidden;
-      width:min(350px, 100%);
-      min-height:340px;
-      border-radius:24px;
-      background-size:cover;
-      background-position:center;
-      border:1px solid rgba(0,0,0,.08);
-      box-shadow:0 24px 60px rgba(0,0,0,.14);
-      transition:transform .18s ease, box-shadow .18s ease;
+      min-height:345px;
+      border-radius:26px;
+      background:#111 center/cover no-repeat;
+      border:1px solid rgba(16,19,27,.08);
+      box-shadow:0 24px 64px rgba(16,19,27,.14);
+      isolation:isolate;
+      transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
     }
-    .serviceCard:hover{
-      transform:translateY(-3px);
-      box-shadow:0 30px 72px rgba(0,0,0,.18);
-    }
-    .serviceCard__overlay{
-      position:absolute;
-      inset:0;
-      background:linear-gradient(180deg, rgba(7,19,45,.16) 0%, rgba(7,19,45,.82) 100%);
-    }
-    .serviceCard__shine{
-      position:absolute;
-      inset:-40%;
-      background:linear-gradient(110deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.16) 44%, rgba(255,255,255,0) 80%);
-      opacity:.55;
-      transform:rotate(12deg);
-      pointer-events:none;
-    }
-    .serviceCard__content{
-      position:relative;
-      z-index:1;
-      display:grid;
-      grid-template-rows:1fr auto;
-      height:100%;
-      padding:18px;
-      color:#fff;
-    }
-    .serviceCard__top{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:flex-start;
-    }
-    .serviceCard h3{
-      margin:0;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:1.9rem;
-      line-height:1.02;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-    .serviceCard__mini{
-      margin:.55rem 0 0;
-      color:rgba(255,255,255,.92);
-      line-height:1.5;
-      font-weight:650;
-      max-width:34ch;
-    }
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:.38rem .68rem;
-      border-radius:999px;
-      background:linear-gradient(135deg, var(--blue) 0%, var(--red) 100%);
-      color:#fff;
-      font-weight:900;
-      font-size:.82rem;
-      white-space:nowrap;
-      box-shadow:0 10px 24px rgba(0,0,0,.16);
-    }
-    .tag--ghost{ visibility:hidden; }
+    .serviceCard:hover{transform:translateY(-4px);box-shadow:0 34px 90px rgba(16,19,27,.2);border-color:rgba(214,178,94,.25);}
+    .serviceCard__overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,19,45,.16) 0%,rgba(7,19,45,.84) 100%);}
+    .serviceCard__shine{position:absolute;inset:-40%;background:linear-gradient(110deg,transparent 0%,rgba(255,255,255,.16) 44%,transparent 80%);opacity:.6;transform:rotate(12deg);pointer-events:none;}
+    .serviceCard__content{position:relative;z-index:1;display:grid;grid-template-rows:1fr auto;height:100%;padding:18px;color:#fff;}
+    .serviceCard__top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+    .serviceCard h3{margin:0;font-family:Oswald,Inter,sans-serif;font-size:1.9rem;line-height:1.04;letter-spacing:.04em;text-transform:uppercase;}
+    .serviceCard__mini{margin:.58rem 0 0;color:rgba(255,255,255,.9);line-height:1.48;font-weight:700;max-width:35ch;}
+    .tag{display:inline-flex;align-items:center;justify-content:center;padding:.38rem .68rem;border-radius:999px;background:linear-gradient(135deg,#1d4ed8 0%,#c91f35 100%);color:#fff;font-weight:900;font-size:.82rem;white-space:nowrap;box-shadow:0 10px 24px rgba(0,0,0,.18);}
+    .tag--ghost{visibility:hidden;}
+    .serviceCard__actions{display:grid;grid-template-columns:1fr;gap:12px;align-self:end;}
+    .serviceCard__actions .btn{width:100%;}
 
-    .serviceCard__actions{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
-      align-self:end;
-    }
-    .serviceCard__actions .btn{
-      width:100%;
-    }
+    .carousel{margin:18px auto 0;width:min(760px,100%);}
+    .carousel__frame{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;}
+    .carousel__viewport{position:relative;overflow:hidden;border-radius:24px;background:rgba(255,255,255,.03);aspect-ratio:4/5;}
+    .carousel__track{display:flex;height:100%;transition:transform .28s ease;}
+    .carousel__slide{flex:0 0 100%;height:100%;}
+    .carouselArrow{width:46px;height:46px;border-radius:999px;border:1px solid rgba(246,217,138,.35);background:rgba(0,0,0,.48);color:#fff;font-size:1.7rem;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.32);}
+    .carouselDots--overlay{position:absolute;left:50%;top:12px;z-index:3;display:flex;gap:8px;transform:translateX(-50%);}
+    .dot{width:8px;height:8px;border-radius:999px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.18);cursor:pointer;}
+    .dot.isActive{width:22px;background:rgba(246,217,138,.78);border-color:rgba(246,217,138,.88);}
 
-    /* Work carousel */
-    .carousel{
-      margin:18px auto 0;
-      width:min(980px, 100%);
-    }
-    .carousel__frame{
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      align-items:center;
-      gap:12px;
-    }
-    .carousel__viewport{
-      overflow:hidden;
-      border-radius:24px;
-      position:relative;
-      aspect-ratio:4 / 5;
-      background:rgba(255,255,255,.03);
-    }
-    .carousel__track{
-      display:flex;
-      transition:transform .28s ease;
-      height:100%;
-    }
-    .carousel__slide{
-      flex:0 0 100%;
-      height:100%;
-    }
-    .carouselArrow{
-      width:46px;
-      height:46px;
-      border-radius:999px;
-      border:1px solid rgba(246,217,138,.32);
-      background:rgba(0,0,0,.48);
-      color:#fff;
-      font-size:1.7rem;
-      cursor:pointer;
-      box-shadow:0 14px 34px rgba(0,0,0,.3);
-    }
-    .carouselDots--overlay{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      top:12px;
-      z-index:3;
-      display:flex;
-      gap:8px;
-    }
-    .dot{
-      width:8px;
-      height:8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.28);
-      background:rgba(255,255,255,.18);
-      cursor:pointer;
-    }
-    .dot.isActive{
-      width:22px;
-      background:rgba(246,217,138,.84);
-      border-color:rgba(246,217,138,.9);
-    }
+    .compare{--pos:12%;position:relative;width:100%;height:100%;border-radius:24px;overflow:hidden;border:1px solid rgba(246,217,138,.16);background:#0b0b0c;box-shadow:0 24px 70px rgba(0,0,0,.32);}
+    .compare__stage{width:100%;height:100%;background-image:var(--after);background-size:cover;background-position:center;background-repeat:no-repeat;position:relative;}
+    .compare__stage::after{content:"";position:absolute;inset:0;width:var(--pos);background-image:var(--before);background-size:cover;background-position:center;background-repeat:no-repeat;border-right:2px solid rgba(255,255,255,.72);}
+    .compare__range{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;}
+    .compare__handle{position:absolute;top:0;left:var(--pos);width:44px;height:100%;transform:translateX(-50%);pointer-events:none;}
+    .compare__handle::before{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;border-radius:999px;background:rgba(0,0,0,.62);border:1px solid rgba(246,217,138,.62);box-shadow:0 18px 44px rgba(0,0,0,.36);transform:translate(-50%,-50%);}
+    .compare__handle::after{content:"↔";position:absolute;top:50%;left:50%;color:#fff;font-weight:900;transform:translate(-50%,-50%);}
 
-    /* Compare */
-    .compare{
-      --pos:12%;
-      --ratio:4 / 5;
-      position:relative;
-      width:100%;
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(246,217,138,.16);
-      box-shadow:0 24px 60px rgba(0,0,0,.3);
-      background:#0b0b0c;
-      height:100%;
-    }
-    .compare__stage{
-      width:100%;
-      height:100%;
-      aspect-ratio:var(--ratio);
-      background-image:var(--after);
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
-      position:relative;
-    }
-    .compare__stage::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      width:var(--pos);
-      background-image:var(--before);
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
-      border-right:2px solid rgba(255,255,255,.7);
-    }
-    .compare__range{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      opacity:0;
-      cursor:ew-resize;
-    }
-    .compare__handle{
-      position:absolute;
-      top:0;
-      left:var(--pos);
-      transform:translateX(-50%);
-      height:100%;
-      width:44px;
-      pointer-events:none;
-    }
-    .compare__handle::before{
-      content:"";
-      position:absolute;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      background:rgba(0,0,0,.6);
-      border:1px solid rgba(246,217,138,.56);
-      box-shadow:0 16px 40px rgba(0,0,0,.34);
-    }
-    .compare__handle::after{
-      content:"↔";
-      position:absolute;
-      top:50%;
-      left:50%;
-      transform:translate(-50%,-50%);
-      font-weight:900;
-      color:#fff;
-    }
+    .reels{width:min(980px,100%);margin:0 auto;}
+    .reelsBar{display:none;}
+    .reel{position:relative;overflow:hidden;border-radius:24px;border:1px solid rgba(16,19,27,.08);background:#000;box-shadow:0 18px 44px rgba(16,19,27,.12);}
+    .reel__video{width:100%;height:100%;object-fit:cover;background:#000;pointer-events:none;}
+    .reel__meta{position:absolute;left:12px;right:12px;bottom:12px;z-index:3;padding:10px 12px;border-radius:16px;background:rgba(0,0,0,.44);border:1px solid rgba(246,217,138,.24);backdrop-filter:blur(8px);}
+    .reel__title{font-weight:900;letter-spacing:.035em;color:rgba(255,255,255,.95);}
+    .reel__overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;z-index:2;background:radial-gradient(800px 420px at 50% 40%,rgba(0,0,0,.12),rgba(0,0,0,.56));pointer-events:none;}
+    .reel__playBadge{display:inline-flex;align-items:center;gap:12px;padding:.85rem 1.05rem;border-radius:999px;font-weight:950;letter-spacing:.035em;color:#fff;background:rgba(0,0,0,.74);border:2px solid rgba(246,217,138,.55);box-shadow:0 24px 70px rgba(0,0,0,.45);backdrop-filter:blur(10px);}
+    .reel__playIcon{width:46px;height:46px;border-radius:999px;background:rgba(246,217,138,.18);border:1px solid rgba(246,217,138,.55);position:relative;}
+    .reel__playIcon::before{content:"";position:absolute;left:19px;top:14px;width:0;height:0;border-left:14px solid rgba(255,255,255,.95);border-top:10px solid transparent;border-bottom:10px solid transparent;}
 
-    /* Reels */
-    .reels{ width:min(980px, 100%); margin:0 auto; }
-    .reelsBar{ display:none; }
-    .reel{
-      position:relative;
-      overflow:hidden;
-      border-radius:24px;
-      border:1px solid rgba(0,0,0,.08);
-      background:#000;
-      box-shadow:0 18px 44px rgba(0,0,0,.12);
-    }
-    .reel__video{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      background:transparent;
-      pointer-events:none;
-    }
-    .reel__meta{
-      position:absolute;
-      left:12px;
-      right:12px;
-      bottom:12px;
-      padding:10px 12px;
-      border-radius:16px;
-      background:rgba(0,0,0,.42);
-      border:1px solid rgba(246,217,138,.22);
-      backdrop-filter:blur(8px);
-      z-index:3;
-    }
-    .reel__title{
-      font-weight:900;
-      letter-spacing:.03em;
-      color:rgba(255,255,255,.94);
-    }
-    .reel__overlay{
-      position:absolute;
-      inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      z-index:2;
-      background:radial-gradient(800px 420px at 50% 40%, rgba(0,0,0,.12), rgba(0,0,0,.55));
-      pointer-events:none;
-    }
-    .reel__playBadge{
-      display:inline-flex;
-      align-items:center;
-      gap:12px;
-      padding:.85rem 1.05rem;
-      border-radius:999px;
-      color:#fff;
-      background:rgba(0,0,0,.74);
-      border:2px solid rgba(246,217,138,.54);
-      box-shadow:0 24px 70px rgba(0,0,0,.44);
-      font-weight:950;
-      letter-spacing:.03em;
-      backdrop-filter:blur(10px);
-    }
-    .reel__playIcon{
-      width:46px;
-      height:46px;
-      border-radius:999px;
-      background:rgba(246,217,138,.16);
-      border:1px solid rgba(246,217,138,.54);
-      position:relative;
-      box-shadow:0 16px 40px rgba(0,0,0,.3);
-    }
-    .reel__playIcon::before{
-      content:"";
-      position:absolute;
-      left:18px;
-      top:13px;
-      width:0;
-      height:0;
-      border-left:14px solid rgba(255,255,255,.95);
-      border-top:10px solid transparent;
-      border-bottom:10px solid transparent;
-    }
+    .steps{display:grid;grid-template-columns:1fr;gap:14px;margin-top:22px;}
+    .stepCard{position:relative;overflow:hidden;background:#fff;border:1px solid rgba(16,19,27,.08);border-radius:24px;box-shadow:0 18px 44px rgba(16,19,27,.1);padding:16px;}
+    .stepCard::before{content:"";position:absolute;inset:-200px -200px auto -200px;height:260px;background:radial-gradient(circle at 20% 30%,rgba(214,178,94,.18),transparent 55%);}
+    .stepTop{display:flex;align-items:center;gap:12px;position:relative;}
+    .stepNum{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#1d4ed8 0%,#c91f35 100%);color:#fff;font-family:Oswald,Inter,sans-serif;font-size:1.35rem;font-weight:900;}
+    .stepTitle{margin:0;color:#111;font-family:Oswald,Inter,sans-serif;font-size:1.24rem;letter-spacing:.04em;text-transform:uppercase;}
+    .stepText{position:relative;margin:10px 0 0;color:var(--muted);line-height:1.7;}
 
-    /* How it works */
-    .steps{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:14px;
-      margin-top:22px;
-    }
-    .stepCard{
-      position:relative;
-      overflow:hidden;
-      padding:16px;
-      background:#fff;
-      border:1px solid rgba(0,0,0,.08);
-      border-radius:24px;
-      box-shadow:0 18px 44px rgba(0,0,0,.1);
-    }
-    .stepCard::before{
-      content:"";
-      position:absolute;
-      inset:-200px -200px auto -200px;
-      height:260px;
-      background:radial-gradient(circle at 20% 30%, rgba(214,178,94,.22), rgba(255,255,255,0) 55%);
-    }
-    .stepTop{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      position:relative;
-    }
-    .stepNum{
-      width:44px;
-      height:44px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-family:Oswald, Inter, sans-serif;
-      font-size:1.4rem;
-      font-weight:800;
-      color:#fff;
-      background:linear-gradient(135deg, var(--blue) 0%, var(--red) 100%);
-    }
-    .stepTitle{
-      margin:0;
-      font-family:Oswald, Inter, sans-serif;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-      font-size:1.24rem;
-      color:#111;
-    }
-    .stepText{
-      position:relative;
-      margin:10px 0 0;
-      color:var(--muted);
-      line-height:1.7;
-    }
+    .areaGrid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:22px;align-items:stretch;}
+    .areaMap{overflow:hidden;border-radius:24px;border:1px solid rgba(255,255,255,.1);background:#000;box-shadow:0 20px 54px rgba(0,0,0,.22);}
+    .areaMap img{width:100%;height:320px;object-fit:cover;object-position:18% 12%;}
+    .areaCard{border-radius:24px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045);box-shadow:0 20px 54px rgba(0,0,0,.22);padding:18px;}
+    .areaTitle{margin:0 0 8px;color:#fff;font-family:Oswald,Inter,sans-serif;letter-spacing:.04em;text-transform:uppercase;}
+    .areaText{margin:0 0 12px;color:rgba(255,255,255,.74);line-height:1.7;}
+    .areaList{margin-top:12px;border-radius:17px;border:1px solid rgba(246,217,138,.18);background:rgba(255,255,255,.04);padding:12px 14px;}
+    .areaList__title{font-weight:900;margin-bottom:8px;color:#fff;}
+    .areaList__ul{margin:0;padding-left:18px;color:rgba(255,255,255,.74);line-height:1.7;}
+    .areaActions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
 
-    /* Service area */
-    .areaGrid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:14px;
-      margin-top:20px;
-      align-items:stretch;
-    }
-    .areaMap{
-      height:100%;
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(0,0,0,.08);
-      box-shadow:0 18px 44px rgba(0,0,0,.12);
-      background:#000;
-    }
-    .areaMap img{
-      width:100%;
-      height:320px;
-      object-fit:cover;
-      object-position:18% 12%;
-      display:block;
-    }
-    .areaCard{
-      position:relative;
-      overflow:hidden;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.14);
-      background:
-        radial-gradient(circle at 14% 10%, rgba(246,217,138,.08), rgba(246,217,138,0) 32%),
-        rgba(255,255,255,.04);
-      padding:18px;
-      box-shadow:0 18px 44px rgba(0,0,0,.18);
-      color:#fff;
-    }
-    .areaTitle{
-      margin:0 0 8px;
-      font-family:Oswald, Inter, sans-serif;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-    .areaText{
-      margin:0 0 12px;
-      color:rgba(255,255,255,.74);
-      line-height:1.7;
-    }
-    .areaList{
-      margin-top:12px;
-      border-radius:16px;
-      border:1px solid rgba(246,217,138,.18);
-      background:rgba(255,255,255,.04);
-      padding:12px 14px;
-    }
-    .areaList__title{
-      font-weight:900;
-      margin-bottom:8px;
-      color:#fff;
-    }
-    .areaList__ul{
-      margin:0;
-      padding-left:18px;
-      color:rgba(255,255,255,.74);
-      line-height:1.7;
-    }
-    .areaActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
+    .aboutGrid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:22px;align-items:center;}
+    .aboutCopy{text-align:center;}
+    .aboutTitle{margin:0 0 10px;color:#111;font-family:Oswald,Inter,sans-serif;font-size:1.6rem;letter-spacing:.04em;text-transform:uppercase;}
+    .aboutText{margin:0 auto 10px;max-width:68ch;color:var(--muted);line-height:1.72;}
+    .aboutActions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px;}
+    .aboutMedia img{width:100%;height:320px;object-fit:cover;border-radius:24px;border:1px solid rgba(16,19,27,.1);box-shadow:0 24px 64px rgba(16,19,27,.16);}
 
-    /* About */
-    .aboutGrid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:18px;
-      margin-top:22px;
-      align-items:center;
-    }
-    .aboutCopy{
-      text-align:center;
-    }
-    .aboutTitle{
-      margin:0 0 10px;
-      font-family:Oswald, Inter, sans-serif;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      font-size:1.6rem;
-    }
-    .aboutText{
-      margin:0 auto 10px;
-      line-height:1.72;
-      color:var(--muted);
-      max-width:68ch;
-    }
-    .aboutMedia img{
-      width:100%;
-      height:320px;
-      object-fit:cover;
-      border-radius:24px;
-      border:1px solid rgba(0,0,0,.1);
-      box-shadow:0 24px 60px rgba(0,0,0,.14);
-    }
-    .aboutActions{
-      margin-top:14px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
+    .reviewsRailWrap{position:relative;margin-top:16px;padding:0 56px;}
+    .reviewsRail{display:grid;grid-auto-flow:column;grid-auto-columns:88%;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:18px;border-radius:24px;background:rgba(0,0,0,.82);border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 54px rgba(0,0,0,.24);-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+    .reviewsRail::-webkit-scrollbar{display:none;}
+    .rCard{scroll-snap-align:start;min-height:190px;border-radius:22px;padding:14px;border:1px solid rgba(255,255,255,.1);background:radial-gradient(600px 240px at 20% 10%,rgba(214,178,94,.12),transparent 60%),rgba(255,255,255,.04);box-shadow:0 18px 44px rgba(0,0,0,.28);}
+    .rHead{display:flex;align-items:center;gap:12px;}
+    .rAvatar{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;font-weight:900;border:1px solid rgba(246,217,138,.32);background:rgba(246,217,138,.14);color:#fff;}
+    .rMeta{flex:1;min-width:0;}
+    .rName{font-weight:900;color:#fff;}
+    .rLoc{margin-top:2px;color:rgba(255,255,255,.66);font-size:.92rem;}
+    .rStars{color:var(--gold-soft);letter-spacing:1px;font-size:1rem;white-space:nowrap;}
+    .rText{margin:10px 0 0;color:rgba(255,255,255,.76);line-height:1.72;}
+    .rImageExpandBtn{display:inline-flex;align-items:center;justify-content:center;width:100%;margin-top:.95rem;padding:.82rem 1rem;border:1px solid rgba(214,167,63,.55);border-radius:14px;background:rgba(214,167,63,.12);color:#f6d98a;font-size:.92rem;font-weight:900;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;}
+    .rImageExpandBtn:hover{background:rgba(214,167,63,.18);border-color:rgba(214,167,63,.82);}
+    .railArrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:44px;height:44px;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.58);color:#fff;font-size:1.6rem;cursor:pointer;box-shadow:0 14px 34px rgba(0,0,0,.25);}
+    .railArrow--left{left:0;}
+    .railArrow--right{right:0;}
+    .sectionCtas{display:flex;justify-content:center;gap:10px;margin-top:14px;}
 
-    /* Reviews */
-    .reviewsRailWrap{
-      position:relative;
-      margin-top:16px;
-      padding:0 56px;
-    }
-    .reviewsRail{
-      display:grid;
-      grid-auto-flow:column;
-      grid-auto-columns:88%;
-      gap:14px;
-      overflow-x:auto;
-      scroll-snap-type:x mandatory;
-      padding:18px 18px;
-      border-radius:24px;
-      background:rgba(0,0,0,.9);
-      border:1px solid rgba(255,255,255,.08);
-      box-shadow:0 18px 44px rgba(0,0,0,.2);
-      -webkit-overflow-scrolling:touch;
-      scrollbar-width:none;
-    }
-    .reviewsRail::-webkit-scrollbar{ display:none; }
+    .footer{background:#fff;color:#111;border-top:1px solid rgba(16,19,27,.08);}
+    .footerMini{display:flex;flex-direction:column;gap:12px;padding:1.1rem 0;}
+    .footerMini__name{font-family:Oswald,Inter,sans-serif;font-size:1.25rem;letter-spacing:.05em;text-transform:uppercase;}
+    .footerMini__sub{margin-top:.35rem;color:rgba(16,19,27,.62);font-weight:650;line-height:1.5;}
+    .footerMini__actions{display:flex;gap:10px;flex-wrap:wrap;}
+    .footer__bottom{border-top:1px solid rgba(16,19,27,.08);}
+    .footer__bottomInner{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding:10px 0;color:rgba(16,19,27,.64);font-size:.95rem;}
+    .footerLink{color:rgba(16,19,27,.82);text-decoration:underline;text-underline-offset:3px;}
+    .footerSep{opacity:.55;}
 
-    .rCard{
-      scroll-snap-align:start;
-      border-radius:22px;
-      padding:14px;
-      min-height:190px;
-      border:1px solid rgba(255,255,255,.1);
-      background:
-        radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.1), rgba(255,255,255,0) 60%),
-        rgba(255,255,255,.04);
-      box-shadow:0 18px 44px rgba(0,0,0,.25);
-    }
-    .rHead{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .rAvatar{
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      border:1px solid rgba(246,217,138,.32);
-      background:rgba(246,217,138,.14);
-      color:#fff;
-    }
-    .rMeta{ flex:1; }
-    .rName{
-      font-weight:900;
-      color:#fff;
-    }
-    .rLoc{
-      font-size:.92rem;
-      margin-top:2px;
-      color:rgba(255,255,255,.66);
-    }
-    .rStars{
-      color:var(--gold-2);
-      letter-spacing:1px;
-      font-size:1rem;
-    }
-    .rText{
-      margin:10px 0 0;
-      line-height:1.72;
-      color:rgba(255,255,255,.76);
-    }
-    .railArrow{
-      position:absolute;
-      top:50%;
-      transform:translateY(-50%);
-      width:44px;
-      height:44px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.56);
-      color:#fff;
-      font-size:1.6rem;
-      cursor:pointer;
-      z-index:3;
-      box-shadow:0 14px 34px rgba(0,0,0,.25);
-    }
-    .railArrow--left{ left:0; }
-    .railArrow--right{ right:0; }
-    .sectionCtas{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      margin-top:14px;
-    }
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:200;padding:1.25rem;}
+    .modal.isOpen{display:flex;}
+    .modal__overlay{position:absolute;inset:0;background:rgba(0,0,0,.62);}
+    .modal__panel,.callPanel,.contactPanel{position:relative;width:min(680px,100%);max-height:calc(100vh - 3rem);overflow:auto;background:#fff;border-radius:20px;box-shadow:var(--shadow-heavy);padding:18px;animation:fadeIn .18s ease both;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+    .modal__close{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:12px;border:1px solid rgba(16,19,27,.12);background:#fff;cursor:pointer;font-size:1.2rem;}
+    .modal__title,.callTitle,.contactTitle{margin:0 0 10px;color:#111;font-family:Oswald,Inter,sans-serif;letter-spacing:.04em;text-transform:uppercase;}
+    .modal__content,.callText,.contactText{color:var(--muted);line-height:1.7;}
+    .modal__actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+    .tiers{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px;}
+    .tier{padding:12px;border-radius:16px;border:1px solid rgba(16,19,27,.1);background:radial-gradient(600px 240px at 20% 10%,rgba(214,178,94,.12),transparent 60%),#fff;box-shadow:0 14px 34px rgba(16,19,27,.06);}
+    .tier__top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+    .tier__name{font-weight:900;color:#111;}
+    .tier__tag{font-size:.85rem;font-weight:900;padding:.25rem .55rem;border-radius:999px;border:1px solid rgba(214,178,94,.4);background:rgba(214,178,94,.12);color:#111;white-space:nowrap;}
+    .tier ul{margin:10px 0 0 18px;padding:0;color:var(--muted);line-height:1.7;}
+    .callNumber{display:inline-block;margin-top:.25rem;padding:10px 12px;border-radius:12px;background:rgba(214,178,94,.1);border:1px solid rgba(214,178,94,.35);color:var(--gold);font-size:1.35rem;font-weight:900;text-decoration:none;}
+    .callHint{margin:10px 0 0;color:rgba(16,19,27,.6);line-height:1.6;}
+    .contactGrid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:10px;}
+    .cField label{display:block;margin-bottom:6px;color:#111;font-weight:900;}
+    .cField input,.cField textarea,.cField select{width:100%;padding:12px;border-radius:14px;border:1px solid rgba(16,19,27,.12);outline:none;background:#fff;font-weight:650;}
+    .cField textarea{min-height:120px;resize:vertical;}
+    .cField input:focus,.cField textarea:focus,.cField select:focus{border-color:rgba(214,178,94,.7);box-shadow:0 0 0 4px rgba(214,178,94,.18);}
+    .hpField{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;}
+    .contactSubmit{width:100%;margin-top:12px;}
+    .contactStatus{margin-top:10px;color:rgba(16,19,27,.65);font-weight:850;line-height:1.5;}
+    .contactStatus.isErr{color:#8b1e1e;}
+    .contactStatus.isOk{color:#0b5a2a;}
+    .contactFine{margin:12px 0 0;color:rgba(16,19,27,.55);font-weight:750;}
+    .contactFine a{font-weight:900;text-decoration:underline;text-underline-offset:3px;}
 
-    .rImageExpandBtn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:.5rem;
-      margin-top:.95rem;
-      width:100%;
-      padding:.82rem 1rem;
-      border:1px solid rgba(214,167,63,.55);
-      border-radius:14px;
-      background:rgba(214,167,63,.12);
-      color:#f6d98a;
-      font-size:.92rem;
-      font-weight:900;
-      letter-spacing:.03em;
-      text-transform:uppercase;
-      cursor:pointer;
-      transition:transform 180ms ease, background 180ms ease, border-color 180ms ease;
-    }
-    .rImageExpandBtn:hover{
-      transform:translateY(-1px);
-      background:rgba(214,167,63,.18);
-      border-color:rgba(214,167,63,.82);
-    }
+    .reviewImageModal[hidden]{display:none!important;}
+    .reviewImageModal{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.25rem;}
+    .reviewImageModal__overlay{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(6px);}
+    .reviewImageModal__panel{position:relative;z-index:1;width:min(980px,100%);max-height:92vh;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:#111;box-shadow:0 30px 90px rgba(0,0,0,.48);overflow:hidden;}
+    .reviewImageModal__top{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem 1rem;border-bottom:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);}
+    .reviewImageModal__title{color:#fff;font-weight:900;font-size:.95rem;}
+    .reviewImageModal__close{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:1.55rem;font-weight:900;line-height:1;cursor:pointer;}
+    .reviewImageModal__img{display:block;width:100%;max-height:calc(92vh - 64px);object-fit:contain;background:#070707;}
 
-    /* Footer */
-    .footer{
-      background:#fff;
-      color:#111;
-      border-top:1px solid rgba(0,0,0,.08);
-    }
-    .footerMini{
-      padding:1.1rem 0;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-    .footerMini__name{
-      font-family:Oswald, Inter, sans-serif;
-      letter-spacing:.05em;
-      text-transform:uppercase;
-      font-size:1.25rem;
-    }
-    .footerMini__sub{
-      margin-top:.35rem;
-      color:rgba(0,0,0,.62);
-      font-weight:600;
-    }
-    .footerMini__actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .footer__bottom{
-      border-top:1px solid rgba(0,0,0,.08);
-    }
-    .footer__bottomInner{
-      padding:10px 0;
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      font-size:.95rem;
-      color:rgba(0,0,0,.65);
-    }
-    .footerLink{
-      color:rgba(0,0,0,.8);
-      text-decoration:underline;
-      text-underline-offset:3px;
-    }
-    .footerLink:hover{ color:#111; }
-    .footerSep{ opacity:.55; }
-
-    /* Modals */
-    .modal{
-      position:fixed;
-      inset:0;
-      display:none;
-      z-index:200;
-      align-items:center;
-      justify-content:center;
-      padding:1.25rem;
-    }
-    .modal.isOpen{ display:flex; }
-    .modal__overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.6);
-    }
-    .modal__close{
-      position:absolute;
-      top:10px;
-      right:10px;
-      width:38px;
-      height:38px;
-      border-radius:12px;
-      border:1px solid rgba(0,0,0,.12);
-      background:#fff;
-      cursor:pointer;
-      font-size:1.2rem;
-    }
-    .modal__panel,
-    .callPanel,
-    .contactPanel{
-      position:relative;
-      width:min(680px, 100%);
-      background:#fff;
-      border-radius:20px;
-      box-shadow:var(--shadow-lg);
-      padding:18px;
-      max-height:calc(100vh - 3rem);
-      overflow:auto;
-      animation:fadeIn .18s ease both;
-    }
-    @keyframes fadeIn{
-      from{ opacity:0; transform:translateY(10px); }
-      to{ opacity:1; transform:translateY(0); }
-    }
-    .modal__title,
-    .callTitle,
-    .contactTitle{
-      margin:0 0 10px;
-      font-family:Oswald, Inter, sans-serif;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      color:#111;
-    }
-    .modal__content,
-    .callText,
-    .contactText{
-      color:var(--muted);
-      line-height:1.7;
-    }
-    .modal__actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
-    }
-
-    .tiers{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:12px;
-    }
-    .tier{
-      border-radius:16px;
-      border:1px solid rgba(0,0,0,.1);
-      background:
-        radial-gradient(600px 240px at 20% 10%, rgba(214,178,94,.12), rgba(255,255,255,0) 60%),
-        #fff;
-      padding:12px;
-      box-shadow:0 14px 34px rgba(0,0,0,.06);
-    }
-    .tier__top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .tier__name{ font-weight:900; color:#111; }
-    .tier__tag{
-      font-weight:900;
-      font-size:.85rem;
-      padding:.25rem .55rem;
-      border-radius:999px;
-      border:1px solid rgba(214,178,94,.4);
-      background:rgba(214,178,94,.12);
-      color:#111;
-      white-space:nowrap;
-    }
-    .tier ul{
-      margin:10px 0 0 18px;
-      padding:0;
-      color:var(--muted);
-      line-height:1.7;
-    }
-
-    .callNumber{
-      display:inline-block;
-      font-weight:900;
-      font-size:1.35rem;
-      color:var(--gold);
-      text-decoration:none;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(214,178,94,.1);
-      border:1px solid rgba(214,178,94,.35);
-      margin-top:.25rem;
-    }
-    .callHint{
-      margin:10px 0 0;
-      color:rgba(0,0,0,.6);
-      line-height:1.6;
-    }
-
-    .contactGrid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .cField label{
-      display:block;
-      font-weight:900;
-      margin-bottom:6px;
-      color:#111;
-    }
-    .cField input,
-    .cField textarea,
-    .cField select{
-      width:100%;
-      padding:12px;
-      border-radius:14px;
-      border:1px solid rgba(0,0,0,.12);
-      outline:none;
-      font-weight:600;
-      font-family:inherit;
-      background:#fff;
-    }
-    .cField textarea{
-      min-height:120px;
-      resize:vertical;
-    }
-    .cField input:focus,
-    .cField textarea:focus,
-    .cField select:focus{
-      border-color:rgba(214,178,94,.7);
-      box-shadow:0 0 0 4px rgba(214,178,94,.18);
-    }
-    .contactSubmit{
-      width:100%;
-      margin-top:12px;
-    }
-    .contactStatus{
-      margin-top:10px;
-      font-weight:850;
-      color:rgba(0,0,0,.65);
-      line-height:1.5;
-    }
-    .contactStatus.isErr{ color:#8b1e1e; }
-    .contactStatus.isOk{ color:#0b5a2a; }
-    .contactFine{
-      margin:12px 0 0;
-      color:rgba(0,0,0,.55);
-      font-weight:750;
-    }
-    .contactFine a{
-      color:inherit;
-      font-weight:900;
-      text-decoration:underline;
-      text-underline-offset:3px;
-    }
-    .hpField{
-      position:absolute;
-      left:-9999px;
-      width:1px;
-      height:1px;
-      overflow:hidden;
-    }
-
-    /* Review image modal */
-    .reviewImageModal[hidden]{ display:none !important; }
-    .reviewImageModal{
-      position:fixed;
-      inset:0;
-      z-index:9999;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:1.25rem;
-    }
-    .reviewImageModal__overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.78);
-      backdrop-filter:blur(6px);
-    }
-    .reviewImageModal__panel{
-      position:relative;
-      z-index:1;
-      width:min(980px, 100%);
-      max-height:92vh;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.12);
-      background:#111;
-      box-shadow:0 30px 90px rgba(0,0,0,.48);
-      overflow:hidden;
-    }
-    .reviewImageModal__top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:1rem;
-      padding:.9rem 1rem;
-      border-bottom:1px solid rgba(255,255,255,.1);
-      background:rgba(255,255,255,.04);
-    }
-    .reviewImageModal__title{
-      color:#fff;
-      font-weight:900;
-      font-size:.95rem;
-    }
-    .reviewImageModal__close{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:38px;
-      height:38px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius:12px;
-      background:rgba(255,255,255,.08);
-      color:#fff;
-      font-size:1.55rem;
-      font-weight:900;
-      line-height:1;
-      cursor:pointer;
-    }
-    .reviewImageModal__close:hover{
-      background:rgba(255,255,255,.14);
-    }
-    .reviewImageModal__img{
-      display:block;
-      width:100%;
-      max-height:calc(92vh - 64px);
-      object-fit:contain;
-      background:#070707;
-    }
-
-    /* Desktop */
     @media (min-width:768px){
-      .nav{
-        position:static;
-        display:flex !important;
-        align-items:center;
-        justify-content:space-between;
-        background:transparent;
-        box-shadow:none;
-        padding:0;
-        max-height:none;
-        overflow:visible;
-        border-radius:0;
-        flex:1;
-        gap:18px;
-      }
-      .nav__links{
-        flex-direction:row;
-        align-items:center;
-        justify-content:center;
-        gap:18px;
-        flex:1;
-      }
-      .nav__link{
-        padding:.45rem .25rem .85rem;
-        white-space:nowrap;
-      }
-      .nav__link::after{
-        text-align:center;
-        margin-top:.22rem;
-        font-size:.5rem;
-        letter-spacing:.18rem;
-      }
-      .nav__cta{
-        width:auto;
-        margin-top:0;
-      }
-      .navToggle{ display:none; }
-
-      .promoCards{ grid-template-columns:repeat(3, 1fr); }
-      .serviceCard__actions{ grid-template-columns:1fr 1fr; }
-      .steps{ grid-template-columns:repeat(2, 1fr); gap:16px; }
-      .areaGrid{ grid-template-columns:1fr 1fr; gap:18px; }
-      .areaMap img{ height:100%; min-height:380px; }
-      .aboutGrid{ grid-template-columns:1.08fr .92fr; gap:22px; }
-      .aboutMedia img{ height:380px; }
-      .footerMini{
-        flex-direction:row;
-        align-items:center;
-        justify-content:space-between;
-      }
-      .tiers{ grid-template-columns:repeat(3, 1fr); }
-      .contactGrid{ grid-template-columns:1fr 1fr; }
-      .reels{
-        display:grid;
-        grid-template-columns:repeat(3, 1fr);
-        gap:14px;
-      }
-      .reel{
-        aspect-ratio:9 / 16;
-        cursor:pointer;
-      }
-      .reel__overlay{ display:flex; }
-      .reel.isPlaying .reel__overlay{
-        opacity:0;
-        transition:opacity .18s ease;
-      }
+      .nav{position:static;display:flex!important;align-items:center;justify-content:space-between;gap:18px;flex:1;max-height:none;overflow:visible;background:transparent;box-shadow:none;border-radius:0;padding:0;}
+      .nav__links{flex:1;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:20px;}
+      .nav__link{align-items:center;padding:.35rem .1rem .15rem;white-space:nowrap;background:transparent!important;}
+      .nav__link .starRow{justify-content:center;}
+      .nav__cta{width:auto;margin-top:0;flex:0 0 auto;}
+      .navToggle{display:none;}
+      .serviceWrap{grid-template-columns:repeat(3,minmax(0,1fr));}
+      .serviceCard:nth-child(4),.serviceCard:nth-child(5){grid-column:auto;}
+      .serviceCard__actions{grid-template-columns:1fr 1fr;}
+      .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+      .reel{aspect-ratio:9/16;cursor:pointer;}
+      .reel__overlay{display:flex;}
+      .reel.isPlaying .reel__overlay{opacity:0;transition:opacity .18s ease;}
+      .steps{grid-template-columns:repeat(2,1fr);gap:16px;}
+      .areaGrid{grid-template-columns:1fr 1fr;}
+      .areaMap img{height:100%;min-height:380px;}
+      .aboutGrid{grid-template-columns:1.08fr .92fr;gap:22px;}
+      .aboutMedia img{height:380px;}
+      .reviewsRailWrap{padding:0 64px;}
+      .tiers{grid-template-columns:repeat(3,1fr);}
+      .contactGrid{grid-template-columns:1fr 1fr;}
+      .footerMini{flex-direction:row;align-items:center;justify-content:space-between;}
     }
 
-    /* Mobile */
     @media (max-width:980px){
-      .promoIntro,
-      .promoGrid{
-        grid-template-columns:1fr;
-      }
-      .promoCards{
-        grid-template-columns:1fr;
-      }
+      .hero__layout{grid-template-columns:1fr;}
+      .hero__content{max-width:100%;}
+      .hero__headline{max-width:13ch;}
+      .heroReview{max-width:100%;}
+      .promo__intro,.promo__grid{grid-template-columns:1fr;}
+      .promoCards{grid-template-columns:1fr;}
     }
 
     @media (max-width:767px){
-      .hero{
-        min-height:auto;
-      }
-      .hero__inner{
-        padding:4.9rem 0 4rem;
-      }
-      .heroPromoStrip{
-        flex-direction:column;
-        align-items:stretch;
-      }
-      .heroPromoStrip__copy{
-        flex-direction:column;
-        align-items:flex-start;
-        gap:.46rem;
-      }
-      .heroPromoStrip .btn{
-        width:100%;
-      }
-      .hero__headline{
-        max-width:10.8ch;
-        font-size:clamp(2.65rem, 11.2vw, 3.95rem);
-        line-height:.98;
-      }
-      .hero__actions{
-        flex-direction:column;
-        align-items:stretch;
-      }
-      .hero__actions .btn{
-        width:100%;
-        border-radius:18px;
-      }
-
-      .serviceCard{
-        width:min(420px, 100%);
-        min-height:380px;
-      }
-
-      .reelsBar{
-        display:flex;
-        justify-content:center;
-        margin:0 auto 10px;
-      }
-      .reelsBar__pill{
-        display:inline-flex;
-        align-items:center;
-        gap:10px;
-        padding:.55rem .95rem;
-        border-radius:999px;
-        font-weight:950;
-        letter-spacing:.035em;
-        font-size:.85rem;
-        color:rgba(255,255,255,.95);
-        background:rgba(0,0,0,.76);
-        border:1px solid rgba(246,217,138,.45);
-        box-shadow:0 18px 44px rgba(0,0,0,.22);
-        backdrop-filter:blur(10px);
-        white-space:nowrap;
-      }
-      .reelsBar__pill::after{
-        content:"→";
-        font-weight:900;
-        color:rgba(246,217,138,.92);
-      }
-
-      .reels{
-        display:grid;
-        grid-auto-flow:column;
-        grid-auto-columns:86%;
-        gap:14px;
-        overflow-x:auto;
-        overflow-y:hidden;
-        scroll-snap-type:x mandatory;
-        -webkit-overflow-scrolling:touch;
-        scrollbar-width:none;
-        padding:0 8px 6px;
-      }
-      .reels::-webkit-scrollbar{ display:none; }
-      .reel{
-        scroll-snap-align:start;
-        height:62vh;
-      }
-
-      .reviewsRailWrap{ padding:0 0 56px; }
-      .railArrow{
-        top:auto;
-        bottom:0;
-        transform:none;
-      }
-      .railArrow--left{ left:calc(50% - 54px); }
-      .railArrow--right{ right:calc(50% - 54px); }
-
-      .carousel__frame{
-        grid-template-columns:1fr;
-      }
-      .carouselArrow{
-        display:none;
-      }
-
-      .promoSplit{
-        grid-template-columns:1fr;
-      }
-
-      .footer__bottomInner{
-        flex-direction:column;
-      }
+      .container{width:min(var(--max),calc(100% - 1.25rem));}
+      .brand__name{font-size:.95rem;}
+      .hero{min-height:auto;}
+      .hero__inner{padding-top:5.1rem;padding-bottom:4.2rem;}
+      .hero__eyebrow{font-size:.74rem;margin-bottom:.85rem;}
+      .hero__headline{max-width:14ch;font-size:clamp(2.65rem,11.9vw,3.95rem);line-height:.98;}
+      .hero__sub{max-width:100%;margin-bottom:0;font-size:1rem;}
+      .hero__actions{flex-direction:column;align-items:stretch;gap:1rem;margin-top:1.35rem;}
+      .hero__actions .btn{width:100%;border-radius:16px;min-height:58px;}
+      .heroReview{display:none;}
+      .promo{padding:3rem 0;}
+      .dealSplit{grid-template-columns:1fr;}
+      .serviceCard{min-height:380px;}
+      .carousel__frame{grid-template-columns:1fr;}
+      .carouselArrow{display:none;}
+      .reelsBar{display:flex;justify-content:center;margin:0 auto 10px;}
+      .reelsBar__pill{display:inline-flex;align-items:center;gap:10px;padding:.55rem .95rem;border-radius:999px;font-weight:950;letter-spacing:.035em;font-size:.85rem;color:rgba(255,255,255,.95);background:rgba(0,0,0,.75);border:1px solid rgba(246,217,138,.45);box-shadow:0 18px 44px rgba(0,0,0,.22);backdrop-filter:blur(10px);white-space:nowrap;}
+      .reelsBar__pill::after{content:"→";font-weight:900;color:rgba(246,217,138,.92);}
+      .reels{display:grid;grid-auto-flow:column;grid-auto-columns:86%;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:0 8px 6px;}
+      .reels::-webkit-scrollbar{display:none;}
+      .reel{scroll-snap-align:start;height:62vh;}
+      .reviewsRailWrap{padding:0 0 56px;}
+      .reviewsRail{grid-auto-columns:88%;}
+      .railArrow{top:auto;bottom:0;transform:none;}
+      .railArrow--left{left:calc(50% - 54px);}
+      .railArrow--right{right:calc(50% - 54px);}
+      .footer__bottomInner{flex-direction:column;}
     }
   </style>
 
@@ -1741,22 +753,11 @@
 <body>
   <header class="header" id="top">
     <div class="container header__inner">
-      <a class="brand" href="#top" aria-label="Home">
-        <img
-          class="brand__logo"
-          src="./Untitled design (2).png"
-          alt="Keizer Mobile Detailing logo"
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-          width="74"
-          height="74"
-        />
+      <a class="brand" href="#top" aria-label="Keizer Mobile Detailing home">
+        <img class="brand__logo" src="./Untitled design (2).png" alt="Keizer Mobile Detailing logo" loading="eager" fetchpriority="high" decoding="async" width="74" height="74" />
         <div class="brand__text">
           <span class="brand__name">Keizer Mobile Detailing</span>
-          <div class="brand__subStars" aria-hidden="true">
-            <span>★</span><span>★</span><span>★</span>
-          </div>
+          <div class="starRow" aria-hidden="true"><span>★</span><span>★</span><span>★</span></div>
         </div>
       </a>
 
@@ -1766,11 +767,11 @@
 
       <nav class="nav" data-nav>
         <div class="nav__links">
-          <a class="nav__link" href="#services">Services</a>
-          <a class="nav__link" href="#work">Our Work</a>
-          <a class="nav__link" href="#process">How It Works</a>
-          <a class="nav__link" href="#about">About</a>
-          <a class="nav__link" href="#reviews">Reviews</a>
+          <a class="nav__link" href="#services">Services <span class="starRow" aria-hidden="true"><span>★</span><span>★</span><span>★</span></span></a>
+          <a class="nav__link" href="#work">Our Work <span class="starRow" aria-hidden="true"><span>★</span><span>★</span><span>★</span></span></a>
+          <a class="nav__link" href="#process">How It Works <span class="starRow" aria-hidden="true"><span>★</span><span>★</span><span>★</span></span></a>
+          <a class="nav__link" href="#about">About <span class="starRow" aria-hidden="true"><span>★</span><span>★</span><span>★</span></span></a>
+          <a class="nav__link" href="#reviews">Reviews <span class="starRow" aria-hidden="true"><span>★</span><span>★</span><span>★</span></span></a>
         </div>
         <a class="btn btn--quote nav__cta" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
       </nav>
@@ -1779,118 +780,112 @@
 
   <section class="hero" aria-label="Hero">
     <div class="hero__bg" aria-hidden="true"></div>
-
     <div class="container hero__inner">
-      <div class="heroPromoStrip" role="region" aria-label="Fourth of July promotion">
-        <div class="heroPromoStrip__copy">
-          <span class="heroPromoStrip__badge">4th of July Special</span>
-          <span class="heroPromoStrip__main">First car full price. Second car 30% off.</span>
-          <span class="heroPromoStrip__sub">Premium multi-car summer promo.</span>
+      <div class="hero__layout">
+        <div class="hero__content">
+          <div class="hero__eyebrow">
+            <span class="hero__eyebrowDot" aria-hidden="true"></span>
+            Mobile detailing in Keizer &amp; Salem
+          </div>
+
+          <h1 class="hero__headline">BRING YOUR <span class="hero__headlineAccent">CAR</span> BACK TO LIFE.</h1>
+          <p class="hero__sub">Interior and exterior detailing that makes your car feel fresh, clean, and reset the second you get back in.</p>
+
+          <div class="hero__actions">
+            <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+            <button class="btn btn--dark" type="button" data-contact-open>CONTACT US</button>
+          </div>
         </div>
-        <a class="btn btn--light" href="./quote.html" data-quote-link>GET QUOTE</a>
-      </div>
 
-      <div class="hero__content">
-        <div class="hero__eyebrow">
-          <span class="hero__eyebrowDot" aria-hidden="true"></span>
-          Mobile detailing in Keizer &amp; Salem
-        </div>
+        <aside class="heroReview" aria-label="Featured customer review">
+          <div class="heroReview__top">
+            <span class="heroReview__pill">Top Review</span>
+            <div class="heroReview__stars" aria-label="5 out of 5 stars">★★★★★</div>
+          </div>
 
-        <h1 class="hero__headline">
-          BRING YOUR <span class="hero__headlineAccent">CAR</span> BACK TO LIFE.
-        </h1>
+          <div class="heroReview__media">
+            <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+          </div>
 
-        <p class="hero__sub">
-          Interior and exterior detailing that makes your vehicle feel fresh, clean, and fully reset the second you step back in.
-        </p>
+          <p class="heroReview__quote">“My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!”</p>
 
-        <div class="hero__actions">
-          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
-          <button class="btn btn--call" type="button" data-contact-open>CONTACT US</button>
-        </div>
+          <div class="heroReview__footer">
+            <div class="heroReview__avatar" aria-hidden="true">ED</div>
+            <div>
+              <div class="heroReview__name">Edgar Diaz</div>
+              <div class="heroReview__meta">Google review · G-Wagon detail</div>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   </section>
 
-  <section class="section section--light promoSection" id="promo">
+  <section class="promo" id="promo">
     <div class="container">
-      <div class="promoIntro">
+      <div class="promo__intro">
         <div>
-          <div class="promoKicker">★ Summer / 4th of July Promotion</div>
-          <h2 class="promoTitle">Detail more than one car and save.</h2>
+          <div class="promo__kicker">★ 4th of July multi-car special</div>
+          <h2 class="promo__title">Detail more than one car and save.</h2>
         </div>
-        <p class="promoText">
-          If you’ve been meaning to get both vehicles cleaned up, this is the time to do it. Book your first vehicle at regular price and get <strong>30% off the second vehicle</strong>. It’s a clean, premium offer built for families, couples, and multi-car households.
-        </p>
+        <p class="promo__text">Book the first vehicle at regular price and get <strong>30% off the second vehicle</strong>. It is built for families, couples, and multi-car households that want both vehicles cleaned up in one clean booking.</p>
       </div>
 
-      <div class="promoGrid">
-        <div class="promoMainCard">
-          <div class="promoMainCard__kicker">Limited-time offer</div>
-          <h3 class="promoMainCard__title">Book 1 car.<br />Get the next 30% off.</h3>
-          <p class="promoMainCard__copy">
-            Perfect if you want to knock out two vehicles in one visit and save money without sacrificing quality.
-          </p>
+      <div class="promo__grid">
+        <article class="dealCard">
+          <div class="dealCard__label">Limited summer offer</div>
+          <h3 class="dealCard__headline">First car full price.<br />Second car 30% off.</h3>
+          <p class="dealCard__copy">A premium detail offer without making the site feel cheap or spammy. Same quality, cleaner booking, better value when you schedule multiple vehicles.</p>
 
-          <div class="promoSplit">
-            <div class="promoSplit__item">
-              <div class="promoSplit__label">Vehicle 1</div>
-              <div class="promoSplit__value">Full Price</div>
+          <div class="dealSplit">
+            <div class="dealSplit__item">
+              <div class="dealSplit__label">Vehicle 1</div>
+              <div class="dealSplit__value">Full Price</div>
             </div>
-            <div class="promoSplit__item promoSplit__item--discount">
-              <div class="promoSplit__label">Vehicle 2</div>
-              <div class="promoSplit__value">30% Off</div>
+            <div class="dealSplit__item dealSplit__item--discount">
+              <div class="dealSplit__label">Vehicle 2</div>
+              <div class="dealSplit__value">30% Off</div>
             </div>
           </div>
 
-          <ul class="promoMainCard__list">
-            <li>Great for families with multiple daily drivers</li>
-            <li>Book both vehicles in the same quote request</li>
-            <li>Available on qualifying detailing services</li>
+          <ul class="dealList">
+            <li>Perfect for households with multiple vehicles</li>
+            <li>Works best when both cars are booked together</li>
+            <li>Include both vehicles in your quote request</li>
           </ul>
 
-          <div style="margin-top:1.1rem; display:flex; gap:10px; flex-wrap:wrap;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:1.1rem;">
             <a class="btn btn--quote" href="./quote.html" data-quote-link>CLAIM THE DEAL</a>
-            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
+            <button class="btn btn--dark" type="button" data-call-open>CALL / TEXT</button>
           </div>
-        </div>
+        </article>
 
         <div class="promoCards">
-          <article class="promoMini">
-            <div class="promoMini__icon">★</div>
-            <h3>Premium Results</h3>
-            <p>
-              This still feels like a premium detail, not a cheap “sale” wash. The goal is the same: clean, sharp, high-quality results.
-            </p>
+          <article class="promoCard">
+            <div class="promoCard__icon">★</div>
+            <h3>Premium Finish</h3>
+            <p>Still positioned like a clean, high-quality detail. The sale feels intentional, not cheap.</p>
           </article>
-
-          <article class="promoMini">
-            <div class="promoMini__icon">🚗</div>
-            <h3>Best for 2 Cars</h3>
-            <p>
-              If both vehicles need attention, this is the easiest way to get them done together and save on the second one.
-            </p>
+          <article class="promoCard">
+            <div class="promoCard__icon">2</div>
+            <h3>Built for Two Cars</h3>
+            <p>Great for families, couples, or anyone who wants more than one vehicle reset at the same time.</p>
           </article>
-
-          <article class="promoMini">
-            <div class="promoMini__icon">✓</div>
-            <h3>Simple Booking</h3>
-            <p>
-              Send in your quote request, include both vehicles, and we’ll help confirm pricing, timing, and the best service fit.
-            </p>
+          <article class="promoCard">
+            <div class="promoCard__icon">✓</div>
+            <h3>Easy Booking</h3>
+            <p>Submit one quote request, add both vehicles, and get the discount applied to the second car.</p>
           </article>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--light" id="services">
+  <section class="section section--soft" id="services">
     <div class="container">
       <div class="section__head">
         <h2 class="section__title">Services</h2>
-        <p class="section__sub">
-          Tap a service to see what’s included. Quotes are based on vehicle size and condition.
-        </p>
+        <p class="section__sub">Tap a service to see what's included. Quotes are based on vehicle size and condition.</p>
       </div>
 
       <div class="serviceWrap">
@@ -1899,15 +894,12 @@
           <div class="serviceCard__shine" aria-hidden="true"></div>
           <div class="serviceCard__content">
             <div class="serviceCard__top">
-              <div>
-                <h3>Interior</h3>
-                <p class="serviceCard__mini">3 levels — from quick refresh to deep reset.</p>
-              </div>
+              <div><h3>Interior</h3><p class="serviceCard__mini">3 levels — from quick refresh to deep reset.</p></div>
               <span class="tag">Most Popular</span>
             </div>
             <div class="serviceCard__actions">
-              <button class="btn btn--ghost" data-modal-open="interior" type="button">Learn More</button>
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>Get Quote</a>
+              <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
             </div>
           </div>
         </article>
@@ -1917,15 +909,12 @@
           <div class="serviceCard__shine" aria-hidden="true"></div>
           <div class="serviceCard__content">
             <div class="serviceCard__top">
-              <div>
-                <h3>Exterior</h3>
-                <p class="serviceCard__mini">3 wash levels. Safe wash to premium protection.</p>
-              </div>
+              <div><h3>Exterior</h3><p class="serviceCard__mini">3 wash levels. Safe wash to premium protection.</p></div>
               <span class="tag">Gloss Reset</span>
             </div>
             <div class="serviceCard__actions">
-              <button class="btn btn--ghost" data-modal-open="exterior" type="button">Learn More</button>
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>Get Quote</a>
+              <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
             </div>
           </div>
         </article>
@@ -1935,15 +924,12 @@
           <div class="serviceCard__shine" aria-hidden="true"></div>
           <div class="serviceCard__content">
             <div class="serviceCard__top">
-              <div>
-                <h3>Upkeep</h3>
-                <p class="serviceCard__mini">Maintenance plan for returning clients.</p>
-              </div>
+              <div><h3>Upkeep</h3><p class="serviceCard__mini">Maintenance plan for returning clients.</p></div>
               <span class="tag">Returning</span>
             </div>
             <div class="serviceCard__actions">
-              <button class="btn btn--ghost" data-modal-open="maintenance" type="button">Learn More</button>
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>Get Quote</a>
+              <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
             </div>
           </div>
         </article>
@@ -1953,15 +939,12 @@
           <div class="serviceCard__shine" aria-hidden="true"></div>
           <div class="serviceCard__content">
             <div class="serviceCard__top">
-              <div>
-                <h3>Ceramic</h3>
-                <p class="serviceCard__mini">Longer gloss, easier washes, and added protection.</p>
-              </div>
+              <div><h3>Ceramic</h3><p class="serviceCard__mini">Longer gloss, easier washes, protection.</p></div>
               <span class="tag tag--ghost">Hidden</span>
             </div>
             <div class="serviceCard__actions">
-              <button class="btn btn--ghost" data-modal-open="ceramic" type="button">Learn More</button>
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>Get Quote</a>
+              <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
             </div>
           </div>
         </article>
@@ -1971,15 +954,12 @@
           <div class="serviceCard__shine" aria-hidden="true"></div>
           <div class="serviceCard__content">
             <div class="serviceCard__top">
-              <div>
-                <h3>Correction</h3>
-                <p class="serviceCard__mini">Swirl removal, clarity, and deeper shine.</p>
-              </div>
+              <div><h3>Correction</h3><p class="serviceCard__mini">Swirl removal, clarity, deeper shine.</p></div>
               <span class="tag tag--ghost">Hidden</span>
             </div>
             <div class="serviceCard__actions">
-              <button class="btn btn--ghost" data-modal-open="paint" type="button">Learn More</button>
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>Get Quote</a>
+              <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
+              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
             </div>
           </div>
         </article>
@@ -1996,34 +976,19 @@
 
       <div class="carousel" data-carousel="work">
         <div class="carousel__frame">
-          <button class="carouselArrow" type="button" data-carousel-prev aria-label="Previous">&#8249;</button>
-
+          <button class="carouselArrow" type="button" data-carousel-prev aria-label="Previous">‹</button>
           <div class="carousel__viewport" data-carousel-viewport>
             <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
-
             <div class="carousel__track" data-carousel-track>
               <div class="carousel__slide">
-                <div
-                  class="compare"
-                  data-compare
-                  data-before="./IMG_2469.jpg"
-                  data-after="./IMG_2461.jpg"
-                  aria-label="Before and after comparison"
-                >
+                <div class="compare" data-compare data-before="./IMG_2469.jpg" data-after="./IMG_2461.jpg" aria-label="Before and after comparison">
                   <div class="compare__stage" aria-hidden="true"></div>
                   <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                   <div class="compare__handle" aria-hidden="true"></div>
                 </div>
               </div>
-
               <div class="carousel__slide">
-                <div
-                  class="compare"
-                  data-compare
-                  data-before="./IMG_2919 (1).jpg"
-                  data-after="./IMG_2912.jpg"
-                  aria-label="Before and after comparison"
-                >
+                <div class="compare" data-compare data-before="./IMG_2919 (1).jpg" data-after="./IMG_2912.jpg" aria-label="Before and after comparison">
                   <div class="compare__stage" aria-hidden="true"></div>
                   <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
                   <div class="compare__handle" aria-hidden="true"></div>
@@ -2031,83 +996,35 @@
               </div>
             </div>
           </div>
-
-          <button class="carouselArrow" type="button" data-carousel-next aria-label="Next">&#8250;</button>
+          <button class="carouselArrow" type="button" data-carousel-next aria-label="Next">›</button>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section section--light" id="reels">
+  <section class="section section--soft" id="reels">
     <div class="container">
       <div class="section__head">
         <h2 class="section__title">Real Job Clips</h2>
-        <p class="section__sub">Tap a clip to play on desktop.</p>
+        <p class="section__sub">Tap a clip to play on desktop. Swipe for more on mobile.</p>
       </div>
 
-      <div class="reelsBar" aria-hidden="true">
-        <div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div>
-      </div>
-
+      <div class="reelsBar" aria-hidden="true"><div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div></div>
       <div class="reels" data-reels aria-label="Short video clips of detailing work">
         <article class="reel" data-reel>
-          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 1">
-            <source
-              src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
-              type="video/mp4"
-            />
-          </video>
-
-          <div class="reel__overlay" aria-hidden="true">
-            <div class="reel__playBadge">
-              <span class="reel__playIcon"></span>
-              <span>PLAY VIDEO</span>
-            </div>
-          </div>
-
-          <div class="reel__meta">
-            <div class="reel__title">Interior Reset</div>
-          </div>
+          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 1"><source src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4" type="video/mp4" /></video>
+          <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+          <div class="reel__meta"><div class="reel__title">Interior Reset</div></div>
         </article>
-
         <article class="reel" data-reel>
-          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 2">
-            <source
-              src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4"
-              type="video/mp4"
-            />
-          </video>
-
-          <div class="reel__overlay" aria-hidden="true">
-            <div class="reel__playBadge">
-              <span class="reel__playIcon"></span>
-              <span>PLAY VIDEO</span>
-            </div>
-          </div>
-
-          <div class="reel__meta">
-            <div class="reel__title">Deep Clean Moment</div>
-          </div>
+          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 2"><source src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4" type="video/mp4" /></video>
+          <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+          <div class="reel__meta"><div class="reel__title">Deep Clean Moment</div></div>
         </article>
-
         <article class="reel" data-reel>
-          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 3">
-            <source
-              src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4"
-              type="video/mp4"
-            />
-          </video>
-
-          <div class="reel__overlay" aria-hidden="true">
-            <div class="reel__playBadge">
-              <span class="reel__playIcon"></span>
-              <span>PLAY VIDEO</span>
-            </div>
-          </div>
-
-          <div class="reel__meta">
-            <div class="reel__title">Finish &amp; Shine</div>
-          </div>
+          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 3"><source src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4" type="video/mp4" /></video>
+          <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+          <div class="reel__meta"><div class="reel__title">Finish &amp; Shine</div></div>
         </article>
       </div>
     </div>
@@ -2119,39 +1036,11 @@
         <h2 class="section__title">How It Works</h2>
         <p class="section__sub">Simple process. Clear communication. Clean results.</p>
       </div>
-
       <div class="steps">
-        <article class="stepCard">
-          <div class="stepTop">
-            <span class="stepNum">1</span>
-            <h3 class="stepTitle">Get a quote online</h3>
-          </div>
-          <p class="stepText">Choose your vehicle size and condition. It takes under a minute.</p>
-        </article>
-
-        <article class="stepCard">
-          <div class="stepTop">
-            <span class="stepNum">2</span>
-            <h3 class="stepTitle">We reach out and schedule</h3>
-          </div>
-          <p class="stepText">We confirm details, give you the earliest opening, and lock in a time that works.</p>
-        </article>
-
-        <article class="stepCard">
-          <div class="stepTop">
-            <span class="stepNum">3</span>
-            <h3 class="stepTitle">We provide the service</h3>
-          </div>
-          <p class="stepText">We show up ready, do the work properly, and focus on what you care about most.</p>
-        </article>
-
-        <article class="stepCard">
-          <div class="stepTop">
-            <span class="stepNum">4</span>
-            <h3 class="stepTitle">Enjoy a clean, spotless car</h3>
-          </div>
-          <p class="stepText">That reset feeling you notice immediately.</p>
-        </article>
+        <article class="stepCard"><div class="stepTop"><span class="stepNum">1</span><h3 class="stepTitle">Get a quote online</h3></div><p class="stepText">Choose your vehicle size and condition. It takes under a minute.</p></article>
+        <article class="stepCard"><div class="stepTop"><span class="stepNum">2</span><h3 class="stepTitle">We reach out and schedule</h3></div><p class="stepText">We confirm details, give you the earliest opening, and lock in a time that works.</p></article>
+        <article class="stepCard"><div class="stepTop"><span class="stepNum">3</span><h3 class="stepTitle">We provide the service</h3></div><p class="stepText">We show up ready, do the work properly, and focus on what you care about most.</p></article>
+        <article class="stepCard"><div class="stepTop"><span class="stepNum">4</span><h3 class="stepTitle">Enjoy a clean, spotless car</h3></div><p class="stepText">That reset feeling you notice immediately.</p></article>
       </div>
     </div>
   </section>
@@ -2162,34 +1051,16 @@
         <h2 class="section__title section__title--dark">Service Area</h2>
         <p class="section__sub section__sub--dark">Serving Keizer, Salem, Portland, and nearby areas.</p>
       </div>
-
       <div class="areaGrid">
-        <div class="areaMap">
-          <img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" decoding="async" />
-        </div>
-
+        <div class="areaMap"><img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" decoding="async" /></div>
         <div class="areaCard">
           <h3 class="areaTitle">Where we come to you</h3>
-          <p class="areaText">
-            We’re mobile — we detail at your home or location. If you're in the Keizer/Salem area or up in Portland and surrounding suburbs, there’s a strong chance you're in range.
-          </p>
-
+          <p class="areaText">We’re mobile, so we detail at your home or location. If you're in Keizer, Salem, Portland, or surrounding suburbs, there’s a strong chance you're in range.</p>
           <div class="areaList">
             <div class="areaList__title">Areas we serve:</div>
-            <ul class="areaList__ul">
-              <li>Keizer</li>
-              <li>Salem</li>
-              <li>Portland</li>
-              <li>Tigard</li>
-              <li>Lake Oswego</li>
-              <li>Nearby areas (ask to confirm)</li>
-            </ul>
+            <ul class="areaList__ul"><li>Keizer</li><li>Salem</li><li>Portland</li><li>Tigard</li><li>Lake Oswego</li><li>Nearby areas, ask to confirm</li></ul>
           </div>
-
-          <div class="areaActions">
-            <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
-            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
-          </div>
+          <div class="areaActions"><a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a><button class="btn btn--dark" type="button" data-call-open>CALL / TEXT</button></div>
         </div>
       </div>
     </div>
@@ -2200,22 +1071,11 @@
       <div class="aboutGrid">
         <div class="aboutCopy">
           <h3 class="aboutTitle">About Keizer Mobile Detailing</h3>
-          <p class="aboutText">
-            Keizer Mobile Detailing is a professional mobile detailing company serving the local area with high-quality interior and exterior services. We bring everything needed directly to your home or workplace, making it simple to keep your vehicle clean and protected.
-          </p>
-          <p class="aboutText">
-            Our focus is on reliable service, attention to detail, and results that make your car look its best.
-          </p>
-
-          <div class="aboutActions">
-            <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
-            <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
-          </div>
+          <p class="aboutText">Keizer Mobile Detailing is a professional mobile detailing company serving the local area with high-quality interior and exterior services. We bring everything needed directly to your home or workplace, making it simple to keep your vehicle clean and protected.</p>
+          <p class="aboutText">Our focus is on reliable service, attention to detail, and results that make your car look its best.</p>
+          <div class="aboutActions"><a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a><button class="btn btn--light" type="button" data-call-open>CALL / TEXT</button></div>
         </div>
-
-        <div class="aboutMedia">
-          <img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" decoding="async" />
-        </div>
+        <div class="aboutMedia"><img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" decoding="async" /></div>
       </div>
     </div>
   </section>
@@ -2226,89 +1086,18 @@
         <h2 class="section__title section__title--dark">Reviews</h2>
         <p class="section__sub section__sub--dark">This is what people are saying.</p>
       </div>
-
       <div class="reviewsRailWrap" data-rail>
-        <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">&#8249;</button>
-
+        <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">‹</button>
         <div class="reviewsRail" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
-          <article class="rCard">
-            <div class="rHead">
-              <div class="rAvatar">SK</div>
-              <div class="rMeta">
-                <div class="rName">Samuel Kumpula</div>
-                <div class="rLoc">1 review</div>
-              </div>
-              <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-            <p class="rText">Was professional and I love supporting local businesses!</p>
-          </article>
-
-          <article class="rCard">
-            <div class="rHead">
-              <div class="rAvatar">CF</div>
-              <div class="rMeta">
-                <div class="rName">Carhart Family</div>
-                <div class="rLoc">1 review</div>
-              </div>
-              <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-            <p class="rText">
-              Was great with scheduling, showed up on time and messaged ahead! Quality work showed up prepared to finish job. Did better than expected to an older car. Would recommend them to anyone looking for a good price and quality job!
-            </p>
-          </article>
-
-          <article class="rCard">
-            <div class="rHead">
-              <div class="rAvatar">ED</div>
-              <div class="rMeta">
-                <div class="rName">Edgar Diaz</div>
-                <div class="rLoc">5 reviews · Google review</div>
-              </div>
-              <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-            <p class="rText">
-              My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!
-            </p>
-            <button class="rImageExpandBtn" type="button" data-review-image-open="./unnamed.webp">
-              Expand Image
-            </button>
-          </article>
-
-          <article class="rCard">
-            <div class="rHead">
-              <div class="rAvatar">TS</div>
-              <div class="rMeta">
-                <div class="rName">Tony Salazar</div>
-                <div class="rLoc">2 reviews · Google review</div>
-              </div>
-              <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-            <p class="rText">The guy did an amazing Job with our car, loved it.</p>
-          </article>
-
-          <article class="rCard">
-            <div class="rHead">
-              <div class="rAvatar">CR</div>
-              <div class="rMeta">
-                <div class="rName">Customer Review</div>
-                <div class="rLoc">Google review</div>
-              </div>
-              <div class="rStars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            </div>
-            <p class="rText">
-              Josh was on time. Professional and detailed. Did an excellent job overall on two cars. Would recommend him anytime. Top quality.
-            </p>
-          </article>
+          <article class="rCard"><div class="rHead"><div class="rAvatar">SK</div><div class="rMeta"><div class="rName">Samuel Kumpula</div><div class="rLoc">1 review</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText">Was professional and I love supporting local businesses!</p></article>
+          <article class="rCard"><div class="rHead"><div class="rAvatar">CF</div><div class="rMeta"><div class="rName">Carhart Family</div><div class="rLoc">1 review</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText">Was great with scheduling, showed up on time and messaged ahead! Quality work showed up prepared to finish job. Did better than expected to an older car. Would recommend them to anyone looking for a good price and quality job!</p></article>
+          <article class="rCard"><div class="rHead"><div class="rAvatar">ED</div><div class="rMeta"><div class="rName">Edgar Diaz</div><div class="rLoc">5 reviews · Google review</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText">My G-Wagon! Got it back and it looked way better right away. Paint’s got that deep shine again and everything actually looks clean. Interior felt fresh too! Amazing job!</p><button class="rImageExpandBtn" type="button" data-review-image-open="./unnamed.webp">Expand Image</button></article>
+          <article class="rCard"><div class="rHead"><div class="rAvatar">TS</div><div class="rMeta"><div class="rName">Tony Salazar</div><div class="rLoc">2 reviews · Google review</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText">The guy did an amazing job with our car, loved it.</p></article>
+          <article class="rCard"><div class="rHead"><div class="rAvatar">CR</div><div class="rMeta"><div class="rName">Customer Review</div><div class="rLoc">Google review</div></div><div class="rStars" aria-label="5 out of 5 stars">★★★★★</div></div><p class="rText">Josh was on time. Professional and detailed. Did an excellent job overall on two cars. Would recommend him anytime. Top quality.</p></article>
         </div>
-
-        <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">&#8250;</button>
+        <button class="railArrow railArrow--right" type="button" data-rail-next aria-label="Next reviews">›</button>
       </div>
-
-      <div class="sectionCtas">
-        <a class="btn btn--call" href="https://share.google/3BiUyeanYHarNl1i2" target="_blank" rel="noopener noreferrer">
-          LEAVE A REVIEW
-        </a>
-      </div>
+      <div class="sectionCtas"><a class="btn btn--dark" href="https://share.google/3BiUyeanYHarNl1i2" target="_blank" rel="noopener noreferrer">LEAVE A REVIEW</a></div>
     </div>
   </section>
 
@@ -2316,125 +1105,72 @@
     <div class="container footerMini">
       <div>
         <div class="footerMini__name">Keizer Mobile Detailing</div>
-        <div class="footerMini__sub">Premium mobile detailing in Keizer, Salem, and nearby areas.</div>
+        <div class="footerMini__sub">Premium mobile detailing in Keizer, Salem, Portland, and nearby areas.</div>
       </div>
-
       <div class="footerMini__actions">
         <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
         <button class="btn btn--light" type="button" data-call-open>CALL / TEXT</button>
         <button class="btn btn--light" type="button" data-contact-open>CONTACT</button>
       </div>
     </div>
-
     <div class="footer__bottom">
       <div class="container footer__bottomInner">
-        <span>&copy; <span data-year></span> Keizer Mobile Detailing</span>
-        <span>
-          <a
-            class="footerLink"
-            href="https://www.instagram.com/keizermobiledetail?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw%3D%3D"
-            target="_blank"
-            rel="noopener noreferrer"
-          >Instagram</a>
-          <span class="footerSep"> • </span>
-          Website produced by Kumpula Marketing
-        </span>
+        <span>© <span data-year></span> Keizer Mobile Detailing</span>
+        <span><a class="footerLink" href="https://www.instagram.com/keizermobiledetail?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw%3D%3D" target="_blank" rel="noopener noreferrer">Instagram</a><span class="footerSep"> • </span>Website produced by Kumpula Marketing</span>
       </div>
     </div>
   </footer>
 
-  <!-- Review image modal -->
   <div class="reviewImageModal" hidden data-review-image-modal aria-hidden="true">
     <div class="reviewImageModal__overlay" data-review-image-close></div>
     <div class="reviewImageModal__panel" role="dialog" aria-modal="true" aria-label="Expanded customer review image">
-      <div class="reviewImageModal__top">
-        <div class="reviewImageModal__title">Edgar Diaz Review Image</div>
-        <button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button>
-      </div>
+      <div class="reviewImageModal__top"><div class="reviewImageModal__title">Edgar Diaz Review Image</div><button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button></div>
       <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" data-review-image-img />
     </div>
   </div>
 
-  <!-- Service modal -->
   <div class="modal" aria-hidden="true" data-modal>
     <div class="modal__overlay" data-modal-close></div>
     <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
-      <button class="modal__close" aria-label="Close" data-modal-close>&#215;</button>
+      <button class="modal__close" aria-label="Close" data-modal-close>×</button>
       <h3 class="modal__title" data-modal-title>Service</h3>
       <div class="modal__content" data-modal-content></div>
-      <div class="modal__actions">
-        <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
-        <button class="btn btn--light" type="button" data-call-open data-modal-close>CALL / TEXT</button>
-      </div>
+      <div class="modal__actions"><a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a><button class="btn btn--light" type="button" data-call-open data-modal-close>CALL / TEXT</button></div>
     </div>
   </div>
 
-  <!-- Call modal -->
   <div class="modal" aria-hidden="true" data-call-modal>
     <div class="modal__overlay" data-call-close></div>
     <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
-      <button class="modal__close" aria-label="Close" data-call-close>&#215;</button>
-      <h3 class="callTitle">CALL OR TEXT</h3>
+      <button class="modal__close" aria-label="Close" data-call-close>×</button>
+      <h3 class="callTitle">Call or Text</h3>
       <p class="callText">Text 2 to 3 photos for the fastest quote.</p>
       <a class="callNumber" href="tel:+19712865503">(971) 286-5503</a>
       <p class="callHint">Include your vehicle size and condition if you know it.</p>
     </div>
   </div>
 
-  <!-- Contact modal -->
   <div class="modal" aria-hidden="true" data-contact-modal>
     <div class="modal__overlay" data-contact-close></div>
     <div class="contactPanel" role="dialog" aria-modal="true" aria-label="Contact us">
-      <button class="modal__close" aria-label="Close" data-contact-close>&#215;</button>
-
+      <button class="modal__close" aria-label="Close" data-contact-close>×</button>
       <h3 class="contactTitle">Contact Us</h3>
       <p class="contactText">Ask a question or send a message. We usually reply fast.</p>
-
       <form class="contactForm" data-contact-form novalidate>
         <div class="contactGrid">
-          <div class="cField">
-            <label for="cName">Name</label>
-            <input id="cName" name="name" type="text" autocomplete="name" required placeholder="Your name" />
-          </div>
-
-          <div class="cField">
-            <label for="cPhone">Phone</label>
-            <input id="cPhone" name="phone" type="tel" autocomplete="tel" placeholder="(971) 555-1234" />
-          </div>
+          <div class="cField"><label for="cName">Name</label><input id="cName" name="name" type="text" autocomplete="name" required placeholder="Your name" /></div>
+          <div class="cField"><label for="cPhone">Phone</label><input id="cPhone" name="phone" type="tel" autocomplete="tel" placeholder="(971) 555-1234" /></div>
         </div>
-
         <div class="contactGrid">
-          <div class="cField">
-            <label for="cEmail">Email</label>
-            <input id="cEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
-          </div>
-
-          <div class="cField">
-            <label for="cPreferredContact">Preferred Contact Method</label>
-            <select id="cPreferredContact" name="preferredContact">
-              <option value="phone">Phone</option>
-              <option value="email">Email</option>
-            </select>
-          </div>
+          <div class="cField"><label for="cEmail">Email</label><input id="cEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" /></div>
+          <div class="cField"><label for="cPreferredContact">Preferred Contact Method</label><select id="cPreferredContact" name="preferredContact"><option value="phone">Phone</option><option value="email">Email</option></select></div>
         </div>
-
-        <div class="cField">
-          <label for="cMessage">Message</label>
-          <textarea id="cMessage" name="message" required placeholder="What can we help with?"></textarea>
-        </div>
-
+        <div class="cField"><label for="cMessage">Message</label><textarea id="cMessage" name="message" required placeholder="What can we help with?"></textarea></div>
         <input type="text" name="website" tabindex="-1" autocomplete="off" class="hpField" aria-hidden="true" />
-
-        <button class="btn btn--quote contactSubmit" type="submit" data-contact-submit>
-          SEND MESSAGE
-        </button>
-
+        <button class="btn btn--quote contactSubmit" type="submit" data-contact-submit>SEND MESSAGE</button>
         <div class="contactStatus" data-contact-status aria-live="polite"></div>
       </form>
-
-      <p class="contactFine">
-        Prefer texting? <a href="tel:+19712865503">(971) 286-5503</a>
-      </p>
+      <p class="contactFine">Prefer texting? <a href="tel:+19712865503">(971) 286-5503</a></p>
     </div>
   </div>
 
@@ -2447,11 +1183,9 @@
       const $ = (sel, root = document) => root.querySelector(sel);
       const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
-      // Year
       const yearEl = $("[data-year]");
       if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
-      // Nav
       const navToggle = $("[data-nav-toggle]");
       const nav = $("[data-nav]");
       if (navToggle && nav) {
@@ -2464,7 +1198,6 @@
         document.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
       }
 
-      // Modal helpers
       const openModal = (modalEl) => {
         if (!modalEl) return;
         modalEl.classList.add("isOpen");
@@ -2478,91 +1211,20 @@
         document.body.style.overflow = "";
       };
 
-      // Service modal
       const serviceModal = $("[data-modal]");
       const serviceTitle = $("[data-modal-title]");
       const serviceContent = $("[data-modal-content]");
-
       const serviceCopy = {
-        interior: {
-          title: "Interior Detail",
-          html: `
-            <p>Choose a tier based on condition. We focus on what you notice every day: seats, carpets, plastics, crevices, and odor.</p>
-            <div class="tiers">
-              <div class="tier">
-                <div class="tier__top"><div class="tier__name">Tier 1 — Refresh</div><div class="tier__tag">Light</div></div>
-                <ul><li>Thorough vacuum</li><li>Wipe down of surfaces</li><li>Glass cleaned</li></ul>
-              </div>
-              <div class="tier">
-                <div class="tier__top"><div class="tier__name">Tier 2 — Reset</div><div class="tier__tag">Normal</div></div>
-                <ul><li>Deep vacuum (seams/edges)</li><li>Dash/console/doors detailed</li><li>Cupholders + cracks cleaned</li></ul>
-              </div>
-              <div class="tier">
-                <div class="tier__top"><div class="tier__name">Tier 3 — Deep Clean</div><div class="tier__tag">Heavy</div></div>
-                <ul><li>Stains / pet hair focus</li><li>Deep agitation + extraction (as needed)</li><li>Most dramatic transformations</li></ul>
-              </div>
-            </div>
-          `
-        },
-        exterior: {
-          title: "Exterior Detail",
-          html: `
-            <p>Safe wash methods and details that make the paint look clean and glossy.</p>
-            <div class="tiers">
-              <div class="tier">
-                <div class="tier__top"><div class="tier__name">Level 1 — Safe Wash</div><div class="tier__tag">Light</div></div>
-                <ul><li>Foam + hand wash</li><li>Wheels + tires cleaned</li><li>Dry + finish wipe</li></ul>
-              </div>
-              <div class="tier">
-                <div class="tier__top"><div class="tier__name">Level 2 — Decon Wash</div><div class="tier__tag">Normal</div></div>
-                <ul><li>Road film removal</li><li>Extra wheel attention</li><li>Improved gloss & clarity</li></ul>
-              </div>
-              <div class="tier">
-                <div class="tier__top"><div class="tier__name">Level 3 — Premium</div><div class="tier__tag">Heavy</div></div>
-                <ul><li>Neglected cleanup</li><li>More detail work</li><li>Best new-look finish</li></ul>
-              </div>
-            </div>
-          `
-        },
-        maintenance: {
-          title: "Upkeep Plan",
-          html: `
-            <p>For returning clients who want their car staying clean all the time.</p>
-            <ul>
-              <li>Maintenance interior touch-up</li>
-              <li>Exterior wash + quick protection (as needed)</li>
-              <li>Recommended every 2–4 weeks</li>
-            </ul>
-          `
-        },
-        ceramic: {
-          title: "Ceramic Coating",
-          html: `
-            <p>Longer-lasting gloss and easier washes. Great for protection and a consistent shine.</p>
-            <ul>
-              <li>Wash + decontamination</li>
-              <li>Prep work before coating</li>
-              <li>Coating applied + cure guidance</li>
-            </ul>
-          `
-        },
-        paint: {
-          title: "Paint Correction",
-          html: `
-            <p>Swirl removal and clarity improvement for deeper, cleaner reflections.</p>
-            <ul>
-              <li>Wash + decontamination</li>
-              <li>Machine polishing (as needed)</li>
-              <li>Finish refinement for gloss</li>
-            </ul>
-          `
-        }
+        interior: { title: "Interior Detail", html: `<p>Choose a tier based on condition. We focus on what you notice every day: seats, carpets, plastics, crevices, and odor.</p><div class="tiers"><div class="tier"><div class="tier__top"><div class="tier__name">Tier 1 — Refresh</div><div class="tier__tag">Light</div></div><ul><li>Thorough vacuum</li><li>Wipe down of surfaces</li><li>Glass cleaned</li></ul></div><div class="tier"><div class="tier__top"><div class="tier__name">Tier 2 — Reset</div><div class="tier__tag">Normal</div></div><ul><li>Deep vacuum</li><li>Dash, console, and doors detailed</li><li>Cupholders and cracks cleaned</li></ul></div><div class="tier"><div class="tier__top"><div class="tier__name">Tier 3 — Deep Clean</div><div class="tier__tag">Heavy</div></div><ul><li>Stains and pet hair focus</li><li>Deep agitation and extraction as needed</li><li>Most dramatic transformation</li></ul></div></div>` },
+        exterior: { title: "Exterior Detail", html: `<p>Safe wash methods and details that make the paint look clean and glossy.</p><div class="tiers"><div class="tier"><div class="tier__top"><div class="tier__name">Level 1 — Safe Wash</div><div class="tier__tag">Light</div></div><ul><li>Foam and hand wash</li><li>Wheels and tires cleaned</li><li>Dry and finish wipe</li></ul></div><div class="tier"><div class="tier__top"><div class="tier__name">Level 2 — Decon Wash</div><div class="tier__tag">Normal</div></div><ul><li>Road film removal</li><li>Extra wheel attention</li><li>Improved gloss and clarity</li></ul></div><div class="tier"><div class="tier__top"><div class="tier__name">Level 3 — Premium</div><div class="tier__tag">Heavy</div></div><ul><li>Neglected cleanup</li><li>More detail work</li><li>Best new-look finish</li></ul></div></div>` },
+        maintenance: { title: "Upkeep Plan", html: `<p>For returning clients who want their car staying clean all the time.</p><ul><li>Maintenance interior touch-up</li><li>Exterior wash and quick protection as needed</li><li>Recommended every 2–4 weeks</li></ul>` },
+        ceramic: { title: "Ceramic Coating", html: `<p>Longer-lasting gloss and easier washes. Great for protection and a consistent shine.</p><ul><li>Wash and decontamination</li><li>Prep work before coating</li><li>Coating applied with cure guidance</li></ul>` },
+        paint: { title: "Paint Correction", html: `<p>Swirl removal and clarity improvement for deeper, cleaner reflections.</p><ul><li>Wash and decontamination</li><li>Machine polishing as needed</li><li>Finish refinement for gloss</li></ul>` }
       };
 
       $$("[data-modal-open]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          const key = btn.getAttribute("data-modal-open");
-          const data = key ? serviceCopy[key] : null;
+          const data = serviceCopy[btn.getAttribute("data-modal-open")];
           if (!serviceModal || !data) return;
           if (serviceTitle) serviceTitle.textContent = data.title;
           if (serviceContent) serviceContent.innerHTML = data.html;
@@ -2571,25 +1233,17 @@
       });
 
       $$("[data-modal-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(serviceModal)));
-      serviceModal?.addEventListener("click", (e) => {
-        if (e.target && e.target.matches("[data-modal-close]")) closeModal(serviceModal);
-      });
+      serviceModal?.addEventListener("click", (e) => { if (e.target && e.target.matches("[data-modal-close]")) closeModal(serviceModal); });
 
-      // Call modal
       const callModal = $("[data-call-modal]");
       $$("[data-call-open]").forEach((btn) => btn.addEventListener("click", () => openModal(callModal)));
       $$("[data-call-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(callModal)));
-      callModal?.addEventListener("click", (e) => {
-        if (e.target && e.target.matches("[data-call-close]")) closeModal(callModal);
-      });
+      callModal?.addEventListener("click", (e) => { if (e.target && e.target.matches("[data-call-close]")) closeModal(callModal); });
 
-      // Contact modal
       const contactModal = $("[data-contact-modal]");
       $$("[data-contact-open]").forEach((btn) => btn.addEventListener("click", () => openModal(contactModal)));
       $$("[data-contact-close]").forEach((btn) => btn.addEventListener("click", () => closeModal(contactModal)));
-      contactModal?.addEventListener("click", (e) => {
-        if (e.target && e.target.matches("[data-contact-close]")) closeModal(contactModal);
-      });
+      contactModal?.addEventListener("click", (e) => { if (e.target && e.target.matches("[data-contact-close]")) closeModal(contactModal); });
 
       document.addEventListener("keydown", (e) => {
         if (e.key !== "Escape") return;
@@ -2598,26 +1252,10 @@
         if (contactModal?.classList.contains("isOpen")) closeModal(contactModal);
       });
 
-      // Lazy backgrounds
       const lazyBackgrounds = Array.from(document.querySelectorAll("[data-bg]"));
       const lazyCompares = Array.from(document.querySelectorAll(".compare[data-before][data-after]"));
-
-      function loadBackground(el) {
-        const bg = el.getAttribute("data-bg");
-        if (!bg) return;
-        el.style.backgroundImage = `url('${bg}')`;
-        el.removeAttribute("data-bg");
-      }
-
-      function loadCompare(el) {
-        const before = el.getAttribute("data-before");
-        const after = el.getAttribute("data-after");
-        if (before) el.style.setProperty("--before", `url('${before}')`);
-        if (after) el.style.setProperty("--after", `url('${after}')`);
-        el.removeAttribute("data-before");
-        el.removeAttribute("data-after");
-      }
-
+      function loadBackground(el){ const bg = el.getAttribute("data-bg"); if (!bg) return; el.style.backgroundImage = `url('${bg}')`; el.removeAttribute("data-bg"); }
+      function loadCompare(el){ const before = el.getAttribute("data-before"); const after = el.getAttribute("data-after"); if (before) el.style.setProperty("--before", `url('${before}')`); if (after) el.style.setProperty("--after", `url('${after}')`); el.removeAttribute("data-before"); el.removeAttribute("data-after"); }
       if ("IntersectionObserver" in window) {
         const observer = new IntersectionObserver((entries, obs) => {
           entries.forEach(entry => {
@@ -2628,7 +1266,6 @@
             obs.unobserve(el);
           });
         }, { rootMargin: "180px 0px" });
-
         lazyBackgrounds.forEach(el => observer.observe(el));
         lazyCompares.forEach(el => observer.observe(el));
       } else {
@@ -2636,7 +1273,6 @@
         lazyCompares.forEach(loadCompare);
       }
 
-      // Compare slider
       $$("[data-compare]").forEach((wrap) => {
         const range = $("[data-compare-range]", wrap);
         if (!range) return;
@@ -2645,7 +1281,6 @@
         range.addEventListener("input", (e) => setPos(e.target.value));
       });
 
-      // Work carousel
       $$("[data-carousel]").forEach((carousel) => {
         const track = $("[data-carousel-track]", carousel);
         const dotsWrap = $("[data-carousel-dots]", carousel);
@@ -2653,9 +1288,7 @@
         const next = $("[data-carousel-next]", carousel);
         const slides = track ? $$(":scope .carousel__slide", track) : [];
         if (!track || slides.length === 0) return;
-
         let idx = 0;
-
         const renderDots = () => {
           if (!dotsWrap) return;
           dotsWrap.innerHTML = "";
@@ -2667,197 +1300,83 @@
             dotsWrap.appendChild(d);
           });
         };
-
         const go = (i) => {
           idx = Math.max(0, Math.min(i, slides.length - 1));
           track.style.transform = `translateX(${-idx * 100}%)`;
           renderDots();
         };
-
         prev?.addEventListener("click", () => go(idx - 1));
         next?.addEventListener("click", () => go(idx + 1));
         go(0);
       });
 
-      // Reviews rail
       const rail = $("[data-rail]");
       if (rail) {
         const track = $("[data-rail-track]", rail);
         const prev = $("[data-rail-prev]", rail);
         const next = $("[data-rail-next]", rail);
-
         const scrollByAmount = (dir) => {
           if (!track) return;
           const firstCard = track.querySelector(".rCard");
           const w = firstCard ? firstCard.getBoundingClientRect().width : 320;
           track.scrollBy({ left: dir * (w + 14), behavior: "smooth" });
         };
-
         prev?.addEventListener("click", () => scrollByAmount(-1));
         next?.addEventListener("click", () => scrollByAmount(1));
       }
 
-      // Reels
       const reelsRoot = $("[data-reels]");
       if (reelsRoot) {
-        const reels = $$("[data-reel]", reelsRoot)
-          .map((card) => ({ card, video: $("video", card) }))
-          .filter((x) => x.video);
-
+        const reels = $$("[data-reel]", reelsRoot).map((card) => ({ card, video: $("video", card) })).filter((x) => x.video);
         const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
-
-        const pauseAll = () => {
-          reels.forEach(({ card, video }) => {
-            video.pause();
-            card.classList.remove("isPlaying");
-          });
-        };
-
-        const safePlay = async (video) => {
-          try {
-            video.muted = true;
-            video.playsInline = true;
-            await video.play();
-          } catch (_) {}
-        };
-
-        const warmThumb = (video) => {
-          try {
-            video.muted = true;
-            video.playsInline = true;
-            video.preload = "metadata";
-            video.load();
-          } catch (_) {}
-        };
-
-        reels.forEach(({ video }) => warmThumb(video));
+        const pauseAll = () => reels.forEach(({ card, video }) => { video.pause(); card.classList.remove("isPlaying"); });
+        const safePlay = async (video) => { try { video.muted = true; video.playsInline = true; await video.play(); } catch (_) {} };
+        reels.forEach(({ video }) => { try { video.muted = true; video.playsInline = true; video.preload = "metadata"; video.load(); } catch (_) {} });
         reels.forEach(({ card, video }) => {
           video.addEventListener("play", () => card.classList.add("isPlaying"));
           video.addEventListener("pause", () => card.classList.remove("isPlaying"));
+          card.addEventListener("click", () => { if (video.paused) { pauseAll(); safePlay(video); } else { video.pause(); } });
         });
-
-        reels.forEach(({ card, video }) => {
-          card.addEventListener("click", () => {
-            if (video.paused) {
-              pauseAll();
-              safePlay(video);
-            } else {
-              video.pause();
-            }
-          });
-        });
-
         if (isMobile()) {
-          const io = new IntersectionObserver(
-            (entries) => {
-              const visible = entries
-                .filter((e) => e.isIntersecting)
-                .sort((a, b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
-              if (!visible) return;
-
-              reels.forEach(({ video, card }) => {
-                if (card === visible.target) {
-                  if (video.paused) safePlay(video);
-                } else {
-                  video.pause();
-                }
-              });
-            },
-            { threshold: [0, 0.35, 0.65, 0.85] }
-          );
-
+          const io = new IntersectionObserver((entries) => {
+            const visible = entries.filter((e) => e.isIntersecting).sort((a,b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
+            if (!visible) return;
+            reels.forEach(({ video, card }) => { if (card === visible.target) { if (video.paused) safePlay(video); } else { video.pause(); } });
+          }, { threshold:[0,.35,.65,.85] });
           reels.forEach(({ card }) => io.observe(card));
         }
       }
 
-      // Contact form
       const form = $("[data-contact-form]");
       const statusEl = $("[data-contact-status]");
       const submitBtn = $("[data-contact-submit]");
       const endpoint = window.CONTACT_ENDPOINT || "";
-
-      const spamKeywords = [
-        "seo","backlink","guest post","website traffic","crypto","forex","viagra","casino","loan","loan approval","telegram"
-      ];
-
-      function setStatus(msg, type) {
-        if (!statusEl) return;
-        statusEl.textContent = msg;
-        statusEl.className = "contactStatus" + (type ? ` is${type}` : "");
-      }
-
+      const spamKeywords = ["seo","backlink","guest post","website traffic","crypto","forex","viagra","casino","loan","loan approval","telegram"];
+      function setStatus(msg, type){ if (!statusEl) return; statusEl.textContent = msg; statusEl.className = "contactStatus" + (type ? ` is${type}` : ""); }
       form?.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         const name = (form.querySelector("input[name='name']")?.value || "").trim();
         const phone = (form.querySelector("input[name='phone']")?.value || "").trim();
         const email = (form.querySelector("input[name='email']")?.value || "").trim();
         const preferredContact = (form.querySelector("select[name='preferredContact']")?.value || "phone").trim();
         const message = (form.querySelector("textarea[name='message']")?.value || "").trim();
         const honeypot = (form.querySelector("input[name='website']")?.value || "").trim();
-
         const combinedText = [honeypot, message, email].join(" ").toLowerCase();
         const isSpam = spamKeywords.some((keyword) => combinedText.includes(keyword)) || honeypot !== "";
-
-        if (isSpam) {
-          setStatus("Message blocked. Please remove promotional or spam-like wording and try again.", "Err");
-          return;
-        }
-
-        if (!name || !message) {
-          setStatus("Please fill out your name and message.", "Err");
-          return;
-        }
-        if (preferredContact === "phone" && !phone) {
-          setStatus("Please enter your phone number if you want to be contacted by phone.", "Err");
-          return;
-        }
-        if (preferredContact === "email" && !email) {
-          setStatus("Please enter your email if you want to be contacted by email.", "Err");
-          return;
-        }
-        if (!endpoint) {
-          setStatus("Form is not connected yet (missing CONTACT_ENDPOINT).", "Err");
-          return;
-        }
-
+        if (isSpam) { setStatus("Message blocked. Please remove promotional or spam-like wording and try again.", "Err"); return; }
+        if (!name || !message) { setStatus("Please fill out your name and message.", "Err"); return; }
+        if (preferredContact === "phone" && !phone) { setStatus("Please enter your phone number if you want to be contacted by phone.", "Err"); return; }
+        if (preferredContact === "email" && !email) { setStatus("Please enter your email if you want to be contacted by email.", "Err"); return; }
+        if (!endpoint) { setStatus("Form is not connected yet.", "Err"); return; }
         if (submitBtn) submitBtn.disabled = true;
         setStatus("Sending…", "");
-
-        const payload = {
-          name,
-          phone,
-          email,
-          preferredContact,
-          message,
-          page: location.href,
-          userAgent: navigator.userAgent,
-          submittedAt: new Date().toISOString(),
-        };
-
+        const payload = { name, phone, email, preferredContact, message, page:location.href, userAgent:navigator.userAgent, submittedAt:new Date().toISOString() };
         try {
-          await fetch(endpoint, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload),
-          });
-
+          await fetch(endpoint, { method:"POST", mode:"no-cors", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(payload) });
           setStatus("✅ Sent! We’ll reach out shortly.", "Ok");
           form.reset();
-
-          if (typeof gtag === "function") {
-            gtag("event", "generate_lead", {
-              event_category: "engagement",
-              event_label: "contact_form_submit"
-            });
-          }
-
-          setTimeout(() => {
-            if (contactModal?.classList.contains("isOpen")) closeModal(contactModal);
-            if (submitBtn) submitBtn.disabled = false;
-            setStatus("", "");
-          }, 1100);
+          if (typeof gtag === "function") gtag("event", "generate_lead", { event_category:"engagement", event_label:"contact_form_submit" });
+          setTimeout(() => { if (contactModal?.classList.contains("isOpen")) closeModal(contactModal); if (submitBtn) submitBtn.disabled = false; setStatus("", ""); }, 1100);
         } catch (err) {
           console.error(err);
           if (submitBtn) submitBtn.disabled = false;
@@ -2865,92 +1384,18 @@
         }
       });
 
-      // Tracking
-      const quoteButtons = document.querySelectorAll("[data-quote-link]");
-      const callButtons = document.querySelectorAll("[data-call-open]");
-      const contactButtons = document.querySelectorAll("[data-contact-open]");
-      const phoneLinks = document.querySelectorAll('a[href^="tel:"]');
+      document.querySelectorAll("[data-quote-link]").forEach((button) => button.addEventListener("click", () => { if (typeof gtag === "function") gtag("event", "generate_lead", { event_category:"engagement", event_label:"quote_button_click" }); }));
+      document.querySelectorAll("[data-call-open]").forEach((button) => button.addEventListener("click", () => { if (typeof gtag === "function") gtag("event", "generate_lead", { event_category:"engagement", event_label:"call_button_click" }); }));
+      document.querySelectorAll("[data-contact-open]").forEach((button) => button.addEventListener("click", () => { if (typeof gtag === "function") gtag("event", "generate_lead", { event_category:"engagement", event_label:"contact_button_click" }); }));
+      document.querySelectorAll('a[href^="tel:"]').forEach((link) => link.addEventListener("click", () => { if (typeof gtag === "function") gtag("event", "contact", { event_category:"engagement", event_label:"phone_number_click" }); }));
 
-      quoteButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-          if (typeof gtag === "function") {
-            gtag("event", "generate_lead", {
-              event_category: "engagement",
-              event_label: "quote_button_click"
-            });
-          }
-        });
-      });
-
-      callButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-          if (typeof gtag === "function") {
-            gtag("event", "generate_lead", {
-              event_category: "engagement",
-              event_label: "call_button_click"
-            });
-          }
-        });
-      });
-
-      contactButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-          if (typeof gtag === "function") {
-            gtag("event", "generate_lead", {
-              event_category: "engagement",
-              event_label: "contact_button_click"
-            });
-          }
-        });
-      });
-
-      phoneLinks.forEach((link) => {
-        link.addEventListener("click", function () {
-          if (typeof gtag === "function") {
-            gtag("event", "contact", {
-              event_category: "engagement",
-              event_label: "phone_number_click"
-            });
-          }
-        });
-      });
-
-      // Review image modal
-      const reviewImageModal = document.querySelector("[data-review-image-modal]");
-      const reviewImageImg = document.querySelector("[data-review-image-img]");
-      const reviewImageOpenButtons = document.querySelectorAll("[data-review-image-open]");
-      const reviewImageCloseButtons = document.querySelectorAll("[data-review-image-close]");
-
-      function openReviewImage(src) {
-        if (!reviewImageModal) return;
-        if (reviewImageImg && src) reviewImageImg.src = src;
-        reviewImageModal.hidden = false;
-        reviewImageModal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-      }
-
-      function closeReviewImage() {
-        if (!reviewImageModal) return;
-        reviewImageModal.hidden = true;
-        reviewImageModal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-      }
-
-      reviewImageOpenButtons.forEach((button) => {
-        button.addEventListener("click", function () {
-          openReviewImage(button.getAttribute("data-review-image-open") || "./unnamed.webp");
-        });
-      });
-
-      reviewImageCloseButtons.forEach((button) => {
-        button.addEventListener("click", closeReviewImage);
-      });
-
-      document.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && reviewImageModal && !reviewImageModal.hidden) {
-          closeReviewImage();
-        }
-      });
+      const reviewImageModal = $("[data-review-image-modal]");
+      const reviewImageImg = $("[data-review-image-img]");
+      function openReviewImage(src){ if (!reviewImageModal) return; if (reviewImageImg && src) reviewImageImg.src = src; reviewImageModal.hidden = false; reviewImageModal.setAttribute("aria-hidden", "false"); document.body.style.overflow = "hidden"; }
+      function closeReviewImage(){ if (!reviewImageModal) return; reviewImageModal.hidden = true; reviewImageModal.setAttribute("aria-hidden", "true"); document.body.style.overflow = ""; }
+      document.querySelectorAll("[data-review-image-open]").forEach((button) => button.addEventListener("click", () => openReviewImage(button.getAttribute("data-review-image-open") || "./unnamed.webp")));
+      document.querySelectorAll("[data-review-image-close]").forEach((button) => button.addEventListener("click", closeReviewImage));
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape" && reviewImageModal && !reviewImageModal.hidden) closeReviewImage(); });
     })();
   </script>
 
