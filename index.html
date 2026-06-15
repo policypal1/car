@@ -1351,6 +1351,165 @@
       }
     }
 
+
+
+    /* =========================================================
+       Final tweak: clearer flag section, readable sale badge, popup
+       ========================================================= */
+    .julyCta{
+      border-top:0!important;
+      border-bottom:0!important;
+      background:#ffffff!important;
+    }
+    .julyCta::before{
+      inset:0!important;
+      filter:none!important;
+      transform:none!important;
+      opacity:.94!important;
+    }
+    .julyCta::after{
+      background:
+        linear-gradient(90deg,rgba(3,8,24,.82) 0%,rgba(5,10,24,.7) 52%,rgba(93,13,28,.68) 100%)!important;
+    }
+    .julyCta__kicker,
+    .julyCta__title,
+    .julyCta__text{
+      text-shadow:0 4px 14px rgba(0,0,0,.72),0 1px 2px rgba(0,0,0,.9)!important;
+    }
+    .julyCta__title{letter-spacing:.035em;}
+    .julyCta__text{color:rgba(255,255,255,.96)!important;font-weight:750;}
+
+    @media (max-width:767px){
+      .julyCta::before{
+        inset:0!important;
+        filter:none!important;
+        transform:none!important;
+        opacity:.95!important;
+      }
+      .julyCta::after{
+        background:
+          linear-gradient(180deg,rgba(4,10,28,.56) 0%,rgba(4,10,28,.72) 46%,rgba(75,8,22,.82) 100%)!important;
+      }
+      .julyFloatBadge{
+        width:144px!important;
+        min-height:88px!important;
+        border:2px solid rgba(255,255,255,.68)!important;
+        box-shadow:0 18px 46px rgba(0,0,0,.38),0 0 0 1px rgba(239,35,60,.18)!important;
+      }
+      .julyFloatBadge::before{
+        filter:none!important;
+        opacity:1!important;
+      }
+      .julyFloatBadge::after{
+        background:linear-gradient(180deg,rgba(4,9,24,.54) 0%,rgba(4,9,24,.9) 100%)!important;
+      }
+      .julyFloatBadge__top{font-size:.7rem!important;}
+      .julyFloatBadge__main{
+        font-size:1.22rem!important;
+        text-shadow:0 4px 12px rgba(0,0,0,.85),0 1px 2px rgba(0,0,0,.95)!important;
+      }
+      .julyFloatBadge__sub{font-size:.74rem!important;}
+    }
+
+    .julySalePopup[hidden]{display:none!important;}
+    .julySalePopup{
+      position:fixed;
+      inset:0;
+      z-index:240;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:1rem;
+    }
+    .julySalePopup__overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.58);
+      backdrop-filter:blur(3px);
+    }
+    .julySalePopup__panel{
+      position:relative;
+      isolation:isolate;
+      overflow:hidden;
+      width:min(460px,100%);
+      border-radius:28px;
+      padding:1.35rem;
+      color:#ffffff;
+      border:1px solid rgba(255,255,255,.34);
+      box-shadow:0 30px 90px rgba(0,0,0,.46);
+      animation:julyPopupIn .2s ease both;
+    }
+    .julySalePopup__panel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-2;
+      background:url("./Flag_of_the_United_States_(DDD-F-416E_specifications).svg.webp") center/cover no-repeat;
+    }
+    .julySalePopup__panel::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:-1;
+      background:
+        linear-gradient(180deg,rgba(4,9,24,.62) 0%,rgba(4,9,24,.86) 100%),
+        radial-gradient(circle at 12% 8%,rgba(246,217,138,.28),transparent 34%);
+    }
+    @keyframes julyPopupIn{from{opacity:0;transform:translateY(12px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+    .julySalePopup__close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      z-index:2;
+      display:grid;
+      place-items:center;
+      width:38px;
+      height:38px;
+      border-radius:13px;
+      border:1px solid rgba(255,255,255,.24);
+      background:rgba(0,0,0,.42);
+      color:#fff;
+      font-size:1.35rem;
+      font-weight:900;
+      line-height:1;
+      cursor:pointer;
+    }
+    .julySalePopup__kicker{
+      margin:0 0 .55rem;
+      color:#f6d98a;
+      font-size:.78rem;
+      font-weight:950;
+      letter-spacing:.13em;
+      text-transform:uppercase;
+      text-shadow:0 4px 14px rgba(0,0,0,.75);
+    }
+    .julySalePopup__title{
+      margin:0;
+      max-width:9.5ch;
+      font-family:Oswald,Inter,sans-serif;
+      font-size:clamp(2.25rem,9vw,3.5rem);
+      line-height:.92;
+      letter-spacing:.025em;
+      text-transform:uppercase;
+      text-shadow:0 7px 22px rgba(0,0,0,.78);
+    }
+    .julySalePopup__text{
+      margin:.8rem 0 1rem;
+      color:rgba(255,255,255,.94);
+      font-weight:750;
+      line-height:1.58;
+      text-shadow:0 4px 14px rgba(0,0,0,.7);
+    }
+    .julySalePopup__actions{display:flex;gap:.7rem;flex-wrap:wrap;}
+    .julySalePopup__actions .btn{flex:1 1 150px;border-radius:16px;min-height:54px;}
+    .julySalePopup__note{
+      margin:.8rem 0 0;
+      color:rgba(255,255,255,.72);
+      font-size:.86rem;
+      font-weight:750;
+      line-height:1.45;
+    }
+
 </style>
 
   <script>
@@ -1814,6 +1973,23 @@
     </span>
   </a>
 
+
+
+  <div class="julySalePopup" data-july-popup hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="julySalePopupTitle">
+    <div class="julySalePopup__overlay" data-july-popup-close></div>
+    <div class="julySalePopup__panel">
+      <button class="julySalePopup__close" type="button" data-july-popup-close aria-label="Close 4th of July sale popup">×</button>
+      <p class="julySalePopup__kicker">4th of July sale</p>
+      <h2 class="julySalePopup__title" id="julySalePopupTitle">30% off your second car.</h2>
+      <p class="julySalePopup__text">Hey, come get the 4th of July sale. Book one car at full price and get the next car 30% off when both are quoted together.</p>
+      <div class="julySalePopup__actions">
+        <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+        <button class="btn btn--dark" type="button" data-july-popup-close>NOT NOW</button>
+      </div>
+      <p class="julySalePopup__note">Limited holiday offer for multi-car details.</p>
+    </div>
+  </div>
+
   <script>
     (() => {
       const $ = (sel, root = document) => root.querySelector(sel);
@@ -2032,6 +2208,43 @@
       document.querySelectorAll("[data-review-image-open]").forEach((button) => button.addEventListener("click", () => openReviewImage(button.getAttribute("data-review-image-open") || "./unnamed.webp")));
       document.querySelectorAll("[data-review-image-close]").forEach((button) => button.addEventListener("click", closeReviewImage));
       document.addEventListener("keydown", (event) => { if (event.key === "Escape" && reviewImageModal && !reviewImageModal.hidden) closeReviewImage(); });
+    })();
+  </script>
+
+
+
+  <script>
+    (() => {
+      const popup = document.querySelector("[data-july-popup]");
+      if (!popup) return;
+
+      const shouldSkip = () => {
+        const path = window.location.pathname.toLowerCase();
+        return path.includes("quote") || sessionStorage.getItem("julySalePopupClosed") === "1";
+      };
+
+      const closePopup = () => {
+        popup.hidden = true;
+        popup.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        sessionStorage.setItem("julySalePopupClosed", "1");
+      };
+
+      const openPopup = () => {
+        if (shouldSkip()) return;
+        const anyModalOpen = document.querySelector(".modal.isOpen") || (document.querySelector("[data-review-image-modal]") && !document.querySelector("[data-review-image-modal]").hidden);
+        if (anyModalOpen) return;
+        popup.hidden = false;
+        popup.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+      };
+
+      window.setTimeout(openPopup, 10000);
+      document.querySelectorAll("[data-july-popup-close]").forEach((btn) => btn.addEventListener("click", closePopup));
+      popup.querySelectorAll("[data-quote-link]").forEach((link) => link.addEventListener("click", () => sessionStorage.setItem("julySalePopupClosed", "1")));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !popup.hidden) closePopup();
+      });
     })();
   </script>
 
