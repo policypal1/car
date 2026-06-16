@@ -2581,6 +2581,441 @@
         }
       }
 
+
+
+      /* =========================================================
+         4TH OF JULY QUOTE PAGE THEME + CONTINUE BUTTON FIX
+         This section intentionally overrides earlier quote styles.
+         ========================================================= */
+
+      :root{
+        --patriot-red:#bf0a30;
+        --patriot-red-bright:#ef233c;
+        --patriot-blue:#07132d;
+        --patriot-blue-2:#1d4ed8;
+        --patriot-gold:#f6d98a;
+      }
+
+      body[data-quote-page="true"]{
+        background:
+          radial-gradient(circle at 12% 5%, rgba(29,78,216,.15), transparent 30%),
+          radial-gradient(circle at 88% 10%, rgba(239,35,60,.12), transparent 30%),
+          linear-gradient(180deg, #f7f8fb 0%, #ffffff 48%, #f7f8fb 100%) !important;
+      }
+
+      body[data-quote-page="true"] .header{
+        position:sticky;
+        top:0;
+        z-index:100;
+        background:#ffffff !important;
+        border-bottom:1px solid rgba(16,19,27,.09) !important;
+        box-shadow:0 10px 26px rgba(16,19,27,.06) !important;
+      }
+
+      .quoteSaleTopBar{
+        position:relative;
+        z-index:40;
+        overflow:hidden;
+        color:#fff;
+        background:#bf0a30;
+      }
+
+      .quoteSaleTopBar::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:
+          radial-gradient(circle at 6% 50%,rgba(255,255,255,.9) 0 1px,transparent 1.8px),
+          radial-gradient(circle at 18% 24%,rgba(255,255,255,.7) 0 1px,transparent 1.7px),
+          radial-gradient(circle at 31% 72%,rgba(255,255,255,.62) 0 1px,transparent 1.7px),
+          radial-gradient(circle at 47% 34%,rgba(255,255,255,.72) 0 1px,transparent 1.7px),
+          radial-gradient(circle at 64% 66%,rgba(255,255,255,.72) 0 1px,transparent 1.7px),
+          radial-gradient(circle at 82% 28%,rgba(255,255,255,.66) 0 1px,transparent 1.7px),
+          radial-gradient(circle at 95% 58%,rgba(255,255,255,.86) 0 1px,transparent 1.8px);
+        opacity:.72;
+        pointer-events:none;
+      }
+
+      .quoteSaleTopBar__inner{
+        position:relative;
+        z-index:1;
+        min-height:34px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:.65rem;
+        padding:.36rem 0;
+        text-align:center;
+        font-size:.72rem;
+        font-weight:950;
+        letter-spacing:.08em;
+        line-height:1.25;
+        text-transform:uppercase;
+      }
+
+      .quoteSaleTopBar__inner strong{
+        color:#fff;
+        font-weight:950;
+      }
+
+      .quoteSaleTopBar__inner span{
+        color:rgba(255,255,255,.96);
+      }
+
+      body[data-quote-page="true"] .quotePageMain{
+        position:relative;
+        isolation:isolate;
+        padding-top:clamp(1.6rem, 3vw, 2.7rem) !important;
+      }
+
+      body[data-quote-page="true"] .quotePageMain::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        z-index:-2;
+        background:
+          radial-gradient(circle at 11% 13%,rgba(255,255,255,.95) 0 1px,transparent 1.35px),
+          radial-gradient(circle at 17% 28%,rgba(255,255,255,.74) 0 1px,transparent 1.35px),
+          radial-gradient(circle at 29% 17%,rgba(255,255,255,.84) 0 1px,transparent 1.35px),
+          radial-gradient(circle at 74% 12%,rgba(255,255,255,.72) 0 1px,transparent 1.35px),
+          radial-gradient(circle at 88% 28%,rgba(255,255,255,.8) 0 1px,transparent 1.35px),
+          linear-gradient(105deg,rgba(7,19,45,.1),rgba(191,10,48,.07));
+        pointer-events:none;
+      }
+
+      .quotePageShell .quotePanel{
+        overflow:hidden !important;
+        border-radius:28px !important;
+        padding:0 !important;
+        border:1px solid rgba(7,19,45,.12) !important;
+        box-shadow:0 28px 80px rgba(7,19,45,.16) !important;
+        background:#ffffff !important;
+      }
+
+      .quoteSaleRibbon{
+        position:relative;
+        overflow:hidden;
+        color:#fff;
+        padding:1.2rem 1.25rem;
+        background:
+          linear-gradient(105deg,rgba(5,13,35,.88) 0%,rgba(8,14,28,.78) 58%,rgba(93,13,27,.74) 100%),
+          url("./Flag_of_the_United_States_(DDD-F-416E_specifications).svg.webp") center/cover no-repeat;
+        border-bottom:1px solid rgba(255,255,255,.1);
+      }
+
+      .quoteSaleRibbon::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:
+          radial-gradient(circle at 8% 0%,rgba(246,217,138,.22),transparent 34%),
+          linear-gradient(90deg,rgba(29,78,216,.18),rgba(239,35,60,.12));
+        pointer-events:none;
+      }
+
+      .quoteSaleRibbon > *{
+        position:relative;
+        z-index:1;
+      }
+
+      .quoteSaleRibbon__kicker{
+        margin-bottom:.42rem;
+        color:#f6d98a;
+        font-size:.74rem;
+        font-weight:950;
+        letter-spacing:.13em;
+        line-height:1.1;
+        text-transform:uppercase;
+        text-shadow:0 4px 14px rgba(0,0,0,.75);
+      }
+
+      .quoteSaleRibbon__title{
+        font-family:Oswald, Inter, sans-serif;
+        font-size:clamp(1.6rem, 4vw, 2.45rem);
+        font-weight:700;
+        letter-spacing:.035em;
+        line-height:.98;
+        text-transform:uppercase;
+        text-shadow:0 8px 26px rgba(0,0,0,.65);
+      }
+
+      .quoteSaleRibbon__text{
+        max-width:62ch;
+        margin-top:.55rem;
+        color:rgba(255,255,255,.92);
+        font-weight:750;
+        line-height:1.55;
+        text-shadow:0 4px 14px rgba(0,0,0,.7);
+      }
+
+      .quoteTop{
+        padding:18px 18px 0;
+      }
+
+      .quoteBody{
+        padding:0 18px 0;
+      }
+
+      .quoteNav{
+        margin:16px 18px 18px !important;
+        padding:14px 0 0 !important;
+        background:#fff !important;
+      }
+
+      .quoteTitle{
+        color:#07132d !important;
+      }
+
+      .quoteTitle::after{
+        content:"";
+        display:block;
+        width:78px;
+        height:4px;
+        margin-top:8px;
+        border-radius:999px;
+        background:linear-gradient(90deg,#1d4ed8 0 33%,#ffffff 33% 66%,#ef233c 66% 100%);
+        box-shadow:0 8px 18px rgba(29,78,216,.14);
+      }
+
+      .qpDot.isOn{
+        background:linear-gradient(90deg,#1d4ed8,#ef233c) !important;
+        border-color:rgba(7,19,45,.25) !important;
+      }
+
+      .qStepTitle{
+        color:#07132d !important;
+      }
+
+      .qStepSub{
+        color:rgba(7,19,45,.68) !important;
+      }
+
+      .qCard,
+      .qFeatureCard--noImg,
+      .qHearBtn,
+      .qCouponBox,
+      .qAddressCard,
+      .qSummaryGroup,
+      .qVehicleSummaryBox,
+      .qAddVehicleWrap{
+        border-color:rgba(7,19,45,.1) !important;
+        box-shadow:0 16px 42px rgba(7,19,45,.08) !important;
+      }
+
+      .qCard.isSel,
+      .qFeatureCard--noImg.isSel,
+      .qHearBtn.isSel{
+        border-color:rgba(239,35,60,.62) !important;
+        box-shadow:
+          0 0 0 4px rgba(239,35,60,.12),
+          0 22px 54px rgba(7,19,45,.13) !important;
+      }
+
+      .qCard.isSel .qCardLabel,
+      .qFeatureCard--noImg.isSel .qFeatureCardTitle{
+        color:#bf0a30 !important;
+      }
+
+      .qCardMedia,
+      .qAddressIcon,
+      .qPayNoticeCheck,
+      .qHearCheck{
+        border-color:rgba(29,78,216,.16) !important;
+      }
+
+      .qEstimateHero{
+        color:#fff !important;
+        background:
+          linear-gradient(105deg,rgba(5,13,35,.9) 0%,rgba(8,14,28,.82) 58%,rgba(93,13,27,.78) 100%),
+          url("./Flag_of_the_United_States_(DDD-F-416E_specifications).svg.webp") center/cover no-repeat !important;
+        border-color:rgba(255,255,255,.18) !important;
+        box-shadow:0 26px 76px rgba(7,19,45,.24) !important;
+      }
+
+      .qEstimateEyebrow{
+        color:#f6d98a !important;
+        text-shadow:0 4px 14px rgba(0,0,0,.75);
+      }
+
+      .qEstimateHeroTitle,
+      .qEstimateBig{
+        color:#ffffff !important;
+        text-shadow:0 8px 26px rgba(0,0,0,.72);
+      }
+
+      .qEstimateHeroSub,
+      .qEstimateFinePrint{
+        color:rgba(255,255,255,.88) !important;
+        text-shadow:0 4px 14px rgba(0,0,0,.62);
+      }
+
+      .qEstimateOld{
+        color:rgba(255,255,255,.68) !important;
+      }
+
+      .qSaveLine{
+        color:rgba(255,255,255,.88) !important;
+      }
+
+      .qSaveLine strong{
+        color:#f6d98a !important;
+      }
+
+      .qCouponBox{
+        background:
+          radial-gradient(600px 220px at 8% 0%, rgba(29,78,216,.08), transparent 56%),
+          radial-gradient(600px 220px at 92% 0%, rgba(239,35,60,.08), transparent 56%),
+          #fff !important;
+      }
+
+      .qCouponBtn{
+        border-color:#07132d !important;
+        color:#07132d !important;
+      }
+
+      .qCouponBtn:hover,
+      .qCouponBtn.isApplied{
+        background:#07132d !important;
+        color:#fff !important;
+        border-color:#07132d !important;
+      }
+
+      .qConfirmHero{
+        background:
+          linear-gradient(105deg,rgba(5,13,35,.92) 0%,rgba(8,14,28,.84) 58%,rgba(93,13,27,.8) 100%),
+          url("./Flag_of_the_United_States_(DDD-F-416E_specifications).svg.webp") center/cover no-repeat !important;
+      }
+
+      .qConfirmHeroLabel{
+        color:#f6d98a !important;
+      }
+
+      .qDoneBadge{
+        background:rgba(29,78,216,.1) !important;
+        color:#07132d !important;
+      }
+
+      .quoteBack{
+        color:#07132d !important;
+        -webkit-text-fill-color:#07132d !important;
+        border:2px solid rgba(7,19,45,.16) !important;
+        background:#ffffff !important;
+      }
+
+      .quoteNext{
+        position:relative;
+        isolation:isolate;
+        min-width:170px !important;
+        color:#ffffff !important;
+        -webkit-text-fill-color:#ffffff !important;
+        background:
+          radial-gradient(180px 80px at 18% 0%,rgba(255,255,255,.28),rgba(255,255,255,0) 68%),
+          linear-gradient(135deg,#ef233c 0%,#b91c1c 100%) !important;
+        border-color:rgba(239,35,60,.62) !important;
+        box-shadow:
+          0 18px 38px rgba(239,35,60,.26),
+          0 0 28px rgba(239,35,60,.18),
+          0 0 42px rgba(29,78,216,.12),
+          inset 0 0 0 1px rgba(255,255,255,.12) !important;
+        text-shadow:0 1px 0 rgba(0,0,0,.22);
+      }
+
+      .quoteNext::after{
+        content:"";
+        position:absolute;
+        inset:-9px;
+        z-index:-1;
+        border-radius:inherit;
+        background:
+          radial-gradient(circle at 30% 50%,rgba(239,35,60,.34),transparent 58%),
+          radial-gradient(circle at 74% 50%,rgba(29,78,216,.22),transparent 60%);
+        filter:blur(12px);
+        opacity:.82;
+        pointer-events:none;
+      }
+
+      .quoteNext:empty::before{
+        content:"Continue";
+      }
+
+      .quoteNext[disabled]{
+        opacity:.62 !important;
+        cursor:not-allowed !important;
+      }
+
+      .btn--quote{
+        color:#fff !important;
+        -webkit-text-fill-color:#fff !important;
+      }
+
+      body[data-quote-page="true"] .footer.footer--light{
+        color:#ffffff !important;
+        background:
+          linear-gradient(105deg,rgba(5,13,35,.92) 0%,rgba(8,14,28,.86) 58%,rgba(93,13,27,.78) 100%),
+          url("./Flag_of_the_United_States_(DDD-F-416E_specifications).svg.webp") center/cover no-repeat !important;
+        border-top:0 !important;
+      }
+
+      body[data-quote-page="true"] .footerMini__name--light,
+      body[data-quote-page="true"] .footer__bottomInner--light,
+      body[data-quote-page="true"] .footerLink,
+      body[data-quote-page="true"] .footerSep{
+        color:#ffffff !important;
+      }
+
+      @media (max-width:720px){
+        .quoteSaleTopBar__inner{
+          min-height:30px;
+          gap:.38rem;
+          font-size:.59rem;
+          letter-spacing:.045em;
+        }
+
+        .quoteSaleTopBar__inner span:nth-of-type(2){
+          max-width:28ch;
+        }
+
+        .quotePageShell .quotePanel{
+          border-radius:22px !important;
+        }
+
+        .quoteSaleRibbon{
+          padding:1rem;
+        }
+
+        .quoteSaleRibbon__title{
+          font-size:clamp(1.45rem, 8vw, 2.05rem);
+        }
+
+        .quoteSaleRibbon__text{
+          font-size:.92rem;
+        }
+
+        .quoteTop{
+          padding:15px 14px 0;
+          display:block;
+        }
+
+        .quoteProgress{
+          margin-top:12px;
+        }
+
+        .quoteBody{
+          padding:0 14px;
+        }
+
+        .quoteNav{
+          margin:14px 14px 14px !important;
+        }
+
+        .quoteNext,
+        .quoteBack{
+          min-height:56px !important;
+          border-radius:16px !important;
+        }
+      }
+
+
     </style>
   </head>
 
@@ -2620,11 +3055,26 @@
       </div>
     </header>
 
+    <div class="quoteSaleTopBar" aria-label="4th of July sale">
+      <div class="container quoteSaleTopBar__inner">
+        <span aria-hidden="true">★</span>
+        <strong>4th of July Sale</strong>
+        <span>Book one car, get the second car 30% off</span>
+        <span aria-hidden="true">★</span>
+      </div>
+    </div>
+
     <main class="quotePageMain">
       <div class="container">
         <div class="quotePageEmbed">
           <div class="quotePageShell" data-quote-modal aria-hidden="false">
             <div class="quotePanel" aria-label="Get a quote">
+              <div class="quoteSaleRibbon" aria-label="4th of July multi-car discount">
+                <div class="quoteSaleRibbon__kicker">★ 4th of July Multi-Car Special</div>
+                <div class="quoteSaleRibbon__title">Second vehicle gets 30% off</div>
+                <div class="quoteSaleRibbon__text">Add another vehicle on the estimate step and the sale discount is applied automatically.</div>
+              </div>
+
               <div class="quoteTop">
                 <h1 class="quoteTitle">GET A QUOTE</h1>
                 <div class="quoteProgress" aria-hidden="true">
@@ -2637,7 +3087,7 @@
 
               <div class="quoteNav">
                 <button class="btn btn--quote quoteBack" type="button" data-quote-back>Back</button>
-                <button class="btn btn--call quoteNext" type="button" data-quote-next>Continue</button>
+                <button class="btn btn--quote quoteNext" type="button" data-quote-next>Continue</button>
               </div>
             </div>
           </div>
@@ -3936,6 +4386,27 @@ function getVehicleHighBeforeCoupon(item) {
   return Number(item?.highBeforeCoupon ?? item?.estimateHighBeforeCoupon ?? item?.estimateHigh ?? low);
 }
 
+
+const JULY_SECOND_VEHICLE_DISCOUNT_RATE = 0.30;
+
+function getJulySecondVehicleDiscountInfo(items = []) {
+  if (!Array.isArray(items) || items.length < 2) {
+    return { low: 0, high: 0, vehicleIndex: -1 };
+  }
+
+  // The sale is intentionally applied to Vehicle 2, matching the public offer:
+  // Vehicle 1 full price, Vehicle 2 gets 30% off.
+  const secondVehicle = items[1];
+  const lowBase = Math.max(0, Number(getVehicleLowBeforeCoupon(secondVehicle) || 0));
+  const highBase = Math.max(lowBase, Number(getVehicleHighBeforeCoupon(secondVehicle) || lowBase));
+
+  return {
+    low: clampInt(lowBase * JULY_SECOND_VEHICLE_DISCOUNT_RATE),
+    high: clampInt(highBase * JULY_SECOND_VEHICLE_DISCOUNT_RATE),
+    vehicleIndex: 1
+  };
+}
+
 function computeTotalEstimateInfo() {
   const currentInfo = computeEstimateInfo();
   const savedVehicles = Array.isArray(quoteState.vehicles) ? quoteState.vehicles : [];
@@ -3948,12 +4419,15 @@ function computeTotalEstimateInfo() {
   let hasStartingAt = false;
   let savings = 0;
 
+  const vehicleItemsForDiscount = [];
+
   savedVehicles.forEach(item => {
     subtotal += Number(item?.subtotal || 0);
     lowBeforeCoupon += getVehicleLowBeforeCoupon(item);
     highBeforeCoupon += getVehicleHighBeforeCoupon(item);
     hasStartingAt = hasStartingAt || !!item?.hasStartingAt;
     savings += Number(item?.savings || 0);
+    vehicleItemsForDiscount.push(item);
   });
 
   if (currentInfo) {
@@ -3962,7 +4436,26 @@ function computeTotalEstimateInfo() {
     highBeforeCoupon += Number(currentInfo.highBeforeCoupon || currentInfo.lowBeforeCoupon || 0);
     hasStartingAt = hasStartingAt || !!currentInfo.hasStartingAt;
     savings += Number(currentInfo.savings || 0);
+
+    vehicleItemsForDiscount.push({
+      subtotal: currentInfo.subtotal,
+      lowBeforeCoupon: currentInfo.lowBeforeCoupon,
+      highBeforeCoupon: currentInfo.highBeforeCoupon,
+      hasStartingAt: !!currentInfo.hasStartingAt,
+      savings: currentInfo.savings || 0
+    });
   }
+
+  const originalLowBeforeDiscounts = clampInt(lowBeforeCoupon);
+  const originalHighBeforeDiscounts = clampInt(highBeforeCoupon);
+
+  const julyDiscount = getJulySecondVehicleDiscountInfo(vehicleItemsForDiscount);
+  const julyDiscountLow = Math.min(Number(julyDiscount.low || 0), lowBeforeCoupon);
+  const julyDiscountHigh = Math.min(Number(julyDiscount.high || julyDiscountLow || 0), highBeforeCoupon);
+
+  lowBeforeCoupon = Math.max(0, lowBeforeCoupon - julyDiscountLow);
+  highBeforeCoupon = Math.max(0, highBeforeCoupon - julyDiscountHigh);
+  savings += julyDiscountLow;
 
   const couponDiscount = Math.min(getCouponDiscount(), lowBeforeCoupon);
   const low = clampInt(Math.max(0, lowBeforeCoupon - couponDiscount));
@@ -3970,6 +4463,8 @@ function computeTotalEstimateInfo() {
 
   return {
     subtotal: clampInt(subtotal),
+    originalLowBeforeDiscounts,
+    originalHighBeforeDiscounts,
     lowBeforeCoupon: clampInt(lowBeforeCoupon),
     highBeforeCoupon: clampInt(highBeforeCoupon),
     low,
@@ -3977,6 +4472,10 @@ function computeTotalEstimateInfo() {
     total: low,
     hasStartingAt,
     savings: clampInt(savings),
+    bundleSavings: clampInt(savings - julyDiscountLow),
+    julyDiscountLow: clampInt(julyDiscountLow),
+    julyDiscountHigh: clampInt(julyDiscountHigh),
+    julyDiscountVehicleIndex: julyDiscount.vehicleIndex,
     couponCode: normalizeCoupon(quoteState.couponCode),
     couponDiscount,
     vehicleCount: savedVehicles.length + (currentInfo ? 1 : 0),
@@ -4234,6 +4733,11 @@ function updateNav() {
     quoteNextBtn.textContent = isQuotePage ? "Back to Home" : "Close";
     quoteNextBtn.disabled = false;
   }
+
+  // Safety fallback: if browser/CSS/old cached styles ever strip the label, restore it.
+  if (quoteNextBtn.style.display !== "none" && !String(quoteNextBtn.textContent || "").trim()) {
+    quoteNextBtn.textContent = getNextButtonText() || "Continue";
+  }
 }
 
 function renderNavPrice() {
@@ -4334,7 +4838,8 @@ function selectedSummaryPillsHtml(info = computeEstimateInfo()) {
   return `
     <div class="qEstimatePills">
       ${chips.map(chip => `<span class="qPill">${escapeHtml(chip)}</span>`).join("")}
-      ${info?.savings ? `<span class="qPill">Bundle savings: -${formatMoney(info.savings)}</span>` : ""}
+      ${info?.bundleSavings ? `<span class="qPill">Bundle savings: -${formatMoney(info.bundleSavings)}</span>` : ""}
+      ${info?.julyDiscountLow ? `<span class="qPill">4th sale: -${formatMoney(info.julyDiscountLow)}</span>` : ""}
       ${info?.couponDiscount ? `<span class="qPill">Coupon: -${formatMoney(info.couponDiscount)}</span>` : ""}
     </div>
   `;
@@ -4547,10 +5052,11 @@ function renderEstimateStep() {
   const info = syncEstimateState();
   const estimateText = formatEstimateDisplay(info);
 
-  const oldEstimateText = info?.couponDiscount
-    ? Number(info.highBeforeCoupon) > Number(info.lowBeforeCoupon)
-      ? `${formatMoney(info.lowBeforeCoupon)} - ${formatMoney(info.highBeforeCoupon)}`
-      : formatMoney(info.lowBeforeCoupon)
+  const hasEstimateDiscount = !!(info?.couponDiscount || info?.julyDiscountLow);
+  const oldEstimateText = hasEstimateDiscount
+    ? Number(info.originalHighBeforeDiscounts) > Number(info.originalLowBeforeDiscounts)
+      ? `${formatMoney(info.originalLowBeforeDiscounts)} - ${formatMoney(info.originalHighBeforeDiscounts)}`
+      : formatMoney(info.originalLowBeforeDiscounts)
     : "";
 
   const couponApplied = !!quoteState.couponDiscount;
@@ -4566,9 +5072,10 @@ function renderEstimateStep() {
         <div class="qEstimateBig">${escapeHtml(estimateText)}</div>
       </div>
 
-      ${info?.savings || info?.couponDiscount ? `
+      ${info?.savings || info?.couponDiscount || info?.julyDiscountLow ? `
         <div class="qEstimateSavings">
-          ${info?.savings ? `<span class="qSaveLine">Bundle savings <strong>−${formatMoney(info.savings)}</strong></span>` : ""}
+          ${info?.bundleSavings ? `<span class="qSaveLine">Bundle savings <strong>−${formatMoney(info.bundleSavings)}</strong></span>` : ""}
+          ${info?.julyDiscountLow ? `<span class="qSaveLine">4th of July second-car discount <strong>−${formatMoney(info.julyDiscountLow)}</strong></span>` : ""}
           ${info?.couponDiscount ? `<span class="qSaveLine">Coupon <strong>−${formatMoney(info.couponDiscount)}</strong></span>` : ""}
         </div>
       ` : ""}
@@ -5414,7 +5921,9 @@ function buildPayload(includeSlot = false) {
     estimateHigh: info?.high ?? "",
     estimateDisplay: formatEstimateDisplay(info),
     estimateIsStartingAt: !!info?.hasStartingAt,
-    bundleSavings: info?.savings || 0,
+    bundleSavings: info?.bundleSavings || 0,
+    julySecondVehicleDiscount: info?.julyDiscountLow || 0,
+    totalSavings: info?.savings || 0,
 
     couponCode: normalizeCoupon(quoteState.couponCode),
     couponDiscount: info?.couponDiscount || 0,
