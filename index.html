@@ -1289,10 +1289,10 @@
         display:flex;
         align-items:center;
         justify-content:center;
-        width:132px;
-        min-height:78px;
-        padding:.72rem .7rem;
-        border-radius:20px;
+        width:162px;
+        min-height:104px;
+        padding:.82rem .76rem;
+        border-radius:22px;
         overflow:hidden;
         isolation:isolate;
         color:#ffffff;
@@ -1318,7 +1318,7 @@
       }
       .julyFloatBadge__inner{
         display:grid;
-        gap:.12rem;
+        gap:.16rem;
         position:relative;
         z-index:1;
       }
@@ -1334,16 +1334,25 @@
       .julyFloatBadge__main{
         color:#ffffff;
         font-family:Oswald,Inter,sans-serif;
-        font-size:1.07rem;
+        font-size:1.02rem;
         font-weight:700;
-        letter-spacing:.04em;
-        line-height:.98;
+        letter-spacing:.035em;
+        line-height:1;
         text-transform:uppercase;
         text-shadow:0 7px 20px rgba(0,0,0,.55);
       }
+      .julyFloatBadge__detail{
+        color:#ffffff;
+        font-size:.62rem;
+        font-weight:900;
+        letter-spacing:.045em;
+        line-height:1.08;
+        text-transform:uppercase;
+        text-shadow:0 5px 16px rgba(0,0,0,.55);
+      }
       .julyFloatBadge__sub{
         color:#ffffff;
-        font-size:.68rem;
+        font-size:.7rem;
         font-weight:950;
         letter-spacing:.06em;
         text-transform:uppercase;
@@ -1391,8 +1400,9 @@
           linear-gradient(180deg,rgba(4,10,28,.56) 0%,rgba(4,10,28,.72) 46%,rgba(75,8,22,.82) 100%)!important;
       }
       .julyFloatBadge{
-        width:144px!important;
-        min-height:88px!important;
+        width:162px!important;
+        min-height:104px!important;
+        padding:.82rem .76rem!important;
         border:2px solid rgba(255,255,255,.68)!important;
         box-shadow:0 18px 46px rgba(0,0,0,.38),0 0 0 1px rgba(239,35,60,.18)!important;
       }
@@ -1405,7 +1415,13 @@
       }
       .julyFloatBadge__top{font-size:.7rem!important;}
       .julyFloatBadge__main{
-        font-size:1.22rem!important;
+        font-size:1.02rem!important;
+        line-height:1!important;
+        text-shadow:0 4px 12px rgba(0,0,0,.85),0 1px 2px rgba(0,0,0,.95)!important;
+      }
+      .julyFloatBadge__detail{
+        font-size:.62rem!important;
+        line-height:1.08!important;
         text-shadow:0 4px 12px rgba(0,0,0,.85),0 1px 2px rgba(0,0,0,.95)!important;
       }
       .julyFloatBadge__sub{font-size:.74rem!important;}
@@ -2776,7 +2792,8 @@
   <a class="julyFloatBadge" href="./quote.html?preset=most-popular&interior=deep-clean&exterior=standard-exterior-wash&promo=july-full-detail-35" data-quote-link data-popular-preset aria-label="Book the most popular combo: Deep Clean Interior Detail and Standard Exterior Wash">
     <span class="julyFloatBadge__inner">
       <span class="julyFloatBadge__top">Most Popular</span>
-      <span class="julyFloatBadge__main">Deep + Wash</span>
+      <span class="julyFloatBadge__main">Deep Clean Interior</span>
+      <span class="julyFloatBadge__detail">+ Standard Exterior Wash</span>
       <span class="julyFloatBadge__sub">$35 Off</span>
     </span>
   </a>
