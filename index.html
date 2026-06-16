@@ -2309,6 +2309,18 @@
       }
     }
 
+  
+
+    /* =========================================================
+       Desktop only: remove the sale/promo section directly after hero
+       Mobile is intentionally left untouched.
+       ========================================================= */
+    @media (min-width:981px){
+      #promo.promo{
+        display:none!important;
+      }
+    }
+
   </style>
 
   <script>
@@ -2407,9 +2419,9 @@
       <div class="promo__intro">
         <div>
           <div class="promo__kicker">★ 4th of July detailing sale</div>
-          <h2 class="promo__title">Full detail savings + second vehicle savings.</h2>
+          <h2 class="promo__title">Save on a full detail or a second vehicle.</h2>
         </div>
-        <p class="promo__text">Get <strong>$35 off a full detail</strong>. Add another vehicle and the second vehicle is <strong>15% off</strong> when booked together.</p>
+        <p class="promo__text">Get <strong>$35 off a full detail</strong>, or save <strong>15% on the second vehicle</strong> when two cars are booked together.</p>
       </div>
 
       <div class="promo__grid">
@@ -2538,7 +2550,7 @@
         <div>
           <p class="julyCta__kicker">4th of July detailing discount</p>
           <h2 class="julyCta__title">Ready to get your 4th of July discount?</h2>
-          <p class="julyCta__text">Get $35 off a full detail package. Add another vehicle and the second vehicle is 15% off when booked together.</p>
+          <p class="julyCta__text">Get $35 off a full detail package, or save 15% on the second vehicle when two cars are booked together.</p>
         </div>
         <div class="julyCta__actions">
           <a class="btn btn--quote" href="./quote.html?preset=most-popular&interior=deep-clean&exterior=standard-exterior-wash&promo=july-full-detail-35" data-quote-link data-popular-preset>GET QUOTE NOW</a>
