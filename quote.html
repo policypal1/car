@@ -2643,15 +2643,21 @@
         display:flex;
         align-items:center;
         justify-content:center;
+        flex-wrap:nowrap;
         gap:.65rem;
-        padding:.36rem 0;
+        padding:.36rem .85rem;
         text-align:center;
         font-size:.72rem;
         font-weight:950;
         letter-spacing:.08em;
-        line-height:1.25;
+        line-height:1.2;
         text-transform:uppercase;
+        white-space:nowrap;
+        overflow-x:auto;
+        overflow-y:hidden;
+        scrollbar-width:none;
       }
+      .quoteSaleTopBar__inner::-webkit-scrollbar{ display:none; }
 
       .quoteSaleTopBar__inner strong{
         color:#fff;
@@ -2696,11 +2702,14 @@
         position:relative;
         overflow:hidden;
         color:#fff;
-        padding:1.2rem 1.25rem;
+        margin:14px 14px 0;
+        padding:1.15rem 1.25rem;
+        border-radius:24px;
         background:
           linear-gradient(105deg,rgba(5,13,35,.88) 0%,rgba(8,14,28,.78) 58%,rgba(93,13,27,.74) 100%),
           url("./Flag_of_the_United_States_(DDD-F-416E_specifications).svg.webp") center/cover no-repeat;
-        border-bottom:1px solid rgba(255,255,255,.1);
+        border:1px solid rgba(255,255,255,.14);
+        box-shadow:0 18px 42px rgba(7,19,45,.14);
       }
 
       .quoteSaleRibbon::after{
@@ -2749,7 +2758,7 @@
       }
 
       .quoteTop{
-        padding:18px 18px 0;
+        padding:16px 18px 0;
       }
 
       .quoteBody{
@@ -2767,14 +2776,8 @@
       }
 
       .quoteTitle::after{
-        content:"";
-        display:block;
-        width:78px;
-        height:4px;
-        margin-top:8px;
-        border-radius:999px;
-        background:linear-gradient(90deg,#1d4ed8 0 33%,#ffffff 33% 66%,#ef233c 66% 100%);
-        box-shadow:0 8px 18px rgba(29,78,216,.14);
+        display:none !important;
+        content:none !important;
       }
 
       .qpDot.isOn{
@@ -2896,16 +2899,35 @@
       }
 
       .quoteBack{
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        min-width:120px !important;
+        font-size:1rem !important;
+        font-weight:900 !important;
+        line-height:1 !important;
+        letter-spacing:.01em !important;
+        text-indent:0 !important;
+        white-space:nowrap !important;
         color:#07132d !important;
         -webkit-text-fill-color:#07132d !important;
         border:2px solid rgba(7,19,45,.16) !important;
-        background:#ffffff !important;
+        background:#f8f8fa !important;
       }
 
       .quoteNext{
         position:relative;
         isolation:isolate;
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:center !important;
         min-width:170px !important;
+        font-size:1rem !important;
+        font-weight:900 !important;
+        line-height:1 !important;
+        letter-spacing:.01em !important;
+        text-indent:0 !important;
+        white-space:nowrap !important;
         color:#ffffff !important;
         -webkit-text-fill-color:#ffffff !important;
         background:
@@ -2966,13 +2988,16 @@
       @media (max-width:720px){
         .quoteSaleTopBar__inner{
           min-height:30px;
-          gap:.38rem;
-          font-size:.59rem;
-          letter-spacing:.045em;
+          justify-content:flex-start;
+          gap:.42rem;
+          padding:.34rem .7rem;
+          font-size:.58rem;
+          letter-spacing:.04em;
         }
 
-        .quoteSaleTopBar__inner span:nth-of-type(2){
-          max-width:28ch;
+        .quoteSaleTopBar__inner span,
+        .quoteSaleTopBar__inner strong{
+          flex:0 0 auto;
         }
 
         .quotePageShell .quotePanel{
@@ -2980,7 +3005,9 @@
         }
 
         .quoteSaleRibbon{
+          margin:12px 12px 0;
           padding:1rem;
+          border-radius:20px;
         }
 
         .quoteSaleRibbon__title{
@@ -3016,7 +3043,24 @@
       }
 
 
-    </style>
+    
+      /* Final quote button + title fixes */
+      body[data-quote-page="true"] .quoteTitle::after{ display:none !important; content:none !important; }
+      body[data-quote-page="true"] .quoteBack,
+      body[data-quote-page="true"] .quoteNext{
+        font-size:1rem !important;
+        font-weight:900 !important;
+        line-height:1 !important;
+        letter-spacing:.01em !important;
+        text-indent:0 !important;
+        white-space:nowrap !important;
+        overflow:visible !important;
+        visibility:visible !important;
+      }
+      body[data-quote-page="true"] .quoteBack{ color:#07132d !important; -webkit-text-fill-color:#07132d !important; }
+      body[data-quote-page="true"] .quoteNext{ color:#ffffff !important; -webkit-text-fill-color:#ffffff !important; }
+
+</style>
   </head>
 
   <body data-quote-page="true">
