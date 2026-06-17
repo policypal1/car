@@ -3747,7 +3747,7 @@ const UPKEEP_FREQUENCY_MULTIPLIER = {
   Monthly: 1
 };
 
-const INTERIOR_EXTERIOR_BUNDLE_DISCOUNT = 30;
+const INTERIOR_EXTERIOR_BUNDLE_DISCOUNT = 35;
 
 // -------------------------
 // HELPERS
@@ -4431,7 +4431,7 @@ function getVehicleHighBeforeCoupon(item) {
 }
 
 
-const JULY_SECOND_VEHICLE_DISCOUNT_RATE = 0.30;
+const JULY_SECOND_VEHICLE_DISCOUNT_RATE = 0.15;
 
 function getJulySecondVehicleDiscountInfo(items = []) {
   if (!Array.isArray(items) || items.length < 2) {
@@ -4439,7 +4439,7 @@ function getJulySecondVehicleDiscountInfo(items = []) {
   }
 
   // The sale is intentionally applied to Vehicle 2, matching the public offer:
-  // Vehicle 1 full price, Vehicle 2 gets 30% off.
+  // Vehicle 1 full price, Vehicle 2 gets 15% off.
   const secondVehicle = items[1];
   const lowBase = Math.max(0, Number(getVehicleLowBeforeCoupon(secondVehicle) || 0));
   const highBase = Math.max(lowBase, Number(getVehicleHighBeforeCoupon(secondVehicle) || lowBase));
