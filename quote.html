@@ -4438,16 +4438,22 @@ function getJulySecondVehicleDiscountInfo(items = []) {
     return { low: 0, high: 0, vehicleIndex: -1 };
   }
 
-  // The sale is intentionally applied to Vehicle 2, matching the public offer:
-  // Vehicle 1 full price, Vehicle 2 gets 15% off.
-  const secondVehicle = items[1];
-  const lowBase = Math.max(0, Number(getVehicleLowBeforeCoupon(secondVehicle) || 0));
-  const highBase = Math.max(lowBase, Number(getVehicleHighBeforeCoupon(secondVehicle) || lowBase));
+  // Keep the public offer wording as "second vehicle," but calculate the
+  // discount from the least-expensive quoted vehicle for the customer.
+  const cheapestVehicleIndex = items.reduce((cheapestIndex, item, index) => {
+    const cheapestPrice = Math.max(0, Number(getVehicleLowBeforeCoupon(items[cheapestIndex]) || 0));
+    const currentPrice = Math.max(0, Number(getVehicleLowBeforeCoupon(item) || 0));
+    return currentPrice < cheapestPrice ? index : cheapestIndex;
+  }, 0);
+
+  const cheapestVehicle = items[cheapestVehicleIndex];
+  const lowBase = Math.max(0, Number(getVehicleLowBeforeCoupon(cheapestVehicle) || 0));
+  const highBase = Math.max(lowBase, Number(getVehicleHighBeforeCoupon(cheapestVehicle) || lowBase));
 
   return {
     low: clampInt(lowBase * JULY_SECOND_VEHICLE_DISCOUNT_RATE),
     high: clampInt(highBase * JULY_SECOND_VEHICLE_DISCOUNT_RATE),
-    vehicleIndex: 1
+    vehicleIndex: cheapestVehicleIndex
   };
 }
 
