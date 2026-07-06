@@ -1447,9 +1447,9 @@
       position:relative;
       isolation:isolate;
       overflow:hidden;
-      width:min(460px,100%);
-      border-radius:28px;
-      padding:1.45rem;
+      width:min(390px,100%);
+      border-radius:24px;
+      padding:1.2rem 1.15rem 1.3rem;
       color:#ffffff;
       border:1px solid rgba(255,255,255,.34);
       box-shadow:0 30px 90px rgba(0,0,0,.46);
@@ -1518,18 +1518,11 @@
       margin:.95rem auto 1.15rem;
       max-width:34ch;
       color:rgba(255,255,255,.94);
-      font-weight:750;
-      line-height:1.58;
+      font-weight:900;
+      line-height:1.4;
+      text-transform:uppercase;
+      letter-spacing:.08em;
       text-shadow:0 4px 14px rgba(0,0,0,.7);
-    }
-    .julySalePopup__actions{
-      display:block;
-      width:100%;
-    }
-    .julySalePopup__actions .btn{
-      width:100%;
-      min-height:56px;
-      border-radius:16px;
     }
 
 
@@ -1862,9 +1855,18 @@
       border-left:1px solid rgba(255,255,255,.46);
     }
     .saleTopBar__timer{
-      font-size:.68rem;
-      letter-spacing:.07em;
+      display:inline-flex;
+      align-items:center;
+      min-height:28px;
+      padding:.22rem .42rem;
+      border:1px solid rgba(255,255,255,.52);
+      border-radius:999px;
+      background:rgba(255,255,255,.14);
+      font-size:.94rem;
+      font-weight:950;
+      letter-spacing:.075em;
       font-variant-numeric:tabular-nums;
+      box-shadow:0 0 16px rgba(255,255,255,.14);
     }
     .saleTopBar__star{
       display:inline-flex!important;
@@ -1892,8 +1894,10 @@
         padding-left:.27rem;
       }
       .saleTopBar__timer{
-        font-size:.55rem;
-        letter-spacing:.035em;
+        min-height:24px;
+        padding:.14rem .3rem;
+        font-size:.74rem;
+        letter-spacing:.045em;
       }
       .saleTopBar__star{font-size:.7em;}
       .saleTopBar__star--mid{display:none!important;}
@@ -2837,12 +2841,9 @@
     <div class="julySalePopup__overlay" data-july-popup-close></div>
     <div class="julySalePopup__panel">
       <button class="julySalePopup__close" type="button" data-july-popup-close aria-label="Close 4th of July sale popup">×</button>
-      <p class="julySalePopup__kicker">4th of July sale</p>
-      <h2 class="julySalePopup__title" id="julySalePopupTitle">$35 off a full detail.</h2>
-      <p class="julySalePopup__text">Full detail includes Deep Clean Interior Detail + Standard Exterior Wash. Booking two vehicles? The second vehicle is 15% off.</p>
-      <div class="julySalePopup__actions">
-        <a class="btn btn--quote" href="./quote.html?preset=most-popular&interiorPackage=deep-clean&exteriorPackage=standard-exterior&promo=july-full-detail-35" data-quote-link data-popular-preset>GET QUOTE NOW</a>
-      </div>
+      <p class="julySalePopup__kicker">Limited time</p>
+      <h2 class="julySalePopup__title" id="julySalePopupTitle">4th of July sale extended</h2>
+      <p class="julySalePopup__text">For 3 more days.</p>
     </div>
   </div>
 
@@ -3117,9 +3118,8 @@
         document.body.style.overflow = "hidden";
       };
 
-      window.setTimeout(openPopup, 10000);
-      document.querySelectorAll("[data-july-popup-close]").forEach((btn) => btn.addEventListener("click", closePopup));
-      popup.querySelectorAll("[data-quote-link]").forEach((link) => link.addEventListener("click", () => sessionStorage.setItem("julySalePopupClosed", "1")));
+      window.setTimeout(openPopup, 650);
+      popup.addEventListener("click", closePopup);
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && !popup.hidden) closePopup();
       });
