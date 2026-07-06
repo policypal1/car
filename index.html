@@ -2371,6 +2371,211 @@
       }
     }
 
+
+    /* =========================================================
+       Video carousel: newest clips first, previous clips retained
+       ========================================================= */
+    .videoCarousel{
+      width:min(670px,100%);
+      margin:0 auto;
+    }
+    .videoCarousel__shell{
+      position:relative;
+      overflow:hidden;
+      padding:12px;
+      border:1px solid rgba(16,19,27,.12);
+      border-radius:30px;
+      background:
+        radial-gradient(circle at 14% 0%,rgba(29,78,216,.16),transparent 33%),
+        radial-gradient(circle at 92% 8%,rgba(239,35,60,.13),transparent 34%),
+        #0a0d14;
+      box-shadow:0 28px 74px rgba(16,19,27,.2);
+    }
+    .videoCarousel__shell::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:repeating-linear-gradient(135deg,rgba(255,255,255,.035) 0 1px,transparent 1px 15px);
+      opacity:.45;
+    }
+    .videoCarousel__viewport{
+      position:relative;
+      z-index:1;
+      overflow:hidden;
+      aspect-ratio:9/16;
+      border-radius:22px;
+      background:#000;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+      touch-action:pan-y;
+    }
+    .videoCarousel__track{
+      display:flex;
+      height:100%;
+      transition:transform .38s cubic-bezier(.22,.7,.25,1);
+      will-change:transform;
+    }
+    .videoCarousel__slide{
+      position:relative;
+      flex:0 0 100%;
+      min-width:0;
+      height:100%;
+      cursor:pointer;
+    }
+    .videoCarousel__slide .reel{
+      position:relative;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      border:0;
+      border-radius:0;
+      background:#000;
+      box-shadow:none;
+    }
+    .videoCarousel__slide .reel__video{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      background:#000;
+      pointer-events:none;
+    }
+    .videoCarousel__slide .reel__overlay{
+      display:flex;
+      opacity:1;
+      transition:opacity .2s ease;
+    }
+    .videoCarousel__slide.isPlaying .reel__overlay{opacity:0;}
+    .videoCarousel__slide .reel__meta{
+      left:14px;
+      right:14px;
+      bottom:14px;
+      padding:11px 13px;
+      border-color:rgba(255,255,255,.2);
+      background:linear-gradient(135deg,rgba(4,7,14,.72),rgba(15,20,34,.5));
+    }
+    .videoCarousel__slide .reel__title{
+      font-size:.96rem;
+      text-transform:uppercase;
+    }
+    .videoCarousel__arrow{
+      position:absolute;
+      top:50%;
+      z-index:4;
+      display:grid;
+      place-items:center;
+      width:48px;
+      height:48px;
+      padding:0;
+      border:1px solid rgba(255,255,255,.32);
+      border-radius:999px;
+      color:#fff;
+      background:rgba(3,6,13,.72);
+      box-shadow:0 16px 38px rgba(0,0,0,.34);
+      font-size:2rem;
+      line-height:1;
+      cursor:pointer;
+      transform:translateY(-50%);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      transition:transform .18s ease,background .18s ease,border-color .18s ease;
+    }
+    .videoCarousel__arrow:hover{
+      background:rgba(29,78,216,.8);
+      border-color:rgba(255,255,255,.7);
+    }
+    .videoCarousel__arrow:active{transform:translateY(-50%) scale(.96);}
+    .videoCarousel__arrow:focus-visible,
+    .videoCarousel__dot:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(214,178,94,.42);}
+    .videoCarousel__arrow--prev{left:14px;}
+    .videoCarousel__arrow--next{right:14px;}
+    .videoCarousel__dots{
+      position:absolute;
+      top:14px;
+      left:50%;
+      z-index:4;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      max-width:calc(100% - 110px);
+      padding:7px 10px;
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:999px;
+      background:rgba(3,6,13,.5);
+      box-shadow:0 12px 28px rgba(0,0,0,.2);
+      transform:translateX(-50%);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+    }
+    .videoCarousel__dot{
+      width:8px;
+      height:8px;
+      padding:0;
+      border:1px solid rgba(255,255,255,.38);
+      border-radius:999px;
+      background:rgba(255,255,255,.28);
+      cursor:pointer;
+      transition:width .18s ease,background .18s ease,border-color .18s ease;
+    }
+    .videoCarousel__dot.isActive{
+      width:24px;
+      border-color:#f6d98a;
+      background:#f6d98a;
+    }
+    .videoCarousel__footer{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding:.9rem .32rem .05rem;
+      color:#10131b;
+    }
+    .videoCarousel__caption{min-width:0;}
+    .videoCarousel__eyebrow{
+      margin:0 0 .18rem;
+      color:#c91f35;
+      font-size:.72rem;
+      font-weight:900;
+      letter-spacing:.11em;
+      text-transform:uppercase;
+    }
+    .videoCarousel__title{
+      margin:0;
+      color:#10131b;
+      font-family:Oswald,Inter,sans-serif;
+      font-size:1.36rem;
+      font-weight:700;
+      letter-spacing:.04em;
+      line-height:1.05;
+      text-transform:uppercase;
+    }
+    .videoCarousel__count{
+      flex:0 0 auto;
+      padding:.52rem .7rem;
+      border:1px solid rgba(16,19,27,.1);
+      border-radius:999px;
+      background:#fff;
+      color:#10131b;
+      font-size:.78rem;
+      font-weight:900;
+      letter-spacing:.07em;
+      white-space:nowrap;
+      box-shadow:0 8px 18px rgba(16,19,27,.07);
+    }
+    @media (max-width:767px){
+      .videoCarousel__shell{padding:8px;border-radius:24px;}
+      .videoCarousel__viewport{border-radius:18px;}
+      .videoCarousel__arrow{width:43px;height:43px;font-size:1.75rem;}
+      .videoCarousel__arrow--prev{left:10px;}
+      .videoCarousel__arrow--next{right:10px;}
+      .videoCarousel__dots{top:10px;gap:6px;padding:6px 8px;}
+      .videoCarousel__dot{width:7px;height:7px;}
+      .videoCarousel__dot.isActive{width:20px;}
+      .videoCarousel__slide .reel__meta{left:10px;right:10px;bottom:10px;}
+      .videoCarousel__footer{padding:.85rem .15rem 0;}
+      .videoCarousel__title{font-size:1.2rem;}
+    }
+
   </style>
 
   <script>
@@ -2651,26 +2856,68 @@
     <div class="container">
       <div class="section__head">
         <h2 class="section__title">Real Job Clips</h2>
-        <p class="section__sub">Tap a clip to play on desktop. Swipe for more on mobile.</p>
+        <p class="section__sub">Tap a clip to play. Use the arrows or dots to view every detail.</p>
       </div>
 
-      <div class="reelsBar" aria-hidden="true"><div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div></div>
-      <div class="reels" data-reels aria-label="Short video clips of detailing work">
-        <article class="reel" data-reel>
-          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 1"><source src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4" type="video/mp4" /></video>
-          <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
-          <div class="reel__meta"><div class="reel__title">Interior Reset</div></div>
-        </article>
-        <article class="reel" data-reel>
-          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 2"><source src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4" type="video/mp4" /></video>
-          <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
-          <div class="reel__meta"><div class="reel__title">Deep Clean Moment</div></div>
-        </article>
-        <article class="reel" data-reel>
-          <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 3"><source src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4" type="video/mp4" /></video>
-          <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
-          <div class="reel__meta"><div class="reel__title">Finish &amp; Shine</div></div>
-        </article>
+      <div class="videoCarousel" data-video-carousel aria-label="Short video clips of detailing work">
+        <div class="videoCarousel__shell">
+          <div class="videoCarousel__viewport" data-video-carousel-viewport>
+            <div class="videoCarousel__track" data-video-carousel-track>
+              <article class="videoCarousel__slide" data-video-slide>
+                <div class="reel">
+                  <video class="reel__video" muted playsinline loop preload="none" aria-label="Recent detailing video clip 1"><source src="./SnapInsta.to_AQNQLutUsJt8xDHvDUN7NrUw5BxHWsQxZeyUyblivko-DedpceAMWvU9exi805CELNefNkfCfwJnm7wLU2Gyhk2Q3gnFjQNhW88fKSk.mp4" type="video/mp4" /></video>
+                  <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+                  <div class="reel__meta"><div class="reel__title">Recent Detail</div></div>
+                </div>
+              </article>
+              <article class="videoCarousel__slide" data-video-slide>
+                <div class="reel">
+                  <video class="reel__video" muted playsinline loop preload="none" aria-label="Recent detailing video clip 2"><source src="./SnapInsta.to_AQOP1Hlge6w-7B7JjEvMxmaDgKdORXxWgM74bS19vW1T3wq_1sigyvtqpFqJsTMTTvGWFMi7-CEqMrnNhpf1A_S7SGN0H7TrnrS4ccc.mp4" type="video/mp4" /></video>
+                  <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+                  <div class="reel__meta"><div class="reel__title">Fresh Finish</div></div>
+                </div>
+              </article>
+              <article class="videoCarousel__slide" data-video-slide>
+                <div class="reel">
+                  <video class="reel__video" muted playsinline loop preload="none" aria-label="Recent detailing video clip 3"><source src="./SnapInsta.to_AQMa946AViH3-OzWJJnvGnGBa4xM-g8Jd4iYutodQoQmZBlcimk6DxULvbkaR9llgTiAsGhMmy5o8XmWLTISeyMvC-wNSZo-AeXIQcQ.mp4" type="video/mp4" /></video>
+                  <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+                  <div class="reel__meta"><div class="reel__title">Clean Results</div></div>
+                </div>
+              </article>
+              <article class="videoCarousel__slide" data-video-slide>
+                <div class="reel">
+                  <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 4"><source src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4" type="video/mp4" /></video>
+                  <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+                  <div class="reel__meta"><div class="reel__title">Interior Reset</div></div>
+                </div>
+              </article>
+              <article class="videoCarousel__slide" data-video-slide>
+                <div class="reel">
+                  <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 5"><source src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4" type="video/mp4" /></video>
+                  <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+                  <div class="reel__meta"><div class="reel__title">Deep Clean Moment</div></div>
+                </div>
+              </article>
+              <article class="videoCarousel__slide" data-video-slide>
+                <div class="reel">
+                  <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 6"><source src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4" type="video/mp4" /></video>
+                  <div class="reel__overlay" aria-hidden="true"><div class="reel__playBadge"><span class="reel__playIcon"></span><span>PLAY VIDEO</span></div></div>
+                  <div class="reel__meta"><div class="reel__title">Finish &amp; Shine</div></div>
+                </div>
+              </article>
+            </div>
+            <button class="videoCarousel__arrow videoCarousel__arrow--prev" type="button" data-video-carousel-prev aria-label="Previous video">‹</button>
+            <button class="videoCarousel__arrow videoCarousel__arrow--next" type="button" data-video-carousel-next aria-label="Next video">›</button>
+            <div class="videoCarousel__dots" data-video-carousel-dots aria-label="Choose a video"></div>
+          </div>
+        </div>
+        <div class="videoCarousel__footer">
+          <div class="videoCarousel__caption">
+            <p class="videoCarousel__eyebrow">Latest work first</p>
+            <p class="videoCarousel__title" data-video-carousel-title>Recent Detail</p>
+          </div>
+          <div class="videoCarousel__count" data-video-carousel-count>1 / 6</div>
+        </div>
       </div>
     </div>
   </section>
@@ -2994,26 +3241,107 @@
         next?.addEventListener("click", () => scrollByAmount(1));
       }
 
-      const reelsRoot = $("[data-reels]");
-      if (reelsRoot) {
-        const reels = $$("[data-reel]", reelsRoot).map((card) => ({ card, video: $("video", card) })).filter((x) => x.video);
-        const isMobile = () => window.matchMedia("(max-width: 767px)").matches;
-        const pauseAll = () => reels.forEach(({ card, video }) => { video.pause(); card.classList.remove("isPlaying"); });
-        const safePlay = async (video) => { try { video.muted = true; video.playsInline = true; await video.play(); } catch (_) {} };
-        reels.forEach(({ video }) => { try { video.muted = true; video.playsInline = true; video.preload = "metadata"; video.load(); } catch (_) {} });
-        reels.forEach(({ card, video }) => {
-          video.addEventListener("play", () => card.classList.add("isPlaying"));
-          video.addEventListener("pause", () => card.classList.remove("isPlaying"));
-          card.addEventListener("click", () => { if (video.paused) { pauseAll(); safePlay(video); } else { video.pause(); } });
+      const videoCarousel = $("[data-video-carousel]");
+      if (videoCarousel) {
+        const track = $("[data-video-carousel-track]", videoCarousel);
+        const slides = track ? $$("[data-video-slide]", track) : [];
+        const prev = $("[data-video-carousel-prev]", videoCarousel);
+        const next = $("[data-video-carousel-next]", videoCarousel);
+        const dots = $("[data-video-carousel-dots]", videoCarousel);
+        const title = $("[data-video-carousel-title]", videoCarousel);
+        const count = $("[data-video-carousel-count]", videoCarousel);
+        let index = 0;
+        let carouselVisible = true;
+        let touchStartX = null;
+
+        const safePlay = async (video) => {
+          try {
+            video.muted = true;
+            video.playsInline = true;
+            await video.play();
+          } catch (_) {}
+        };
+        const pauseAll = () => slides.forEach((slide) => {
+          const video = $("video", slide);
+          if (video) video.pause();
+          slide.classList.remove("isPlaying");
         });
-        if (isMobile()) {
-          const io = new IntersectionObserver((entries) => {
-            const visible = entries.filter((e) => e.isIntersecting).sort((a,b) => (b.intersectionRatio || 0) - (a.intersectionRatio || 0))[0];
-            if (!visible) return;
-            reels.forEach(({ video, card }) => { if (card === visible.target) { if (video.paused) safePlay(video); } else { video.pause(); } });
-          }, { threshold:[0,.35,.65,.85] });
-          reels.forEach(({ card }) => io.observe(card));
+        const setDots = () => {
+          if (!dots) return;
+          dots.innerHTML = "";
+          slides.forEach((slide, i) => {
+            const dot = document.createElement("button");
+            dot.type = "button";
+            dot.className = "videoCarousel__dot" + (i === index ? " isActive" : "");
+            dot.setAttribute("aria-label", `Show video ${i + 1}`);
+            dot.setAttribute("aria-current", i === index ? "true" : "false");
+            dot.addEventListener("click", () => show(i));
+            dots.appendChild(dot);
+          });
+        };
+        const show = (nextIndex, shouldPlay = true) => {
+          if (!track || !slides.length) return;
+          index = (nextIndex + slides.length) % slides.length;
+          track.style.transform = `translateX(${-index * 100}%)`;
+          slides.forEach((slide, i) => {
+            const video = $("video", slide);
+            const active = i === index;
+            slide.classList.toggle("isActive", active);
+            if (!active && video) video.pause();
+          });
+          const activeSlide = slides[index];
+          const activeVideo = $("video", activeSlide);
+          if (title) title.textContent = $(".reel__title", activeSlide)?.textContent || "Detailing Clip";
+          if (count) count.textContent = `${index + 1} / ${slides.length}`;
+          setDots();
+          if (shouldPlay && carouselVisible && activeVideo) safePlay(activeVideo);
+        };
+
+        slides.forEach((slide) => {
+          const video = $("video", slide);
+          if (!video) return;
+          try {
+            video.muted = true;
+            video.playsInline = true;
+            video.preload = "metadata";
+            video.load();
+          } catch (_) {}
+          video.addEventListener("play", () => slide.classList.add("isPlaying"));
+          video.addEventListener("pause", () => slide.classList.remove("isPlaying"));
+          slide.addEventListener("click", () => {
+            const activeVideo = $("video", slides[index]);
+            if (slide !== slides[index]) {
+              show(slides.indexOf(slide));
+            } else if (activeVideo?.paused) {
+              pauseAll();
+              safePlay(activeVideo);
+            } else {
+              activeVideo?.pause();
+            }
+          });
+        });
+        prev?.addEventListener("click", (event) => { event.stopPropagation(); show(index - 1); });
+        next?.addEventListener("click", (event) => { event.stopPropagation(); show(index + 1); });
+        const viewport = $("[data-video-carousel-viewport]", videoCarousel);
+        viewport?.addEventListener("touchstart", (event) => { touchStartX = event.changedTouches[0]?.clientX ?? null; }, { passive:true });
+        viewport?.addEventListener("touchend", (event) => {
+          if (touchStartX === null) return;
+          const endX = event.changedTouches[0]?.clientX ?? touchStartX;
+          const distance = endX - touchStartX;
+          touchStartX = null;
+          if (Math.abs(distance) < 42) return;
+          show(distance < 0 ? index + 1 : index - 1);
+        }, { passive:true });
+        if ("IntersectionObserver" in window) {
+          const observer = new IntersectionObserver((entries) => {
+            const entry = entries[0];
+            carouselVisible = Boolean(entry?.isIntersecting && entry.intersectionRatio > .2);
+            if (carouselVisible) show(index);
+            else pauseAll();
+          }, { threshold:[0,.2,.5] });
+          observer.observe(videoCarousel);
         }
+        show(0, false);
       }
 
       const form = $("[data-contact-form]");
