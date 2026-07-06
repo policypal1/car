@@ -2337,6 +2337,36 @@
       }
     }
 
+  
+
+    /* Subtle hero extension notice */
+    .hero__saleExtension{
+      display:inline-flex;
+      align-items:center;
+      width:max-content;
+      max-width:100%;
+      margin:0 0 .2rem;
+      padding:.42rem .7rem;
+      border:1px solid rgba(246,217,138,.28);
+      border-radius:999px;
+      background:rgba(0,0,0,.18);
+      color:rgba(255,255,255,.86);
+      font-size:.72rem;
+      font-weight:800;
+      letter-spacing:.075em;
+      line-height:1.35;
+      text-transform:uppercase;
+      text-shadow:0 2px 12px rgba(0,0,0,.35);
+    }
+    @media (max-width:767px){
+      .hero__saleExtension{
+        margin-top:.1rem;
+        padding:.38rem .62rem;
+        font-size:.66rem;
+        letter-spacing:.06em;
+      }
+    }
+
   </style>
 
   <script>
@@ -2400,6 +2430,9 @@
 
           <h1 class="hero__headline">BRING YOUR <span class="hero__headlineAccent">CAR</span> BACK TO LIFE.</h1>
           <p class="hero__sub">Interior and exterior detailing that makes your car feel fresh, clean, and reset the second you get back in.</p>
+
+
+          <p class="hero__saleExtension">4TH OF JULY SALE EXTENDED FOR 3 MORE DAYS</p>
 
           <div class="hero__actions">
             <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
