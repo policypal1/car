@@ -2376,12 +2376,12 @@
 </head>
 
 <body>
-  <div class="saleTopBar" aria-label="4th of July sale countdown">
+  <div class="saleTopBar" aria-label="4th of July sale extended for three more days">
     <div class="container saleTopBar__inner">
       <span class="saleTopBar__star" aria-hidden="true">★</span>
-      <span class="saleTopBar__copy">4TH OF JULY SALE · $35 OFF FULL DETAIL</span>
+      <span class="saleTopBar__copy">4TH OF JULY SALE EXTENDED · 3 MORE DAYS</span>
       <span class="saleTopBar__star saleTopBar__star--mid" aria-hidden="true">★</span>
-      <span class="saleTopBar__timerWrap" aria-label="Countdown until July 4th">
+      <span class="saleTopBar__timerWrap" aria-label="Countdown until July 9th">
         <span class="saleTopBar__star" aria-hidden="true">★</span>
         <span class="saleTopBar__timer" data-july-countdown>LOADING</span>
         <span class="saleTopBar__star" aria-hidden="true">★</span>
@@ -3132,7 +3132,7 @@
       const countdown = document.querySelector("[data-july-countdown]");
       if (!countdown) return;
 
-      const target = new Date(2026, 6, 4, 0, 0, 0);
+      const target = new Date(2026, 6, 9, 23, 59, 59);
 
       function renderCountdown() {
         const now = new Date();
