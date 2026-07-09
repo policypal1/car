@@ -418,3 +418,53 @@
     }
   });
 })();
+
+/* AVAILABILITY POPUP */
+(function () {
+  const modal = document.querySelector("[data-availability-modal]");
+  if (!modal) return;
+
+  const closeBtns = document.querySelectorAll("[data-availability-close]");
+  const storageKey = "kmdAvailabilityNoticeClosed_v1";
+
+  function shouldShowNotice() {
+    try {
+      return sessionStorage.getItem(storageKey) !== "true";
+    } catch (_) {
+      return true;
+    }
+  }
+
+  function markNoticeClosed() {
+    try {
+      sessionStorage.setItem(storageKey, "true");
+    } catch (_) {}
+  }
+
+  function openAvailabilityNotice() {
+    modal.hidden = false;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeAvailabilityNotice() {
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    markNoticeClosed();
+  }
+
+  closeBtns.forEach((button) => {
+    button.addEventListener("click", closeAvailabilityNotice);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.hidden) {
+      closeAvailabilityNotice();
+    }
+  });
+
+  if (shouldShowNotice()) {
+    window.setTimeout(openAvailabilityNotice, 650);
+  }
+})();
