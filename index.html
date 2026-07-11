@@ -799,6 +799,8 @@
   </head>
 
   <body>
+    <a class="skipLink" href="#main-content">Skip to main content</a>
+
     <header class="header" id="top">
       <div class="container header__inner">
         <a class="brand" href="#top" aria-label="Home">
@@ -820,11 +822,11 @@
           </div>
         </a>
 
-        <button class="navToggle" aria-label="Open menu" aria-expanded="false" data-nav-toggle>
+        <button class="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="primary-navigation" data-nav-toggle>
           <span></span><span></span><span></span>
         </button>
 
-        <nav class="nav" data-nav>
+        <nav class="nav" id="primary-navigation" aria-label="Primary navigation" data-nav>
           <a href="#services">Services</a>
           <a href="#work">Our Work</a>
           <a href="#process">How It Works</a>
@@ -835,7 +837,8 @@
       </div>
     </header>
 
-    <section class="hero" aria-label="Hero">
+    <main id="main-content" tabindex="-1">
+    <section class="hero" aria-labelledby="hero-title">
       <div class="hero__bg" aria-hidden="true"></div>
       <div class="container hero__inner">
         <div class="hero__layout">
@@ -845,7 +848,7 @@
               Mobile detailing in Keizer &amp; Salem
             </div>
 
-            <h1 class="hero__headline">BRING YOUR <span class="hero__headlineAccent">CAR</span> BACK TO LIFE.</h1>
+            <h1 class="hero__headline" id="hero-title">BRING YOUR <span class="hero__headlineAccent">CAR</span> BACK TO LIFE.</h1>
             <p class="hero__sub">
               Interior and exterior detailing that makes your car feel fresh, clean, and reset the second you get back in.
             </p>
@@ -978,7 +981,7 @@
                   <h3>CERAMIC</h3>
                   <p class="serviceCard__mini">Longer gloss, easier washes, protection.</p>
                 </div>
-                <span class="tag tag--ghost">Hidden</span>
+                <span class="tag tag--ghost" aria-hidden="true">Hidden</span>
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
@@ -996,7 +999,7 @@
                   <h3>CORRECTION</h3>
                   <p class="serviceCard__mini">Swirl removal, clarity, deeper shine.</p>
                 </div>
-                <span class="tag tag--ghost">Hidden</span>
+                <span class="tag tag--ghost" aria-hidden="true">Hidden</span>
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
@@ -1011,49 +1014,49 @@
     <section class="section section--dark" id="work">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title section__title--dark">RECENT TRANSFORMATIONS</h2>
+          <h2 class="section__title section__title--dark" id="work-title">RECENT TRANSFORMATIONS</h2>
           <p class="section__sub section__sub--dark">Drag the slider to reveal the after.</p>
         </div>
 
-        <div class="carousel carousel--outsideNav" data-carousel="work">
+        <div class="carousel carousel--outsideNav" data-carousel="work" role="region" aria-roledescription="carousel" aria-labelledby="work-title">
           <div class="carousel__frame">
-            <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous">&#8249;</button>
+            <button class="carouselArrow carouselArrow--left" type="button" data-carousel-prev aria-label="Previous transformation">&#8249;</button>
 
             <div class="carousel__viewport" data-carousel-viewport>
-              <div class="carouselDots carouselDots--overlay" data-carousel-dots aria-hidden="true"></div>
+              <div class="carouselDots carouselDots--overlay" data-carousel-dots role="group" aria-label="Choose a transformation"></div>
 
               <div class="carousel__track" data-carousel-track>
-                <div class="carousel__slide">
+                <div class="carousel__slide" role="group" aria-roledescription="slide">
                   <div
                     class="compare compare--fill"
                     data-compare
                     data-before="./IMG_2469.jpg"
                     data-after="./IMG_2461.jpg"
-                    aria-label="Before and after comparison"
+                    role="group" aria-label="Interactive before-and-after vehicle detailing comparison"
                   >
                     <div class="compare__stage" aria-hidden="true"></div>
-                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal before image for transformation 1" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
 
-                <div class="carousel__slide">
+                <div class="carousel__slide" role="group" aria-roledescription="slide">
                   <div
                     class="compare compare--fill"
                     data-compare
                     data-before="./IMG_2919 (1).jpg"
                     data-after="./IMG_2912.jpg"
-                    aria-label="Before and after comparison"
+                    role="group" aria-label="Interactive before-and-after vehicle detailing comparison"
                   >
                     <div class="compare__stage" aria-hidden="true"></div>
-                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal after image" />
+                    <input class="compare__range" data-compare-range type="range" min="0" max="100" value="12" aria-label="Reveal before image for transformation 2" />
                     <div class="compare__handle" aria-hidden="true"></div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next">&#8250;</button>
+            <button class="carouselArrow carouselArrow--right" type="button" data-carousel-next aria-label="Next transformation">&#8250;</button>
           </div>
         </div>
       </div>
@@ -1062,8 +1065,8 @@
     <section class="section section--light" id="reels">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title">REAL JOB CLIPS</h2>
-          <p class="section__sub">Tap a clip to play on desktop.</p>
+          <h2 class="section__title" id="reels-title">REAL JOB CLIPS</h2>
+          <p class="section__sub">Tap a clip to play.</p>
         </div>
 
         <div class="reelsWrap">
@@ -1071,9 +1074,10 @@
             <div class="reelsBar__pill">SWIPE FOR MORE CLIPS</div>
           </div>
 
-          <div class="reels" data-reels aria-label="Short video clips of detailing work">
-            <article class="reel" data-reel>
-              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 1">
+          <div class="reels" data-reels role="region" aria-labelledby="reels-title" aria-describedby="reels-instructions">
+            <p class="srOnly" id="reels-instructions">Select a video with a mouse, touch, Enter, or Space. Select it again to pause.</p>
+            <article class="reel" data-reel tabindex="0" role="button" aria-pressed="false" aria-label="Play Interior Reset video">
+              <video class="reel__video" muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1">
                 <source
                   src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
                   type="video/mp4"
@@ -1092,8 +1096,8 @@
               </div>
             </article>
 
-            <article class="reel" data-reel>
-              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 2">
+            <article class="reel" data-reel tabindex="0" role="button" aria-pressed="false" aria-label="Play Deep Clean Moment video">
+              <video class="reel__video" muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1">
                 <source
                   src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4"
                   type="video/mp4"
@@ -1112,8 +1116,8 @@
               </div>
             </article>
 
-            <article class="reel" data-reel>
-              <video class="reel__video" muted playsinline loop preload="none" aria-label="Detailing video clip 3">
+            <article class="reel" data-reel tabindex="0" role="button" aria-pressed="false" aria-label="Play Finish and Shine video">
+              <video class="reel__video" muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1">
                 <source
                   src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4"
                   type="video/mp4"
@@ -1246,17 +1250,17 @@
     <section class="section section--dark" id="reviews">
       <div class="container">
         <div class="section__head">
-          <h2 class="section__title section__title--dark">REVIEWS</h2>
+          <h2 class="section__title section__title--dark" id="reviews-title">REVIEWS</h2>
           <p class="section__sub section__sub--dark">This is what people are saying.</p>
         </div>
 
-        <div class="reviewsRailWrap reviewsRailWrap--roomy" data-rail>
+        <div class="reviewsRailWrap reviewsRailWrap--roomy" data-rail role="region" aria-roledescription="carousel" aria-labelledby="reviews-title">
           <button class="railArrow railArrow--left" type="button" data-rail-prev aria-label="Previous reviews">&#8249;</button>
 
           <div class="reviewsRail reviewsRail--dark" data-rail-track tabindex="0" aria-label="Customer reviews carousel">
             <article class="rCard rCard--rail rCard--dark">
               <div class="rHead">
-                <div class="rAvatar rAvatar--dark">SK</div>
+                <div class="rAvatar rAvatar--dark" aria-hidden="true">SK</div>
                 <div class="rMeta">
                   <div class="rName rName--dark">Samuel Kumpula</div>
                   <div class="rLoc rLoc--dark">1 review</div>
@@ -1268,7 +1272,7 @@
 
             <article class="rCard rCard--rail rCard--dark">
               <div class="rHead">
-                <div class="rAvatar rAvatar--dark">CF</div>
+                <div class="rAvatar rAvatar--dark" aria-hidden="true">CF</div>
                 <div class="rMeta">
                   <div class="rName rName--dark">Carhart Family</div>
                   <div class="rLoc rLoc--dark">1 review</div>
@@ -1283,7 +1287,7 @@
 
             <article class="rCard rCard--rail rCard--dark">
               <div class="rHead">
-                <div class="rAvatar rAvatar--dark">ED</div>
+                <div class="rAvatar rAvatar--dark" aria-hidden="true">ED</div>
                 <div class="rMeta">
                   <div class="rName rName--dark">Edgar Diaz</div>
                   <div class="rLoc rLoc--dark">5 reviews · Google review</div>
@@ -1300,7 +1304,7 @@
 
             <article class="rCard rCard--rail rCard--dark">
               <div class="rHead">
-                <div class="rAvatar rAvatar--dark">TS</div>
+                <div class="rAvatar rAvatar--dark" aria-hidden="true">TS</div>
                 <div class="rMeta">
                   <div class="rName rName--dark">Tony Salazar</div>
                   <div class="rLoc rLoc--dark">2 reviews · Google review</div>
@@ -1312,7 +1316,7 @@
 
             <article class="rCard rCard--rail rCard--dark">
               <div class="rHead">
-                <div class="rAvatar rAvatar--dark">CR</div>
+                <div class="rAvatar rAvatar--dark" aria-hidden="true">CR</div>
                 <div class="rMeta">
                   <div class="rName rName--dark">Customer Review</div>
                   <div class="rLoc rLoc--dark">Google review</div>
@@ -1327,7 +1331,7 @@
 
             <article class="rCard rCard--rail rCard--dark">
               <div class="rHead">
-                <div class="rAvatar rAvatar--dark">AJ</div>
+                <div class="rAvatar rAvatar--dark" aria-hidden="true">AJ</div>
                 <div class="rMeta">
                   <div class="rName rName--dark">aaron jakub</div>
                   <div class="rLoc rLoc--dark">Google review · 2014 Tahoe detail</div>
@@ -1351,6 +1355,8 @@
       </div>
     </section>
 
+    </main>
+
     <footer class="footer footer--light">
       <div class="container footerMini footerMini--light">
         <div class="footerMini__left">
@@ -1369,6 +1375,14 @@
         <div class="container footer__bottomInner footer__bottomInner--light">
           <span>&#169; <span data-year></span> Keizer Mobile Detailing</span>
           <span class="footerProduced">
+            <span class="footerLegal" aria-label="Legal and accessibility links">
+              <a class="footerLink" href="./privacy-policy.html">Privacy</a>
+              <span class="footerSep" aria-hidden="true">&#8226;</span>
+              <a class="footerLink" href="./terms-of-service.html">Terms</a>
+              <span class="footerSep" aria-hidden="true">&#8226;</span>
+              <a class="footerLink" href="./accessibility-statement.html">Accessibility</a>
+            </span>
+            <span class="footerSep" aria-hidden="true">&#8226;</span>
             <a
               class="footerLink"
               href="https://www.instagram.com/keizermobiledetail?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw%3D%3D"
@@ -1376,7 +1390,7 @@
               rel="noopener noreferrer"
               >Instagram</a
             >
-            <span class="footerSep">&#8226;</span>
+            <span class="footerSep" aria-hidden="true">&#8226;</span>
             Website produced by Kumpula Marketing
           </span>
         </div>
@@ -1398,11 +1412,11 @@
 
 
     <div class="availabilityModal" hidden data-availability-modal aria-hidden="true">
-      <div class="availabilityModal__overlay" data-availability-close></div>
-      <div class="availabilityModal__panel" role="dialog" aria-modal="true" aria-label="Availability notice">
+      <div class="availabilityModal__overlay" data-availability-close aria-hidden="true"></div>
+      <div class="availabilityModal__panel" role="dialog" aria-modal="true" aria-labelledby="availability-title" tabindex="-1">
         <button class="availabilityModal__close" type="button" data-availability-close aria-label="Close availability notice">&times;</button>
         <div class="availabilityModal__badge">Availability Update</div>
-        <h3 class="availabilityModal__title">Currently Unavailable</h3>
+        <h2 class="availabilityModal__title" id="availability-title">Currently Unavailable</h2>
         <p class="availabilityModal__text">
           We’re currently out of office and will not be available for a little while. Thank you for your patience while we take a short break.
         </p>
@@ -1411,10 +1425,10 @@
     </div>
 
     <div class="reviewImageModal" hidden data-review-image-modal aria-hidden="true">
-      <div class="reviewImageModal__overlay" data-review-image-close></div>
-      <div class="reviewImageModal__panel" role="dialog" aria-modal="true" aria-label="Expanded customer review image">
+      <div class="reviewImageModal__overlay" data-review-image-close aria-hidden="true"></div>
+      <div class="reviewImageModal__panel" role="dialog" aria-modal="true" aria-labelledby="review-image-title" tabindex="-1">
         <div class="reviewImageModal__top">
-          <div class="reviewImageModal__title">Edgar Diaz Review Image</div>
+          <h2 class="reviewImageModal__title" id="review-image-title">Edgar Diaz Review Image</h2>
           <button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button>
         </div>
         <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" data-review-image-img />
@@ -1422,10 +1436,10 @@
     </div>
 
     <div class="modal" aria-hidden="true" data-modal>
-      <div class="modal__overlay" data-modal-close></div>
-      <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Service details">
-        <button class="modal__close" aria-label="Close" data-modal-close>&#215;</button>
-        <h3 class="modal__title" data-modal-title>Service</h3>
+      <div class="modal__overlay" data-modal-close aria-hidden="true"></div>
+      <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="service-modal-title" tabindex="-1">
+        <button class="modal__close" type="button" aria-label="Close service details" data-modal-close>&#215;</button>
+        <h2 class="modal__title" id="service-modal-title" data-modal-title>Service</h2>
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
           <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
@@ -1435,10 +1449,10 @@
     </div>
 
     <div class="modal modal--call" aria-hidden="true" data-call-modal>
-      <div class="modal__overlay" data-call-close></div>
-      <div class="callPanel" role="dialog" aria-modal="true" aria-label="Call or text us">
-        <button class="modal__close" aria-label="Close" data-call-close>&#215;</button>
-        <h3 class="callTitle">CALL OR TEXT</h3>
+      <div class="modal__overlay" data-call-close aria-hidden="true"></div>
+      <div class="callPanel" role="dialog" aria-modal="true" aria-labelledby="call-title" tabindex="-1">
+        <button class="modal__close" type="button" aria-label="Close call or text information" data-call-close>&#215;</button>
+        <h2 class="callTitle" id="call-title">CALL OR TEXT</h2>
         <p class="callText">Text 2 to 3 photos for the fastest quote.</p>
         <a class="callNumber" href="tel:+19712865503">(971) 286-5503</a>
         <p class="callHint">Include: vehicle size and condition if you know it.</p>
@@ -1446,45 +1460,47 @@
     </div>
 
     <div class="modal modal--contact" aria-hidden="true" data-contact-modal>
-      <div class="modal__overlay" data-contact-close></div>
+      <div class="modal__overlay" data-contact-close aria-hidden="true"></div>
 
-      <div class="contactPanel" role="dialog" aria-modal="true" aria-label="Contact us">
-        <button class="modal__close" aria-label="Close" data-contact-close>&#215;</button>
+      <div class="contactPanel" role="dialog" aria-modal="true" aria-labelledby="contact-title" aria-describedby="contact-description" tabindex="-1">
+        <button class="modal__close" type="button" aria-label="Close contact form" data-contact-close>&#215;</button>
 
-        <h3 class="contactTitle">CONTACT US</h3>
-        <p class="contactText">Ask a question or send a message. We usually reply fast.</p>
+        <h2 class="contactTitle" id="contact-title">CONTACT US</h2>
+        <p class="contactText" id="contact-description">Ask a question or send a message. We usually reply fast.</p>
 
         <form class="contactForm" data-contact-form novalidate>
           <div class="contactGrid">
             <div class="cField">
-              <label for="cName">Name</label>
-              <input id="cName" name="name" type="text" autocomplete="name" required placeholder="Your name" />
+              <label for="cName">Name <span aria-hidden="true">*</span><span class="srOnly"> required</span></label>
+              <input id="cName" name="name" type="text" autocomplete="name" required aria-required="true" placeholder="Your name" />
             </div>
 
             <div class="cField">
               <label for="cPhone">Phone</label>
-              <input id="cPhone" name="phone" type="tel" autocomplete="tel" placeholder="(971) 555-1234" />
+              <input id="cPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" aria-describedby="contact-method-help" placeholder="(971) 555-1234" />
             </div>
           </div>
 
           <div class="contactGrid">
             <div class="cField">
               <label for="cEmail">Email</label>
-              <input id="cEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" />
+              <input id="cEmail" name="email" type="email" inputmode="email" autocomplete="email" aria-describedby="contact-method-help" placeholder="you@example.com" />
             </div>
 
             <div class="cField">
               <label for="cPreferredContact">Preferred Contact Method</label>
-              <select id="cPreferredContact" name="preferredContact">
+              <select id="cPreferredContact" name="preferredContact" aria-describedby="contact-method-help">
                 <option value="phone">Phone</option>
                 <option value="email">Email</option>
               </select>
             </div>
           </div>
 
+          <p class="contactHelp" id="contact-method-help">Enter the phone number or email address that matches your preferred contact method.</p>
+
           <div class="cField">
-            <label for="cMessage">Message</label>
-            <textarea id="cMessage" name="message" required placeholder="What can we help with?"></textarea>
+            <label for="cMessage">Message <span aria-hidden="true">*</span><span class="srOnly"> required</span></label>
+            <textarea id="cMessage" name="message" required aria-required="true" placeholder="What can we help with?"></textarea>
           </div>
 
           <input type="text" name="website" tabindex="-1" autocomplete="off" class="hpField" aria-hidden="true" />
@@ -1493,7 +1509,9 @@
             SEND MESSAGE
           </button>
 
-          <div class="contactStatus" data-contact-status aria-live="polite"></div>
+          <div class="contactStatus" data-contact-status role="status" aria-live="polite" aria-atomic="true" tabindex="-1"></div>
+
+          <p class="formDisclosure">By submitting this form, you agree that Keizer Mobile Detailing may contact you about your request. See our <a href="./privacy-policy.html">Privacy Policy</a> and <a href="./terms-of-service.html">Terms</a>.</p>
         </form>
 
         <p class="contactFine">
@@ -1506,7 +1524,7 @@
       window.CONTACT_ENDPOINT = "https://script.google.com/macros/s/AKfycbxZQ_Jf4Rp27mL9nyRn_2oAVtwt_RIhXskoB2GjTmyJYGLBdkd7LKgKNNOK457clicn/exec";
     </script>
 
-    <script src="./script.js"></script>
+    <script src="./script.js" defer></script>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -1634,140 +1652,7 @@
       });
     </script>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const contactForm = document.querySelector("[data-contact-form]");
-        const contactStatus = document.querySelector("[data-contact-status]");
-        const quoteBody = document.querySelector("[data-quote-body]");
 
-        const spamKeywords = [
-          "seo",
-          "backlink",
-          "guest post",
-          "website traffic",
-          "crypto",
-          "forex",
-          "viagra",
-          "casino",
-          "loan",
-          "loan approval",
-          "telegram"
-        ];
-
-        if (contactForm) {
-          contactForm.addEventListener("submit", function (event) {
-            const honeyPot = contactForm.querySelector('input[name="website"]');
-            const messageField = contactForm.querySelector("#cMessage");
-            const emailField = contactForm.querySelector("#cEmail");
-            const combinedText = [
-              honeyPot ? honeyPot.value : "",
-              messageField ? messageField.value : "",
-              emailField ? emailField.value : ""
-            ].join(" ").toLowerCase();
-
-            const isSpam = spamKeywords.some((keyword) => combinedText.includes(keyword)) || (honeyPot && honeyPot.value.trim() !== "");
-
-            if (isSpam) {
-              event.preventDefault();
-              if (contactStatus) {
-                contactStatus.textContent = "Message blocked. Please remove promotional or spam-like wording and try again.";
-              }
-            }
-          });
-        }
-
-        function enhanceBookedScreen() {
-          if (!quoteBody) return;
-
-          const bodyText = quoteBody.textContent.toLowerCase();
-          const looksLikeSuccess =
-            bodyText.includes("you're booked") ||
-            bodyText.includes("you’re booked") ||
-            bodyText.includes("booking confirmed") ||
-            bodyText.includes("thank you") ||
-            bodyText.includes("we'll reach out") ||
-            bodyText.includes("we’ll reach out");
-
-          quoteBody.classList.toggle("quoteBody--success", looksLikeSuccess);
-
-          if (!looksLikeSuccess) return;
-          if (quoteBody.querySelector(".quoteSuccessWrap")) return;
-
-          const originalMarkup = quoteBody.innerHTML.trim();
-          if (!originalMarkup) return;
-
-          quoteBody.innerHTML = `
-            <div class="quoteSuccessWrap">
-              <div class="quoteSuccessBadge">Request received</div>
-              <h4 class="quoteSuccessTitle">You’re booked in.</h4>
-              <p class="quoteSuccessText">
-                Your request came through. We’ll reach out shortly to confirm the details and lock everything in.
-              </p>
-              <div class="quoteSuccessInner">${originalMarkup}</div>
-            </div>
-          `;
-        }
-
-        enhanceBookedScreen();
-
-        if (quoteBody) {
-          const quoteObserver = new MutationObserver(function () {
-            enhanceBookedScreen();
-          });
-
-          quoteObserver.observe(quoteBody, {
-            childList: true,
-            subtree: true,
-            characterData: true
-          });
-        }
-      });
-    </script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const reviewImageModal = document.querySelector("[data-review-image-modal]");
-        const reviewImageImg = document.querySelector("[data-review-image-img]");
-        const reviewImageOpenButtons = document.querySelectorAll("[data-review-image-open]");
-        const reviewImageCloseButtons = document.querySelectorAll("[data-review-image-close]");
-
-        function openReviewImage(src) {
-          if (!reviewImageModal) return;
-
-          if (reviewImageImg && src) {
-            reviewImageImg.src = src;
-          }
-
-          reviewImageModal.hidden = false;
-          reviewImageModal.setAttribute("aria-hidden", "false");
-          document.body.style.overflow = "hidden";
-        }
-
-        function closeReviewImage() {
-          if (!reviewImageModal) return;
-
-          reviewImageModal.hidden = true;
-          reviewImageModal.setAttribute("aria-hidden", "true");
-          document.body.style.overflow = "";
-        }
-
-        reviewImageOpenButtons.forEach((button) => {
-          button.addEventListener("click", function () {
-            openReviewImage(button.getAttribute("data-review-image-open") || "./unnamed.webp");
-          });
-        });
-
-        reviewImageCloseButtons.forEach((button) => {
-          button.addEventListener("click", closeReviewImage);
-        });
-
-        document.addEventListener("keydown", function (event) {
-          if (event.key === "Escape" && reviewImageModal && !reviewImageModal.hidden) {
-            closeReviewImage();
-          }
-        });
-      });
-    </script>
 
     <script>
       window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
