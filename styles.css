@@ -1170,3 +1170,222 @@ body{
     padding:1.15rem;
   }
 }
+
+/* =========================================================
+   ACCESSIBILITY ENHANCEMENTS — WCAG 2.2 AA SUPPORT
+   These rules preserve the existing visual design while
+   improving keyboard, focus, motion, target-size, and form UX.
+   ========================================================= */
+
+.srOnly{
+  position:absolute !important;
+  width:1px !important;
+  height:1px !important;
+  padding:0 !important;
+  margin:-1px !important;
+  overflow:hidden !important;
+  clip:rect(0,0,0,0) !important;
+  white-space:nowrap !important;
+  border:0 !important;
+}
+
+.skipLink{
+  position:fixed;
+  top:10px;
+  left:10px;
+  z-index:20000;
+  padding:.75rem 1rem;
+  border-radius:12px;
+  background:#fff;
+  color:#000;
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:0 12px 30px rgba(0,0,0,.3);
+  transform:translateY(-180%);
+  transition:transform .15s ease;
+}
+.skipLink:focus{
+  transform:translateY(0);
+}
+
+#main-content:focus{ outline:none; }
+section[id], #main-content{ scroll-margin-top:6rem; }
+
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible{
+  outline:3px solid #8a6500;
+  outline-offset:3px;
+}
+
+.navToggle:focus-visible,
+.nav a:focus-visible,
+.carouselArrow:focus-visible,
+.railArrow:focus-visible,
+.modal__close:focus-visible,
+.reviewImageModal__close:focus-visible,
+.availabilityModal__close:focus-visible,
+.callNumber:focus-visible,
+.footerLink:focus-visible{
+  outline:3px solid #8a6500;
+  outline-offset:3px;
+}
+
+.modal__overlay,
+.reviewImageModal__overlay,
+.availabilityModal__overlay{
+  cursor:pointer;
+}
+
+body.hasOpenDialog{
+  overflow:hidden;
+}
+
+.carouselArrow:disabled,
+.railArrow:disabled{
+  opacity:.42;
+  cursor:not-allowed;
+  transform:none;
+}
+
+/* Keep a large click/touch target while preserving the small dot appearance. */
+.dot{
+  position:relative;
+  width:32px;
+  height:32px;
+  padding:0;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+}
+.dot::before{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.65);
+  background:rgba(255,255,255,.32);
+  transform:translate(-50%,-50%);
+}
+.dot.isActive::before{
+  width:22px;
+  background:#d6b25e;
+  border-color:#f6d98a;
+}
+
+.compare:focus-within{
+  outline:3px solid #f6d98a;
+  outline-offset:4px;
+}
+.compare:focus-within .compare__handle::before{
+  box-shadow:0 0 0 4px rgba(246,217,138,.35), 0 18px 44px rgba(0,0,0,.35);
+}
+
+.reel[role="button"]{
+  cursor:pointer;
+}
+.reel[role="button"]:focus-visible{
+  outline:3px solid #8a6500;
+  outline-offset:4px;
+}
+
+.contactHelp,
+.formDisclosure{
+  margin:.25rem 0 .75rem;
+  color:rgba(0,0,0,.67);
+  font-size:.9rem;
+  line-height:1.55;
+}
+.formDisclosure{
+  margin-top:.8rem;
+}
+.formDisclosure a{
+  color:#3f3000;
+  font-weight:800;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.cField [aria-invalid="true"]{
+  border-color:#9b1c1c;
+  box-shadow:0 0 0 4px rgba(155,28,28,.14);
+}
+.contactStatus:empty{
+  display:none;
+}
+.contactStatus:focus{
+  outline:none;
+}
+
+/* Darker text than the decorative gold token for readable links on white. */
+.callNumber{
+  color:#624800;
+}
+
+.footerLegal{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+@media (max-width:767px){
+  .footer__bottomInner--light{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *, *::before, *::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+@media (forced-colors: active){
+  .btn,
+  .navToggle,
+  .carouselArrow,
+  .railArrow,
+  .modal__close,
+  .reviewImageModal__close,
+  .availabilityModal__close{
+    border:1px solid ButtonText;
+  }
+  .dot::before{
+    border:1px solid ButtonText;
+    background:ButtonFace;
+  }
+  .dot.isActive::before{
+    background:Highlight;
+  }
+}
+
+
+/* Final accessibility specificity fixes */
+.dot.isActive{
+  width:32px;
+  height:32px;
+  border:0;
+  background:transparent;
+}
+.reviewImageModal__title{ margin:0; }
+.btn:focus-visible,
+.navToggle:focus-visible,
+.nav a:focus-visible,
+.carouselArrow:focus-visible,
+.railArrow:focus-visible,
+.modal__close:focus-visible,
+.reviewImageModal__close:focus-visible,
+.availabilityModal__close:focus-visible,
+.callNumber:focus-visible,
+.footerLink:focus-visible,
+.reel[role="button"]:focus-visible{
+  outline:3px solid #fff;
+  outline-offset:2px;
+  box-shadow:0 0 0 6px #111;
+}
