@@ -11,6 +11,14 @@
   const yearEl = $("[data-year]");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+  /* ---------------- Launch cleanup ---------------- */
+  $("[data-availability-modal]")?.remove();
+
+  const popularQuoteBubble = $(".popularQuoteBubble");
+  if (popularQuoteBubble) {
+    popularQuoteBubble.style.setProperty("display", "flex", "important");
+  }
+
   /* ---------------- Mobile navigation ---------------- */
   const navToggle = $("[data-nav-toggle]");
   const nav = $("[data-nav]");
@@ -92,7 +100,7 @@
 
     modal.classList.remove("isOpen");
     modal.setAttribute("aria-hidden", "true");
-    if (state.usesHidden || modal.matches("[data-availability-modal], [data-review-image-modal]")) {
+    if (state.usesHidden || modal.matches("[data-review-image-modal]")) {
       modal.hidden = true;
     }
 
@@ -243,9 +251,9 @@
   /* ---------------- Backdrop closing ---------------- */
   document.addEventListener("click", (event) => {
     if (!activeDialog) return;
-    const closeSelector = "[data-modal-close], [data-call-close], [data-contact-close], [data-review-image-close], [data-availability-close]";
+    const closeSelector = "[data-modal-close], [data-call-close], [data-contact-close], [data-review-image-close]";
     const isModalOverlay = event.target.matches(closeSelector) && event.target.classList.contains("modal__overlay");
-    const isHiddenDialogOverlay = event.target.matches(".reviewImageModal__overlay, .availabilityModal__overlay");
+    const isHiddenDialogOverlay = event.target.matches(".reviewImageModal__overlay");
     if (isModalOverlay || isHiddenDialogOverlay) {
       hideDialog(activeDialog);
     }
@@ -587,34 +595,4 @@
     }
   });
 
-  /* ---------------- Availability notice ---------------- */
-  const availabilityModal = $("[data-availability-modal]");
-  const availabilityStorageKey = "kmdAvailabilityNoticeClosed_v1";
-
-  const shouldShowAvailability = () => {
-    try {
-      return sessionStorage.getItem(availabilityStorageKey) !== "true";
-    } catch (_) {
-      return true;
-    }
-  };
-
-  const markAvailabilityClosed = () => {
-    try {
-      sessionStorage.setItem(availabilityStorageKey, "true");
-    } catch (_) {}
-  };
-
-  $$("[data-availability-close]").forEach((button) => {
-    button.addEventListener("click", () => hideDialog(availabilityModal));
-  });
-
-  if (availabilityModal && shouldShowAvailability()) {
-    window.setTimeout(() => {
-      showDialog(availabilityModal, document.activeElement, {
-        usesHidden: true,
-        onClose: markAvailabilityClosed
-      });
-    }, reducedMotion.matches ? 0 : 650);
-  }
 })();
