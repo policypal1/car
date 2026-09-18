@@ -32,6 +32,7 @@
     <link rel="apple-touch-icon" href="./Untitled design (2).png" />
 
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="preload" as="image" href="./b1d23148-c3e1-4497-bab9-7c6aa4b9c5cf.webp" fetchpriority="high" />
 
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -658,23 +659,24 @@
         right: 18px;
         bottom: 18px;
         z-index: 1200;
-        width: 126px;
-        height: 126px;
+        width: 228px;
+        min-height: 108px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.28rem;
-        padding: 0.8rem;
-        border: 1px solid rgba(255, 236, 166, 0.92);
-        border-radius: 999px;
+        gap: 0.42rem;
+        padding: 1rem 1.15rem;
+        border: 1px solid rgba(255, 236, 166, 0.94);
+        border-radius: 24px 10px 24px 10px;
+        clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
         background:
-          radial-gradient(circle at 32% 18%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 34%),
-          linear-gradient(135deg, #ffe58d 0%, #f6d98a 34%, #d6a73f 100%);
+          radial-gradient(circle at 24% 10%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 35%),
+          linear-gradient(135deg, #ffe99f 0%, #f6d98a 42%, #d3a039 100%);
         color: #111111;
         text-align: center;
         text-decoration: none;
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32), 0 0 0 5px rgba(214, 167, 63, 0.14);
+        box-shadow: 0 20px 46px rgba(0, 0, 0, 0.34), 0 0 0 5px rgba(214, 167, 63, 0.12);
         backdrop-filter: blur(14px);
         -webkit-backdrop-filter: blur(14px);
         animation: popularBubbleFloat 3.4s ease-in-out infinite;
@@ -708,11 +710,12 @@
       .popularQuoteBubble__title {
         color: #111111;
         font-family: Oswald, Inter, sans-serif;
-        font-size: 0.96rem;
+        font-size: 0.9rem;
         font-weight: 900;
-        letter-spacing: 0.025em;
-        line-height: 1.02;
+        letter-spacing: 0.035em;
+        line-height: 1.15;
         text-transform: uppercase;
+        text-wrap: balance;
       }
 
       .popularQuoteBubble__sub {
@@ -757,11 +760,10 @@
           left: auto;
           right: 12px;
           bottom: 12px;
-          width: 118px;
-          height: 118px;
-          min-height: 0;
-          padding: 0.72rem;
-          border-radius: 999px;
+          width: min(208px, calc(100vw - 24px));
+          min-height: 96px;
+          padding: 0.85rem 1rem;
+          border-radius: 20px 8px 20px 8px;
         }
 
         .popularQuoteBubble__badge {
@@ -770,7 +772,8 @@
         }
 
         .popularQuoteBubble__title {
-          font-size: 0.88rem;
+          font-size: 0.82rem;
+          line-height: 1.15;
         }
 
         .popularQuoteBubble__sub {
@@ -779,10 +782,14 @@
       }
 
 
-      /* TEMP_HIDE_POPULAR_QUOTE_BUBBLE
-         Remove this block when you want the shortcut bubble live again. */
-      .popularQuoteBubble {
-        display: none !important;
+
+      /* PERFORMANCE_PASS_2026_09 */
+      .hero__bg {
+        background-image: url("./b1d23148-c3e1-4497-bab9-7c6aa4b9c5cf.webp") !important;
+      }
+      #services, #work, #reels, #process, #service-area, #about, #reviews {
+        content-visibility: auto;
+        contain-intrinsic-size: 800px;
       }
 
 /* Keep all quote buttons using the original site button font */
@@ -866,7 +873,7 @@
             </div>
 
             <div class="heroReview__media">
-              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" />
             </div>
 
             <p class="heroReview__quote">
@@ -895,7 +902,7 @@
             </div>
 
             <div class="mobileServiceReview__media">
-              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" />
+              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" />
             </div>
 
             <p class="mobileServiceReview__quote">
@@ -1077,7 +1084,7 @@
           <div class="reels" data-reels role="region" aria-labelledby="reels-title" aria-describedby="reels-instructions">
             <p class="srOnly" id="reels-instructions">Select a video with a mouse, touch, Enter, or Space. Select it again to pause.</p>
             <article class="reel" data-reel tabindex="0" role="button" aria-pressed="false" aria-label="Play Interior Reset video">
-              <video class="reel__video" muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1">
+              <video class="reel__video" muted playsinline loop preload="none" aria-hidden="true" tabindex="-1">
                 <source
                   src="./SnapInsta.to_AQM6j9N73C5V5o_E01iJI0T1Q9Au1E-annL8UhMp_IV8azOdtUxgIyDw43-oBNK9OaZHtzpwQgz4kWthfGduXhE3.mp4"
                   type="video/mp4"
@@ -1097,7 +1104,7 @@
             </article>
 
             <article class="reel" data-reel tabindex="0" role="button" aria-pressed="false" aria-label="Play Deep Clean Moment video">
-              <video class="reel__video" muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1">
+              <video class="reel__video" muted playsinline loop preload="none" aria-hidden="true" tabindex="-1">
                 <source
                   src="./SnapInsta.to_AQP4xn4U8fr3gEQs_rn0fodt-_NVz04xXIMPvbx5iIjHYRbRgk3VE-yHB8ud3mtiL6itR4eC-TZSoGXfQRPHBDtA.mp4"
                   type="video/mp4"
@@ -1117,7 +1124,7 @@
             </article>
 
             <article class="reel" data-reel tabindex="0" role="button" aria-pressed="false" aria-label="Play Finish and Shine video">
-              <video class="reel__video" muted playsinline loop preload="metadata" aria-hidden="true" tabindex="-1">
+              <video class="reel__video" muted playsinline loop preload="none" aria-hidden="true" tabindex="-1">
                 <source
                   src="./SnapInsta.to_AQMfmG-uBq2DcGgHFxCZuU-ApiTakNAD23ZMIUmmwjpP9TxMeVAYn3_HamFKEvj-n9hyiTMQqwfP-8AXrwXn3xiF.mp4"
                   type="video/mp4"
@@ -1192,7 +1199,7 @@
 
         <div class="areaGrid">
           <div class="areaMap">
-            <img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" decoding="async" />
+            <img src="Screenshot 2026-03-09 182734(3).png" alt="Service area map" loading="lazy" decoding="async" fetchpriority="low" />
           </div>
 
           <div class="areaCard">
@@ -1241,7 +1248,7 @@
           </div>
 
           <div class="aboutMedia">
-            <img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" decoding="async" />
+            <img src="./IMG_2925.jpg" alt="Detailing work" loading="lazy" decoding="async" fetchpriority="low" />
           </div>
         </div>
       </div>
@@ -1399,13 +1406,13 @@
 
     <a
       class="popularQuoteBubble"
-      href="./quote.html?preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=standard&exteriorPackage=standard&start=vehicle"
+      href="./quote.html?preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=deep&exteriorPackage=standard&start=vehicle"
       data-quote-link
       data-popular-quote-bubble
-      aria-label="Get the most popular standard inside and outside detail quote"
+      aria-label="Get the most popular interior deep clean plus standard exterior detail quote"
     >
       <span class="popularQuoteBubble__badge">Most Popular</span>
-      <span class="popularQuoteBubble__title">Standard In + Out</span>
+      <span class="popularQuoteBubble__title">Interior Deep Clean + Standard Exterior</span>
     </a>
 
 
@@ -1431,7 +1438,7 @@
           <h2 class="reviewImageModal__title" id="review-image-title">Edgar Diaz Review Image</h2>
           <button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button>
         </div>
-        <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" data-review-image-img />
+        <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" data-review-image-img />
       </div>
     </div>
 
@@ -1584,7 +1591,7 @@
                 autoPreset: "standard-in-out",
                 category: "both",
                 service: "inside-outside",
-                interiorPackage: "standard",
+                interiorPackage: "deep",
                 exteriorPackage: "standard",
                 start: "vehicle",
                 skipServiceSelection: true,
