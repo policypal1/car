@@ -2,15 +2,30 @@
 <html lang="en">
   <head>
 
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-RZQ6CD7XZD"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <!-- Google Analytics: queued immediately, network-loaded after interaction/idle so it does not compete with LCP. -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RZQ6CD7XZD');
 
-  gtag('config', 'G-RZQ6CD7XZD');
-</script>
+      (() => {
+        let loaded = false;
+        const loadAnalytics = () => {
+          if (loaded) return;
+          loaded = true;
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RZQ6CD7XZD';
+          document.head.appendChild(script);
+        };
+
+        ['pointerdown', 'touchstart', 'keydown'].forEach((eventName) => {
+          window.addEventListener(eventName, loadAnalytics, { once: true, passive: true });
+        });
+        window.addEventListener('load', () => setTimeout(loadAnalytics, 2500), { once: true });
+      })();
+    </script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -26,7 +41,10 @@
     <link
       href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" /></noscript>
 
     <link rel="icon" href="./Untitled design (4).png" type="image/png" />
     <link rel="apple-touch-icon" href="./Untitled design (2).png" />
@@ -859,10 +877,10 @@
         <a class="brand" href="#top" aria-label="Home">
           <img
             class="brand__logo"
-            src="./Untitled design (2).png"
+            src="./Untitled design (2) (3).webp"
             alt="Keizer Mobile Detailing logo"
             loading="eager"
-            fetchpriority="high"
+            fetchpriority="auto"
             decoding="async"
             width="74"
             height="74"
@@ -885,7 +903,7 @@
           <a href="#process">How It Works</a>
           <a href="#about">About</a>
           <a href="#reviews">Reviews</a>
-          <a class="btn btn--quote nav__cta" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
+          <a class="btn btn--quote nav__cta" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE NOW</a>
         </nav>
       </div>
     </header>
@@ -907,7 +925,7 @@
             </p>
 
             <div class="hero__actions">
-              <a class="btn btn--quote btn--lg" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
+              <a class="btn btn--quote btn--lg" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
             </div>
           </div>
@@ -919,7 +937,7 @@
             </div>
 
             <div class="heroReview__media">
-              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" />
+              <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-src="./unnamed.webp" data-defer-image alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" />
             </div>
 
             <p class="heroReview__quote">
@@ -948,7 +966,7 @@
             </div>
 
             <div class="mobileServiceReview__media">
-              <img src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" />
+              <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-src="./unnamed.webp" data-defer-image alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" />
             </div>
 
             <p class="mobileServiceReview__quote">
@@ -984,7 +1002,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1002,7 +1020,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1020,7 +1038,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1038,7 +1056,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1056,7 +1074,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1268,7 +1286,7 @@
             </div>
 
             <div class="areaActions">
-              <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
+              <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
           </div>
@@ -1288,7 +1306,7 @@
             </p>
 
             <div class="aboutActions">
-              <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
+              <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
           </div>
@@ -1417,7 +1435,7 @@
         </div>
         <div class="footerMini__right">
           <div class="footerMini__actions">
-            <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
+            <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE</a>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             <button class="btn btn--call" type="button" data-contact-open>CONTACT</button>
           </div>
@@ -1452,7 +1470,7 @@
 
     <a
       class="popularQuoteBubble"
-      href="./quote.html?v=20260918-2&amp;preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=deep&exteriorPackage=standard&start=vehicle"
+      href="./quote.html?v=20260918-3&amp;preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=deep&exteriorPackage=standard&start=vehicle"
       data-quote-link
       data-popular-quote-bubble
       aria-label="Get the most popular interior deep clean plus standard exterior detail quote"
@@ -1485,7 +1503,7 @@
           <h2 class="reviewImageModal__title" id="review-image-title">Edgar Diaz Review Image</h2>
           <button class="reviewImageModal__close" type="button" data-review-image-close aria-label="Close expanded review image">&times;</button>
         </div>
-        <img class="reviewImageModal__img" src="./unnamed.webp" alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" data-review-image-img />
+        <img class="reviewImageModal__img" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-src="./unnamed.webp" data-defer-image alt="Blue G-Wagon after detailing" loading="lazy" decoding="async" fetchpriority="low" data-review-image-img />
       </div>
     </div>
 
@@ -1496,7 +1514,7 @@
         <h2 class="modal__title" id="service-modal-title" data-modal-title>Service</h2>
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
-          <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
+          <a class="btn btn--quote" href="./quote.html?v=20260918-3" data-quote-link>GET QUOTE NOW</a>
           <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
         </div>
       </div>
@@ -1618,6 +1636,46 @@
           lazyBackgrounds.forEach(loadBackground);
           lazyCompares.forEach(loadCompare);
         }
+      });
+    </script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const deferredImages = Array.from(document.querySelectorAll("img[data-defer-image][data-src]"));
+
+        function loadDeferredImage(img) {
+          const src = img.getAttribute("data-src");
+          if (!src) return;
+          img.src = src;
+          img.removeAttribute("data-src");
+          img.removeAttribute("data-defer-image");
+        }
+
+        if ("IntersectionObserver" in window) {
+          const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              loadDeferredImage(entry.target);
+              observer.unobserve(entry.target);
+            });
+          }, { rootMargin: "40px 0px" });
+
+          deferredImages.forEach((img) => imageObserver.observe(img));
+        } else {
+          deferredImages.forEach(loadDeferredImage);
+        }
+
+        document.querySelectorAll("[data-review-image-open]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const modalImage = document.querySelector("[data-review-image-img]");
+            const fullSrc = button.getAttribute("data-review-image-open");
+            if (modalImage && fullSrc) {
+              modalImage.src = fullSrc;
+              modalImage.removeAttribute("data-src");
+              modalImage.removeAttribute("data-defer-image");
+            }
+          });
+        });
       });
     </script>
 
