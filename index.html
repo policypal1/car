@@ -659,70 +659,114 @@
         right: 18px;
         bottom: 18px;
         z-index: 1200;
-        width: 228px;
-        min-height: 108px;
+        width: 244px;
+        min-height: 126px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 0.42rem;
-        padding: 1rem 1.15rem;
-        border: 1px solid rgba(255, 236, 166, 0.94);
-        border-radius: 24px 10px 24px 10px;
-        clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+        gap: 0.52rem;
+        padding: 1.05rem 1.15rem 1rem;
+        overflow: hidden;
+        border: 1px solid rgba(239, 201, 111, 0.78);
+        border-radius: 22px;
         background:
-          radial-gradient(circle at 24% 10%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 35%),
-          linear-gradient(135deg, #ffe99f 0%, #f6d98a 42%, #d3a039 100%);
-        color: #111111;
+          radial-gradient(180px 90px at 50% -12%, rgba(246, 217, 138, 0.22), transparent 72%),
+          linear-gradient(145deg, rgba(25, 25, 25, 0.985) 0%, rgba(13, 13, 13, 0.99) 100%);
+        color: #ffffff;
         text-align: center;
         text-decoration: none;
-        box-shadow: 0 20px 46px rgba(0, 0, 0, 0.34), 0 0 0 5px rgba(214, 167, 63, 0.12);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        box-shadow:
+          0 22px 55px rgba(0, 0, 0, 0.38),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08),
+          0 0 0 1px rgba(255, 255, 255, 0.025);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
         animation: popularBubbleFloat 3.4s ease-in-out infinite;
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+      }
+
+      .popularQuoteBubble::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #f6d98a 22%, #d6a73f 78%, transparent);
+        opacity: 0.95;
+      }
+
+      .popularQuoteBubble::after {
+        content: "";
+        position: absolute;
+        width: 112px;
+        height: 112px;
+        right: -52px;
+        bottom: -62px;
+        border-radius: 999px;
+        background: rgba(214, 167, 63, 0.10);
+        filter: blur(2px);
+        pointer-events: none;
       }
 
       .popularQuoteBubble:hover {
-        border-color: rgba(255, 247, 218, 1);
-        box-shadow: 0 24px 56px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(214, 167, 63, 0.18);
+        transform: translateY(-3px);
+        border-color: rgba(246, 217, 138, 1);
+        box-shadow:
+          0 27px 64px rgba(0, 0, 0, 0.46),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          0 0 0 1px rgba(246, 217, 138, 0.08);
       }
 
       .popularQuoteBubble:focus-visible {
         outline: none;
-        box-shadow: 0 0 0 4px rgba(246, 217, 138, 0.44), 0 18px 42px rgba(0, 0, 0, 0.32);
+        box-shadow: 0 0 0 4px rgba(246, 217, 138, 0.34), 0 24px 54px rgba(0, 0, 0, 0.4);
       }
 
       .popularQuoteBubble__badge {
+        position: relative;
+        z-index: 1;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 0.22rem 0.42rem;
+        padding: 0.38rem 0.68rem;
+        border: 1px solid rgba(255, 244, 205, 0.65);
         border-radius: 999px;
-        background: rgba(17, 17, 17, 0.14);
+        background: linear-gradient(135deg, #ffe9a3 0%, #d8a83f 100%);
         color: #111111;
-        font-size: 0.58rem;
+        font-size: 0.63rem;
         font-weight: 1000;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.145em;
         line-height: 1;
         text-transform: uppercase;
+        box-shadow: 0 7px 18px rgba(214, 167, 63, 0.20);
       }
 
       .popularQuoteBubble__title {
-        color: #111111;
+        position: relative;
+        z-index: 1;
+        max-width: 205px;
+        color: #ffffff;
         font-family: Oswald, Inter, sans-serif;
-        font-size: 0.9rem;
-        font-weight: 900;
-        letter-spacing: 0.035em;
-        line-height: 1.15;
+        font-size: 1.02rem;
+        font-weight: 800;
+        letter-spacing: 0.025em;
+        line-height: 1.18;
         text-transform: uppercase;
         text-wrap: balance;
       }
 
       .popularQuoteBubble__sub {
-        color: rgba(17, 17, 17, 0.74);
-        font-size: 0.68rem;
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.28rem;
+        color: #f6d98a;
+        font-size: 0.66rem;
         font-weight: 900;
-        line-height: 1.1;
+        letter-spacing: 0.11em;
+        line-height: 1;
+        text-transform: uppercase;
       }
 
       @media (max-width: 640px) {
@@ -760,24 +804,26 @@
           left: auto;
           right: 12px;
           bottom: 12px;
-          width: min(208px, calc(100vw - 24px));
-          min-height: 96px;
-          padding: 0.85rem 1rem;
-          border-radius: 20px 8px 20px 8px;
+          width: min(226px, calc(100vw - 24px));
+          min-height: 116px;
+          padding: 0.95rem 1rem 0.9rem;
+          border-radius: 20px;
         }
 
         .popularQuoteBubble__badge {
-          font-size: 0.54rem;
-          padding: 0.2rem 0.38rem;
+          font-size: 0.58rem;
+          padding: 0.34rem 0.6rem;
         }
 
         .popularQuoteBubble__title {
-          font-size: 0.82rem;
-          line-height: 1.15;
+          max-width: 190px;
+          font-size: 0.91rem;
+          line-height: 1.16;
         }
 
         .popularQuoteBubble__sub {
-          display: none;
+          display: inline-flex;
+          font-size: 0.6rem;
         }
       }
 
@@ -839,7 +885,7 @@
           <a href="#process">How It Works</a>
           <a href="#about">About</a>
           <a href="#reviews">Reviews</a>
-          <a class="btn btn--quote nav__cta" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+          <a class="btn btn--quote nav__cta" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
         </nav>
       </div>
     </header>
@@ -861,7 +907,7 @@
             </p>
 
             <div class="hero__actions">
-              <a class="btn btn--quote btn--lg" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+              <a class="btn btn--quote btn--lg" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call btn--lg" type="button" data-contact-open>CONTACT US</button>
             </div>
           </div>
@@ -938,7 +984,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="interior" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -956,7 +1002,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="exterior" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -974,7 +1020,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="maintenance" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -992,7 +1038,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="ceramic" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1010,7 +1056,7 @@
               </div>
               <div class="serviceCard__actions">
                 <button class="btn btn--ghostGold" data-modal-open="paint" type="button">LEARN MORE</button>
-                <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+                <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
               </div>
             </div>
           </article>
@@ -1222,7 +1268,7 @@
             </div>
 
             <div class="areaActions">
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+              <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
           </div>
@@ -1242,7 +1288,7 @@
             </p>
 
             <div class="aboutActions">
-              <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+              <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
               <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             </div>
           </div>
@@ -1371,7 +1417,7 @@
         </div>
         <div class="footerMini__right">
           <div class="footerMini__actions">
-            <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE</a>
+            <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE</a>
             <button class="btn btn--call" type="button" data-call-open>CALL / TEXT</button>
             <button class="btn btn--call" type="button" data-contact-open>CONTACT</button>
           </div>
@@ -1406,13 +1452,14 @@
 
     <a
       class="popularQuoteBubble"
-      href="./quote.html?preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=deep&exteriorPackage=standard&start=vehicle"
+      href="./quote.html?v=20260918-2&amp;preset=standard-in-out&quick=standard-inside-outside&autoPreset=standard-in-out&category=both&service=inside-outside&interiorPackage=deep&exteriorPackage=standard&start=vehicle"
       data-quote-link
       data-popular-quote-bubble
       aria-label="Get the most popular interior deep clean plus standard exterior detail quote"
     >
       <span class="popularQuoteBubble__badge">Most Popular</span>
       <span class="popularQuoteBubble__title">Interior Deep Clean + Standard Exterior</span>
+      <span class="popularQuoteBubble__sub">GET QUOTE <span aria-hidden="true">→</span></span>
     </a>
 
 
@@ -1449,7 +1496,7 @@
         <h2 class="modal__title" id="service-modal-title" data-modal-title>Service</h2>
         <div class="modal__content" data-modal-content></div>
         <div class="modal__actions">
-          <a class="btn btn--quote" href="./quote.html" data-quote-link>GET QUOTE NOW</a>
+          <a class="btn btn--quote" href="./quote.html?v=20260918-2" data-quote-link>GET QUOTE NOW</a>
           <button class="btn btn--call" type="button" data-call-open data-modal-close>CALL / TEXT</button>
         </div>
       </div>

@@ -12,6 +12,9 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <title>Get a Quote | Keizer Mobile Detailing</title>
     <meta name="description" content="Keizer Mobile Detailing — interior and exterior detailing with fast quotes and simple booking." />
 
@@ -2585,42 +2588,69 @@
 
 /* 10-minute appointment booking offer */
 .qBookingOffer{
-  margin:0 auto 18px;
-  max-width:520px;
-  padding:18px 18px 16px;
-  border:1px solid rgba(214,178,94,.42);
-  border-radius:22px;
-  background:
-    radial-gradient(440px 150px at 50% 0%, rgba(214,178,94,.18), rgba(255,255,255,0) 70%),
-    linear-gradient(180deg,#fffdf8 0%,#fff8e8 100%);
-  box-shadow:0 16px 38px rgba(0,0,0,.07);
+  position:relative;
+  isolation:isolate;
+  margin:2px auto 22px;
+  width:min(560px,100%);
+  padding:20px 20px 18px;
+  overflow:hidden;
+  border:1px solid rgba(221,178,76,.72);
+  border-radius:20px;
+  background:linear-gradient(145deg,#151515 0%,#080808 100%);
+  box-shadow:0 18px 42px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.07);
   text-align:center;
 }
+.qBookingOffer::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0 0 auto;
+  height:3px;
+  background:linear-gradient(90deg,transparent,#f6d98a 24%,#d6a73f 76%,transparent);
+}
+.qBookingOffer::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:270px;
+  height:120px;
+  left:50%;
+  top:-86px;
+  transform:translateX(-50%);
+  border-radius:999px;
+  background:rgba(214,167,63,.18);
+  filter:blur(22px);
+}
 .qBookingOfferKicker{
-  color:rgba(0,0,0,.54);
-  font-size:.72rem;
+  color:#f6d98a;
+  font-size:.73rem;
   font-weight:1000;
-  letter-spacing:.16em;
+  letter-spacing:.17em;
   text-transform:uppercase;
 }
 .qBookingOfferTimer{
-  margin:5px 0 4px;
-  color:#111;
+  margin:7px 0 6px;
+  color:#fff;
   font-family:Oswald,Inter,sans-serif;
-  font-size:clamp(2.4rem,8vw,3.35rem);
+  font-size:clamp(2.85rem,10vw,4rem);
   font-weight:900;
-  letter-spacing:.06em;
+  letter-spacing:.07em;
   line-height:1;
   font-variant-numeric:tabular-nums;
+  text-shadow:0 8px 26px rgba(0,0,0,.34);
 }
 .qBookingOfferText{
-  color:rgba(0,0,0,.68);
-  font-size:.93rem;
+  color:rgba(255,255,255,.78);
+  font-size:.94rem;
   font-weight:700;
   line-height:1.45;
 }
-.qBookingOfferText strong{ color:#111; font-weight:1000; }
-.qBookingOffer.isExpired{ opacity:.72; }
+.qBookingOfferText strong{ color:#f6d98a; font-weight:1000; }
+.qBookingOffer.isExpired{ opacity:.66; }
+@media(max-width:620px){
+  .qBookingOffer{padding:18px 14px 16px;border-radius:18px;}
+  .qBookingOfferTimer{font-size:3rem;}
+}
 
     </style>
   </head>
@@ -4734,9 +4764,9 @@ function renderAppointmentStep() {
     <h3 class="qStepTitle">Pick your appointment time</h3>
 
     <div class="qBookingOffer" data-booking-offer>
-      <div class="qBookingOfferKicker">Book-now savings</div>
+      <div class="qBookingOfferKicker">5% OFF · BOOK NOW</div>
       <div class="qBookingOfferTimer" data-booking-offer-timer>09:58</div>
-      <div class="qBookingOfferText" data-booking-offer-text>Book within the next 10 minutes and get <strong>5% off</strong>.</div>
+      <div class="qBookingOfferText" data-booking-offer-text>Book your appointment within the next 10 minutes and get <strong>5% off</strong>.</div>
     </div>
 
     <div class="qCalWrap">
@@ -6244,6 +6274,59 @@ initQuoteWizard();
   }
 })();
 
+    </script>
+
+    <script>
+      // Defensive quote UI sync: keeps the estimate CTA and appointment offer visible
+      // even if another render path or cached wizard state replaces the step markup.
+      (() => {
+        const body = document.querySelector("[data-quote-body]");
+        const next = document.querySelector("[data-quote-next]");
+        if (!body) return;
+
+        function currentTitle() {
+          return (body.querySelector(".qStepTitle")?.textContent || "").trim();
+        }
+
+        function syncEstimateButton() {
+          if (!next) return;
+          if (/your estimate is ready/i.test(currentTitle())) {
+            next.textContent = "Get My Estimate";
+          }
+        }
+
+        function ensureAppointmentOffer() {
+          if (!/appointment time/i.test(currentTitle())) return;
+
+          let offer = body.querySelector("[data-booking-offer]");
+          if (!offer) {
+            offer = document.createElement("div");
+            offer.className = "qBookingOffer";
+            offer.setAttribute("data-booking-offer", "");
+            offer.innerHTML = `
+              <div class="qBookingOfferKicker">5% OFF · BOOK NOW</div>
+              <div class="qBookingOfferTimer" data-booking-offer-timer>09:58</div>
+              <div class="qBookingOfferText" data-booking-offer-text>
+                Book your appointment within the next 10 minutes and get <strong>5% off</strong>.
+              </div>
+            `;
+            body.querySelector(".qStepTitle")?.insertAdjacentElement("afterend", offer);
+          }
+
+          if (typeof startBookingOfferTimer === "function") {
+            startBookingOfferTimer();
+          }
+        }
+
+        function syncQuoteUi() {
+          syncEstimateButton();
+          ensureAppointmentOffer();
+        }
+
+        const observer = new MutationObserver(syncQuoteUi);
+        observer.observe(body, { childList: true, subtree: true });
+        syncQuoteUi();
+      })();
     </script>
 
     <script>
