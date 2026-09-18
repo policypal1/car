@@ -4787,10 +4787,10 @@ function renderAppointmentStep() {
 
   startBookingOfferTimer();
 
+  // Slot loading must never run inside the button click/render task. Deferring it
+  // keeps the Get My Estimate -> appointment transition responsive and avoids INP spikes.
   if (shouldStartFirstLoad) {
     setTimeout(() => maybeLoadAppointmentSlots(), 0);
-  } else {
-    maybeLoadAppointmentSlots();
   }
 }
 
@@ -5393,6 +5393,11 @@ async function maybeLoadAppointmentSlots(force = false) {
   const key = getSlotsLoadKey();
   const cacheKey = `kmdAppointmentSlots:${key}`;
 
+  // If this route is already loaded, do nothing. This check MUST happen before
+  // reading sessionStorage so an appointment render cannot recursively render itself.
+  if (!force && appointmentSlotsLoadedKey === key) return;
+  if (appointmentSlotsLoading) return;
+
   // Re-use a very recent slot response when a customer goes back/forward in the quote.
   if (!force && key) {
     try {
@@ -5407,7 +5412,15 @@ async function maybeLoadAppointmentSlots(force = false) {
           const first = parseLocalDate(dates[0]) || new Date();
           calendarMonthDate = new Date(first.getFullYear(), first.getMonth(), 1);
         }
-        if (steps[stepIndex] === "appointment") render();
+
+        // Never render synchronously from inside a slot-loader call. If the
+        // appointment screen is currently showing its loading state, update it
+        // on the next frame so the click interaction can paint first.
+        if (steps[stepIndex] === "appointment") {
+          requestAnimationFrame(() => {
+            if (steps[stepIndex] === "appointment") render();
+          });
+        }
         return;
       }
     } catch (error) {}
@@ -5415,8 +5428,6 @@ async function maybeLoadAppointmentSlots(force = false) {
 
   // Don't retry the same key automatically — only on explicit user action (force=true).
   // This prevents the infinite "Try again" flashing loop when the request errors out.
-  if (!force && appointmentSlotsLoadedKey === key) return;
-  if (appointmentSlotsLoading) return;
 
   appointmentSlotsLoading = true;
   appointmentSlotsError = "";
