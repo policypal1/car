@@ -2605,82 +2605,51 @@
 
 
 
-/* 10-minute appointment booking offer */
+/* Small 10-minute booking detail below the coupon field. */
 .qBookingOffer{
-  position:relative;
-  isolation:isolate;
-  margin:2px auto 22px;
-  width:min(560px,100%);
-  padding:20px 20px 18px;
-  overflow:hidden;
-  border:1px solid rgba(221,178,76,.72);
-  border-radius:20px;
-  background:linear-gradient(145deg,#151515 0%,#080808 100%);
-  box-shadow:0 18px 42px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.07);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:.35rem;
+  margin:9px auto 2px;
+  width:fit-content;
+  max-width:100%;
+  padding:.38rem .62rem;
+  border:1px solid rgba(214,167,63,.28);
+  border-radius:999px;
+  background:rgba(214,167,63,.055);
+  color:#6d5a2a;
   text-align:center;
 }
-.qBookingOffer::before{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  inset:0 0 auto;
-  height:3px;
-  background:linear-gradient(90deg,transparent,#f6d98a 24%,#d6a73f 76%,transparent);
-}
-.qBookingOffer::after{
-  content:"";
-  position:absolute;
-  z-index:-1;
-  width:270px;
-  height:120px;
-  left:50%;
-  top:-86px;
-  transform:translateX(-50%);
-  border-radius:999px;
-  background:rgba(214,167,63,.18);
-  filter:blur(22px);
-}
 .qBookingOfferKicker{
-  color:#f6d98a;
-  font-size:.73rem;
-  font-weight:1000;
-  letter-spacing:.17em;
-  text-transform:uppercase;
+  color:#8a6d28;
+  font-size:.68rem;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:none;
 }
 .qBookingOfferTimer{
-  margin:7px 0 6px;
-  color:#fff;
-  font-family:Oswald,Inter,sans-serif;
-  font-size:clamp(2.85rem,10vw,4rem);
+  margin:0;
+  color:#8a6d28;
+  font-family:Inter,Arial,sans-serif;
+  font-size:.72rem;
   font-weight:900;
-  letter-spacing:.07em;
   line-height:1;
   font-variant-numeric:tabular-nums;
-  text-shadow:0 8px 26px rgba(0,0,0,.34);
 }
 .qBookingOfferText{
-  color:rgba(255,255,255,.78);
-  font-size:.94rem;
-  font-weight:700;
-  line-height:1.45;
+  color:rgba(32,32,32,.58);
+  font-size:.68rem;
+  font-weight:600;
+  line-height:1.25;
 }
-.qBookingOfferText strong{ color:#f6d98a; font-weight:1000; }
-.qBookingOffer.isExpired{ opacity:.66; }
-.qBookingOffer--estimate{
-  margin:16px auto 4px;
-  padding:16px 18px 15px;
-  width:min(520px,100%);
-}
-.qBookingOffer--estimate .qBookingOfferTimer{
-  font-size:clamp(2.45rem,8vw,3.35rem);
-  margin:6px 0 5px;
-}
-.qBookingOffer--estimate .qBookingOfferText{
-  font-size:.9rem;
-}
+.qBookingOfferText strong{ color:#8a6d28; font-weight:800; }
+.qBookingOffer.isExpired{ opacity:.52; }
+.qBookingOffer--estimate{ margin:9px auto 2px; }
 @media(max-width:620px){
-  .qBookingOffer{padding:18px 14px 16px;border-radius:18px;}
-  .qBookingOfferTimer{font-size:3rem;}
+  .qBookingOffer{gap:.28rem;padding:.34rem .52rem;}
+  .qBookingOfferKicker,.qBookingOfferTimer,.qBookingOfferText{font-size:.64rem;}
 }
 
     </style>
@@ -2865,7 +2834,7 @@ function updateBookingOfferTimer() {
   if (timer) timer.textContent = bookingOfferTimeText(remaining);
 
   if (box) box.classList.toggle("isExpired", remaining <= 0);
-  if (text && remaining <= 0) text.innerHTML = "The 5% booking window has ended.";
+  if (text && remaining <= 0) text.textContent = "· booking window ended";
 
   if (remaining <= 0 && bookingOfferTimerId) {
     clearInterval(bookingOfferTimerId);
@@ -4780,9 +4749,9 @@ function renderEstimateStep() {
     </div>
 
     <div class="qBookingOffer qBookingOffer--estimate" data-booking-offer>
-      <div class="qBookingOfferKicker">5% OFF · BOOK WITHIN 10 MINUTES</div>
-      <div class="qBookingOfferTimer" data-booking-offer-timer>${bookingOfferTimeText()}</div>
-      <div class="qBookingOfferText" data-booking-offer-text>Choose an appointment before the timer ends and keep your <strong>5% booking discount</strong>.</div>
+      <span class="qBookingOfferKicker">5% off if booked in</span>
+      <span class="qBookingOfferTimer" data-booking-offer-timer>${bookingOfferTimeText()}</span>
+      <span class="qBookingOfferText" data-booking-offer-text>· appointment discount</span>
     </div>
 
     <p class="qEstimateFinePrint">Heavier stains, excessive pet hair, or unusual vehicle condition may affect final pricing.</p>
@@ -6344,58 +6313,7 @@ initQuoteWizard();
 
     </script>
 
-    <script>
-      // Defensive quote UI sync: keeps the estimate CTA and appointment offer visible
-      // even if another render path or cached wizard state replaces the step markup.
-      (() => {
-        const body = document.querySelector("[data-quote-body]");
-        const next = document.querySelector("[data-quote-next]");
-        if (!body) return;
 
-        function currentTitle() {
-          return (body.querySelector(".qStepTitle")?.textContent || "").trim();
-        }
-
-        function syncEstimateButton() {
-          if (!next) return;
-          if (/your estimate is ready/i.test(currentTitle())) {
-            next.textContent = "Get My Estimate";
-          }
-        }
-
-        function ensureAppointmentOffer() {
-          if (!/(appointment time|estimate is ready)/i.test(currentTitle())) return;
-
-          let offer = body.querySelector("[data-booking-offer]");
-          if (!offer) {
-            offer = document.createElement("div");
-            offer.className = "qBookingOffer";
-            offer.setAttribute("data-booking-offer", "");
-            offer.innerHTML = `
-              <div class="qBookingOfferKicker">5% OFF · BOOK NOW</div>
-              <div class="qBookingOfferTimer" data-booking-offer-timer>09:58</div>
-              <div class="qBookingOfferText" data-booking-offer-text>
-                Book your appointment within the next 10 minutes and get <strong>5% off</strong>.
-              </div>
-            `;
-            body.querySelector(".qStepTitle")?.insertAdjacentElement("afterend", offer);
-          }
-
-          if (typeof startBookingOfferTimer === "function") {
-            startBookingOfferTimer();
-          }
-        }
-
-        function syncQuoteUi() {
-          syncEstimateButton();
-          ensureAppointmentOffer();
-        }
-
-        const observer = new MutationObserver(syncQuoteUi);
-        observer.observe(body, { childList: true, subtree: true });
-        syncQuoteUi();
-      })();
-    </script>
 
     <script>
       window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
