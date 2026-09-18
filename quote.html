@@ -4730,12 +4730,6 @@ function renderEstimateStep() {
         <div class="qEstimateBig">${escapeHtml(estimateText)}</div>
       </div>
 
-      <div class="qBookingOffer qBookingOffer--estimate" data-booking-offer>
-        <div class="qBookingOfferKicker">5% OFF · BOOK WITHIN 10 MINUTES</div>
-        <div class="qBookingOfferTimer" data-booking-offer-timer>${bookingOfferTimeText()}</div>
-        <div class="qBookingOfferText" data-booking-offer-text>Choose an appointment before the timer ends and keep your <strong>5% booking discount</strong>.</div>
-      </div>
-
       ${info?.savings || info?.couponDiscount || info?.bookingOfferDiscountPercent ? `
         <div class="qEstimateSavings">
           ${info?.savings ? `<span class="qSaveLine">Bundle savings <strong>−${formatMoney(info.savings)}</strong></span>` : ""}
@@ -4785,6 +4779,12 @@ function renderEstimateStep() {
       ${quoteState.couponMessage ? `<div class="qCouponMsg ${couponApplied ? "isOk" : "isErr"}">${escapeHtml(quoteState.couponMessage)}</div>` : ""}
     </div>
 
+    <div class="qBookingOffer qBookingOffer--estimate" data-booking-offer>
+      <div class="qBookingOfferKicker">5% OFF · BOOK WITHIN 10 MINUTES</div>
+      <div class="qBookingOfferTimer" data-booking-offer-timer>${bookingOfferTimeText()}</div>
+      <div class="qBookingOfferText" data-booking-offer-text>Choose an appointment before the timer ends and keep your <strong>5% booking discount</strong>.</div>
+    </div>
+
     <p class="qEstimateFinePrint">Heavier stains, excessive pet hair, or unusual vehicle condition may affect final pricing.</p>
   `;
 
@@ -4804,12 +4804,6 @@ function renderAppointmentStep() {
 
   quoteBody.innerHTML = `
     <h3 class="qStepTitle">Pick your appointment time</h3>
-
-    <div class="qBookingOffer" data-booking-offer>
-      <div class="qBookingOfferKicker">5% OFF · BOOK NOW</div>
-      <div class="qBookingOfferTimer" data-booking-offer-timer>09:58</div>
-      <div class="qBookingOfferText" data-booking-offer-text>Book your appointment within the next 10 minutes and get <strong>5% off</strong>.</div>
-    </div>
 
     <div class="qCalWrap">
       <div class="qCalTopRow">
