@@ -860,6 +860,7 @@
         z-index: 1200;
         width: 320px;
         height: 162px;
+        min-height: 0;
         padding: 0;
         display: block;
         isolation: isolate;
@@ -870,6 +871,8 @@
         text-align: center;
         text-decoration: none;
         box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         animation: none;
         transition: none;
       }
@@ -942,7 +945,7 @@
         .popularQuoteBubble {
           right: 5px;
           bottom: 7px;
-          width: min(294px, calc(100vw - 10px));
+          width: min(205px, calc(100vw - 16px));
           height: auto;
           aspect-ratio: 320 / 162;
         }
@@ -951,12 +954,12 @@
           width: 76.25%;
           gap: 3px;
         }
-        .popularQuoteBubble__badge { font-size: clamp(8px, 3vw, 9.5px); padding: 2px 8px; }
-        .popularQuoteBubble__title { font-size: clamp(12px, 5.1vw, 16.5px); max-width: 100%; line-height: 1.04; }
-        .popularQuoteBubble__sub { font-size: clamp(8px, 3.25vw, 10.5px); }
+        .popularQuoteBubble__badge { font-size: 8px; padding: 2px 6px; }
+        .popularQuoteBubble__title { font-size: clamp(9px, 2.9vw, 12px); max-width: 100%; line-height: 1.04; }
+        .popularQuoteBubble__sub { font-size: 8px; }
       }
       @media (max-width: 300px) {
-        .popularQuoteBubble__title { font-size: 13px; }
+        .popularQuoteBubble__title { font-size: 9px; }
       }
       @media (prefers-reduced-motion: reduce) {
         .popularQuoteBubble { animation: none; }
