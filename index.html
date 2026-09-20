@@ -852,42 +852,30 @@
   font-family: inherit !important;
 }
 
-      /* Front-facing car shortcut: car-shaped only, with the original offer text back. */
+      /* Minimal side-profile car CTA. Everything outside this shortcut is unchanged. */
       .popularQuoteBubble {
         position: fixed;
         right: 12px;
-        bottom: 10px;
+        bottom: 12px;
         z-index: 1200;
-        isolation: isolate;
-        box-sizing: border-box;
-        width: 198px;
-        height: 176px;
+        width: 320px;
+        height: 162px;
         padding: 0;
         display: block;
-        overflow: visible;
+        isolation: isolate;
         border: 0;
         border-radius: 0;
         background: transparent;
-        box-shadow: none;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
         color: #fff;
-        text-decoration: none;
         text-align: center;
+        text-decoration: none;
+        box-shadow: none;
         animation: popularBubbleFloat 3.4s ease-in-out infinite;
-        transition: transform .18s ease, filter .18s ease;
+        transition: filter .18s ease;
       }
-      .popularQuoteBubble::before {
-        content: none;
-      }
-      .popularQuoteBubble:hover {
-        transform: translateY(-3px);
-        filter: drop-shadow(0 10px 16px rgba(0,0,0,.28));
-      }
-      .popularQuoteBubble:focus-visible {
-        outline: 3px solid rgba(246, 217, 138, 0.72);
-        outline-offset: 3px;
-      }
+      .popularQuoteBubble::before { content: none; }
+      .popularQuoteBubble:hover { filter: drop-shadow(0 4px 8px rgba(0,0,0,.24)); }
+      .popularQuoteBubble:focus-visible { outline: 3px solid #f6d98a; outline-offset: 2px; }
       .popularQuoteBubble__car {
         position: absolute;
         inset: 0;
@@ -895,61 +883,77 @@
         height: 100%;
         display: block;
         overflow: visible;
-        filter: drop-shadow(0 8px 12px rgba(0,0,0,.28));
+        filter: drop-shadow(0 8px 12px rgba(0,0,0,.3));
+        pointer-events: none;
       }
       .popularQuoteBubble__content {
         position: absolute;
+        top: 79px;
         left: 50%;
-        top: 74px;
         transform: translateX(-50%);
-        width: 132px;
+        width: 234px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 4px;
         pointer-events: none;
       }
+      .popularQuoteBubble__badge {
+        position: static;
+        padding: 2px 7px;
+        border: 0;
+        border-radius: 999px;
+        background: #f6d98a;
+        color: #111;
+        font-size: 8px;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        box-shadow: none;
+      }
       .popularQuoteBubble__title {
-        color: #ffffff;
+        position: static;
+        max-width: 234px;
+        color: #fff;
         font-family: Oswald, Inter, sans-serif;
-        font-size: 0.84rem;
+        font-size: 13.5px;
         font-weight: 800;
-        line-height: 1.04;
-        letter-spacing: 0.02em;
+        line-height: 1.05;
+        letter-spacing: .015em;
         text-transform: uppercase;
         text-wrap: balance;
       }
       .popularQuoteBubble__sub {
+        position: static;
         display: inline-flex;
         align-items: center;
         gap: 4px;
         color: #f6d98a;
-        font-family: Oswald, Inter, sans-serif;
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
+        font-family: Inter, sans-serif;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: .07em;
         line-height: 1;
         text-transform: uppercase;
         white-space: nowrap;
       }
       @media (max-width: 640px) {
         .popularQuoteBubble {
-          right: 4px;
-          bottom: 8px;
-          width: min(182px, calc(100vw - 10px));
-          height: calc(min(182px, calc(100vw - 10px)) * 0.889);
+          right: 5px;
+          bottom: 7px;
+          width: min(294px, calc(100vw - 10px));
+          height: auto;
+          aspect-ratio: 320 / 162;
         }
         .popularQuoteBubble__content {
-          top: 67px;
-          width: 120px;
-          gap: 4px;
+          top: 48.7%;
+          width: 73.125%;
+          gap: 3px;
         }
-        .popularQuoteBubble__title {
-          font-size: 0.77rem;
-        }
-        .popularQuoteBubble__sub {
-          font-size: 0.69rem;
-        }
+        .popularQuoteBubble__badge { font-size: 7px; padding: 2px 6px; }
+        .popularQuoteBubble__title { font-size: 12px; max-width: 100%; line-height: 1.04; }
+        .popularQuoteBubble__sub { font-size: 8px; }
       }
       @media (prefers-reduced-motion: reduce) {
         .popularQuoteBubble { animation: none; }
@@ -1564,14 +1568,19 @@
       data-popular-quote-bubble
       aria-label="Get the most popular interior deep clean plus standard exterior detail quote"
     >
-      <svg class="popularQuoteBubble__car" viewBox="0 0 198 176" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-        <path d="M29 60 L44 28 Q48 18 58 18 H140 Q150 18 154 28 L169 60 L181 60 Q189 60 189 69 V140 Q189 149 180 149 H160 Q152 149 152 141 V112 H46 V141 Q46 149 38 149 H18 Q9 149 9 140 V69 Q9 60 17 60 Z" fill="#111111" stroke="#dcb651" stroke-width="4" stroke-linejoin="round"/>
-        <path d="M30 56 L13 61 L13 76 L31 71 Z" fill="#111111" stroke="#dcb651" stroke-width="4" stroke-linejoin="round"/>
-        <path d="M168 56 L185 61 L185 76 L167 71 Z" fill="#111111" stroke="#dcb651" stroke-width="4" stroke-linejoin="round"/>
-        <path d="M49 112 H149" stroke="#dcb651" stroke-width="3.5" stroke-linecap="round" opacity="0.95"/>
-        <rect x="76" y="121" width="46" height="12" rx="6" fill="#dcb651"/>
+      <svg class="popularQuoteBubble__car" viewBox="0 0 320 162" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <!-- A single, balanced side-view outline with a plain black body. -->
+        <path d="M18 76 C27 72 53 68 76 64 L94 33 Q101 18 119 18 H201 Q219 18 226 33 L244 64 C267 68 293 72 302 76 Q310 80 310 93 V128 Q310 138 300 138 H20 Q10 138 10 128 V93 Q10 80 18 76 Z" fill="#141414" stroke="#dcb651" stroke-width="2.6" stroke-linejoin="round"/>
+        <!-- Two simple window outlines, no fills, headlights, trim, or mirrors. -->
+        <path d="M101 61 L111 35 Q114 29 123 29 H157 V61 Z M163 29 H197 Q206 29 209 35 L219 61 H163 Z" fill="none" stroke="#dcb651" stroke-width="1.7" stroke-linejoin="round" opacity=".7"/>
+        <!-- Identical wheel sizes, visible beneath the body. -->
+        <circle cx="66" cy="137" r="18" fill="#0b0b0b" stroke="#dcb651" stroke-width="2.8"/>
+        <circle cx="66" cy="137" r="8" fill="#111" stroke="#dcb651" stroke-width="1.6"/>
+        <circle cx="254" cy="137" r="18" fill="#0b0b0b" stroke="#dcb651" stroke-width="2.8"/>
+        <circle cx="254" cy="137" r="8" fill="#111" stroke="#dcb651" stroke-width="1.6"/>
       </svg>
       <span class="popularQuoteBubble__content">
+        <span class="popularQuoteBubble__badge">Most Popular</span>
         <span class="popularQuoteBubble__title">Interior Deep Clean + Standard Exterior</span>
         <span class="popularQuoteBubble__sub">Get Quote <span aria-hidden="true">→</span></span>
       </span>
