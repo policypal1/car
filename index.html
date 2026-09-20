@@ -888,24 +888,24 @@
       }
       .popularQuoteBubble__content {
         position: absolute;
-        top: 66px;
+        top: 42px;
         left: 50%;
         transform: translateX(-50%);
-        width: 234px;
+        width: 244px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
+        gap: 5px;
         pointer-events: none;
       }
       .popularQuoteBubble__badge {
         position: static;
-        padding: 2px 7px;
+        padding: 3px 10px;
         border: 0;
         border-radius: 999px;
         background: #f6d98a;
         color: #111;
-        font-size: 8px;
+        font-size: 10px;
         font-weight: 900;
         line-height: 1.1;
         letter-spacing: .09em;
@@ -914,10 +914,10 @@
       }
       .popularQuoteBubble__title {
         position: static;
-        max-width: 234px;
+        max-width: 244px;
         color: #fff;
         font-family: Oswald, Inter, sans-serif;
-        font-size: 13.5px;
+        font-size: 18px;
         font-weight: 800;
         line-height: 1.05;
         letter-spacing: .015em;
@@ -931,7 +931,7 @@
         gap: 4px;
         color: #f6d98a;
         font-family: Inter, sans-serif;
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 900;
         letter-spacing: .07em;
         line-height: 1;
@@ -947,13 +947,16 @@
           aspect-ratio: 320 / 162;
         }
         .popularQuoteBubble__content {
-          top: 40.7%;
-          width: 73.125%;
+          top: 25.9%;
+          width: 76.25%;
           gap: 3px;
         }
-        .popularQuoteBubble__badge { font-size: 7px; padding: 2px 6px; }
-        .popularQuoteBubble__title { font-size: 12px; max-width: 100%; line-height: 1.04; }
-        .popularQuoteBubble__sub { font-size: 8px; }
+        .popularQuoteBubble__badge { font-size: clamp(8px, 3vw, 9.5px); padding: 2px 8px; }
+        .popularQuoteBubble__title { font-size: clamp(12px, 5.1vw, 16.5px); max-width: 100%; line-height: 1.04; }
+        .popularQuoteBubble__sub { font-size: clamp(8px, 3.25vw, 10.5px); }
+      }
+      @media (max-width: 300px) {
+        .popularQuoteBubble__title { font-size: 13px; }
       }
       @media (prefers-reduced-motion: reduce) {
         .popularQuoteBubble { animation: none; }
