@@ -852,7 +852,7 @@
   font-family: inherit !important;
 }
 
-      /* Simplified popular quote shortcut: toned down, balanced, and easier to read. */
+      /* Front-facing car shortcut: simple icon, square card, gold outline. */
       .popularQuoteBubble {
         position: fixed;
         right: 14px;
@@ -860,9 +860,9 @@
         z-index: 1200;
         isolation: isolate;
         box-sizing: border-box;
-        width: 170px;
-        min-height: 170px;
-        padding: 18px 16px 16px;
+        width: 168px;
+        min-height: 168px;
+        padding: 14px 12px 12px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -870,8 +870,8 @@
         gap: 10px;
         overflow: hidden;
         border: 2px solid #dcb651;
-        border-radius: 26px;
-        background: linear-gradient(145deg, rgba(25, 25, 25, 0.985) 0%, rgba(13, 13, 13, 0.99) 100%);
+        border-radius: 24px;
+        background: linear-gradient(145deg, rgba(25, 25, 25, 0.985) 0%, rgba(10, 10, 10, 0.995) 100%);
         box-shadow: 0 18px 40px rgba(0, 0, 0, 0.34), 0 0 0 4px rgba(220, 182, 81, 0.08);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
@@ -899,7 +899,7 @@
         outline-offset: 2px;
       }
       .popularQuoteBubble__car {
-        width: 130px;
+        width: 122px;
         height: auto;
         flex: 0 0 auto;
         display: block;
@@ -914,7 +914,7 @@
         padding: 0;
         color: #f6d98a;
         font-family: Oswald, Inter, sans-serif;
-        font-size: 0.94rem;
+        font-size: 0.92rem;
         font-weight: 800;
         letter-spacing: 0.08em;
         line-height: 1;
@@ -925,17 +925,17 @@
         .popularQuoteBubble {
           right: 10px;
           bottom: 10px;
-          width: 150px;
-          min-height: 150px;
-          padding: 16px 14px 14px;
+          width: 148px;
+          min-height: 148px;
+          padding: 12px 10px 11px;
           gap: 8px;
           border-radius: 22px;
         }
         .popularQuoteBubble__car {
-          width: 114px;
+          width: 108px;
         }
         .popularQuoteBubble__label {
-          font-size: 0.84rem;
+          font-size: 0.82rem;
           letter-spacing: 0.07em;
         }
       }
@@ -1552,18 +1552,11 @@
       data-popular-quote-bubble
       aria-label="Get the most popular interior deep clean plus standard exterior detail quote"
     >
-      <svg class="popularQuoteBubble__car" viewBox="0 0 170 88" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 57 L24 45 C28 38 36 34 45 34 H56 L67 22 C70 18 75 16 80 16 H114 C120 16 125 18 129 22 L143 34 H148 C156 34 162 40 162 48 V57 C162 62 158 66 153 66 H148 C147 56 139 49 129 49 C119 49 111 56 110 66 H60 C59 56 51 49 41 49 C31 49 23 56 22 66 H18 C13 66 9 62 9 57 V52 C9 48 12 44 16 42 L23 38" fill="#171717" stroke="#dcb651" stroke-width="2.5" stroke-linejoin="round"/>
-        <path d="M70 34 L79 23.5 C81 21 84 20 87 20 H98 V34 Z" fill="#3c484e" stroke="#dcb651" stroke-width="1.7" stroke-linejoin="round"/>
-        <path d="M101 20 H114 C119 20 122 21.5 125 24.5 L136 34 H101 Z" fill="#3c484e" stroke="#dcb651" stroke-width="1.7" stroke-linejoin="round"/>
-        <path d="M58 31 L63 28" stroke="#dcb651" stroke-width="2" stroke-linecap="round"/>
-        <path d="M142 31 L137 28" stroke="#dcb651" stroke-width="2" stroke-linecap="round"/>
-        <path d="M20 49 L31 45 H39 L29 53 H18 Z" fill="#f6d98a"/>
-        <path d="M150 45 H159 L160 51 L151 53 H145 Z" fill="#f6d98a"/>
-        <circle cx="41" cy="66" r="15" fill="#0b0b0b" stroke="#dcb651" stroke-width="3"/>
-        <circle cx="41" cy="66" r="8.5" fill="#111" stroke="#dcb651" stroke-width="2"/>
-        <circle cx="129" cy="66" r="15" fill="#0b0b0b" stroke="#dcb651" stroke-width="3"/>
-        <circle cx="129" cy="66" r="8.5" fill="#111" stroke="#dcb651" stroke-width="2"/>
+      <svg class="popularQuoteBubble__car" viewBox="0 0 160 120" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 44 L36 22 Q40 14 48 14 H112 Q120 14 124 22 L138 44 L145 44 Q152 44 152 51 V96 Q152 104 144 104 H124 Q122 104 122 102 V73 H38 V102 Q38 104 36 104 H16 Q8 104 8 96 V51 Q8 44 15 44 Z" fill="#0f0f0f" stroke="#dcb651" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M20 39 L6 44 L6 53 L22 49 Z" fill="#0f0f0f" stroke="#dcb651" stroke-width="3.5" stroke-linejoin="round"/>
+        <path d="M140 39 L154 44 L154 53 L138 49 Z" fill="#0f0f0f" stroke="#dcb651" stroke-width="3.5" stroke-linejoin="round"/>
+        <rect x="61" y="83" width="38" height="10" rx="5" fill="#dcb651"/>
       </svg>
       <span class="popularQuoteBubble__label">Get Quote</span>
     </a>
