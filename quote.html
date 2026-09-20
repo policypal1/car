@@ -2816,7 +2816,7 @@ function isBookingOfferActive() {
 
 function bookingOfferDiscountFor(amount) {
   if (!isBookingOfferActive()) return 0;
-  return clampInt(Math.max(0, Number(amount || 0)) * 0.05) || 0;
+  return Math.min(5, Math.max(0, clampInt(Number(amount) || 0)));
 }
 
 function bookingOfferTimeText(seconds = bookingOfferRemainingSeconds()) {
@@ -4108,7 +4108,8 @@ function computeTotalEstimateInfo() {
     savings: clampInt(savings),
     couponCode: normalizeCoupon(quoteState.couponCode),
     couponDiscount,
-    bookingOfferDiscountPercent: isBookingOfferActive() ? 5 : 0,
+    bookingOfferDiscountPercent: 0, // Legacy percentage field: this offer is a flat dollar amount.
+    bookingOfferDiscountAmount: bookingOfferDiscountLow,
     bookingOfferDiscountLow,
     bookingOfferDiscountHigh,
     vehicleCount: savedVehicles.length + (currentInfo ? 1 : 0),
@@ -4680,7 +4681,7 @@ function renderEstimateStep() {
   const info = syncEstimateState();
   const estimateText = formatEstimateDisplay(info);
 
-  const oldEstimateText = (info?.couponDiscount || info?.bookingOfferDiscountPercent)
+  const oldEstimateText = (info?.couponDiscount || info?.bookingOfferDiscountAmount)
     ? Number(info.highBeforeCoupon) > Number(info.lowBeforeCoupon)
       ? `${formatMoney(info.lowBeforeCoupon)} - ${formatMoney(info.highBeforeCoupon)}`
       : formatMoney(info.lowBeforeCoupon)
@@ -4699,11 +4700,11 @@ function renderEstimateStep() {
         <div class="qEstimateBig">${escapeHtml(estimateText)}</div>
       </div>
 
-      ${info?.savings || info?.couponDiscount || info?.bookingOfferDiscountPercent ? `
+      ${info?.savings || info?.couponDiscount || info?.bookingOfferDiscountAmount ? `
         <div class="qEstimateSavings">
           ${info?.savings ? `<span class="qSaveLine">Bundle savings <strong>−${formatMoney(info.savings)}</strong></span>` : ""}
           ${info?.couponDiscount ? `<span class="qSaveLine">Coupon <strong>−${formatMoney(info.couponDiscount)}</strong></span>` : ""}
-          ${info?.bookingOfferDiscountPercent ? `<span class="qSaveLine">10-minute booking offer <strong>−5%</strong></span>` : ""}
+          ${info?.bookingOfferDiscountAmount ? `<span class="qSaveLine">10-minute booking offer <strong>−${formatMoney(info.bookingOfferDiscountAmount)}</strong></span>` : ""}
         </div>
       ` : ""}
     </div>
@@ -4749,7 +4750,7 @@ function renderEstimateStep() {
     </div>
 
     <div class="qBookingOffer qBookingOffer--estimate" data-booking-offer>
-      <span class="qBookingOfferKicker">5% off if booked in</span>
+      <span class="qBookingOfferKicker">$5 off if booked in</span>
       <span class="qBookingOfferTimer" data-booking-offer-timer>${bookingOfferTimeText()}</span>
       <span class="qBookingOfferText" data-booking-offer-text>· appointment discount</span>
     </div>
@@ -5016,7 +5017,7 @@ function renderConfirmStep() {
       <div class="qSummaryGroupTitle">Vehicle & service</div>
       ${vehicleRows}
       ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", `${normalizeCoupon(quoteState.couponCode)} (−${formatMoney(quoteState.couponDiscount)})`) : ""}
-      ${info?.bookingOfferDiscountPercent ? summaryRow("Booking offer", "5% off") : ""}
+      ${info?.bookingOfferDiscountAmount ? summaryRow("Booking offer", "$5 off") : ""}
       ${quoteState.notes ? summaryRow("Notes", quoteState.notes) : ""}
     </div>
 
@@ -5062,7 +5063,7 @@ function renderDoneStep() {
         ${vehicleRows}
         ${summaryRow("Estimate", formatEstimateDisplay())}
         ${quoteState.couponCode && quoteState.couponDiscount ? summaryRow("Coupon", normalizeCoupon(quoteState.couponCode)) : ""}
-        ${isBookingOfferActive() ? summaryRow("Booking offer", "5% off") : ""}
+        ${isBookingOfferActive() ? summaryRow("Booking offer", "$5 off") : ""}
       </div>
 
       <p class="qDoneFootNote">Final price may vary based on vehicle condition. We'll confirm before starting.</p>
@@ -5609,7 +5610,8 @@ function buildPayload(includeSlot = false) {
 
     couponCode: normalizeCoupon(quoteState.couponCode),
     couponDiscount: info?.couponDiscount || 0,
-    bookingOfferDiscountPercent: info?.bookingOfferDiscountPercent || 0,
+    bookingOfferDiscountPercent: 0,
+    bookingOfferDiscountAmount: info?.bookingOfferDiscountAmount || 0,
     bookingOfferDiscountLow: info?.bookingOfferDiscountLow || 0,
     bookingOfferDiscountHigh: info?.bookingOfferDiscountHigh || 0,
 
