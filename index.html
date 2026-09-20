@@ -870,11 +870,11 @@
         text-align: center;
         text-decoration: none;
         box-shadow: none;
-        animation: popularBubbleFloat 3.4s ease-in-out infinite;
-        transition: filter .18s ease;
+        animation: none;
+        transition: none;
       }
       .popularQuoteBubble::before { content: none; }
-      .popularQuoteBubble:hover { filter: drop-shadow(0 4px 8px rgba(0,0,0,.24)); }
+      .popularQuoteBubble:hover { transform: none; filter: none; box-shadow: none; background: transparent; border: 0; }
       .popularQuoteBubble:focus-visible { outline: 3px solid #f6d98a; outline-offset: 2px; }
       .popularQuoteBubble__car {
         position: absolute;
@@ -883,12 +883,12 @@
         height: 100%;
         display: block;
         overflow: visible;
-        filter: drop-shadow(0 8px 12px rgba(0,0,0,.3));
+        filter: none;
         pointer-events: none;
       }
       .popularQuoteBubble__content {
         position: absolute;
-        top: 79px;
+        top: 66px;
         left: 50%;
         transform: translateX(-50%);
         width: 234px;
@@ -947,7 +947,7 @@
           aspect-ratio: 320 / 162;
         }
         .popularQuoteBubble__content {
-          top: 48.7%;
+          top: 40.7%;
           width: 73.125%;
           gap: 3px;
         }
@@ -1571,13 +1571,12 @@
       <svg class="popularQuoteBubble__car" viewBox="0 0 320 162" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
         <!-- A single, balanced side-view outline with a plain black body. -->
         <path d="M18 76 C27 72 53 68 76 64 L94 33 Q101 18 119 18 H201 Q219 18 226 33 L244 64 C267 68 293 72 302 76 Q310 80 310 93 V128 Q310 138 300 138 H20 Q10 138 10 128 V93 Q10 80 18 76 Z" fill="#141414" stroke="#dcb651" stroke-width="2.6" stroke-linejoin="round"/>
-        <!-- Two simple window outlines, no fills, headlights, trim, or mirrors. -->
-        <path d="M101 61 L111 35 Q114 29 123 29 H157 V61 Z M163 29 H197 Q206 29 209 35 L219 61 H163 Z" fill="none" stroke="#dcb651" stroke-width="1.7" stroke-linejoin="round" opacity=".7"/>
+        <!-- Plain black roof without window outlines. -->
         <!-- Identical wheel sizes, visible beneath the body. -->
-        <circle cx="66" cy="137" r="18" fill="#0b0b0b" stroke="#dcb651" stroke-width="2.8"/>
-        <circle cx="66" cy="137" r="8" fill="#111" stroke="#dcb651" stroke-width="1.6"/>
-        <circle cx="254" cy="137" r="18" fill="#0b0b0b" stroke="#dcb651" stroke-width="2.8"/>
-        <circle cx="254" cy="137" r="8" fill="#111" stroke="#dcb651" stroke-width="1.6"/>
+        <circle cx="66" cy="137" r="23" fill="#0b0b0b" stroke="#dcb651" stroke-width="2.8"/>
+        <circle cx="66" cy="137" r="11" fill="#111" stroke="#dcb651" stroke-width="1.6"/>
+        <circle cx="254" cy="137" r="23" fill="#0b0b0b" stroke="#dcb651" stroke-width="2.8"/>
+        <circle cx="254" cy="137" r="11" fill="#111" stroke="#dcb651" stroke-width="1.6"/>
       </svg>
       <span class="popularQuoteBubble__content">
         <span class="popularQuoteBubble__badge">Most Popular</span>
