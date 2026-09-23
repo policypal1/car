@@ -1389,3 +1389,52 @@ body.hasOpenDialog{
   outline-offset:2px;
   box-shadow:0 0 0 6px #111;
 }
+
+
+/*
+ * Replace only the existing floating "Most Popular" car/quote graphic.
+ * Append this file's contents to the END of the site's existing styles.css.
+ * Keep the original index.html and script.js unchanged so the quote link,
+ * package preselection and click tracking keep working as before.
+ */
+.popularQuoteBubble[data-popular-quote-bubble] {
+  width: min(420px, calc(100vw - 24px)) !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: 1662 / 729 !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: url("./most-popular-car.webp") center / 100% 100% no-repeat !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+/* The wording and quote arrow are already part of the uploaded car image. */
+.popularQuoteBubble[data-popular-quote-bubble]::before,
+.popularQuoteBubble[data-popular-quote-bubble] .popularQuoteBubble__car,
+.popularQuoteBubble[data-popular-quote-bubble] .popularQuoteBubble__content {
+  display: none !important;
+  content: none !important;
+}
+
+.popularQuoteBubble[data-popular-quote-bubble]:hover {
+  transform: none !important;
+  border: 0 !important;
+  background: url("./most-popular-car.webp") center / 100% 100% no-repeat !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+@media (max-width: 640px) {
+  .popularQuoteBubble[data-popular-quote-bubble] {
+    width: min(325px, calc(100vw - 16px)) !important;
+    height: auto !important;
+    aspect-ratio: 1662 / 729 !important;
+  }
+}
