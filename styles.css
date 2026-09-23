@@ -1398,7 +1398,7 @@ body.hasOpenDialog{
  * package preselection and click tracking keep working as before.
  */
 .popularQuoteBubble[data-popular-quote-bubble] {
-  width: min(420px, calc(100vw - 24px)) !important;
+  width: min(406px, calc(100vw - 24px)) !important;
   height: auto !important;
   min-height: 0 !important;
   aspect-ratio: 1662 / 729 !important;
@@ -1433,7 +1433,7 @@ body.hasOpenDialog{
 
 @media (max-width: 640px) {
   .popularQuoteBubble[data-popular-quote-bubble] {
-    width: min(325px, calc(100vw - 16px)) !important;
+    width: min(315px, calc(100vw - 16px)) !important;
     height: auto !important;
     aspect-ratio: 1662 / 729 !important;
   }
